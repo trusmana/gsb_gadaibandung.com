@@ -1,4 +1,3 @@
-'''
 from django import template
 register = template.Library()
 
@@ -99,4 +98,4 @@ def ttl_t_akumulasi(plns):
 def ttl_piutang(plns):
     total = sum(d.get('piutang') for d in plns)
     return total
-'''
+
