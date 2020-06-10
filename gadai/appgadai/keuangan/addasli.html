@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block extrahead %}
+{% include "alat/biaya.html" %}
+{% endblock %}
+{% block section %}Biaya{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right">Menu Input Biaya Gerai</h2>
+<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %}
+<table align="center" width="100%" class='list'>
+    <tr>
+        <td>GERAI:</td>
+        <td>{{form.gerai}}{% if form.gerai.errors %}<span style = " color : orange ; " >BELUM DIPILIH </span>{% endif %}</td>
+        <td>SALDO AWAL:</td>
+        <td>{{form.saldo_awal}}</td>
+		<td>TANGGAL:</td>
+        <td>{{form.tanggal}}</td>
+    </tr>
+
+	<td colspan="3" height="10"><h3>KAS GERAI</h3></td>
+	<tr><td></td><td></td><td></td><td align="center"><b>Nilai</b></td><td align="center"><b>Keterangan</b></td></tr>
+	<tr>
+        <td>SETORAN KAS GERAI </td><td>{{form.antar_gerai}}</td><td>{{form.js_trans}}</td><td>{{form.penambahan_saldo}}</td><td>{{form.ket_penambahan_saldo}}</td>
+	</tr>
+	<tr>
+		<td>PENGELUARAN KAS GERAI </td><td>{{form.antar_gerai_kembali}}</td><td>{{form.js_trans_kembali}}</td><td>{{form.pengembalian_saldo}}</td><td>{{form.ket_pengembalian_saldo}}</td>
+    </tr>
+
+	<td colspan="3" height="10"><h3>UANG MUKA GERAI</h3></td>
+	<tr>
+        <td>PENGAMBILAN UANG MUKA :</td><td></td><td></td><td> {{form.penambahan_uk}}</td><td>{{form.ket_penambahan_uk}}</td>
+	</tr>
+	<tr>
+		<td>PENGEMBALIAN UANG MUKA :</td><td></td><td></td><td>{{form.pengembalian_uk}}</td><td>{{form.ket_pengembalian_uk}}</td>
+    </tr>
+	<tr align="center">
+
+    </tr>
+	<tr>
+		<td colspan="2"><h3>BEBAN BIAYA HARIAN</h3></td>
+	</tr>
+
+	<tr>
+		<td>PARKIR :</td>
+		<td> {{form.jenis_transaksi_palkir}}</td>
+		<td>{{form.palkir}}</td><td colspan="4">{{form.ket_palkir}}</td>
+	</tr>
+
+	<tr>
+		<td>BBM :</td>
+		<td> {{form.jenis_transaksi_bbm}}</td>
+		<td>{{form.bbm}}</td><td>{{form.ket_bbm}}</td>
+	</tr>
+
+	<tr>
+		<td>PULSA :</td>
+		<td> {{form.jenis_transaksi_pulsa}}</td>
+		<td>{{form.pulsa}}</td><td>{{form.ket_pulsa}}</td>
+	</tr>
+
+	<tr>
+		<td>MATERAI :</td>
+		<td> {{form.jenis_transaksi_materai}}</td>
+		<td>{{form.materai}}</td><td>{{form.ket_materai}}</td>
+	</tr>
+
+	<tr>
+		<td>FOTO COPY :</td>
+		<td> {{form.jenis_transaksi_foto_copy}}</td>
+		<td>{{form.foto_copy}}</td><td>{{form.ket_foto_copy}}</td>
+	</tr>
+
+	<tr>
+		<td>AIR MINUM :</td>
+		<td> {{form.jenis_transaksi_air_minum}}</td>
+		<td>{{form.air_minum}}</td><td>{{form.ket_air_minum}}</td>
+	</tr>
+
+	<tr>
+		<td>MAJALAH :</td>
+		<td> {{form.jenis_transaksi_majalah}}</td>
+		<td>{{form.majalah}}</td><td>{{form.ket_majalah}}</td>
+	</tr>
+
+	<tr>
+		<td>KEAMANAN :</td>
+		<td> {{form.jenis_transaksi_iuran_keamanan}}</td>
+		<td>{{form.iuran_keamanan}}</td><td>{{form.ket_iuran_keamanan}}</td>
+	</tr>
+
+	<tr>
+		<td>KEBERSIHAN :</td>
+		<td> {{form.jenis_transaksi_iuran_kebersihan}}</td>
+		<td>{{form.iuran_kebersihan}}</td><td>{{form.ket_iuran_kebersihan}}</td>
+    </tr>
+
+	<tr>
+        <td>LISTRIK :</td>
+		<td> {{form.jenis_transaksi_listrik}}</td>
+        <td>{{form.listrik}}</td><td>{{form.ket_listrik}}</td>
+	<tr/>
+
+	<tr>
+		<td>PDAM :</td>
+		<td> {{form.jenis_transaksi_pdam}}</td>
+        <td>{{form.pdam}}</td><td>{{form.ket_pdam}}</td>
+	</tr>
+
+	<tr>
+		<td>TELPON :</td>
+		<td> {{form.jenis_transaksi_telpon}}</td>
+        <td> {{form.telpon}}</td><td>{{form.ket_telpon}}</td>
+    </tr>
+
+	<tr>
+		<td>LAIN-LAIN :</td>
+		<td> {{form.jenis_transaksi_nilai_lain_lain}}</td>
+		<td> {{form.nilai_lain_lain}}</td>
+		<td>{{form.ket_lain_lain}}</td>
+		<td >{{form.lain_lain}}</td>
+    </tr>
+
+	<tr>
+		<td colspan="2"><h3>PENDAPATAN LAIN</h3></td>
+	</tr>
+    <tr>
+		<td>PENDAPATAN LAIN : </td>
+		<td></td><td></td>
+        <td>{{form.pendapatan_lain}} </td>
+		<td> {{form.ket_pendapatan_lain}}</td>
+	</tr>
+
+	<!--<tr>
+		<td></td>
+		<td></td>
+        <td>SALDO AKHIR :</td>
+        <td>{{form.saldo_akhir}}</td>
+		<td></td>
+        <td></td>
+    </tr>-->
+
+	<!--{{form.as_table}}-->
+
+<tr><td><label ></td><td></td><td><input type="submit" value="Simpan" class="simpan"></td></tr>
+</table>
+</form>
+
+<br><h2>Posting Biaya</h2><a>
+<form method="POST" action="/biaya/biaya_post/add/">{% csrf_token %}
+<input type="hidden" name="id" value="{{object.id}}" />
+<table id="list">
+    <thead>
+        <tr>
+          <th><input id="select_all" type="checkbox" align="center"></th>
+          <th>Kode Account</th>
+          <th>No Bukti</th>
+          <th>Keterangan</th>
+          <th>Debet(Rp)</th>
+          <th>Kredit(Rp)</th>
+          <th>Approve</th>
+          <th>Menu</th>
+
+        </tr>
+    </thead>
+    {% for p in bea%}
+
+    <tbody>
+        <tr>
+            <td><input type="checkbox"  value="{{ p.id }}" class="checkbox_delete" name='id_pilih' /></td>
+            <td>{{p}}.{{p.id_coa}} {{ p.antar_kantor }}</td>
+            <td>{{p.jurnal.nobukti}}</td>
+            <td>{{p.jurnal.diskripsi}}</td>
+            <td align="right">{{p.debet|number_format:0}}</td>
+            <td align="right">{{p.kredit|number_format:0}}</td>
+            <td align="center">{{p.next_group}}</td>
+            <td align="center"><a href="/biaya/{{p.id}}/hapus_jurnal/" class="cari">Batal</a>
+        </tr>
+    </tbody>
+    {%endfor%}
+  <tr>
+    <td align="center" colspan="4">Jumlah</td>
+    <td align="right"><b><span id="t_debet">0</span></b></td>
+    <td align="right"><b>{{total_kredit|number_format:0}}</b></td>
+    <td align="right"></td><td></td>
+  </tr>
+
+</table>
+
+
+<p align="right"><input type="submit" value="Simpan" class="next" /></p>
+</form>
+
+{% endblock %}

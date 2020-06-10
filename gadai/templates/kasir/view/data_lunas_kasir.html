@@ -1,0 +1,46 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="center">DATA NASABAH LUNAS KASIR &nbsp<small><small>KSU RA</small></h2>
+	<table  class="list" cellspacing="0" >
+		<thead>
+			<tr>
+				<th>NO</th>
+				<th>NOREK</th>
+				<th>NASABAH</th>
+				<th>PLAFON (Rp)</th>
+				<th>TANGGAL LUNAS</th>
+				<th>JW</th>
+				<th>Menu</th>
+			</tr>
+		</thead>
+                <tbody>
+{% for a in akad1%}
+	        <tr class="{% cycle 'row1' 'row2' as rowcolors %}">
+			<td>{{ forloop.counter }}</td>
+			<td>{{ a.kasir_lunas.norek }}</td>
+			<td>{{ a.kasir_lunas.agnasabah.nama|striptags  }}</td>
+			<td>{{ a.kasir_lunas.nilai|number_format:0}}</td>
+			<td>{{ a.kasir_lunas.lunas|date:'d-M-Y'}}</td>
+			<td>{% if a.kasir_lunas.jenis_transaksi = '1'  %}{{ a.kasir_lunas.jangka_waktu|default_if_none:"" }} Hari{%else%}
+				{{ a.kasir_lunas.jangka_waktu_kendaraan|default_if_none:"" }} Bulan</td>{% endif %}
+			<td align="center">
+				{% if a.kasir_lunas.jenis_transaksi = '1'  %}{% if a.kasir_lunas.status_kwlunas = '0'  %}
+				<a href="/pelunasan/{{a.kasir_lunas_id}}/kwlunas/" class="cetak">Elektronik</a>{% endif %}{%else%}{% if a.kasir_lunas.status_kwlunas = '0'  %}
+				<a href="/pelunasan/{{a.kasir_lunas.coba_pelunasan_terakhir}}/kwlunas_kendaraan/" class="cetak">Kendaraan</a>
+				{% endif %}{% endif %}
+                                <a href="/pelunasan/{{a.kasir_lunas_id}}/kw_sbg_plns/" class="cetak">SBG Plns</a>
+			</td>
+		</tr>
+{% endfor %}
+</tbody>
+	</table>
+</div>
+
+{% endblock %}
+

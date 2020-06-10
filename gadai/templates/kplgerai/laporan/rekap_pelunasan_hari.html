@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}ledger{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2> Rekap Pelunasan Gerai {{nacab}} <small>{{start_date}} s.d {{end_date}}</small></h2>  
+<form method="GET" action="/kplgerai/{{kocab}}/pelunasan_gerai/">{% csrf_token %}
+   <table id="tabel" align="center">
+   <li><label for="id_tgl_trans">Tanggal </label> :<input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> 
+   <label for="id_tgl_trans">Tanggal </label> :<input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
+   <br>
+   <li><input type="submit" value="CETAK XLS" class="cari" name="submit_tiga"/>&nbsp; 
+	  <input type="submit" value="CETAK PDF" class="cari" name="submit_dua"/> &nbsp;
+	  <input type="submit" value="VIEW" class="cari" name="submit_satu" value="Add"/>
+   </li>
+   </table>
+</form>
+<br>
+<hr>
+
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+    <th rowspan= "2">No</th>
+    <th rowspan= "2">No Rekening</th>
+    <th rowspan= "2">No Nasabah</th>
+    <th rowspan= "2">Nama</th>
+    <th rowspan= "2">JW (hari)</th>
+    <th rowspan= "2">Jatuh Tempo</th>
+    <th rowspan= "2">Status</th>
+    <th rowspan= "2">Pinjaman (Rp)</th>
+    <th colspan = "4" >Pendapatan (Rp)</th>
+</tr>
+<tr>
+    <th>Jasa</th>
+    <th>Adm</th>
+    <th>Bea Simpan</th>
+    <th>Total</th>
+<tr>
+
+{% for p in tes %}
+<tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ p.norek }}</td>
+    <td align="center">{{ p.nonas }}</td>
+    <td>{{ p.agnasabah.nama|truncatewords:2 }}</td>
+    <td align="center">{% if p.jenis_transaksi = 1 %}{{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}{{ p.jangka_waktu|default_if_none:"" }}</td>{% endif %}
+    <td align="center">{% if p.jenis_transaksi = 1  %}{{ p.jatuh_tempo_kendaraan|date:" d-M-Y"}}{% else %}{{ p.jatuhtempo|date:" d-m-Y"}}</abbr></td>{% endif %}
+    <td align="center">{{p.status_transaksi|default_if_none:"0"}}</td>
+    <td align="right">{{ p.nilai|number_format:0|default_if_none:"0" }}</td>
+    <td align = "right">{% if p.jenis_transaksi = 1 %}{{p.jasa_kendaraan|number_format:0}}{%else%}{{p.jasa|number_format:0}}</td>{%endif%}
+    <td align = "right">{% if p.jenis_transaksi = 1 %}{{p.adm_kendaraan|number_format:0|default_if_none:"0"}}{%else%}{{p.adm|number_format:0|default_if_none:"0"}}</td>{%endif%}
+    <td align = "right">{% if p.jenis_transaksi = 1 %}{{p.beasimpan_kendaraan|number_format:0}}{%else%}{{p.biayasimpan|number_format:0}}</td>{%endif%}
+    <td align = "right">{{p.jumlah_biaya|number_format:0|default_if_none:"0"}}</td>
+</tr>
+{% endfor %}
+<tr>
+    <th colspan="7" class="r"><strong>Jumlah</strong></th>
+    <th align="right" >{{nilai|number_format:0}}</th>
+    <th align="right" >{{jasa|number_format:0}}</th>
+    <th align="right" >{{adm|number_format:0}}</th>
+    <th align="right" >{{simpan|number_format:0}}</th>
+    <th align="right" >{{bersih|number_format:0}}</th>
+</tr>
+</table>
+{% endblock %}
+

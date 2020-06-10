@@ -1,0 +1,59 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="center">DATA NASABAH LUNAS&nbsp<small><small>KSU RA</small></h2>
+
+	<table class="list" cellspacing="0" >
+		<thead>
+			<tr>
+				<th>NO</th>
+				<th>NOREK</th>
+				<th>NASABAH</th>
+				<th>PLAFON (Rp)</th>
+				<th>TANGGAL LUNAS</th>
+				<th>JW</th>
+				<th>Menu</th>
+				
+			</tr>
+		</thead>
+                <tbody>
+{% for a in akad%}
+	        <tr>
+			<td>{{ forloop.counter }} {{a.gerai}}</td>
+			<td>{{ a.norek }}</td>
+			<td>{{ a.pelunasan.agnasabah.nama|striptags  }}</td>
+			<td>{{ a.nilai|number_format:0}}</td>
+			<td>{{ a.pelunasan.lunas|date:'d-M-Y'}}</td>
+			<td>{% if a.pelunasan.jenis_transaksi = '1'  %}{{ a.pelunasan.jangka_waktu|default_if_none:"" }} Hari{%else%}
+				{{ a.pelunasan.jangka_waktu_kendaraan|default_if_none:"" }} Bulan</td>{% endif %}
+			<td align="center">
+				<a href="/akadgadai/{{a.pelunasan.id}}/skl/" class="cari" >SKL</a>
+                <a href="/akadgadai/{{a.pelunasan.id}}/show/" class="cari">Lihat</a>
+			</td>
+		</tr>
+{% endfor %}
+</tbody>
+	</table>
+<div class="pagination" align="center">
+    <span class="step-links">
+        {% if akad.has_previous %}
+            <a href="?page={{ akad.previous_page_number }}" class="next">Back</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ akad.number }} of {{ akad.paginator.num_pages }}.
+        </span>
+
+        {% if akad.has_next %}
+            <a href="?page={{ akad.next_page_number }}" class="next">Next</a>
+        {% endif %}
+    </span>
+</div>
+
+{% endblock %}
+

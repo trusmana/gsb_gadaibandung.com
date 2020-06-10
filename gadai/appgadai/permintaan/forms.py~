@@ -1,0 +1,8 @@
+from django import forms
+from gadai.appgadai.models import Barang,Nasabah
+from appgadai.widgets import MultipleSelectWithPop
+
+class BarangForm(forms.ModelForm):    
+    class Meta:
+        model = Barang
+        fields = ('barang_masuk', 'barang_keluar', 'ruang', 'rak', 'row')

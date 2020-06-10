@@ -1,0 +1,47 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>DATA PLAN JATUH TEMPO GERAI {{rekap}}<small> DIV PJB</small></h2>  
+
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="40%">
+<tr class="tableizer-firstrow">
+    <th>NO</th>
+	<th>NAMA</th>
+    <th>TANGGAL AKAD</th>
+	<th>JATUH TEMPO</th>
+  	<th>NILAI</th>
+	<th>PLAN PENDAPATAN</th>
+    <!--<th>REALISASI</th>-->
+
+
+</tr>
+
+{% for k in aa %}
+		<tr>
+            <td align = "center">{{forloop.counter}}</td>
+			<td align = "left">{{k.agnasabah.nama}}</td>
+			<td align = "center">{{k.tanggal|date:" d-M-Y"}} </td>
+			<td align = "center">{{k.jatuhtempo|date:" d-M-Y"}} </td>
+			<td align = "right">{{k.nilai|number_format:0}} </td>
+			<td align = "right">{{k.plan_gerai|number_format:0}}</td>
+            <!--<td align = "right">{{k.realisasi_all|number_format:0}}</td>-->
+
+			
+		</tr>
+  {% endfor %}
+   	  <tr>
+        <td align = "center">{{total_noa_jt|number_format:0}} </td>
+		<td colspan = "3" align ="center">Total </td>
+        <td align ="right">{{total_nilai_jt|number_format:0}}</td>
+		<td align ="right">{{total_nilai_plan_jt|number_format:0}}</td>
+		<!--<td align ="right">{{total_realisasi_all|number_format:0}}</td>-->
+	  </tr>
+   
+</table>
+
+{% endblock %}

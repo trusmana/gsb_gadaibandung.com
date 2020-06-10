@@ -1,0 +1,89 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}akadgadai{% endblock %}
+{% block extrahead %}
+{% include "alat/pelunasan.html" %}
+{% endblock %}
+{% block content %}
+<h2 align="center">MENU INPUT PELUNASAN<small><small>An:{{akad.agnasabah.nama}}</small></small></h2>
+{% if akad.lunas %}<h3 align="center">Nasabah ini Sudah Lunas </h>{% else %}
+<form method="post" action="/akadgadai/{{akad.id}}/pelunasan/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table align="center">
+<!--{{ form.as_table}}-->
+
+    <tr>
+        <td> {{form.pelunasan}}</td>
+    </tr>
+    <tr><td >KANTOR BAYAR</td><td>: {{form.gerai}}</td>
+    <tr>
+        <td>Tanggal Pelunasan</td>
+        <td>: {{form.tanggal}}{% if form.tanggal.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+        <td>TANGGAL JATUHTEMPO</td><td>: {{form.jatuhtempo }}</td>
+    </tr>    
+    
+    <tr>
+        <td>Nilai Pelunasan (Rp)</td>
+        <td>: {{form.nilai}}{% if form.nilai.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td>Jenis Transkasi</td>
+        <td> {{form.jenis_barang}} {% if form.jenis_barang.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class ="formbarang" style= "display:none">
+        <td >Terlambat Hari</td>
+        <td>: {{form.terlambat}}</td>
+    </tr>
+    
+    <tr class ="formbarang" style= "display:none">
+        <td>Denda (Rp)</td>
+        <td>: {{form.denda}}{% if form.denda.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    
+    
+    <tr class ="formbarang" style= "display:none">
+        <td >Bea Jasa (Rp)</td>
+        <td>: {{form.bea_jasa}}</td>
+    </tr>
+    
+    <tr class="formkendaraan" style="display:none">
+        <td >Terlambat Hari Kendaraan</td>
+        <td>: {{form.terlambat_kendaraan}}</td>
+    </tr>
+    
+    <tr class="formkendaraan" style="display:none">
+        <td>Denda Kendaraan (Rp)</td>
+        <td> : {{form.denda_kendaraan}}</td>
+    </tr>   
+    
+    <tr class="formkendaraan" style="display:none">
+        <td >Jasa Kendaraan (Rp)</td>
+        <td>: {{form.bea_jasa_kendaraan}}</td>
+    </tr>
+    
+    <tr class="formkendaraan" style="display:none">
+        <td>TOTAL PELUNASAN (Rp)</td><td></label>: {{ form.total_kendaraan}}</td>
+    </tr>
+    <tr class="formbarang" style="display:none">
+        <td>TOTAL PELUNASAN (Rp)</td><td></label>: {{ form.total}}</td>
+    </tr>
+        
+    <tr>
+        <td></td>
+        <td>{{form.status_transaksi}}</td>
+    </tr>
+    
+    <tr>
+        <td></td>
+        <td> {{form.lunas}}</td>
+    </tr>
+    <tr>
+        <td></td><td>{% include "alat/save.html" %}</td>
+    </tr>
+</table>
+</div>
+
+</form>{% endif %}
+{% endblock %} 

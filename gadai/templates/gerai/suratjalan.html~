@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Rekap {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 0.5px; margin: 1px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #316D2C; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/gerai/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center">
+<img src="/static/img/logoksu.png" width="105" height="110" align="left" hspace="20"/>
+<h3>SURAT JALAN KSU RIZKY ABADI</h3>
+<h5>GERAI : {{gr.nama}} </h5>
+<h6>Bulan {{tanggal|date:"F Y"}}</h6></td></tr>
+</table>
+<table width="100%">
+</td>
+<td width="230" >
+<p><h5>Kepada :	<br/>
+Kepala Gudang Gadai<br/>										
+Jl. Jakarta No. 71 Bandung<br/>
+Tanggal Kirim :  {% now "d F Y" %}
+<h5></p></td>
+<td width="100" >
+<p><h5>No. Formulir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :<br/>
+Dikirim Dengan&nbsp;:<br/>
+No. Kendaraan&nbsp;&nbsp;:<br/>
+Nama Driver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:									
+</h5></p></td></table>
+<table class="tableizer-table" width="100%" border="1">
+<tr class="tableizer-firstrow"><th rowspan= "2">NO</th><th rowspan= "2">NO NASABAH</th><th rowspan= "2">NAMA NASABAH</th><th rowspan= "2">JW</th><th rowspan= "2">Jatuh Tempo</th><th rowspan= "2" >SPESIFIKASI BARANG</th><th colspan = "8" >JENIS DAN JUMLAH BARANG</th></tr>
+<tr ><th>JENIS BARANG</th><th>HP</th><th>LT</th><th>CM</th><th>PS</th><th>TV</th><th>SM</th><th>MB</th><tr>
+{% for p in gerai %}	
+<tr><td align="center">{{ forloop.counter }}</td><td align="center">{{ p.nonas }}</td><td>{{ p.agnasabah.nama|truncatewords:2 }}</td><td align="center">{{ p.jangka_waktu }}</td><td align="center">{{p.jatuhtempo}}</td><td align="left">{{p.barang.merk}}, {{p.barang.type}}, {{p.barang.warna}}, {{p.barang.bulan_produksi}}, {{p.barang.tahun_pembuatan}}, (SN {{p.barang.sn}}). </td><td align="left">{{p.barang.get_jenis_barang_display}}</td><td align = "center">{{p.barang.jenis_barang}}</td><td align = "center">{{p.barang.jenis_barang}}</td><td align = "center">{{p.barang.jenis_barang}}</td><td align = "center">{{p.barang.jenis_barang}}</td><td align = "center">{{p.barang.jenis_barang}}</td><td align = "center">{{p.barang.jenis_barang}}</td><td align = "center">{{p.barang.jenis_barang}}</td></tr>
+{% endfor %}
+  <tr><th colspan="7" class="r" align="left"><strong>Jumlah</strong></th><td >Rp.{{jasa|number_format:0}}</td><td>Rp.{{adm|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td></tr>
+<!--Buat Kolom retur-->
+<th rowspan="2" colspan= "14" align="left">RETUR</th><tr>
+<tr><th rowspan= "2">NO</th><th rowspan= "2">NO NASABAH</th><th rowspan= "2">NAMA NASABAH</th><th rowspan= "2">JW</th><th rowspan= "2">Jatuh Tempo</th><th rowspan= "2">SPESIFIKASI BARANG</th><th colspan = "8" >JENIS DAN JUMLAH BARANG</th></tr>
+<tr ><th>JENIS BARANG</th><th>HP</th><th>LT</th><th>CM</th><th>PS</th><th>TV</th><th>SM</th><th>MB</th><tr>
+{% for p in gerai %}	
+<tr><td align="center">1</td><td align="center"></td><td></td><td align="center"></td><td align="center"></td><td align="left">  </td><td align="left"></td><td align = "center"></td><td align = "center"></td><td align = "center"></td><td align = "center"></td><td align = "center"></td><td align = "center"></td><td align = "center"></td></tr>
+{% endfor %}
+<tr><th colspan="7" class="r" align="left"><strong>Jumlah Retur</strong></th><td >Rp.</td><td>Rp.{{adm|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td></tr>
+<tr><th colspan="7" class="r" align="left"><strong>Jumlah Dikirim</strong></th><td >Rp.{{jasa|number_format:0}}</td><td>Rp.{{adm|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td><td>Rp.{{simpan|number_format:0}}</td></tr>
+<tr><th rowspan="2" colspan= "14" align="center">Bersama ini kami kirim dan serahkan 1 (satu) Cash Box dari Gerai {{gr.nama}} Ke Gudang</th><tr>
+</table>
+<br/>
+<table  width="100%" >
+<tr>
+  <td width="500" align="center">Bandung, {% now "d F Y" %}<br/>DIKIRIM OLEH<br/> KA. GERAI
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+{{gr.adm_gadai}}
+  </td>
+<td width="700" align="center">PETUGAS PICK UP<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+ABUBAKAR
+</td>
+<td align="center">DITERIMA OLEH<br/>
+  KA. GUDANG
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+IMAM
+ </td></tr>
+</table>

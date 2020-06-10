@@ -1,0 +1,47 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tgl_barang_keluar").datepicker({dateFormat: 'dd-mm-yy'});
+    $("#id_tgl_barang_masuk").datepicker({dateFormat: 'dd-mm-yy'});
+});
+</script>
+<style>
+#login_form {
+		background: #EBEBEB;
+		padding: 0.5em 1.5em 0.1em;
+		margin:0 auto 150px;
+		width: auto;height:auto;
+		border: 1px solid #EBEBEB;
+		border-top:8px;
+		-webkit-border-radius:3px;
+		-moz-border-radius:3px;
+		border-radius:10px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.5) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+</style>
+{% endblock %}
+{% block section %}Barang{% endblock %}
+{% block title %}Rak Gudang {{ object.nama }} - {{ block.super }}{% endblock %}
+{% block content %}
+<h2 align="right">Nasabah AN: {{gr.agnasabah.nama}} Norek: {{gr.norek}} </h2>
+<div id="login_form">
+<table border=0 align="center">
+<h3 align="center"> MENU INPUT</h3>
+<hr>
+<form method="POST" action="/barang/{{barang.id }}/{{gr.id }}/rak_input/" class="tabular">{% csrf_token %}
+{{ form.as_table }}
+<td align ="center">{% include "alat/save.html" %}</td>
+</form>
+<br>
+</table>
+</div>
+{% endblock %}

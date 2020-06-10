@@ -1,0 +1,20 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}akadgadai{% endblock %}
+{% block extrahead %}
+{% include "alat/manop_val.html" %}
+{% endblock %}
+{% block content %}
+<h2 align="center">OTORISASI PELUNASAN <small>An:{{ag.pelunasan.agnasabah.nama}}</small></h2>
+{% if akad.lunas %}<h3 align="center">Nasabah ini Sudah Lunas </h>{% else %}
+<form method="post" action="/manop/{{ag.id}}/edit_view/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table align="center">
+    {{ form.as_table}}
+
+        <td></td><td>{% include "alat/save.html" %}</td>
+    </tr>
+</table>
+</div>
+
+</form>{% endif %}
+{% endblock %} 

@@ -1,0 +1,73 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}Jurnal | {{ block.super }}{% endblock %}
+{% block section %}jurnal{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% endblock extrahead %}
+{% block sidebar %}
+{% endblock %}
+{% load number_format %}
+{% block content %}
+
+<h2>TRANSAKSI HARIAN KAS&nbsp;&nbsp;<small><small>KSU RA</small></small></h2>
+<h4 style='text-align: center'>AKUN <small><small>&nbsp;{{kode}}</small></small></h4>
+{% if jurnal_list %}
+<table class="list1">
+	<thead>
+		<tr>
+			<th>No</th>
+			<th>Tanggal</th>
+			<th>NO BUKTI</th>
+			<th>Kode COA</th>
+			<th>Nama COA</th>
+			<th>Keterangan</th>
+			<th>Debet</th>
+			<th>Kredit</th>
+			<th>Saldo Akhir</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for j in jurnal_list %}	
+		<tr>{% if forloop.first %}
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td>Saldo Awal</td>
+			<td style="text-align:right"></td>
+			<td style="text-align:right"></td>
+			<td style="text-align:right">{{kode.saldo_pjb}}</td>{%endif%}
+		</tr>
+		{% if d.id_coa.id != kode.id %}
+		<tr>
+			<td>{{forloop.counter}}</td>
+			<td>{{j.tgl_trans}}</td>
+			<td>{{j.nobukti}}</td>
+			<td>{{j.kepala_coa}}.{{j.coa}}</td>
+			<td>{{ j.deskripsi }}</td>
+			<td>{{ j.diskripsi }}</td>				
+			<td style="text-align:right">Rp. {{ j.debet|number_format:0 }}</td>
+			<td style="text-align:right">Rp. {{ j.kredit|number_format:0 }}</td>			
+			<td style="text-align:right">{{j.saldo_awal}} </td>
+		</tr>
+		{%endif%}
+		{% endfor %}
+	</tbody>
+
+		<tr>
+			<td colspan="6" style="text-align: center">Jumlah</td>
+			<td style="text-align:right">Rp.{{total_debet|number_format:0 }}</td>	
+			<td style="text-align:right">Rp.{{total_kredit|number_format:0 }}</td>					
+			<td style="text-align:right">Rp.{{saldo_kas|number_format:0 }}</td>
+		</tr>
+		</tr>
+
+  
+
+</table>
+{% else %}
+<p>Tidak ada data dalam Jurnal.</p>
+{% endif %}
+
+{% endblock %}

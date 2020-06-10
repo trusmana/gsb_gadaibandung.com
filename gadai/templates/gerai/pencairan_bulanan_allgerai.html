@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD TML 4.01 Transitional//EN">
+<html><head>
+<title>REKAP PENCAIRAN</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center">
+<img src="/static/img/logoksu.png" width="110" height="80" align="left" hspace="20"/>
+</td>
+<td align="center">
+<h3>REKAP TRANSAKSI PENCAIRAN BULANAN SELURUH GERAI<br /></h3>
+<h3>KSU RIZKYABADI<br /></h3>
+<h4>Bulan: {% now " F - Y" %}</h4></td></tr>
+</table>
+<p>&nbsp;</p>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow">
+        <th rowspan= "2">KODE</th>
+        <th rowspan= "2">GERAI</th>
+        <th rowspan= "2">TOTAL NASABAH</th>
+        <th rowspan= "2">TOTAL TRANSAKSI</th>
+        <th colspan = "3" >PENDAPATAN</th>
+	<th rowspan = "2" >TOTAL PENDAPATAN JASA</th>
+    <tr>
+        <th>JASA</th>
+        <th>ADM</th>
+        <th>Bea SIMPAN</th>
+       <tr>
+{% for k in pk %}
+    <tr>
+        <td align="center">{{k.kode}}</td>
+        <td>{{k.nama}} </td>
+        <td align = "center">{{k.all_aktif_bulanan}}</td>
+        <td align = "center">Rp.{{k.get_jumlah_nilai_bulanan|number_format:0}}</td>
+        <td align = "center">Rp.{{k.get_jumlah_jasa_bulanan|number_format:0}}</td>
+        <td align = "center">Rp.{{k.get_jumlah_adm_bulanan|number_format:0}}</td>
+        <td align = "center">Rp.{{k.get_jumlah_beasimpan_bulanan|number_format:0}}</td>
+	<td align = "center">Rp.{{k.total_pendapatan_bulanan|number_format:0}}</td>
+    </tr>
+{% endfor %}
+    <tr>
+        <th colspan="2">Total </th>
+        <th>{{npk}}</th>
+        <th>Rp.{{nilai|number_format:0}}</th>
+        <th>Rp.{{jasa|number_format:0}}</th>
+        <th>Rp.{{adm|number_format:0}}</th>
+        <th>Rp.{{simpan|number_format:0}}</th>
+	<th>Rp.{{total_pendapatan_bulanan|number_format:0}}</th>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<table  width="100%" class="no-break">
+<tr>
+  <td align="center">Mengetahui / Menyetujui<br />
+    Ketua
+<br />
+<br />
+<br />
+<br />
+<br />
+Venny Risvarinny, SE
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+KANIT GADAI
+<br />
+<br />
+<br />
+<br />
+<br />
+GUNTUR WIRYAGURNITA
+</td></tr>
+</table>

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}kasirgerai{% endblock %}
+{% block section %}kasir{% endblock %}
+{% block extrahead %}
+{% include "alat/kasir.html" %}
+{% include "alat/sidebar.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %} 
+{% block content %}			
+<h2 align="center">PELUNASANAN ATAS NAMA:<small>  {{kasir.agnasabah.nama}}</small>&nbsp;&nbsp; NOREK : <small>{{kasir.norek}}</small></h2>
+{% if kasir.lunas or status %}<h3 align="center">Nasabah ini Sudah Lunas </h3>
+<h4 align="left">History Pembayaran Pelunasan</h4>
+<table class="list" align="center">
+   <tr>
+	  <th>PEMBAYARAN KE </th><th>TANGGAL</th><th>NILAI TITIPAN PELUNASAN</th>
+   </tr>
+   <tbody>
+   {% for a in pembayaran%}
+   <tr>
+	  <td align="center">{{forloop.counter}}</td><td align="center">{{a.tanggal|date:" d-M-Y"}}</td><td align="right">{{a.nilai|number_format:0}}</td>
+   </tr></tbody>
+{%endfor%}
+   <tr>
+	  <td colspan= 2 align="center">Total Pembayaran Pelunasan</td><td align="right"><b>{{total|number_format:0}}</b></td>
+   </tr>
+</table>
+{% else %}{% if lunas %}<h3 align="center">Nasabah ini Sudah Lunas </h3>
+{%else%}
+<form method="post" action="/kasirgerai/{{ kasir.id }}/inputkasir_pelunasan/" class="tabular">{% csrf_token %}
+
+<table border=0 align="center" >
+   
+<tr><br></tr>
+<!--{{form.as_table}}-->
+<tr><td ><b>Nilai Pinjaman (Rp) </b></td><td>: {{ form.nilai }}{% if form.nilai.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr>  
+<tr><td><b>Total Pelunasan</b></td><td>: {{form.nilai_terima_bersih}}</td>
+    <td><b>Titipan Pelunasan</b></td><td>: {{form.nilai_dibayar}}</td>
+</tr>
+<tr><td><b>Sisa Yang  Harus Dibayar</b></td><td>: {{form.sisa_bayar}}</td></tr>
+<tr><td><b>Nilai Yang Dibayarkan</b></td><td>: {{form.nilai_pembulatan}}</td></tr>
+<tr><td><b>Selisih</b></td><td>: {{form.selisih}}</td></tr>
+<tr><td>Tanggal</td><td>: {{form.tanggal }}{% if form.tanggal.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr> 
+<tr><td>Jenis Transaksi </td><td> {{ form.jenis_transaksi }}{% if form.jenis_transaksi.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr> 
+<tr><td></td><td>{{ form.status }}</td></tr>
+<tr><td></td><td></td></tr>
+<tr><td align="left"></td>
+   <td>{% include "alat/save.html" %}</td>
+</tr>
+<tr></tr>
+<tr></tr>
+</form>
+</table>
+
+
+{% endif %}{% endif %}
+{% endblock %} 
+
+

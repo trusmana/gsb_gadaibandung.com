@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Rekap {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/">Kembali</a> ]</p>
+</script>
+
+<h3></h3>
+<table width="100%"  class="deepsea">
+<tr>
+	<td width="10" align="center">
+		<h4 align="center">KONDISI BARANG</br>
+		Nama Nasabah : {{barang.agnasabah.nama}}</br>
+                Norek : {{barang.norek}}</br>
+                GERAI : {{barang.gerai.nama_cabang}}</br>
+                BARANG : {% if barang.jenis_transaksi = '1' %}{{barang.barang.get_jenis_barang_display}}{%else%}{{barang.barang.get_jenis_kendaraan_display}} </h4>{%endif%}
+<!--		<h4 align="center">BARANG : {% if barang.jenis_transaksi = 1 %} {{barang.jenis_kendaraan}}{% else %} {{barang.barang.get_jenis_barang_display}} {{barang.barang.merk}} {%endif%}
+		{% if barang.jenis_transaksi == 1 %}&nbsp S/N : {{barang.barang.sn}} {%endif%}</h4>		-->
+	</td>
+</tr>
+</table>
+
+<div class="CSSTableGenerator" >
+<table align ="center" border="1" bordercolor="silver "  width="50%" cellpadding="0" cellspacing="0" border-bottom-style:outset;>
+<tr align="center" style="background-color:#FF9933;height: 15px;" >
+	<th>Indikator</th><th>Keterangan Barang</th><th>Kondisi Barang</th>
+</tr>
+<!--
+{% if barang.jenis_transaksi == 1 %}
+{% if barang.barang.jenis_barang == 1 or barang.barang.jenis_barang == 2 %}
+<tr>
+	<th>Charger</th><th>{{barang.barang.get_charger_display}}</th><th>{{barang.barang.get_kondisi_charger_display}}</th>
+</tr>
+<tr>
+	<th>Batre</th><th>{{barang.barang.get_batre_display}}</th><th>{{barang.barang.get_kondisi_batre_display}}</th>
+</tr>
+<tr>
+	<th>Keyboard / Keypad</th><th>{{barang.barang.get_keybord_display}}</th><th>{{barang.barang.get_kondisi_keybord_display}}</th>
+</tr>
+<tr>
+	<th>Cassing</th><th>{{barang.barang.get_cassing_display}}</th><th>{{barang.barang.get_kondisi_cassing_display}}</th>
+</tr>
+<tr>
+	<th>Layar</th><th>{{barang.barang.get_layar_display}}</th><th>{{barang.barang.get_kondisi_layar_display}}</th>
+</tr>
+<tr>
+	<th>Password / Key Password</th><th>{{barang.barang.get_password_display}}</th><th>{{barang.barang.password_barang}}</th>
+</tr>
+{%else%}{%if barang.barang.jenis_barang == '5'%}
+<tr>
+	<th>Layar TV</th><th>{{barang.barang.get_layar_tv_display}}</th><th>{{barang.barang.get_kondisi_layar_tv_display}}</th>
+</tr>
+{%else%}{%if barang.barang.jenis_barang == '3'%}
+<tr>
+	<th>Lensa</th><th>{{barang.barang.get_lensa_display}}</th><th>{{barang.barang.get_kondisi_lensa_display}}</th>
+</tr>
+
+<tr>
+	<th>Batre Kamera</th><th>{{barang.barang.get_batre_kamera_display}}</th><th>{{barang.barang.get_kondisi_batre_kamera_display}}</th>
+</tr>
+
+<tr>
+	<th>Cassing Kamera</th><th>{{barang.barang.get_cassing_kamera_display}}</th><th>{{barang.barang.get_kondisi_cassing_kamera_display}}</th>
+</tr>
+	
+    
+    
+{%else%}{%if barang.barang.jenis_barang == '4'%}
+<tr>
+	<th>Optik PS</th><th>{{barang.barang.get_optik_ps_display}}</th><th>{{barang.barang.get_kondisi_optik_ps_display}}</th>
+</tr>
+<tr>
+	<th>Harddisk PS</th><th>{{barang.barang.get_harddisk_display}}</th><th>{{barang.barang.get_kondisi_harddisk_display}}</th>
+</tr>
+<tr>
+	<th>Stick PS</th><th>{{barang.barang.get_stick_display}}</th><th>{{barang.barang.get_kondisi_stick_display}}</th>
+</tr>
+<tr>
+	<th>Hdmi PS</th><th>{{barang.barang.get_hdmi_display}}</th><th>{{barang.barang.get_kondisi_hdmi_display}}</th>
+</tr>
+
+
+
+{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+
+-->
+
+{% if barang.jenis_transaksi == '1' %}
+
+	{% if barang.barang.jenis_barang == '1' or barang.barang.jenis_barang == '2' %}
+		<tr>
+			<th>Charger</th><th>{{barang.barang.get_charger_display}}</th><th>{{barang.barang.get_kondisi_charger_display}}</th>
+		</tr>
+		<tr>
+			<th>Batre</th><th>{{barang.barang.get_batre_display}}</th><th>{{barang.barang.get_kondisi_batre_display}}</th>
+		</tr>
+		<tr>
+			<th>Keyboard / Keypad</th><th>{{barang.barang.get_keybord_display}}</th><th>{{barang.barang.get_kondisi_keybord_display}}</th>
+		</tr>
+		<tr>
+			<th>Cassing</th><th>{{barang.barang.get_cassing_display}}</th><th>{{barang.barang.get_kondisi_cassing_display}}</th>
+		</tr>
+		<tr>
+			<th>Layar</th><th>{{barang.barang.get_layar_display}}</th><th>{{barang.barang.get_kondisi_layar_display}}</th>
+		</tr>
+		<tr>
+			<th>Password / Key Password</th><th>{{barang.barang.get_password_display}}</th><th>{{barang.barang.password_barang}}</th>
+		</tr>
+                <tr>
+                        <th>Tas </th><th>{{barang.barang.get_tas_display}}</th><th></th>
+                </tr>
+                <tr>
+                        <th>Dus </th><th>{{barang.barang.get_dus_display}}</th><th></th>
+                </tr>
+                <tr>
+                        <th>Catatan Kondisi Barang</th>
+                        <th colspan="2" align="left">{{barang.barang.accesoris_barang1}}</th>
+                </tr>
+	{% endif %}		
+	{% if barang.barang.jenis_barang == '5'%}
+		<tr>
+			<th>Layar TV</th><th>{{barang.barang.get_layar_tv_display}}</th><th>{{barang.barang.get_kondisi_layar_tv_display}}</th>
+		</tr>
+                <tr>
+                        <th>Remote</th><th>{{barang.barang.get_remote_display}}</th><th>{{barang.barang.get_kondisi_remote_display}}</th>
+                </tr>
+                <tr>
+                        <th>Tas </th><th>{{barang.barang.get_tas_display}}</th><th></th>
+                </tr>
+                <tr>
+                        <th>Dus </th><th>{{barang.barang.get_dus_display}}</th><th></th>
+                </tr>
+                <tr>
+                        <th>Catatan Kondisi Barang</th>
+                        <th colspan="2" align="left">{{barang.barang.accesoris_barang1}}</th>
+                </tr>
+	{% endif %}		
+	{% if barang.barang.jenis_barang == '3'%}
+		<tr>
+			<th>Lensa</th><th>{{barang.barang.get_lensa_display}}</th><th>{{barang.barang.get_kondisi_lensa_display}}</th>
+		</tr>
+
+		<tr>
+			<th>Batre Kamera</th><th>{{barang.barang.get_batre_kamera_display}}</th><th>{{barang.barang.get_kondisi_batre_kamera_display}}</th>
+		</tr>
+
+		<tr>
+			<th>Cassing Kamera</th><th>{{barang.barang.get_cassing_kamera_display}}</th><th>{{barang.barang.get_kondisi_cassing_kamera_display}}</th>
+		</tr>    
+                <tr>
+                        <th>Tas </th><th>{{barang.barang.get_tas_display}}</th><th></th>
+                </tr>
+                <tr>
+                        <th>Dus </th><th>{{barang.barang.get_dus_display}}</th><th></th>
+                </tr>
+                <tr>
+                        <th>Catatan Kondisi Barang</th>
+                        <th colspan="2" align="left">{{barang.barang.accesoris_barang1}}</th>
+                </tr>
+
+        {% endif %}	
+	{%if barang.barang.jenis_barang == '4'%}
+		<tr>
+			<th>Optik PS</th><th>{{barang.barang.get_optik_ps_display}}</th><th>{{barang.barang.get_kondisi_optik_ps_display}}</th>
+		</tr>
+		<tr>
+			<th>Harddisk PS</th><th>{{barang.barang.get_harddisk_display}}</th><th>{{barang.barang.get_kondisi_harddisk_display}}</th>
+		</tr>
+		<tr>
+			<th>Stick PS</th><th>{{barang.barang.get_stick_display}}</th><th>{{barang.barang.get_kondisi_stick_display}}</th>
+		</tr>
+		<tr>
+			<th>Hdmi PS</th><th>{{barang.barang.get_hdmi_display}}</th><th>{{barang.barang.get_kondisi_hdmi_display}}</th>
+		</tr>
+		<tr>
+		        <th>Tas </th><th>{{barang.barang.get_tas_display}}</th><th></th>
+		</tr>
+		<tr>
+		        <th>Dus </th><th>{{barang.barang.get_dus_display}}</th><th></th>
+		</tr>
+		<tr>
+		        <th>Catatan Kondisi Barang</th>
+		        <th colspan="2" align="left">{{barang.barang.accesoris_barang1}}</th>
+		</tr>
+
+	{% endif %}
+{% elif barang.jenis_transaksi = '2' or '3'%}
+<tr>
+	<th>BPKB </th><th>{{barang.barang.get_bpkb_display}}</th><th>{{barang.barang.get_kondisi_bpkb_display}}</th>
+</tr>
+<tr>
+	<th>STNK </th><th>{{barang.barang.get_stnk_display}}</th><th>{{barang.barang.get_kondisi_stnk_display}}</th>
+</tr>
+<tr>
+	<th>Faktur </th><th>{{barang.barang.get_faktur_display}}</th><th>{{barang.barang.get_kondisi_faktur_display}}</th>
+</tr>
+<tr>
+	<th>Gesek No Mesin </th><th>{{barang.barang.get_gesek_nomesin_display}}</th><th>{{barang.barang.get_kondisi_gesek_nomesin_display}}</th>
+</tr>
+<tr>
+	<th>Gesek No Rangka </th><th>{{barang.barang.get_gesek_norangka_display}}</th><th>{{barang.barang.get_kondisi_gesek_norangka_display}}</th>
+</tr>
+<tr>
+	<th>Catatan Kondisi Barang</th>
+	<th colspan="2" align="left">{{barang.barang.accesoris_barang1}}</th>
+</tr>
+{% endif %}
+</table>
+
+
+
+<br>
+
+<table  width="70%" align="center">
+
+<tr>
+<td width="500" align="center">Bandung, {% now "d F Y" %}<br/>NASABAH<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+[{{barang.agnasabah.nama}}]
+</td>
+
+
+<td align="center">Bandung, {% now "d F Y"%}<br/>PETUGAS GERAI<br/>
+<img src="/static/img/logoksu.png" width="60" height="60" hspace="10"/>
+<br/>
+<br/>
+
+[{{barang.gerai.nama_kg}}]
+ </td></tr>
+</table>
+<br/>
+<br/>
+

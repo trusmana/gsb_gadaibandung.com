@@ -1,0 +1,16 @@
+{% extends "base_aplikasi.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<form action="/manop/cariplns/" method="get" size="10" align="center" height="27" >{% csrf_token %}
+<table align="center">
+    <td>NOREK: <input type="text" name="rekening" placeholder="Masukan Norek"></td>
+    <td><input type="submit" value="Cari " class="cari"></td>    
+</table>
+</form>
+{% endblock %}

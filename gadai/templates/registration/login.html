@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>DIV PJB | KSURA</title>
+<link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="login.css" />
+<style type="text/css">
+*{ margin: 0; padding: 0; }
+body{ font-family: Georgia, serif; background: url(/static/img/login-page-bg2.png) top center no-repeat #c4c4c4; color: #3a3a3a;  }
+.clear     { clear: both; }
+Form    { width: 406px; margin: 170px auto 0; }
+legend    { display: none; }
+fieldset    { border: 0; }
+label    { width: 115px; text-align: right; float: left; margin: 0 10px 0 0; padding: 9px 0 0 0; font-size: 16px; }
+input    { width: 220px; display: block; padding: 4px; margin: 0 0 10px 0; font-size: 18px;
+color: #3a3a3a; font-family: Georgia, serif;}
+input[type=checkbox]{ width: 20px; margin: 0; display: inline-block; }                     
+.button    { background: url(/static/button-bg.png) repeat-x top center; border: 1px solid #999;
+  -moz-border-radius: 5px; padding: 5px; color: black; font-weight: bold;
+  -webkit-border-radius: 5px; font-size: 13px;  width: 70px; }
+.button:hover    { background: white; color: black; }
+</style>
+</head>
+<body>
+
+<fieldset>
+
+<legend>Login User</legend> 
+<form action="." method="POST">{% csrf_token %}
+<input type="hidden" name="next" value="{% if next %}{{ next|escape }}{% else %}/{% endif %}">
+{% if form.errors %}
+<p id="error">Ulangi kembali,Username atau password anda salah.</p>
+{% endif %}  
+<label for="login">Username</label>
+{{ form.username }}
+<div class="clear"></div>
+<label for="password">Password</label>
+{{ form.password }}
+<div class="clear"></div>
+<br />
+<input type="submit" style="margin: -20px 0 0 287px;" class="button" name="submit" value="Log in"/>   
+</fieldset>
+</form>  
+</body>
+</html>

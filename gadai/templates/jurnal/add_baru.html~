@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Jurnal{% endblock %}
+{% block extrahead %}
+<script type="text/javascript" src="/static/fomset/js/jquery.formset.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $('#id_orders_table tbody tr').formset({
+            prefix: 'ordered_items'
+        })
+    })
+</script>
+<style type="text/css">
+    .delete-row {
+        margin-left:5px;
+    }
+</style>
+{% include "alat/sidebar.html" %}
+{% include "alat/jurnal.html" %}
+{% endblock %}
+{% block content %}
+{% load useringroup number_format %}  
+<h2 align="right">Pembukuan Manual Transaksi KAS<small> <i>Divisi PJB</i></small></h2>
+   <form  method="POST" class="tabular" id="form_jurnal">{% csrf_token %}
+            {{ form.as_p }}
+            <hr>
+            <table id="id_orders_table" border="0" cellpadding="0" cellspacing="5">
+                <thead>
+                    <tr>
+                        <th scope="col">Kode COA</th>
+                        <th scope="col">Debet</th>
+                        <th scope="col">Kredit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset.forms %}
+                    <tr id="{{ form.prefix }}-row">
+                        <td>
+                            {% for fld in form.hidden_fields %}{{ fld }}{% endfor %}
+                            {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
+                            {{ form.id_coa }}
+                        </td>
+                        <td>{{ form.debet }}</td>
+                        <td>{{ form.kredit }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <td>{{ formset.management_form }}
+                    <input type="submit" value="SIMPAN" class="perpanjang"/>
+                    </td>
+                </tfoot>
+            </table>
+        </form>
+
+
+<br><h2>Data Transaksi</h2><a>
+<form method="POST" action="/jurnal/kasir_post/add/">{% csrf_token %}
+<input type="hidden" name="id" value="{{object.id}}" />
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%">
+<tr class="tableizer-firstrow">
+          <th><input id="select_all" type="checkbox" align="center"></th>
+          <th>Kode Account</th>
+          <th>No Bukti</th>
+          <th>Keterangan</th>          
+          <th>Debet(Rp)</th>
+          <th>Kredit(Rp)</th>
+          <th>Approve</th>
+          <th>Menu</th>
+        </tr>
+    </thead>
+    {% for p in show %}
+    <tbody>
+        <tr>
+            <td><input type="checkbox"  value="{{ p.id }}" class="checkbox_delete" name='id_pilih' /></td>
+            <td>{{p.kepala_coa}}.{{p.id_coa}} {{ p.antar_kantor }}</td>
+            <td>{{p.jurnal.nobukti}}</td>
+            <td>{{p.jurnal.diskripsi}}</td>            
+            <td align="right">{{p.debet|number_format:0}}</td>
+            <td align="right">{{p.kredit|number_format:0}}</td>
+            <td align="center">{{p.next_group}}</td>
+            {% if p.manopkeu.status == '1' %} {%else%}
+            <td align="center"><a href="/jurnal/{{p.id}}/hapus_jurnal/" class="cari">Batal</a>{% endif %}           
+            {%if p.debet == 0 %}
+             <a href="/kasirgerai/{{p.id}}/gl_val/" class ='cari'>Validasi</a></td>{% endif %}
+        </tr>
+    </tbody>
+    {%endfor%}
+  <tr>
+    <td align="center" colspan="4">Jumlah</td>
+    <td align="right"><b>{{total_debet|number_format:0}}</b></td>
+    <td align="right"><b>{{total_kredit|number_format:0}}</b></td>
+    <td align="right"></td><td></td>
+  </tr>
+  <tr>
+    <td align="right"><input type="submit" value="Simpan" class="simpan" /></td>
+  </tr>
+</table>
+
+</form>
+{% endblock %}

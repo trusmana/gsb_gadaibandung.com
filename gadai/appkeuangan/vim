@@ -1,0 +1,10 @@
+from django.conf.urls.defaults import *
+from django.views.generic import create_update
+import urllib
+from gadai.appgadai.models import Tbl_Akun
+from gadai.appgadai.jurnal.views import *
+
+urlpatterns = patterns('',
+    #url(r'^(?P<object_id>\d+)/antar_bank_aktiva/$', antar_bank_aktiva),
+    #url(r'^(?P<object_id>\d+)/laporan_kas_besar/$', laporan_kas_besar),
+)

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block section %}barang{% endblock %}
+{% block extrahead %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal_pengiriman").datepicker({dateFormat: 'yy-mm-dd'});
+    
+});
+</script>
+{% endblock %}
+{% block sidebar %}
+<h3>DATA PENCAIRAN</h3>
+<p>Harian</p>
+<ol>
+{% for d in day_list %}
+<li><a href = "/permintaan/arsip/?tgl={{d|date:'Y-m-d'}}">{{ d|date:"d M Y"}}</a></li>{% endfor %}
+</ol>
+
+<p>Bulanan</p>
+<ol>
+{% for m in month_list %}
+<li><a href = "/permintaan/arsip_month/?tgl={{m|date:'Y-m-1'}}">{{ m|date:"M Y"}}</a></li>{% endfor %}
+</ol>
+<p>Tahunan</p>
+<ol>
+{% for y in year_list %}
+<li><a href = "/permintaan/rekap_tahun/?tgl={{y|date:'Y-1-1'}}">{{ y|date:"Y"}}</a></li>{% endfor %}
+</ol>
+
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="center">Permintaan Barang Gerai  {{tanggal_permintaan|date:"d F Y "}}</h2>
+<span class="contextual"></span>
+{% for p in gerai %}
+ {% ifchanged p.gerai %}
+ {% endifchanged %} 
+ {% ifchanged  p.gerai %}
+ {% if not forloop.first %}</table></form><br />{% else %}{% endif %}
+<p align="center"> 
+<a href ="/permintaan/{{p.gerai.id}}/hari/?tgl={{tanggal_permintaan|date:'Y-m-d'}}">Gerai :<b> {{ p.gerai}}</b> </a> 
+</p>
+
+<h3>Permintaan Barang</h3>
+<form method="POST" action="/permintaan/permintaan/add/">
+<input type="hidden"name="tgl" value="{{tanggal_permintaan|date:'Y-m-d'}}" />Tanggal : <input type="text" name="tanggal_pengiriman" id ="id_tanggal_pengiriman" size="10" />
+Status Permintaan :<select name="status_permintaan" id="id_status_permintaan"><option value="3">Kirim</option>
+  
+</select>
+<input type="submit" value="Simpan" /></p>
+
+
+<table class="tableizer-table"width="100%" border="1"border="1" bordercolor="silver " style="background-color:#FFFFFF" cellpadding="0" cellspacing="0">
+<tr  class="tableizer-firstrow">
+    <th>ID</th>
+    <th>Nonas</th>
+    <th>Nasabah</th>
+    <th>JW</th>
+    <th>Barang</th>
+    <th>SN/No Mesin</th>
+    <th>Transaksi</th>
+    <th>Jatuh Tempo</th>
+    <th>Tgl Permintaan</th><th>Tgl Pengiriman</th>
+    <th>Status Permintaan</th>
+    </tr>
+    
+ {% else %}
+ {% endifchanged %}
+ <tr {% if p.lunas %} class="row_lunas"{% endif %} {% if p.status_gadai %} class="row_status_gadai"{% endif %}{% if p.lewat_jw %} class="row_lewat_jw"{% endif %}>
+    {%if p.tanggal_permintaan%}
+    <td><input type="checkbox" name="id_minta" value="{{ p.id }}" /></td>
+    <td><a href="{{ p.get_absolute_url }}">{{ p.norek }}</a></td>
+    <td>{{ p.agnasabah.nama }}</td>
+    <td>{{ p.jangka_waktu }}</td>
+    <td>{%if p.jangka_waktu_kendaraan %}{{ p.barang.type_kendaraan}}{%else%} {{p.barang.merk}} {%endif%}</td>
+    <td> {%if p.jangka_waktu_kendaraan %} {{p.barang.no_mesin}} {%else%}{{ p.barang.sn }}{%endif%}</td>
+    <td>{{ p.tanggal|date:"d M Y " }}</td>
+    <td>{%if p.jangka_waktu_kendaraan%}{{p.jatuh_tempo_kendaraan|date:"d M Y"}}{%else%}{{ p.jatuhtempo|date:"d M Y " }}{%endif%}</td>
+    <td>{{p.tanggal_permintaan|date:"d M Y" }}</td>
+    <td>{{p.tanggal_pengiriman|date:"d M Y" }}</td>     
+    <td>{{p.get_status_permintaan_display }} </td>   
+    {%endif%}{% endfor %}
+</tr>
+
+</table>
+
+{% endblock %} 
+

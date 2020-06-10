@@ -1,0 +1,34 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}{{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right">:: Daftar Taksiran Barang Gadai ::</h2>
+<table table width="100%" border="1" align="center">
+<tr class="{% cycle 'odd' 'even' %}">
+    <th>Kode Barang</th>
+    <th>Type</th>
+    <th>Nama barang</th>
+    <th>Harga Baru</th>
+    <th>Harga Pasar</th>
+    <th>Max Pinjaman</th>
+    <th>Tanggal Update</th>
+    <th colspan= "2">MENU</th>
+</tr>
+
+<tr>
+    <th>{{ tkr.kobar}}</th>
+    <td>{{ tkr.type }}</td>
+    <td>{{ tkr.spesifikasi }}</td>
+    <td>{{ tkr.harga_baru}}</td>
+    <td>{{ tkr.harga_pasar}}</td>
+    <td>{{ tkr.maxpinjaman}}</td>
+    <td>{{ tkr.tglupdate|date:" d-M-Y"}}</td>
+    <td><a href="/taksir/{{tkr.id }}/edit/"><img src="/static/images/edit.png" height="27px"/></td></tr>
+
+</table>
+{% endblock %}

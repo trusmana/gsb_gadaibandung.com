@@ -1,0 +1,2164 @@
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.template import RequestContext    
+from django.shortcuts import render_to_response, get_object_or_404
+from gadai.appgadai.models import *
+from django import forms
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+import os, string
+from django.conf import settings
+from gadai.appgadai.templatetags.terbilang import terbilang
+from gadai.appgadai.templatetags.number_format import number_format
+from gadai.appgadai.akadgadai.forms import *
+import datetime
+import decimal
+import csv
+from django.contrib import messages
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User,Group
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from io import BytesIO
+from django.contrib.auth.decorators import login_required, user_passes_test
+from dateutil.relativedelta import *
+import locale
+locale.setlocale(locale.LC_ALL, 'id_ID.UTF-8')
+
+##### IMPORT AKADGADAI ALL JURNALL #####
+class UploadAkadForm(forms.Form):
+    ag_file = forms.FileField()
+
+def import_ag(request):
+    if request.method != 'POST':
+        messages.add_message(request, messages.INFO,"Bukan POST.")
+        return HttpResponseRedirect('/')
+    else:
+        form = UploadAkadForm(request.POST, request.FILES)
+        if 1:
+            reader = csv.reader(request.FILES['ag_file'])
+            out = 0
+            for row in reader:
+                (nama, tgl_lahir,tempat, no_ktp, alamat_ktp,  rt_ktp,rw_ktp, telepon_ktp,hp_ktp,kelurahan_ktp,kecamatan_ktp,\
+                    jenis_pekerjaan,alamat_kantor,kode_pos,telepon_kantor,\
+                    email,jenis_kelamin,cdate,mdate, \
+                    jenis_barang,merk,type,sn,warna, tahun_pembuatan,bulan_produksi,accesoris_barang1,lampiran_dokumen,\
+                    jenis_kendaraan,merk_kendaraan,type_kendaraan,no_polisi,no_rangka,no_mesin,tahun_pembuatan_kendaraan,warna_kendaraan,\
+                    no_bpkb,stnk_atas_nama,no_faktur,\
+                    tanggal,gerai,nilai,jangka_waktu,jangka_waktu_kendaraan,bea_materai,jenis_transaksi,status_taksir,jatuhtempo,taksir) = row
+                
+                (tg, bl, th) = tgl_lahir.split('-')
+                tlahir = datetime.date(int(tg), int(bl), int(th))
+                try:
+                    (nasabah, created) = Nasabah.objects.get_or_create(no_ktp=no_ktp, defaults={'nama':nama, 'tgl_lahir':tlahir,'tempat':tempat, 'no_ktp':no_ktp, 'alamat_ktp':alamat_ktp,\
+                    'no_rumah_ktp':0,'rt_ktp':rt_ktp,'rw_ktp':rw_ktp,'telepon_ktp':telepon_ktp,'hp_ktp':hp_ktp, 'kelurahan_ktp':kelurahan_ktp,\
+                    'kecamatan_ktp':kecamatan_ktp, 'kotamadya_ktp':0, 'kabupaten_ktp':0,\
+                    'no_sim':0,'alamat_sim':0,\
+                    'rt_sim':0,'rw_sim':0,'kelurahan_sim':0, 'kecamatan_sim':0, 'alamat_domisili':0,\
+                    'no_rumah_domisili':0,'rt_domisili':0, 'rw_domisili':0,'telepon_domisili':0,\
+                    'hp_domisili':0,'kelurahan_domisili':0,'kecamatan_domisili':0,'kotamadya_domisili':0, \
+                    'kabupaten_domisili':0,
+                    'jenis_pekerjaan':jenis_pekerjaan,'alamat_kantor':alamat_kantor,'kode_pos':kode_pos, \
+                    'telepon_kantor':telepon_kantor,'email':email,'jenis_kelamin':jenis_kelamin,'cdate':cdate,'mdate':mdate})
+                    
+                except Nasabah.MultipleObjectsReturned:
+                    nasabah = Nasabah.objects.filter(no_ktp=no_ktp)[0]
+                (barang, created) = Barang.objects.get_or_create(jenis_barang=jenis_barang, merk = merk, type= type,sn= sn, tahun_pembuatan= tahun_pembuatan, \
+                bulan_produksi=bulan_produksi, accesoris_barang1=accesoris_barang1, lampiran_dokumen =lampiran_dokumen,jenis_kendaraan =jenis_kendaraan, \
+                merk_kendaraan = merk_kendaraan,type_kendaraan = type_kendaraan,no_polisi = no_polisi,no_rangka = no_rangka,no_mesin = no_mesin, \
+                tahun_pembuatan_kendaraan = tahun_pembuatan_kendaraan,warna_kendaraan = warna_kendaraan,no_bpkb = no_bpkb,stnk_atas_nama = stnk_atas_nama, \
+                no_faktur = no_faktur)                    
+                (th,bl,tg) = tanggal.split('-')
+                trx = datetime.date(int(th), int(bl), int(tg))
+                (ts, created) = Taksir.objects.get_or_create(id=int(taksir))#, type = type, spesifikasi = spesifikasi,harga_baru = harga_baru, harga_pasar = harga_pasar, maxpinjaman = maxpinjaman, tglupdate = tglupdate)
+                (kb, created) = Tbl_Cabang.objects.get_or_create(id=int(gerai), defaults={'nama': ''})
+                nilai = float(nilai)
+                (im, created) = AkadGadai.objects.get_or_create(agnasabah = nasabah ,barang =barang ,tanggal = trx,gerai = kb, nilai = nilai,jatuhtempo =jatuhtempo ,\
+                    jangka_waktu =jangka_waktu , jangka_waktu_kendaraan = jangka_waktu_kendaraan,jenis_transaksi=jenis_transaksi,status_taksir=status_taksir,\
+                    taksir = ts,nocoa_titipan ='21.05.01',nocoa_kas = '11.01.04')
+                im.asumsi_jasa = im.asumsi_pendapatan_jasa()
+                im.nilai_jasa = im.jasa
+                im.nilai_jasa_kendaraan = im.jasa_kendaraan
+                im.nilai_biayasimpan = im.biayasimpan
+                im.nilai_beasimpan_kendaraan = im.beasimpan_kendaraan
+                im.nilai_adm = im.adm
+                im.nilai_adm_kendaraan = im.adm_kendaraan
+                im.save()
+                out += 1                
+                jurnal_pencairan_import(im, request.user)
+            messages.add_message(request, messages.INFO,"Sukses import data akad sebanyak %s" % out)
+        else:
+            messages.add_message(request, messages.INFO,"Form tidak valid.")
+        return HttpResponseRedirect('/')
+
+def jurnal_pencairan_import(im, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_pinjaman = get_object_or_404(Tbl_Akun, id=163L)
+    a_pdp_adm = get_object_or_404(Tbl_Akun, id='430')
+    a_pdp_jasa = get_object_or_404(Tbl_Akun, id='189')
+    a_pdp_bea_simpan = get_object_or_404(Tbl_Akun, id='429')
+   
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (im.norek_import(), im.agnasabah.nama),tgl_trans = im.tanggal,nobukti = im.norek_import())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = 'Pencairan', id_coa = a_pinjaman,
+        debet = im.nilai,kredit = 0,
+        id_product = '4',status_jurnal ='1',id_cabang = im.gerai.kode_cabang,tgl_trans =im.tanggal,
+        id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = 'Pencairan', id_coa = a_pdp_adm,
+        debet = 0,kredit = im.adm_all(),
+        id_product = '4',status_jurnal ='1',id_cabang = im.gerai.kode_cabang,tgl_trans = im.tanggal,
+        id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan"), id_coa = a_pdp_jasa,tgl_trans =im.tanggal,
+        debet = 0,kredit =  round(im.asumsi_pendapatan_jasa()),
+        id_product = '4',status_jurnal ='1',
+        id_cabang =im.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan"), id_coa = a_pdp_bea_simpan,
+        debet = 0,kredit =  im.beasimpan_all(),
+        id_product = '4',status_jurnal ='1',id_cabang = im.gerai.kode_cabang,tgl_trans = im.tanggal,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan"), id_coa = a_titipan_pencairan,
+        debet = 0 , kredit = im.nilai - im.adm_all() - round(im.asumsi_pendapatan_jasa()) - im.beasimpan_all(),
+        id_product = '4',status_jurnal ='1',id_cabang = im.gerai.kode_cabang,tgl_trans = im.tanggal,
+        id_unit= 300)
+##### IMPORT AKADGADAI ALL JURNALL #####
+
+### fungsi pelunasan gadai ###
+def batal_lunas(request, object_id):
+    ag = AkadGadai.objects.get(id=object_id)     
+    ag.lunas = None
+    ag.status_transaksi = None
+    ag.save()
+    tbl_pelunasan = ag.pelunasan_set.all()
+    tbl_pelunasan.delete()       
+    id_akad = ag.id
+    jurnal = Jurnal.objects.filter(object_id=id_akad).order_by('-id')
+    jrl = jurnal[0]
+    jrl.delete() 
+    messages.add_message(request, messages.INFO, 'Akadgadai no rek : %s BATAL lunas" % ag.norek()')
+    return HttpResponseRedirect(ag.get_absolute_url())
+
+def lunas(request):
+    akad = AkadGadai.objects.all()
+    template='pelunasan/plns.html'
+    variable = RequestContext(request,{'akad': akad})
+    return render_to_response(template,variable)
+
+def cariplns(request):
+    rekening=request.GET['rekening']
+    try:
+        akad=AkadGadai.objects.get(id=int(rekening))
+        return HttpResponseRedirect("/akadgadai/%s/plns/" % akad.id)
+    except:
+        messages.add_message(request, messages.INFO,'No rekening tidak ditemukan.')
+        return HttpResponseRedirect("/")
+    
+def plns(request, object_id):
+    sekarang = datetime.date.today()
+    akad = AkadGadai.objects.get(id=object_id)
+    form = PelunasanForm(initial={'pelunasan': akad.id,'tanggal': sekarang,'nilai': int(akad.nilai),
+        'jenis_barang':akad.jenis_transaksi,'terlambat':akad.hari_terlambat,'lunas':sekarang,'terlambat_kendaraan':akad.hari_terlambat,
+        'gerai':akad.gerai,'jatuhtempo':akad.jatuhtempo,'lunas':sekarang,'status_transaksi':1,'tgl_akad':akad.tanggal,'norek':akad.norek(),
+        'denda': round(int(akad.hitung_denda_pelunasan())),'bea_jasa':int(akad.hitung_jasa_pelunasan()),
+        'total': (int(akad.nilai) + int(akad.hitung_denda_pelunasan()) + int(akad.hitung_jasa_pelunasan()))})
+    form_diskon = PelunasanDiskonForm(initial={'pelunasan': akad.id,'tanggal': sekarang,'nilai': int(akad.nilai_pelunasan()),
+        'jenis_barang':akad.jenis_transaksi,'terlambat':akad.hari_terlambat,'lunas':sekarang,'terlambat_kendaraan':akad.hari_terlambat,
+        'gerai':akad.gerai,'jatuhtempo':akad.jatuhtempo,'lunas':sekarang,'status_transaksi':1,'tgl_akad':akad.tanggal,'norek':akad.norek(),
+        'denda': round(int(akad.lunas_denda_all())),'bea_jasa':int(akad.lunas_jasa_all()),
+        'total': (int(akad.nilai_pelunasan()) + int(akad.lunas_denda_all()) + int(akad.lunas_jasa_all()))})
+    form.fields['pelunasan'].widget = forms.HiddenInput()
+    form.fields['lunas'].widget = forms.HiddenInput()
+    form.fields['status_transaksi'].widget = forms.HiddenInput()
+    form_diskon.fields['pelunasan'].widget = forms.HiddenInput()
+    form_diskon.fields['lunas'].widget = forms.HiddenInput()
+    form_diskon.fields['status_transaksi'].widget = forms.HiddenInput()    
+    template = 'akadgadai/pelunasan.html'
+    variable = RequestContext(request, {'akad': akad,'form': form,'form_diskon':form_diskon})
+    return render_to_response(template,variable) 
+
+
+def pelunasan(request, object_id):
+    d = decimal.Decimal
+    ag = AkadGadai.objects.get(id=object_id)
+    #plns =  Pelunasan.objects.filter(pelunasan = ag.id)
+    if request.method == 'POST':
+        form= PelunasanForm(request.POST)
+        if form.is_valid():
+            lunas = form.cleaned_data['lunas']
+            status_transaksi = form.cleaned_data['status_transaksi']
+            tanggal = form.cleaned_data['tanggal']
+            nilai = form.cleaned_data['nilai']
+            pelunasan = form.cleaned_data['pelunasan']
+            terlambat = form.cleaned_data['terlambat']
+            denda = form.cleaned_data['denda']
+            bea_jasa = form.cleaned_data['bea_jasa']
+            jenis_barang = form.cleaned_data['jenis_barang']
+            terlambat_kendaraan = form.cleaned_data['terlambat_kendaraan']
+            denda_kendaraan = form.cleaned_data['denda_kendaraan']
+            bea_jasa_kendaraan = form.cleaned_data['bea_jasa_kendaraan']
+            gerai = form.cleaned_data['gerai']
+            status = form.cleaned_data['status']
+            comment = form.cleaned_data['comment']
+            plns=Pelunasan(nilai=nilai,tanggal=tanggal,terlambat=terlambat,denda = denda,bea_jasa=bea_jasa,pelunasan_id=ag.id,
+                jenis_barang=jenis_barang,terlambat_kendaraan=terlambat_kendaraan,denda_kendaraan=denda_kendaraan,val= 0,
+                bea_jasa_kendaraan=bea_jasa_kendaraan,gerai=gerai,nocoa_titipan='21.03.01',nocoa_kas='11.01.04',status_kwlunas = 0,status=status,comment=comment)
+            plns.save()
+
+            if  ag.agnasabah.jenis_keanggotaan == u'1' and plns.status == u'1':
+                ag.lunas = tanggal
+                ag.os_pokok = 0
+                ag.status_transaksi = 1
+                ag.denda_lunas = denda
+                ag.denda_kendaraan_lunas = denda_kendaraan
+                ag.jasa_lunas = bea_jasa
+                ag.jasa_kendaaraan_lunas = bea_jasa_kendaraan
+                ag.terlambat = terlambat
+                ag.terlambat_kendaraan = terlambat_kendaraan
+                ag.save()
+                messages.add_message(request, messages.INFO, 'Akadgadai telah dilunasi')
+                jurnal_pelunasan(ag, request.user)
+            elif  ag.agnasabah.jenis_keanggotaan == u'2' and plns.status == u'1':
+                ag.lunas = tanggal
+                ag.os_pokok = 0
+                ag.status_transaksi = 1
+                ag.denda_lunas = denda
+                ag.denda_kendaraan_lunas = denda_kendaraan
+                ag.jasa_lunas = bea_jasa
+                ag.jasa_kendaaraan_lunas = bea_jasa_kendaraan
+                ag.terlambat = terlambat
+                ag.terlambat_kendaraan = terlambat_kendaraan
+                ag.save()
+                messages.add_message(request, messages.INFO, 'Akadgadai telah dilunasi')
+                jurnal_pelunasan_none(ag, request.user)
+            elif  ag.agnasabah.jenis_keanggotaan == u'1' and plns.status == u'2':
+                manop = ManopPelunasan(pelunasan = plns.id,tanggal = datetime.date.today(),status = 1)
+                manop.save()
+                messages.add_message(request, messages.INFO, 'Otorisasi Pelunasan On Proses Manop')
+                
+            elif  ag.agnasabah.jenis_keanggotaan == u'2' and plns.status == u'2':
+                manop = ManopPelunasan(tanggal = datetime.date.today(),pelunasan_id = plns.id,status = 1)
+                manop.save()
+                messages.add_message(request, messages.INFO, 'Otorisasi Pelunasan On Proses Manop')
+            messages.add_message(request, messages.INFO, 'Nilai Pelunasan OK')
+            return HttpResponseRedirect('/')
+        else:
+            variables = RequestContext(request, {'form': form,'ag':ag})
+            return render_to_response('akadgadai/pelunasan.html', variables)    
+        
+def jurnal_pelunasan(ag, user):
+    D = decimal.Decimal
+    a_titipan_pelunasan = get_object_or_404(Tbl_Akun, id=287L)
+    a_pinjaman_anggota = get_object_or_404(Tbl_Akun, id=163L)
+    a_denda = get_object_or_404(Tbl_Akun, id=442L)
+    a_pdp_jasa = get_object_or_404(Tbl_Akun, id='416')
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pelunasan: NoRek: %s an: %s  ' % (ag.norek(), ag.agnasabah.nama),
+        tgl_trans = ag.lunas,nobukti=ag.norek(),object_id = ag.norek_id())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm"), id_coa = a_titipan_pelunasan,
+        kredit = 0,debet = D(str(ag.nilai  + ag.jasa_lunas + (ag.denda_lunas))),id_product = '4',status_jurnal ='1',tgl_trans = ag.lunas ,
+        id_cabang =ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm"), id_coa = a_denda,
+        debet = 0,kredit = ag.denda_lunas,id_product = '4',status_jurnal ='1',tgl_trans = ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm"), id_coa = a_pdp_jasa,
+        debet = 0,kredit = ag.jasa_lunas,id_product = '4',status_jurnal ='1',tgl_trans = ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm"), id_coa = a_pinjaman_anggota,
+        debet = 0,kredit = ag.nilai,id_product = '4',status_jurnal ='1',tgl_trans =ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_pelunasan_none(ag, user):
+    D = decimal.Decimal
+    a_titipan_pelunasan = get_object_or_404(Tbl_Akun, id=287L)
+    a_pinjaman_anggota = get_object_or_404(Tbl_Akun, id=166L)
+    a_denda = get_object_or_404(Tbl_Akun, id=442L)
+    a_pdp_jasa = get_object_or_404(Tbl_Akun, id='416')
+
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pelunasan: NoRek: %s an: %s  ' % (ag.norek(), ag.agnasabah.nama),
+        tgl_trans = ag.lunas,nobukti=ag.norek(),object_id = ag.norek_id())
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm"), id_coa = a_titipan_pelunasan,
+        kredit = 0,debet = D(str(ag.nilai  + ag.jasa_lunas + (ag.denda_lunas))),id_product = '4',status_jurnal ='1',tgl_trans = ag.lunas ,
+        id_cabang =ag.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm"), id_coa = a_denda,
+        debet = 0,kredit = ag.denda_lunas,id_product = '4',status_jurnal ='1',tgl_trans = ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm"), id_coa = a_pdp_jasa,
+        debet = 0,kredit = ag.jasa_lunas,id_product = '4',status_jurnal ='1',tgl_trans = ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm"), id_coa = a_pinjaman_anggota,
+        debet = 0,kredit = ag.nilai,id_product = '4',status_jurnal ='1',tgl_trans =ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+
+def diskon_pelunasan(request, object_id):
+    d = decimal.Decimal
+    ag = AkadGadai.objects.get(id=object_id)
+    plns =  Pelunasan.objects.filter(pelunasan = ag.id)
+    if request.method == 'POST':
+        form = PelunasanDiskonForm(request.POST)
+        if form.is_valid():
+            lunas = form.cleaned_data['lunas']
+            status_transaksi = form.cleaned_data['status_transaksi']
+            tanggal = form.cleaned_data['tanggal']
+            nilai = form.cleaned_data['nilai']
+            pelunasan = form.cleaned_data['pelunasan']
+            terlambat = form.cleaned_data['terlambat']
+            denda = form.cleaned_data['denda']
+            bea_jasa = form.cleaned_data['bea_jasa']
+            jenis_barang = form.cleaned_data['jenis_barang']
+            terlambat_kendaraan = form.cleaned_data['terlambat_kendaraan']
+            denda_kendaraan = form.cleaned_data['denda_kendaraan']
+            bea_jasa_kendaraan = form.cleaned_data['bea_jasa_kendaraan']
+            gerai = form.cleaned_data['gerai']
+            status = form.cleaned_data['status']
+            comment = form.cleaned_data['comment']
+            #form.save()
+            plns.update(status =1)
+            
+            if ag.agnasabah.jenis_keanggotaan == u'2' and int(ag.lunas_denda()) < ag.hitung_denda_pelunasan() and int(ag.nilai) < int(ag.nilai_pelunasan())\
+                and int(ag.lunas_jasa()) == ag.hitung_jasa_pelunasan() and int(ag.lunas_bea_jasa_kendaraan()) == 0 and int(ag.lunas_denda_kendaraan()) ==0 :
+                ag.lunas = tanggal
+                ag.os_pokok = 0
+                ag.status_transaksi = 1
+                ag.save()
+                messages.add_message(request, messages.INFO, 'Akadgadai telah dilunasi Jurnal Diskon Denda')
+                jurnal_pelunasan_diskon_denda(ag, request.user)
+            elif  ag.agnasabah.jenis_keanggotaan == u'2' and ag.status_manop_pelunasan == u'1' and int(ag.denda.lunas_denda()) == ag.hitung_denda_pelunasan() \
+                and int(ag.lunas_jasa()) < ag.hitung_jasa_pelunasan() and int(ag.lunas_bea_jasa_kendaraan()) == 0 and int(ag.lunas_denda_kendaraan()) == 0 \
+                and int(ag.nilai) == int(ag.nilai_pelunasan()):
+                ag.lunas = tanggal
+                ag.os_pokok = 0
+                ag.status_transaksi = 1
+                ag.save()
+                messages.add_message(request, messages.INFO, 'Akadgadai telah dilunasi Jurnal Diskon Jasa')
+            elif ag.agnasabah.jenis_keanggotaan == u'2' and int(ag.lunas_denda()) == 0 and int(ag.nilai) == int(ag.nilai_pelunasan())\
+                and int(ag.lunas_jasa()) == 0 and int(ag.lunas_bea_jasa_kendaraan()) < ag.hitung_denda_pelunasan() and int(ag.lunas_denda_kendaraan()) == ag.hitung_jasa_pelunasan() :
+                ag.lunas = tanggal
+                ag.os_pokok = 0
+                ag.status_transaksi = 1
+                ag.save()
+                messages.add_message(request, messages.INFO, 'Akadgadai telah dilunasi Jurnal Diskon Denda')
+                jurnal_pelunasan_diskon_denda(ag, request.user)
+            elif ag.agnasabah.jenis_keanggotaan == u'2' and int(ag.lunas_denda()) == 0 and int(ag.nilai) == ag.nilai_pelunasan() and ag.nilai == int(ag.nilai_pelunasan())\
+                and int(ag.lunas_jasa()) == 0 and int(ag.lunas_bea_jasa_kendaraan()) == ag.hitung_denda_pelunasan() and int(ag.lunas_denda_kendaraan()) < ag.hitung_jasa_pelunasan() :
+                ag.lunas = tanggal
+                ag.os_pokok = 0
+                ag.status_transaksi = 1
+                ag.save()
+                messages.add_message(request, messages.INFO, 'Akadgadai telah dilunasi Jurnal Diskon Jasa')
+                jurnal_pelunasan_diskon_denda(ag, request.user)
+            elif ag.agnasabah.jenis_keanggotaan == u'2' and int(ag.lunas_denda()) < ag.hitung_denda_pelunasan() and int(ag.nilai) == int(ag.nilai_pelunasan()) \
+                and int(ag.lunas_jasa()) < ag.hitung_jasa_pelunasan() and int(ag.lunas_bea_jasa_kendaraan()) < ag.hitung_denda_pelunasan() and int(ag.lunas_denda_kendaraan()) < ag.hitung_jasa_pelunasan() :
+                ag.lunas = tanggal
+                ag.os_pokok = 0
+                ag.status_transaksi = 1
+                ag.save()
+                messages.add_message(request, messages.INFO, 'Akadgadai telah dilunasi Jurnal Diskon Jasa')
+                jurnal_pelunasan_diskon_denda(ag, request.user)
+                
+            elif ag.agnasabah.jenis_keanggotaan == u'2' and int(ag.lunas_denda()) < ag.hitung_denda_pelunasan()  and int(ag.nilai_pelunasan()) < int(ag.nilai) \
+                and int(ag.lunas_jasa()) < ag.hitung_jasa_pelunasan() and int(ag.lunas_bea_jasa_kendaraan()) < ag.hitung_denda_pelunasan() and int(ag.lunas_denda_kendaraan()) < ag.hitung_jasa_pelunasan() :
+                ag.lunas = tanggal
+                ag.os_pokok = 0
+                ag.status_transaksi = 1
+                ag.save()
+                messages.add_message(request, messages.INFO, 'Akadgadai telah dilunasi Jurnal Diskon Jasa Denda ')
+                jurnal_pelunasan_diskon_pokok(ag, request.user)
+            #else:
+                #ag.lunas = tanggal
+                #ag.os_pokok = 0
+                #ag.status_transaksi = 1
+                #ag.save()
+                #messages.add_message(request, messages.INFO, 'Akadgadai telah dilunasi Jurnal Diskon POKOK')
+                #jurnal_pelunasan_diskon_pokok(ag, request.user)
+                
+            messages.add_message(request, messages.INFO, 'Nilai Pelunasan OK')
+            return HttpResponseRedirect('/')
+        else:
+            variables = RequestContext(request, {'form_diskon': form,'ag':ag})
+            return render_to_response('akadgadai/pelunasan.html', variables)
+        
+def jurnal_pelunasan_diskon_denda(ag, user):
+    D = decimal.Decimal
+    a_titipan_pelunasan = get_object_or_404(Tbl_Akun, id=287L)
+    a_pinjaman_anggota = get_object_or_404(Tbl_Akun, id=166L)
+    a_denda = get_object_or_404(Tbl_Akun, id=442L)
+    a_pdp_jasa = get_object_or_404(Tbl_Akun, id='416')
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pelunasan: NoRek: %s an: %s  ' % (ag.norek(), ag.agnasabah.nama),
+        tgl_trans = ag.lunas,nobukti=ag.norek(),object_id = ag.norek_id())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm_diskon"), id_coa = a_titipan_pelunasan,
+        kredit = 0,debet = ((D(ag.nilai))  + ag.lunas_jasa() + ag.lunas_denda() + ag.lunas_denda_kendaraan() + ag.lunas_bea_jasa_kendaraan()),id_product = '4',status_jurnal ='2',tgl_trans = ag.lunas ,
+        id_cabang =ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm_diskon"), id_coa = a_denda,
+        debet = 0,kredit = ag.lunas_denda(),id_product = '4',status_jurnal ='2',tgl_trans = ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm_diskon"), id_coa = a_pdp_jasa,
+        debet = 0,kredit = ag.lunas_jasa(),id_product = '4',status_jurnal ='2',tgl_trans = ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm_diskon"), id_coa = a_pinjaman_anggota,
+        debet = 0,kredit = ag.nilai,id_product = '4',status_jurnal ='2',tgl_trans =ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_pelunasan_diskon_pokok(ag, user):
+    D = decimal.Decimal
+    a_ppap = get_object_or_404(Tbl_Akun, id=172L)
+    a_titipan_pelunasan = get_object_or_404(Tbl_Akun, id=287L)
+    a_pinjaman_anggota = get_object_or_404(Tbl_Akun, id=166L)
+    a_denda = get_object_or_404(Tbl_Akun, id=442L)
+    a_pdp_jasa = get_object_or_404(Tbl_Akun, id='416')
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pelunasan: NoRek: %s an: %s  ' % (ag.norek(), ag.agnasabah.nama),
+        tgl_trans = ag.lunas,nobukti=ag.norek(),object_id = ag.norek_id())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm_diskon"), id_coa = a_ppap,
+        kredit = 0,debet = D(ag.nilai) - D(ag.nilai_pelunasan())  ,id_product = '4',status_jurnal ='2',tgl_trans = ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm_diskon"), id_coa = a_titipan_pelunasan,
+        kredit = 0,debet = D(ag.nilai_pelunasan()),id_product = '4',status_jurnal ='2',tgl_trans = ag.lunas ,
+        id_cabang =ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm_diskon"), id_coa = a_denda,
+        debet = 0,kredit = ag.lunas_denda(),id_product = '4',status_jurnal ='2',tgl_trans = ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm_diskon"), id_coa = a_pdp_jasa,
+        debet = 0,kredit = ag.lunas_jasa(),id_product = '4',status_jurnal ='2',tgl_trans = ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_adm_diskon"), id_coa = a_pinjaman_anggota,
+        debet = 0,kredit = ag.nilai,id_product = '4',status_jurnal ='2',tgl_trans =ag.lunas,
+        id_cabang = ag.gerai.kode_cabang,id_unit= 300)
+
+
+### fungsi pelunasan gadai ###
+
+def kw_val(request, object_id):
+    gr = AkadGadai.objects.get(id = object_id)
+    template = 'akadgadai/kw_val.html'
+    variable = RequestContext(request, {'gr':gr,})
+    return render_to_response(template,variable)
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='manop'))
+def view_verifikasi_manop(request, object_id):
+    ag = AkadGadai.objects.get(id=object_id)
+    a = datetime.date.today()
+    form = Verifikasi_ManOpForm(initial={'manop': ag.id,'tanggal': a})
+    form.fields['manop'].widget = forms.HiddenInput()
+
+    template = 'manop/verifikasi_manop.html'
+    variable = RequestContext(request, {
+        'ag': ag,
+        'form': form})
+    return render_to_response(template,variable) 
+    
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='manop'))
+def verifikasi_manop(request, object_id):
+    ag = AkadGadai.objects.get(id=object_id)
+    if request.method == 'POST':
+        f = Verifikasi_ManOpForm(request.POST)
+        if f.is_valid():
+            manop = f.cleaned_data['manop']   
+            tanggal = f.cleaned_data['tanggal']
+            status = f.cleaned_data['status']
+            note = f.cleaned_data['note']
+            f = ManopGadai(manop=ag, tanggal=tanggal, status=status, note = note)
+            f.save()
+            if f.status == '1':
+                ag.status_taksir = 1
+                ag.save()
+                messages.add_message(request, messages.INFO,'### PENGAJUAN DITERIMA ###')    
+            else: 
+                ag.status_taksir = 2
+                ag.save()    
+                messages.add_message(request, messages.INFO,'### PENGAJUAN DITOLAK ###')                
+        return HttpResponseRedirect('/manop/')
+    else:
+        variables = RequestContext(request, {'object': ag, 'form': f})
+        return render_to_response('manop/verifikasi_manop.html', variables)
+
+def teguran(request, object_id):
+    akadgadai = AkadGadai.objects.get(id=object_id)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="suratteguran.pdf"'
+    sekarang=datetime.datetime.now()
+    h=sekarang.day
+    m=sekarang.month
+    y=sekarang.year
+    buffer = BytesIO()
+    tb=terbilang(akadgadai.terima_bersih)
+    p = canvas.Canvas(buffer)
+    p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 0.4*inch, (5.2 + 5.35) * inch, width=35.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+
+    p.drawRightString(550, 800, "KSU RIZKY ABADI DIVISI PJB")
+    p.drawRightString(550 , 788,"%s" % akadgadai.gerai.alamat)
+    p.drawRightString(550 , 776,"%s" % akadgadai.gerai.telepon)
+    p.drawRightString(550 , 765,"pjb.contactcenter@ksura.co.id")
+
+    p.line(  30 , 760, 580 ,760  ) 
+    p.setLineWidth(.3)
+    p.line(  30 , 758, 580 ,758  ) 
+    p.setFont('Helvetica', 10)
+    p.drawRightString(550,748,"Bandung,%s" % sekarang.strftime('%d %B %Y'))
+    p.drawString(30,748,"Nomor ")
+    p.drawString(75,748,":         /PJB-RA/%s"% sekarang.strftime('%Y'))
+    p.drawString(30,736,"Lampiran")
+    p.drawString(75,736,":")    
+    p.drawString(30,724,"Perihal")
+    p.drawString(75,724,": SURAT TAGIHAN")    
+    p.drawString(350,712,"Kepada Yth:")
+    p.drawString(350,700,"Bpk/ Ibu/ Sdr/ I %s" % akadgadai.agnasabah.nama)
+    p.drawString(350,688,"Di %s RT %s RW%s" % (akadgadai.agnasabah.alamat_domisili,akadgadai.agnasabah.rt_domisili,akadgadai.agnasabah.rw_domisili))
+    p.drawString(30,676,"Dengan Hormat,")
+    p.drawString(45,664,"Diberitahukan kepada Bpk/ Ibu/ Sdr/ i bahwa sesuai dengan  kwitansi  pencairan / perpanjangan  pinjaman sebesar")   
+    p.drawString(30,652,"Rp. %s , berupa satu buah %s %s bahwa pinjaman atas nama Bpk/ Ibu/ Sdr/ i"% (number_format(akadgadai.nilai),akadgadai.barang.get_jenis_barang_display(),akadgadai.barang.merk, ))
+    p.drawString(30,640,"telah jatuh tempo pada tanggal %s dan telah mengalami keterlambatan selama %s hari." %(akadgadai.jatuhtempo.strftime('%d %B %Y'),akadgadai.terlambat_tajuhtempo()))
+    p.drawString(45,628,"Sesuai dengan Surat Perjanjian Pinjaman tanggal %s No %s yang telah Bpk/ Ibu/ Sdr/ i " % (akadgadai.tanggal.strftime('%d %B %Y'),akadgadai.norek()))   
+    p.drawString(30,616,"tandatangani, maka koperasi akan melakukan penjualan apabila sampai dengan tanggal %s Bpk/ Ibu/ Sdr/ i" % akadgadai.tgl_jatuhtempo().strftime('%d %B %Y'))
+    p.drawString(30,604,"belum juga melunasi pinjamannya.")
+    p.drawString(45,592,"Demikian surat tagihan dan pemberitahuan ini kami sampaikan untuk mendapat perhatian dari Bpk/Ibu/Sdr/i.")
+    p.drawString(30,580,"Atas perhatian dan kerjasamanya kami ucapkan  terimakasih.")    
+    p.drawRightString(550,568,"KSU RIZKY ABADI DIVISI PJB")
+    p.drawString(412,556,"Manajer Operasi")
+    p.drawString(412,490,"( BANI ARVIN )")
+    p.drawString(30,556,"Tanda terima surat :")
+    p.drawString(30,544,"Diterima oleh .................. Tanggal .................." )
+    p.drawString(30,490,"( Tanda Tangan Dan Nama Jelas)" )
+ 
+    p.drawString(0,480,"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - " )
+    p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 0.4*inch, (5.2 + 0.75) * inch, width=35.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+
+    p.drawRightString(550, 470, "KSU RIZKY ABADI DIVISI PJB")
+    p.drawRightString(550 , 458,"%s" % akadgadai.gerai.alamat)
+    p.drawRightString(550 , 446,"%s" % akadgadai.gerai.telepon)
+    p.drawRightString(550 , 434,"pjb.contactcenter@ksura.co.id")
+
+    p.line(  30 ,430 , 580 ,430  ) 
+    p.setLineWidth(.3)
+    p.line(  30 , 427, 580 ,427  ) 
+    p.setFont('Helvetica', 10)
+    p.drawRightString(550,417,"Bandung,%s" % sekarang.strftime('%d %B %Y'))
+    p.drawString(30,417,"Nomor ")
+    p.drawString(75,417,":         /PJB-RA/%s"% sekarang.strftime('%Y'))
+    p.drawString(30,402,"Lampiran")
+    p.drawString(75,402,":")    
+    p.drawString(30,390,"Perihal")
+    p.drawString(75,390,": SURAT TAGIHAN")    
+    p.drawString(350,378,"Kepada Yth:")
+    p.drawString(350,366,"Bpk/ Ibu/ Sdr/ I %s" % akadgadai.agnasabah.nama)
+    p.drawString(350,354,"Di %s RT %s RW %s" % (akadgadai.agnasabah.alamat_domisili,akadgadai.agnasabah.rt_domisili,akadgadai.agnasabah.rw_domisili))
+    p.drawString(30,342,"Dengan Hormat,")
+    p.drawString(45,330,"Diberitahukan kepada Bpk/ Ibu/ Sdr/ i bahwa sesuai dengan  kwitansi  pencairan / perpanjangan  pinjaman sebesar")   
+    p.drawString(30,318,"Rp. %s , berupa satu buah %s %s bahwa pinjaman atas nama Bpk/ Ibu/ Sdr/ i"% (number_format(akadgadai.nilai),akadgadai.barang.get_jenis_barang_display(),akadgadai.barang.merk, ))
+    p.drawString(30,306,"telah jatuh tempo pada tanggal %s dan telah mengalami keterlambatan selama %s hari." %(akadgadai.jatuhtempo.strftime('%d %B %Y'),akadgadai.terlambat_tajuhtempo()))
+    p.drawString(45,294,"Sesuai dengan Surat Perjanjian Pinjaman tanggal %s No %s yang telah Bpk/ Ibu/ Sdr/ i " % (akadgadai.tanggal.strftime('%d %B %Y'),akadgadai.norek()))   
+    p.drawString(30,282,"tandatangani, maka koperasi akan melakukan penjualan apabila sampai dengan tanggal %s Bpk/ Ibu/ Sdr/ i" % akadgadai.tgl_jatuhtempo().strftime('%d %B %Y'))
+    p.drawString(30,270,"belum juga melunasi pinjamannya.")
+    p.drawString(45,258,"Demikian surat tagihan dan pemberitahuan ini kami sampaikan untuk mendapat perhatian dari Bpk/Ibu/Sdr/i.")
+    p.drawString(30,246,"Atas perhatian dan kerjasamanya kami ucapkan  terimakasih.")    
+    p.drawRightString(550,234,"KSU RIZKY ABADI DIVISI PJB")
+    p.drawString(412,222,"Manajer Operasi")
+    p.drawString(412,156,"( BANI ARVIN )")
+    p.drawString(30,222,"Tanda terima surat :")
+    p.drawString(30,210,"Diterima oleh .................. Tanggal .................." )
+    p.drawString(30,156,"( Tanda Tangan Dan Nama Jelas)" )
+           
+    p.showPage()
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+    return response
+
+'''##jatuh Tempo Akad Gadai Elektronik All
+def hitung_jatuhtempo_elektronik_all(request):
+    akad = AkadGadai.objects.filter(jenis_transaksi=1)
+    for hitung in akad:
+        hitung.jatuhtempo = hitung.jatuhtempo_hitung()
+        hitung.save()
+    variable = RequestContext(request,{'akad': akad})
+    return render_to_response(variable)
+
+##jatuh Tempo Akad Gadai Kendaraan All
+def hitung_jatuhtempo_kendaraan_all(request):
+    akad = AkadGadai.objects.filter(jenis_transaksi=2)
+    for hitung in akad:
+        hitung.jatuhtempo = hitung.jatuh_tempo_kendaraan_hitung()
+        hitung.save()
+    variable = RequestContext(request,{'akad': akad})
+    return render_to_response(variable)
+
+##jatuh Tempo Perpanjang 1 Elektronik 
+def hitung_jatuhtempo_perpanjang_1_elektronik(request):
+    akad = AkadGadai.objects.filter(perpanjang__status=u'P1').filter(jenis_transaksi=1)
+    for hitung in akad:
+        hitung.jatuhtempo = hitung.prpj_jatuhtempo()
+        hitung.save()
+    variable = RequestContext(request,{'akad': akad})
+    return render_to_response(variable)
+'''
+##jatuh Tempo Perpanjang 2 Kendaraan
+def hitung_jatuhtempo_perpanjang_2_kendaraan(request):
+    akad = AkadGadai.objects.filter(perpanjang__status=u'P2').filter(jenis_transaksi=2)
+    for hitung in akad:
+        hitung.jatuhtempo = hitung.prpj_jatuhtempo_kendaraan()
+        hitung.save()
+    variable = RequestContext(request,{'akad': akad})
+    return render_to_response(variable)
+
+def akad_terbit_bulan_csv(request, year, month):
+    ''' Tampilkan Akad pada bulan/tahun terpilih dalam format CSV '''
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=akadgadai_%s_%s.csv' % (year, month)
+    writer = csv.writer(response)
+    writer.writerow(['No Rek','Tgl Akad','Nama','JW','JW Kendaraan','No KTP','Telepon','HP','Alamat','Barang','Jenis Barang','Nilai Pinjaman','Bea Jasa', 'Bea Simpan','Adm','Gerai','Adm Gerai'])
+    for p in AkadGadai.objects.filter(tanggal__year=year).filter(tanggal__month=month):
+        writer.writerow([p.norek(), p.tanggal, p.agnasabah.nama,p.jangka_waktu,p.jangka_waktu_kendaraan, p.agnasabah.no_ktp, p.agnasabah.telepon_ktp, p.agnasabah.hp_ktp, p.agnasabah.alamat_ktp, p.barang, p.barang.jenis_barang, p.nilai, p._get_jasa(), p._get_biayasimpan(), p._get_adm(), p.gerai, p.cu])
+    return response
+    
+def prpj_terbit_bulan_csv(request, year, month):
+    ''' Tampilkan Perpanjangan pada bulan/tahun terpilih dalam format CSV '''
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=perpanjangan_%s_%s.csv' % (year, month)
+    writer = csv.writer(response)
+    writer.writerow(['No Rek','Tgl Perpanjangan','Nama','No KTP','Telepon','HP','Alamat','Barang','Jenis Barang','jw','jw_kendaraan','Nilai Pinjaman','Terlambat Hari','Bea Jasa', 'Bea Simpan','Gerai','Adm Gerai','Terlambat'])
+    for p in Perpanjang.objects.filter(tanggal__year=year).filter(tanggal__month=month):
+        writer.writerow([p.agkredit.norek(), p.tanggal,p.agkredit.agnasabah.nama, p.agkredit.agnasabah.no_ktp, p.agkredit.agnasabah.telepon_ktp, p.agkredit.agnasabah.hp_ktp, p.agkredit.agnasabah.alamat_ktp, p.agkredit.barang, p.agkredit.barang.jenis_barang,p.agkredit.jangka_waktu, p.agkredit.jangka_waktu_kendaraan, p.agkredit.nilai, p.terlambat, p.bea_jasa(), p.bea_simpan, p.agkredit.gerai, p.agkredit.cu,p.terlambat])
+    return response
+
+def pelunasan_terbit_bulan_csv(request, year, month):
+    ''' Tampilkan Pelunasan pada bulan/tahun terpilih dalam format CSV '''
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=pelunasan_%s_%s.csv' % (year, month)
+    writer = csv.writer(response)
+    writer.writerow(['No Rek','Tgl Pelunasan','Nama','No KTP','Telepon','HP','Alamat','Barang','Jenis Barang','Nilai Pinjaman','Terlambat Hari','Bea Jasa', 'Denda','Gerai','Adm Gerai'])
+    #ag = AkadGadai.objects.all()
+    for p in Pelunasan.objects.filter(tanggal__year=year).filter(tanggal__month=month):
+        writer.writerow([p.pelunasan.norek(), p.tanggal, p.pelunasan.agnasabah.nama, p.pelunasan.agnasabah.no_ktp, p.pelunasan.agnasabah.telepon_ktp, p.pelunasan.agnasabah.hp_ktp, p.pelunasan.agnasabah.alamat_ktp, p.pelunasan.barang, p.pelunasan.barang.jenis_barang, p.nilai, p.terlambat, p.bea_jasa, p.denda, p.pelunasan.gerai, p.pelunasan.cu])
+    return response
+
+def list(request):
+    akad = AkadGadai.objects.all()
+    paginator = Paginator(akad, 10)
+
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+    try:
+        akad = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        akad = paginator.page(paginator.num_pages)
+
+    template='akadgadai/index.html'
+    variable = RequestContext(request,{'akad': akad})
+    return render_to_response(template,variable)
+
+@login_required
+def perpanjang(request, object_id):
+    ag = AkadGadai.objects.get(id=object_id)
+    if request.method == 'POST':
+        f = PerpanjangForm(request.POST)
+        if f.is_valid():
+            agkredit = f.cleaned_data['agkredit']
+            tanggal= f.cleaned_data['tanggal']
+            jenis_barang = f.cleaned_data['jenis_barang']
+            status = f.cleaned_data['status']
+            gerai =f.cleaned_data['gerai']
+            ###ELEKTRONIK
+            terlambat=f.cleaned_data['terlambat']
+            #denda = f.cleaned_data['denda']
+            bea_simpan = f.cleaned_data['bea_simpan']
+            #bea_jasa = f.cleaned_data['bea_jasa']
+            #bea_jasa_terlambat = f.cleaned_data['bea_jasa_terlambat']
+            jw = f.cleaned_data['jw']
+            hitung_hari = f.cleaned_data['hitung_hari']            
+            ###kendaraan
+            jw_kendaraan = f.cleaned_data['jw_kendaraan']
+            terlambat_kendaraan = f.cleaned_data['terlambat_kendaraan']
+            #denda_kendaraan = f.cleaned_data['denda_kendaraan']
+            beasimpan_kendaraan = f.cleaned_data['beasimpan_kendaraan']
+            nilai = f.cleaned_data['nilai']          
+            hitung_hari_kendaraan = f.cleaned_data['hitung_hari_kendaraan'] 
+            bunga_denda = f.cleaned_data['bunga_denda']
+            bunga_jasa = f.cleaned_data['bunga_jasa']
+            prj =Perpanjang(agkredit = agkredit,tanggal= tanggal, jenis_barang =jenis_barang, status = status, gerai =gerai,terlambat=terlambat,
+                bea_simpan = bea_simpan, jw = jw, hitung_hari = hitung_hari, jw_kendaraan = jw_kendaraan,
+                terlambat_kendaraan = terlambat_kendaraan, beasimpan_kendaraan = beasimpan_kendaraan,nilai=nilai,bunga_denda=bunga_denda,bunga_jasa =bunga_jasa,
+                hitung_hari_kendaraan = hitung_hari_kendaraan)
+            prj.save()
+            ag.jatuhtempo = prj.coba_jt_prpj()           
+            ag.save()         
+            messages.add_message(request, messages.INFO, 'Data Perpanjangan Telah berhasil simpan.')
+        return HttpResponseRedirect(ag.get_absolute_url())
+    else:
+        sekarang = datetime.datetime.now()
+        f = PerpanjangForm(initial={'agkredit': ag.id,'jenis_barang': ag.jenis_transaksi,
+            'gerai': ag.gerai.id,
+            'tanggal': sekarang.date,
+            'nilai': ag.nilai,'bea_simpan':ag.biayasimpan,'beasimpan_kendaraan':ag.beasimpan_kendaraan})
+        f.fields['agkredit'].widget = forms.HiddenInput()
+        variables = RequestContext(request,{'object': ag,'form':f})
+        return render_to_response('akadgadai/perpanjang.html',variables)
+
+def show(request,object_id):
+    ag = AkadGadai.objects.get(id=object_id)
+    sekarang = datetime.datetime.now()
+    form = PelunasanForm(initial={'pelunasan': ag.id, 
+        'gerai': ag.gerai.id,
+        'tanggal': sekarang.date,
+        'nilai': ag.nilai})
+
+    template = 'akadgadai/show.html'
+    variable = RequestContext(request, {
+        'ag': ag,'form': form})
+    return render_to_response(template,variable)
+
+def add(request):
+    user = request.user
+    D = decimal.Decimal
+    if request.method == "POST":
+        form = AGForm(request.POST,request.FILES)
+        if form.is_valid():
+            jenis_keanggotaan = form.cleaned_data['jenis_keanggotaan']
+            nama = form.cleaned_data['nama']
+            tgl_lahir = form.cleaned_data['tgl_lahir']
+            tempat = form.cleaned_data['tempat']
+            no_ktp = form.cleaned_data['no_ktp']
+            alamat_ktp = form.cleaned_data['alamat_ktp']
+            rt_ktp= form.cleaned_data['rt_ktp']
+            rw_ktp= form.cleaned_data['rw_ktp']
+            telepon_ktp = form.cleaned_data['telepon_ktp']
+            hp_ktp =form.cleaned_data['hp_ktp']
+            kelurahan_ktp = form.cleaned_data['kelurahan_ktp']
+            kecamatan_ktp = form.cleaned_data['kecamatan_ktp']
+            kotamadya_ktp = form.cleaned_data['kotamadya_ktp']
+            kabupaten_ktp = form.cleaned_data['kabupaten_ktp']
+            no_rumah_ktp = form.cleaned_data['no_rumah_ktp']
+            
+            alamat_domisili = form.cleaned_data['alamat_domisili']
+            rt_domisili= form.cleaned_data['rt_domisili']
+            rw_domisili= form.cleaned_data['rw_domisili']
+            telepon_domisili = form.cleaned_data['telepon_domisili']
+            hp_domisili =form.cleaned_data['hp_domisili']
+            kelurahan_domisili = form.cleaned_data['kelurahan_domisili']
+            kecamatan_domisili = form.cleaned_data['kecamatan_domisili']
+            kotamadya_domisili = form.cleaned_data['kotamadya_domisili']
+            kabupaten_domisili = form.cleaned_data['kabupaten_domisili']
+            no_rumah_domisili = form.cleaned_data['no_rumah_domisili']
+            
+            jenis_pekerjaan = form.cleaned_data['jenis_pekerjaan']
+            alamat_kantor = form.cleaned_data['alamat_kantor']
+            kode_pos = form.cleaned_data['kode_pos']
+            telepon_kantor =form.cleaned_data['telepon_kantor']
+            email= form.cleaned_data['email']
+            jenis_kelamin= form.cleaned_data['jenis_kelamin']
+
+            jenis_barang = form.cleaned_data['jenis_barang']            
+            #merk = form.cleaned_data['merk']
+            #type = form.cleaned_data['type']
+            sn= form.cleaned_data['sn']
+            warna = form.cleaned_data['warna']
+            tahun_pembuatan =form.cleaned_data['tahun_pembuatan']
+            bulan_produksi = form.cleaned_data['bulan_produksi']
+            lampiran_dokumen = form.cleaned_data['lampiran_dokumen']            
+            accesoris_barang1 = form.cleaned_data['accesoris_barang1']
+
+            jangka_waktu_kendaraan = form.cleaned_data['jangka_waktu_kendaraan'] 
+            jenis_kendaraan = form.cleaned_data['jenis_kendaraan']
+            merk_kendaraan = form.cleaned_data['merk_kendaraan']
+            type_kendaraan = form.cleaned_data['type_kendaraan']
+            no_polisi = form.cleaned_data['no_polisi']
+            no_rangka = form.cleaned_data['no_rangka']
+            no_mesin = form.cleaned_data['no_mesin']
+            warna_kendaraan = form.cleaned_data['warna_kendaraan']
+            no_bpkb = form.cleaned_data['no_bpkb']
+            stnk_atas_nama = form.cleaned_data['stnk_atas_nama']
+            no_faktur = form.cleaned_data['no_faktur']
+            
+            tanggal = form.cleaned_data['tanggal']
+            gerai = form.cleaned_data['gerai']
+            jangka_waktu = form.cleaned_data['jangka_waktu']
+            nilai = form.cleaned_data['nilai']
+            taksir = form.cleaned_data['taksir']
+            bea_materai = form.cleaned_data['bea_materai']
+            jenis_transaksi = form.cleaned_data['jenis_transaksi']
+            foto_nasabah = form.cleaned_data['foto_nasabah']
+            tanda_tangan = form.cleaned_data['tanda_tangan']
+            berkas_barang = form.cleaned_data['berkas_barang']
+            #Data Pasangan
+            nama_pasangan = form.cleaned_data['nama_pasangan']
+            alamat_pasangan = form.cleaned_data['alamat_pasangan']
+            jekel_pasangan = form.cleaned_data['jekel_pasangan']
+            tlp_pasangan = form.cleaned_data['tlp_pasangan'] 
+            no_rumah_pas = form.cleaned_data['no_rumah_pas']
+            no_rt_pas = form.cleaned_data['no_rt_pas']
+            no_rw_pas = form.cleaned_data['no_rw_pas']
+            
+            charger = form.cleaned_data['charger']
+            kondisi_charger = form.cleaned_data['kondisi_charger']   
+            batre = form.cleaned_data['batre']
+            kondisi_batre = form.cleaned_data['kondisi_batre']
+            keybord = form.cleaned_data['keybord']
+            kondisi_keybord = form.cleaned_data['kondisi_keybord']   
+            cassing = form.cleaned_data['cassing']
+            kondisi_cassing = form.cleaned_data['kondisi_cassing']   
+            layar = form.cleaned_data['layar']
+            kondisi_layar = form.cleaned_data['kondisi_layar']  
+            lensa = form.cleaned_data['lensa']
+            kondisi_lensa = form.cleaned_data['kondisi_lensa']
+            batre_kamera = form.cleaned_data['batre_kamera']
+            kondisi_batre_kamera = form.cleaned_data['kondisi_batre_kamera']
+            cassing_kamera = form.cleaned_data['cassing_kamera']
+            kondisi_cassing_kamera = form.cleaned_data['kondisi_cassing_kamera']
+            password = form.cleaned_data['password']
+            password_barang = form.cleaned_data['password_barang']
+
+            optik_ps = form.cleaned_data['optik_ps']
+            kondisi_optik_ps = form.cleaned_data['kondisi_optik_ps']
+            layar_tv = form.cleaned_data['layar_tv']
+            kondisi_layar_tv = form.cleaned_data['kondisi_layar_tv']
+            
+            harddisk  = form.cleaned_data['harddisk']
+            kondisi_harddisk = form.cleaned_data['kondisi_harddisk']
+            stick  = form.cleaned_data['stick']
+            kondisi_stick = form.cleaned_data['kondisi_stick']
+            hdmi  = form.cleaned_data['hdmi']
+            kondisi_hdmi = form.cleaned_data['kondisi_hdmi']
+            remote = form.cleaned_data['remote']
+            kondisi_remote = form.cleaned_data['kondisi_remote']
+            dus = form.cleaned_data['dus']
+            tas = form.cleaned_data['tas']
+
+                
+            agnasabah = Nasabah(nama=nama,tgl_lahir=tgl_lahir,tempat=tempat,no_ktp=no_ktp,alamat_ktp=alamat_ktp,jenis_keanggotaan = jenis_keanggotaan,
+                rt_ktp=rt_ktp,rw_ktp=rw_ktp,telepon_ktp=telepon_ktp,hp_ktp=hp_ktp,kelurahan_ktp=kelurahan_ktp,jenis_pekerjaan=jenis_pekerjaan,alamat_kantor=alamat_kantor,
+                kode_pos=kode_pos,telepon_kantor=telepon_kantor,email=email,jenis_kelamin=jenis_kelamin,kotamadya_ktp=kotamadya_ktp,no_rumah_ktp=no_rumah_ktp,
+                kabupaten_ktp=kabupaten_ktp,kecamatan_ktp=kecamatan_ktp,alamat_domisili = alamat_ktp,rt_domisili= rt_domisili,rw_domisili= rw_domisili,
+                telepon_domisili = telepon_domisili,hp_domisili =hp_domisili,kelurahan_domisili = kelurahan_domisili,kecamatan_domisili = kecamatan_domisili,
+                kotamadya_domisili = kotamadya_domisili,kabupaten_domisili = kabupaten_domisili,no_rumah_domisili=no_rumah_domisili,
+                nama_pasangan = nama_pasangan,alamat_pasangan = alamat_pasangan,jekel_pasangan = jekel_pasangan,tlp_pasangan = tlp_pasangan,
+                no_rumah_pas = no_rumah_pas, no_rt_pas = no_rt_pas, no_rw_pas = no_rw_pas)
+            agnasabah.save()
+            barang = Barang(sn=sn,warna=warna,tahun_pembuatan=tahun_pembuatan,bulan_produksi=bulan_produksi,
+                lampiran_dokumen=lampiran_dokumen,accesoris_barang1=accesoris_barang1,jenis_barang=jenis_barang,
+                merk_kendaraan=merk_kendaraan,no_polisi=no_polisi,no_rangka=no_rangka,no_mesin=no_mesin,warna_kendaraan=warna_kendaraan,
+                no_bpkb=no_bpkb,stnk_atas_nama=stnk_atas_nama,no_faktur=no_faktur,jenis_kendaraan=jenis_kendaraan,
+                type_kendaraan=type_kendaraan,\
+                charger=charger,kondisi_charger=kondisi_charger,batre=batre,kondisi_batre=kondisi_batre,keybord=keybord,
+                kondisi_keybord=kondisi_keybord,cassing=cassing,kondisi_cassing = kondisi_cassing,layar=layar,
+                kondisi_layar=kondisi_layar,lensa=lensa,kondisi_lensa=kondisi_lensa,optik_ps=optik_ps,kondisi_optik_ps=kondisi_optik_ps,
+                
+                layar_tv=layar_tv,kondisi_layar_tv = kondisi_layar_tv,
+                harddisk = harddisk,kondisi_harddisk = kondisi_harddisk,stick  = stick,kondisi_stick = kondisi_stick,hdmi  = hdmi,kondisi_hdmi = kondisi_hdmi,
+                remote = remote,kondisi_remote = kondisi_remote,dus = dus,tas = tas,
+                batre_kamera = batre_kamera,kondisi_batre_kamera = kondisi_batre_kamera,cassing_kamera = cassing_kamera,
+                kondisi_cassing_kamera = kondisi_cassing_kamera,password = password,password_barang =password_barang)
+            barang.save()
+            
+            ag = AkadGadai (tanggal = tanggal,agnasabah=agnasabah, gerai=gerai, jangka_waktu=jangka_waktu,bea_materai=bea_materai,status_kw = '0',
+                nilai=nilai,cu=request.user, mu=request.user,taksir=taksir,barang=barang,jangka_waktu_kendaraan=jangka_waktu_kendaraan,
+                jenis_transaksi=jenis_transaksi,status_transaksi=3,selisih_pelunasan = 0)
+
+            if  ag.jenis_transaksi == u'1' and ag.nilai > ag.taksir.maxpinjaman and ag.agnasabah.jenis_keanggotaan == u'1':
+                ag.status_taksir = 2
+                ag.asumsi_jasa = round(ag.asumsi_pendapatan_jasa())
+                ag.os_pokok = ag.nilai
+                ag.jatuhtempo = ag.menu_hitung_jt()
+                ag.nilai_adm = D(ag.adm)
+                ag.nilai_jasa = D(round(ag.jasa))
+                ag.nilai_biayasimpan = D(ag.biayasimpan)
+                ag.nilai_asuransi = 0
+                ag.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')
+                ag.save()
+                request.FILES['tanda_tangan'].name = nama + '_' +  ag.norek() + '_' + request.FILES['tanda_tangan'].name
+                request.FILES['foto_nasabah'].name = nama + '_' +  ag.norek() + '_' + request.FILES['foto_nasabah'].name
+                request.FILES['berkas_barang'].name = nama + '_' +  ag.norek() + '_' + request.FILES['berkas_barang'].name
+                berkas = BerkasGadai(upload=ag, tanda_tangan=request.FILES['tanda_tangan'], foto_nasabah=request.FILES['foto_nasabah'] ,\
+                    berkas_barang=request.FILES['berkas_barang'])
+                berkas.save()
+                #jurnal_pencairan(ag, request.user)
+                
+            elif ag.jenis_transaksi == u'2' and ag.nilai > ag.taksir.maxpinjaman and ag.agnasabah.jenis_keanggotaan == u'1':
+                ag.status_taksir = 2
+                ag.asumsi_jasa = round(ag.asumsi_pendapatan_jasa())
+                ag.os_pokok = ag.nilai
+                ag.jatuhtempo = ag.menu_hitung_jt()
+                ag.nilai_adm_kendaraan = D(ag.adm_kendaraan)
+                ag.nilai_jasa_kendaraan = D(round(ag.jasa_kendaraan))
+                ag.nilai_beasimpan_kendaraan = D(ag.beasimpan_kendaraan)
+                ag.nilai_asuransi = 0
+                ag.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')
+                ag.save()
+                request.FILES['tanda_tangan'].name = nama + '_' +  ag.norek() + '_' + request.FILES['tanda_tangan'].name
+                request.FILES['foto_nasabah'].name = nama + '_' +  ag.norek() + '_' + request.FILES['foto_nasabah'].name
+                request.FILES['berkas_barang'].name = nama + '_' +  ag.norek() + '_' + request.FILES['berkas_barang'].name
+                berkas = BerkasGadai(upload=ag, tanda_tangan=request.FILES['tanda_tangan'], foto_nasabah=request.FILES['foto_nasabah'] ,\
+                    berkas_barang=request.FILES['berkas_barang'])
+                berkas.save()
+                #jurnal_pencairan(ag, request.user)
+                
+            elif ag.jenis_transaksi == u'1' and ag.nilai <=  ag.taksir.maxpinjaman and ag.agnasabah.jenis_keanggotaan == u'1':
+                ag.status_taksir = 1
+                ag.asumsi_jasa = ag.asumsi_pendapatan_jasa()
+                ag.os_pokok = ag.nilai
+                ag.jatuhtempo = ag.menu_hitung_jt()
+                ag.nilai_adm = D(ag.adm)
+                ag.nilai_jasa = D(round(ag.jasa))
+                ag.nilai_biayasimpan = D(ag.biayasimpan)
+                ag.nilai_asuransi = 0
+                ag.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                ag.save()
+                request.FILES['tanda_tangan'].name = nama + '_' +  ag.norek() + '_' + request.FILES['tanda_tangan'].name
+                request.FILES['foto_nasabah'].name = nama + '_' +  ag.norek() + '_' + request.FILES['foto_nasabah'].name
+                request.FILES['berkas_barang'].name = nama + '_' +  ag.norek() + '_' + request.FILES['berkas_barang'].name
+                berkas = BerkasGadai(upload=ag, tanda_tangan=request.FILES['tanda_tangan'], foto_nasabah=request.FILES['foto_nasabah'] ,\
+                    berkas_barang=request.FILES['berkas_barang'])
+                berkas.save()
+                #jurnal_pencairan(ag, request.user)
+                
+            elif ag.jenis_transaksi == u'2' and ag.nilai <= ag.taksir.maxpinjaman and ag.agnasabah.jenis_keanggotaan == u'1':
+                ag.status_taksir = 1
+                ag.asumsi_jasa = round(ag.asumsi_pendapatan_jasa())
+                ag.os_pokok = ag.nilai
+                ag.jatuhtempo = ag.menu_hitung_jt()
+                ag.nilai_adm_kendaraan = D(ag.adm_kendaraan)
+                ag.nilai_jasa_kendaraan = D(round(ag.jasa_kendaraan))
+                ag.nilai_beasimpan_kendaraan = D(ag.beasimpan_kendaraan)
+                ag.nilai_asuransi = 0
+                ag.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                ag.save()
+                request.FILES['tanda_tangan'].name = nama + '_' +  ag.norek() + '_' + request.FILES['tanda_tangan'].name
+                request.FILES['foto_nasabah'].name = nama + '_' +  ag.norek() + '_' + request.FILES['foto_nasabah'].name
+                request.FILES['berkas_barang'].name = nama + '_' +  ag.norek() + '_' + request.FILES['berkas_barang'].name
+                berkas = BerkasGadai(upload=ag, tanda_tangan=request.FILES['tanda_tangan'], foto_nasabah=request.FILES['foto_nasabah'] ,\
+                    berkas_barang=request.FILES['berkas_barang'])
+                berkas.save()
+                #jurnal_pencairan(ag, request.user)
+
+            elif  ag.jenis_transaksi == u'1' and ag.nilai > ag.taksir.maxpinjaman and ag.agnasabah.jenis_keanggotaan == u'2':
+                ag.status_taksir = 2
+                ag.asumsi_jasa = round(ag.asumsi_pendapatan_jasa())
+                ag.os_pokok = ag.nilai
+                ag.jatuhtempo = ag.menu_hitung_jt()
+                ag.nilai_adm = D(ag.adm)
+                ag.nilai_jasa = D(round(ag.jasa))
+                ag.nilai_biayasimpan = D(ag.biayasimpan)
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')
+                ag.save()
+                request.FILES['tanda_tangan'].name = nama + '_' +  ag.norek() + '_' + request.FILES['tanda_tangan'].name
+                request.FILES['foto_nasabah'].name = nama + '_' +  ag.norek() + '_' + request.FILES['foto_nasabah'].name
+                request.FILES['berkas_barang'].name = nama + '_' +  ag.norek() + '_' + request.FILES['berkas_barang'].name
+                berkas = BerkasGadai(upload=ag, tanda_tangan=request.FILES['tanda_tangan'], foto_nasabah=request.FILES['foto_nasabah'] ,\
+                    berkas_barang=request.FILES['berkas_barang'])
+                berkas.save()
+                #jurnal_pencairan_nonanggota(ag, request.user)
+                
+            elif ag.jenis_transaksi == u'2' and ag.nilai > ag.taksir.maxpinjaman and ag.agnasabah.jenis_keanggotaan == u'2':
+                ag.status_taksir = 2
+                ag.asumsi_jasa = round(ag.asumsi_pendapatan_jasa())
+                ag.os_pokok = ag.nilai
+                ag.jatuhtempo = ag.menu_hitung_jt()
+                ag.nilai_adm_kendaraan = D(ag.adm_kendaraan)
+                ag.nilai_jasa_kendaraan = D(round(ag.jasa_kendaraan))
+                ag.nilai_beasimpan_kendaraan = D(ag.beasimpan_kendaraan)
+                ag.nilai_asuransi = 0
+                ag.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')
+                ag.save()
+                request.FILES['tanda_tangan'].name = nama + '_' +  ag.norek() + '_' + request.FILES['tanda_tangan'].name
+                request.FILES['foto_nasabah'].name = nama + '_' +  ag.norek() + '_' + request.FILES['foto_nasabah'].name
+                request.FILES['berkas_barang'].name = nama + '_' +  ag.norek() + '_' + request.FILES['berkas_barang'].name
+                berkas = BerkasGadai(upload=ag, tanda_tangan=request.FILES['tanda_tangan'], foto_nasabah=request.FILES['foto_nasabah'] ,\
+                    berkas_barang=request.FILES['berkas_barang'])
+                berkas.save()
+                #jurnal_pencairan_nonanggota(ag, request.user)
+                
+            elif ag.jenis_transaksi == u'1' and ag.nilai <=  ag.taksir.maxpinjaman and ag.agnasabah.jenis_keanggotaan == u'2':
+                ag.status_taksir = 1
+                ag.asumsi_jasa = round(ag.asumsi_pendapatan_jasa())
+                ag.os_pokok = ag.nilai
+                ag.jatuhtempo = ag.menu_hitung_jt()
+                ag.nilai_adm = D(ag.adm)
+                ag.nilai_jasa = D(round(ag.jasa))
+                ag.nilai_biayasimpan = D(ag.biayasimpan)
+                ag.nilai_asuransi = 0
+                ag.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                ag.save()
+                request.FILES['tanda_tangan'].name = nama + '_' +  ag.norek() + '_' + request.FILES['tanda_tangan'].name
+                request.FILES['foto_nasabah'].name = nama + '_' +  ag.norek() + '_' + request.FILES['foto_nasabah'].name
+                request.FILES['berkas_barang'].name = nama + '_' +  ag.norek() + '_' + request.FILES['berkas_barang'].name
+                berkas = BerkasGadai(upload=ag, tanda_tangan=request.FILES['tanda_tangan'], foto_nasabah=request.FILES['foto_nasabah'] ,\
+                    berkas_barang=request.FILES['berkas_barang'])
+                berkas.save()
+                #jurnal_pencairan_nonanggota(ag, request.user)
+                
+            #elif ag.jenis_transaksi == u'2' and ag.nilai <= ag.taksir.maxpinjaman and ag.agnasabah.jenis_keanggotaan == u'2':
+            else:
+                ag.status_taksir = 1
+                ag.asumsi_jasa = ag.asumsi_pendapatan_jasa()
+                ag.jatuhtempo = ag.menu_hitung_jt()
+                ag.nilai_adm_kendaraan = D(ag.adm_kendaraan)
+                ag.nilai_jasa_kendaraan = D(round(ag.jasa_kendaraan))
+                ag.nilai_beasimpan_kendaraan = D(ag.beasimpan_kendaraan)
+                ag.nilai_asuransi = 0
+                ag.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                ag.save()
+                request.FILES['tanda_tangan'].name = nama + '_' +  ag.norek() + '_' + request.FILES['tanda_tangan'].name
+                request.FILES['foto_nasabah'].name = nama + '_' +  ag.norek() + '_' + request.FILES['foto_nasabah'].name
+                request.FILES['berkas_barang'].name = nama + '_' +  ag.norek() + '_' + request.FILES['berkas_barang'].name
+                berkas = BerkasGadai(upload=ag, tanda_tangan=request.FILES['tanda_tangan'], foto_nasabah=request.FILES['foto_nasabah'] ,\
+                    berkas_barang=request.FILES['berkas_barang'])
+                berkas.save()
+                #jurnal_pencairan_nonanggota(ag, request.user)
+                form  = AGForm()
+                form.fields['gerai'].queryset = Tbl_Cabang.objects.for_user(user)
+            barang = Barang.objects.all()
+            banding = barang.filter(id = ag.barang_id)
+            banding.update(merk = ag.taksir.type,type = ag.taksir.type )       
+            messages.add_message(request, messages.INFO, 'Akadgadai Telah tersimpan')
+            return HttpResponseRedirect('/')
+
+    else:
+        form  = AGForm()
+        form.fields['gerai'].queryset = Tbl_Cabang.objects.for_user(user) 
+    variables = RequestContext(request, {'form': form})
+    return render_to_response('akadgadai/akadnasabah.html', variables)
+
+def jurnal_pencairan(ag, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_pinjaman = get_object_or_404(Tbl_Akun, id=163L)
+    a_pdp_adm = get_object_or_404(Tbl_Akun, id='430')
+    a_pdp_jasa = get_object_or_404(Tbl_Akun, id='383')
+    a_pdp_bea_simpan = get_object_or_404(Tbl_Akun, id='429')
+   
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ag.norek(), ag.agnasabah.nama),tgl_trans =ag.tanggal,nobukti=ag.norek(),
+        object_id=ag.norek_id())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = 'Pencairan', id_coa = a_pinjaman,
+        debet = ag.nilai,kredit = 0,
+        id_product = '4',status_jurnal ='1',id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,
+        id_unit= 300)
+    
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = 'Pencairan', id_coa = a_pdp_adm,
+        debet = 0,kredit = D(float(ag.adm_all())),
+        id_product = '4',status_jurnal ='1',id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,
+        id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan"), id_coa = a_pdp_jasa,no_trans = no_trans,
+        debet = 0,kredit =  D(float(ag.jasa_all())),
+        id_product = '4',status_jurnal ='1',
+        id_cabang = ag.gerai.kode_cabang,tgl_trans =ag.tanggal,id_unit= 300)
+
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan"), id_coa = a_pdp_bea_simpan,
+        debet = 0,kredit =  D(float(ag.beasimpan_all())),
+        id_product = '4',status_jurnal ='1',id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan"), id_coa = a_titipan_pencairan,
+        debet = 0 ,  kredit = round(D(ag.nilai) - D(ag.adm_all()) - ag.jasa_all() - ag.beasimpan_all()),
+        id_product = '4',status_jurnal ='1',id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,
+        id_unit= 300)
+
+def jurnal_pencairan_nonanggota(ag, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_pinjaman = get_object_or_404(Tbl_Akun, id=166L)
+    a_pdp_adm = get_object_or_404(Tbl_Akun, id='432')
+    a_pdp_jasa = get_object_or_404(Tbl_Akun, id='383')
+    a_pdp_bea_simpan = get_object_or_404(Tbl_Akun, id='429')
+   
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ag.norek(), ag.agnasabah.nama),tgl_trans =ag.tanggal,nobukti=ag.norek(),
+        object_id=ag.norek_id())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = 'Pencairan', id_coa = a_pinjaman,
+        debet = ag.nilai,kredit = 0,
+        id_product = '4',status_jurnal ='1',id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,
+        id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = 'Pencairan', id_coa = a_pdp_adm,
+        debet = 0,kredit = D(float(ag.adm_all())),
+        id_product = '4',status_jurnal ='1',id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,
+        id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan"), id_coa = a_pdp_jasa,
+        debet = 0,kredit =  D(float(ag.jasa_all())),
+        id_product = '4',status_jurnal ='1',
+        id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,id_unit= 300)
+    
+    #''' Pendapatan Jasa Diterima Dimuka
+    #jurnal.tbl_transaksi_set.create(
+        #jenis = '%s' % ("Pencairan"), id_coa = a_pdp_jasa, #no_trans = no_trans,
+        #debet = 0,kredit =  D(ag.asumsi_pendapatan_jasa()),
+        #id_product = '4',status_jurnal ='1',
+        #id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan"), id_coa = a_pdp_bea_simpan,
+        debet = 0,kredit =  D(float(ag.beasimpan_all())),
+        id_product = '4',status_jurnal ='1',id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan"), id_coa = a_titipan_pencairan,
+        debet = 0 , kredit = round(D(ag.nilai) - D(ag.adm_all()) - ag.jasa_all() - ag.beasimpan_all()),#D(ag.jasa_all()) 
+        id_product = '4',status_jurnal ='1',id_cabang =ag.gerai.kode_cabang,tgl_trans =ag.tanggal,
+        id_unit= 300)
+
+
+def baru(request):
+    if request.method == "POST":
+        D = decimal.Decimal
+        form = AkadForm(request.POST)
+        if form.is_valid():
+            agnasabah = form.cleaned_data['agnasabah']
+            tanggal = form.cleaned_data['tanggal']
+            gerai = form.cleaned_data['gerai']
+            jenis_transaksi = form.cleaned_data['jenis_transaksi']
+            taksir = form.cleaned_data['taksir'] 
+            jangka_waktu = form.cleaned_data['jangka_waktu']
+            nilai = form.cleaned_data['nilai']
+            jenis_kendaraan = form.cleaned_data['jenis_kendaraan']
+            barang = form.cleaned_data['barang']
+            jangka_waktu_kendaraan = form.cleaned_data['jangka_waktu_kendaraan']
+            bea_materai = form.cleaned_data['bea_materai']
+            
+            akad = AkadGadai (tanggal = tanggal,agnasabah=agnasabah, gerai=gerai, jangka_waktu=jangka_waktu,
+                nilai=nilai,cu=request.user, mu=request.user,taksir=taksir,barang=barang,
+                bea_materai=bea_materai, jangka_waktu_kendaraan=jangka_waktu_kendaraan,
+                jenis_transaksi=jenis_transaksi)
+  
+            if  akad.jenis_transaksi == u'1' and akad.nilai > akad.taksir.maxpinjaman:
+                akad.status_taksir = 2
+                akad.jatuhtempo = ag.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(akad.jasa)
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nocoa_titipan = '21.05.01'
+                akad.nocoa_kas = '11.01.04'
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')
+                akad.save()
+            elif akad.jenis_transaksi == u'2' and akad.nilai > akad.taksir.maxpinjaman:
+                akad.status_taksir = 2
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(akad.jasa_kendaraan)
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nocoa_titipan = '21.05.01'
+                akad.nocoa_kas = '11.01.04'
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')
+                akad.save()
+            elif akad.jenis_transaksi == u'1' and akad.nilai <=  akad.taksir.maxpinjaman:
+                akad.status_taksir = 1
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(akad.jasa)
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nocoa_titipan = '21.05.01'
+                akad.nocoa_kas = '11.01.04'
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                akad.save()
+                
+            elif akad.jenis_transaksi == u'2' and akad.nilai <= akad.taksir.maxpinjaman:
+                akad.status_taksir = 1
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(akad.jasa_kendaraan)
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nocoa_titipan = '21.05.01'
+                akad.nocoa_kas = '11.01.04'
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                akad.save()
+            jurnal_pencairan(akad, request.user)            
+            return HttpResponseRedirect('/')
+    else:
+        form = Akadform()
+    template='nasabah/addnasabah.html'
+    variable = RequestContext(request, {'form':form})
+    return render_to_response(template,variable)
+
+
+def tterima(request,object_id):
+    akadgadai = AkadGadai.objects.get(id=object_id)
+   # barang = Barang.objects.get(id=object_id)
+    #gerai = GeraiGadai.objects.get(id=object_id)
+    sekarang=datetime.datetime.now()
+    h=sekarang.day
+    m=sekarang.month
+    y=sekarang.year
+    if m+1 <= 12:
+        b=m+1
+        t=y
+    else  :
+        b=1
+        t=y+1
+        patokan=datetime.date(int(t),int(b),int(h))
+
+
+        trk=akadgadai.tanggal
+        dd=patokan.month-trk.month
+        yy=patokan.year-trk.year
+
+    response = HttpResponse(mimetype='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename= kuitansi_%s.pdf' % akadgadai.norek()
+    
+    c = canvas.Canvas(response, pagesize=(9.5*inch, 11*inch))
+
+    header0=(8.25 *inch, (5.2 + 5.5) * inch)
+    header1=(4.60 *inch, (5.35 + 5.5) * inch)
+    colom1 = (0.3*inch, (4.35 + 5.5) *inch)
+    colom2 = (6.3*inch, (4.35 + 5.5) *inch)
+    colom3 = (6.3*inch, (4.3 + 4.5) *inch)
+    
+    c.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 0.5*inch, (4.8 + 5.5) * inch, width=24.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+
+    x,y = header0
+    y1 = 0.126* inch
+    c.setFont("Courier", 7)
+    #c.drawString(x-0.02*inch, y+0.2, "[kowil][koger][%b] [akadgadai.mu]"); y -=2*y1
+    #c.drawString(x-0.02*inch, y+0.2*inch,    "( %s )"% (akadgadai.agnasabah.nama)  ); y -=y1
+    c.drawString(x+0.02*inch, y+0.2*inch, "%s" % sekarang.strftime('[%-b][%Y]') ); y -= y1
+
+    x,y = header1
+    y1 = 0.10* inch
+    c.setFont("Courier-Bold", 14)
+    c.drawString(x-1.9*inch, y, "TANDA TERIMA BARANG JAMINAN" ); y -=1.5*y1
+    c.setFont("Courier-Bold", 10)
+    c.drawString(x-3.1*inch, y,"Badan Hukum No.518/BH.88-Diskop/THN.2007 Tgl 27 Desember 2007 "); y -=1.5*y1
+    c.setFont("Courier-Bold", 10)
+    c.drawString(x-1.1*inch, y, "GERAI [%s]"% (akadgadai.gerai.nama)); y -=1.5*y1
+    c.drawString(x-1.9*inch, y, "[%s/Telp: %s]"% (akadgadai.gerai.alamat, akadgadai.gerai.telepon)); y -=y1
+    #c.line( 0.53 * inch , y , 7.75 * inch , y ) ; y -=2*y1
+    #c.setFont("Courier-Bold", 14)
+
+    x,y = colom1
+    y1 = 0.100 * inch
+
+    tb=terbilang(akadgadai.terima_bersih)
+
+    c.setFont("Courier-Bold", 10)
+    c.drawString(x, y, "Telah terima dari   : %s" % (akadgadai.agnasabah.nama)); y -= 1.2*y1
+    c.drawString(x, y, "Nomor Kwitansi      : %s" % (akadgadai.norek())); y -=1.5*y1
+    c.drawString(x, y, "No.KTP              : %s" % (akadgadai.agnasabah.no_ktp)); y -=1.5*y1
+    c.drawString(x, y, "Barang jaminan, sebagai berikut :  " ); y -= 1.5*y1
+    c.drawString(x, y, "1.  %s %s"% (akadgadai.barang.merk,akadgadai.barang.type, )); y -=1.5* y1
+    c.drawString(0.2*inch, y-0.4*inch, "Diserahkan pada tanggal: %s" % sekarang.strftime('%d-%-b-%Y') ); y -= y1
+    c.drawString(4.0*inch, y-0.3*inch, "Dikembalikan pada tanggal:" ); y -= 1.5*y1
+   
+    y -=  3 * y1
+    y2 = y + 0.1 * inch
+    c.setFont("Courier-Bold", 11)
+    c.line( 0.2 * inch , y2 , 7.7 * inch , y2 );
+   
+    
+    y -= y1
+    c.setFont("Courier-Bold", 9)
+    c.drawString(0.3*inch, y-0.1*inch,  "DEBITUR"); y -= y1
+    c.line( 2.3* inch , y , 5.7 * inch , y );
+    c.drawString(x+2.1*inch, y+0.1*inch,  "YANG MENERIMA"); y -= y1
+    c.drawString(x+2.1*inch, y-0.0*inch,  "GERAI %s"% (akadgadai.gerai.nama)); y -= y1
+    c.line( 0.2* inch , y , 7.7 * inch , y );y -= y1
+    c.drawString(x+3.8*inch, y+0.4*inch,  "YANG MENYERAHKAN"); y -= y1
+    c.drawString(x+3.8*inch, y+0.3*inch,  "GERAI %s"% (akadgadai.gerai.nama)); y -= y1
+    c.drawString(x+5.5*inch, y+0.5*inch,  "DEBITUR"); y -= y1
+    
+    c.setFont("Courier-Bold", 8)
+    c.drawString(x+3.8*inch, y-0.4*inch,  "%s"%(akadgadai.cu)); y -= y1
+    c.drawString(x+5.5*inch, y-0.3*inch,  "%s"% (akadgadai.agnasabah.nama)); y -= y1
+    c.line( 0.2* inch , y , 7.7 * inch , y ); y -= y1
+    c.setFont("Courier-Bold", 8)
+    c.drawString(x+2.1*inch, y-0.1*inch,  "%s"%(akadgadai.cu)); y -= y1
+    c.drawString(0.3*inch, y-0.0*inch,  "%s"% (akadgadai.agnasabah.nama)); y -= y1
+    
+    c.line( 0.2* inch , y2 , 0.2 * inch , y );
+    c.line( 4.0 * inch , y2 , 4.0  * inch , y );
+    c.line( 2.3 * inch , y2 , 2.3  * inch , y  );
+    c.line( 0.2* inch , y , 7.7 * inch , y );
+    c.line( 5.7 * inch , y2 , 5.7  * inch , y  );
+    c.line( 7.7 * inch , y2 , 7.7  * inch , y );
+    c.drawString(0.2*inch, y-0.2*inch,  "KETENTUAN :"); y -= y1
+    c.drawString(0.2*inch, y-0.2*inch,  "Syarat Pengambilan Barang Jaminan harus menunjukan bukti ini, Kwitansi & KTP Debitur / Ahli Waris"); y -= y1
+    
+    c.showPage()
+    c.save()
+    
+    return response
+
+
+
+def cari(request):
+    rekening=request.GET['rekening']
+    
+    try:
+        ag=AkadGadai.objects.get(id=int(rekening))
+        return HttpResponseRedirect("/akadgadai/%s/show/" % ag.id)
+    except:
+        messages.add_message(request, messages.INFO,'No rekening tidak ditemukan.')
+        return HttpResponseRedirect("/akadgadai/")
+def pengundurandiri(request, object_id):
+    sekarang=datetime.datetime.now()
+    akad = AkadGadai.objects.get(id=object_id)
+    tb=terbilang(akad.nilai)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename= "Formulir Pendaftaran %s.pdf"' % akad.norek()
+    h=sekarang.day
+    m=sekarang.month
+    y=sekarang.year
+
+    buffer = BytesIO()
+
+    p = canvas.Canvas(buffer)
+    p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/kopri.png'), 0.4*inch, (5.2 + 5.7) * inch, width=33.5/17.5*0.51*inch,height=26/17.5*0.51*inch)
+    p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 7.0*inch, (5.2 + 5.7) * inch, width=35.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+    
+    
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawCentredString(300, 800, "FORMULIR PENGUNDURAN DIRI")
+    p.drawCentredString(300, 780, "ANGGOTA KOPERASI RIZKY ABADI")
+    p.line(  30 , 775, 580 ,775  ) 
+    p.setLineWidth(.3)
+    p.line(  30 , 773, 580 ,773  ) 
+    p.setFont('Helvetica', 10)
+    #p.drawAlignedString(30,763,'Yang bertanda tangan dibawah ini :')
+    p.drawString(30,750,'Yang bertanda tangan dibawah ini :')
+    p.drawString(30,735,"Nama Lengkap")
+    p.drawString(145,735,": %s" % akad.agnasabah.nama)
+    p.drawString(30,720,"Tempat & Tanggal Lahir")
+    p.drawString(145,720,": %s, %s " % (akad.agnasabah.tempat,akad.agnasabah.tgl_lahir))
+    p.drawString(30,705,"Alamat Lengkap")
+    p.drawString(145,705,": %s RT %s RW %s Kel %s Kec %s" % (akad.agnasabah.alamat_ktp,akad.agnasabah.rt_ktp,akad.agnasabah.rw_ktp,akad.agnasabah.kelurahan_ktp,akad.agnasabah.kecamatan_ktp))
+    p.drawString(30,690,"Nomor KTP / SIM")
+    p.drawString(145,690,": %s " % akad.agnasabah.no_ktp)
+    p.drawString(30,675,"Pekerjaan")
+    p.drawString(145,675,": %s " % akad.agnasabah.get_jenis_pekerjaan_display())
+    p.drawString(30,660,"Pendidikan Terakhir")
+    p.drawString(145,660,": .................................")
+    p.drawString(30,645,"Status Pernikahan")
+    p.drawString(145,645,": .................................")
+    p.drawString(30,630,"No. Telepon")
+    p.drawString(145,630,": %s " % akad.agnasabah.telepon_ktp)
+    p.setFont('Helvetica', 10)
+    p.drawString(30,610,'Melalui formulir ini saya selaku Anggota mengajukan pengunduran diri dari Koperasi "Rizky Abadi" dengan alasan .........')
+    p.drawString(30,600,'....................................................................................................................................')
+    p.drawString(395,600,'............................................................')
+    p.drawString(30,590,'....................................................................................................................................')
+    p.drawString(395,590,'............................................................')
+    p.drawAlignedString(353,580,'formulir ini saya buat sesuai peraturan yang berrlaku di KSU Rizky Abadi. Saya berharap KSU Rizky Abadi dapat mema-')
+    p.drawString(30,570,'hami kondisi saya dan memberikan hak - hak saya sesuai ketentuan yang berlaku')
+    p.drawAlignedString(565,560,'Demikian surat pengunduran diri ini saya buat dengan sesungguhnya,  atas bantuan  dan dukungan yang telah diberikan')
+    p.drawString(30,550,'selama ini, saya ucapkan terima kasih.')
+    p.drawCentredString(300,530,"Bandung, %s" % sekarang.strftime('%d %B %Y'))
+    p.drawCentredString(300, 520, "Yang membuat pernyataan,")    
+    p.drawCentredString(300,470,"( %s )" % akad.agnasabah.nama)
+    p.drawCentredString(300, 280, "Disetujui oleh,")
+    p.drawCentredString(300, 230, "..................................................................")
+    p.setLineWidth(.3)
+    p.line(209, 229,391, 229)
+    p.setFont('Helvetica-Bold', 10)
+    p.drawCentredString(300, 220, "Ketua / Kepala Kantor / Manager")
+    p.drawCentredString(300, 200, "Kantor Pusat :")
+    p.drawCentredString(300, 190, "Badan Hukum Nomor : 518/BH.88-DISKOP/THN.2007 Tgl. 27 Desember 2007")
+    p.drawCentredString(300, 175, "Jl. Cisaranten Kulaon IV No 55 Rt.06/Rw.05 Kel. Cisaranten Kulon")
+    p.drawCentredString(300, 165, "Kec. Arcamanik Bandung 40293 Telp./Fax. 022 87882769")
+
+    
+    p.showPage()
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+    return response
+ 
+def keanggotaan(request, object_id):
+    sekarang=datetime.datetime.now()
+    akad = AkadGadai.objects.get(id=object_id)
+    tb=terbilang(akad.nilai)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename= "Formulir Pendaftaran %s.pdf"' % akad.norek()
+    h=sekarang.day
+    m=sekarang.month
+    y=sekarang.year
+
+    buffer = BytesIO()
+
+    p = canvas.Canvas(buffer)
+    p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/kopri.png'), 0.4*inch, (5.2 + 5.7) * inch, width=33.5/17.5*0.51*inch,height=26/17.5*0.51*inch)
+    p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 7.0*inch, (5.2 + 5.7) * inch, width=35.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawCentredString(300, 800, "FORMULIR PENDAFTARAN")
+    p.drawCentredString(300, 780, "ANGGOTA KOPERASI RIZKY ABADI")
+    p.line(  30 , 775, 580 ,775  ) 
+    p.setLineWidth(.3)
+    p.line(  30 , 773, 580 ,773  ) 
+    p.setFont('Helvetica', 10)
+    #p.drawAlignedString(30,763,'Yang bertanda tangan dibawah ini :')
+    p.drawString(30,750,'Yang bertanda tangan dibawah ini :')
+    p.drawString(30,735,"Nama Lengkap")
+    p.drawString(145,735,": %s" % akad.agnasabah.nama)
+    p.drawString(30,720,"Tempat & Tanggal Lahir")
+    p.drawString(145,720,": %s, %s " % (akad.agnasabah.tempat,akad.agnasabah.tgl_lahir))
+    p.drawString(30,705,"Alamat Lengkap")
+    p.drawString(145,705,": %s RT %s RW %s Kel %s Kec %s" % (akad.agnasabah.alamat_ktp,akad.agnasabah.rt_ktp,akad.agnasabah.rw_ktp,akad.agnasabah.kelurahan_ktp,akad.agnasabah.kecamatan_ktp))
+    p.drawString(30,690,"Nomor KTP / SIM")
+    p.drawString(145,690,": %s " % akad.agnasabah.no_ktp)
+    p.drawString(30,675,"Pekerjaan")
+    p.drawString(145,675,": %s " % akad.agnasabah.get_jenis_pekerjaan_display())
+    p.drawString(30,660,"Pendidikan Terakhir")
+    p.drawString(145,660,": .................................")
+    p.drawString(30,645,"Status Pernikahan")
+    p.drawString(145,645,": .................................")
+    p.drawString(30,630,"No. Telepon")
+    p.drawString(145,630,": %s " % akad.agnasabah.telepon_ktp)
+    p.setFont('Helvetica-Bold', 10)
+    p.drawString(30,610,"*")
+    p.setFont('Helvetica', 10)
+    p.drawAlignedString(565,610,'Saya dengan ini mengajukan permohonan menjadi Anggota Koperasi "Rizky Abadi",  dan bersedia mentaati Anggaran')
+    p.drawAlignedString(565,600,'Dasar, Anggaran Rumah Tangga, Keputusan kebijakan pengurus serta peraturan lain yang berlaku di Koperasi "Rizky')
+    p.drawString(40,590,'Abadi" dengan jujur, disiplin, dan penuh tanggung jawab.')
+    p.drawString(45,580,'')
+    p.setFont('Helvetica-Bold', 10)
+    p.drawString(30,570,"*")
+    p.setFont('Helvetica', 10)
+    p.drawAlignedString(565,570,'Saya bersedia membayar  simpanan koperasi berupa Simpanan Pokok dan Simpanan Wajib di  Koperasi Rizky  Abadi')
+    p.drawAlignedString(565,560,'yang pembayarannya  disesuaikan dengan aturan yang  ada dan sebagaimana yang telah tercantum dalam Anggaran')
+    p.drawString(37,550,' dalam Anggaran Dasar/Anggaran Rumah dengan jujur, disiplin, dan penuh tanggung jawab.')
+    p.setFont('Helvetica-Bold', 10)
+    p.drawString(30,530,"*")
+    p.setFont('Helvetica', 10)
+    p.drawString(37,530,'Bersama Formulir Permohonan ini, saya sertakan :')
+    p.drawString(37,520,'1. Satu lembar Fotocopy KTP/SIM (yang masih berlaku)')
+    p.drawString(37,510,'2. Satu lembar Foto Ukuran 2x3 (uk. KTP jika ada)')
+    p.drawString(37,490,'Demikian permohonan ini saya buat dengan sebenar-benarnya, atas perhatiannya diucapkan terimakasih.')
+    p.drawString(37,470,"Bandung,%s" % sekarang.strftime('%d %B %Y'))
+    p.drawString(37,400,"( %s )" % akad.agnasabah.nama)
+    
+    p.drawCentredString(300, 379, "Diisi/Dicatat oleh Petugas Administrasi")
+    p.drawString(35, 365, "Unit Usaha :")
+    p.drawString(135, 365, "No anggota :")
+    p.drawString(235, 365, "Tanggal menjadi anggota :")
+    #p.drawString(200, 355, "")
+    p.drawString(395, 365, "Paraf / tanda tangan petugas :")
+    #p.drawString(480, 355, "")
+    p.setFont('Helvetica', 10)
+    # garis Paling atas
+    p.line(30, 390, 550, 390)
+    #garis kedua dari atas
+    p.line(30, 375, 550, 375)
+    #garis paling bawah
+    p.line(30, 300, 550, 300)
+    #garis paling kiri
+    p.line(30, 390, 30, 300)
+    #garis kedua dari kiri
+    p.line(130, 375, 130, 300)
+    #garis ketiga dari kiri
+    p.line(230, 375, 230, 300)
+    #garis ketiga dari kiri
+    p.line(390, 375, 390, 300)
+    #garis paling kanan
+    p.line(550, 390, 550, 300)
+
+
+    p.drawCentredString(300, 280, "Disetujui oleh,")
+    p.drawCentredString(300, 230, "..................................................................")
+    p.setLineWidth(.3)
+    p.line(209, 229,391, 229)
+    p.setFont('Helvetica-Bold', 10)
+    p.drawCentredString(300, 220, "Ketua / Kepala Kantor / Manager")
+    p.drawCentredString(300, 200, "Kantor Pusat :")
+    p.drawCentredString(300, 190, "Badan Hukum Nomor : 518/BH.88-DISKOP/THN.2007 Tgl. 27 Desember 2007")
+    p.drawCentredString(300, 175, "Jl. Cisaranten Kulaon IV No 55 Rt.06/Rw.05 Kel. Cisaranten Kulon")
+    p.drawCentredString(300, 165, "Kec. Arcamanik Bandung 40293 Telp./Fax. 022 87882769")
+
+    
+    p.showPage()
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+    return response
+
+def pk(request, object_id):
+    sekarang=datetime.datetime.now()
+    akad = AkadGadai.objects.get(id=object_id)
+    tb=terbilang(akad.nilai)
+    tb_total=terbilang(akad.jumlah_biaya_pk())
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename= "pkbaru %s_%s.pdf"' % (akad.norek(),akad.agnasabah.nama)
+    h=sekarang.day
+    m=sekarang.month
+    y=sekarang.year
+    buffer = BytesIO()
+    
+    p = canvas.Canvas(buffer)
+    #p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/kopri.png'), 0.4*inch, (5.2 + 5.7) * inch, width=33.5/17.5*0.51*inch,height=26/17.5*0.51*inch)
+    p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 0.4*inch, (5.25 + 5.7) * inch, width=35.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+
+    p.drawCentredString(300, 810, "PERJANJIAN KREDIT DENGAN JAMINAN BARANG")
+    p.drawCentredString(300, 795, "No. ________/______/_____-_______/2014")
+    p.line(  15 , 789, 580 ,789  ) 
+    p.setLineWidth(.3)
+    p.line(  15 , 787, 580 ,787  )
+    #p.line(580, 800, 580, 10)
+    #line batas
+    p.setFont('Helvetica', 9)
+    p.drawString(20,777,"Pada hari ini")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(75,777,"%s" %(akad.tanggal).strftime('%A, tanggal %d-%m-%Y,'))
+    p.setFont('Helvetica', 9)
+    p.drawString(195,777, 'kami yang bertanda tangan dibawah ini:')
+    p.drawString(20,767,"I.  Nama")
+    p.setFont("Helvetica-Bold",9)
+    p.drawString(145,767,": %s"%(akad.gerai.nama_admin))
+    p.setFont("Helvetica",10)    
+    p.drawString(30,752,"Jabatan")
+    p.drawString(145,752,": Kepala Gerai %s KSU RIZKY ABADI"%(akad.gerai.nama_cabang))
+    p.drawString(20,739,"dalam hal ini bertindak dalam  jabatannya tersebut  berwenang untuk dan  atas KSU RIZKY ABADI,  untuk selanjutnya disebut")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(20,729,"Pihak Pertama / Koperasi")
+    
+    p.setFont('Helvetica', 9)
+    p.drawString(20,716,"II. Nama")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(145,716,": %s"%(akad.agnasabah.nama))
+    p.setFont('Helvetica', 9)
+    p.drawString(30,703,"Usia")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(145,703,": %s Tahun"% (akad.usia))
+    p.setFont('Helvetica', 9)
+    p.drawString(30,690,"Alamat")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(145,690,": %s No %s Rt %s/%s Kelurahan %s Kecamatan %s "%(akad.agnasabah.alamat_ktp,akad.agnasabah.no_rumah_ktp,akad.agnasabah.rt_ktp, akad.agnasabah.rw_ktp,akad.agnasabah.kelurahan_ktp, akad.agnasabah.kelurahan_ktp))
+    p.setFont('Helvetica', 9)
+    p.drawString(30,677,"Nomor KTP/SIM")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(145,677,": %s"%(akad.agnasabah.no_ktp))
+    
+    p.setFont('Helvetica', 9)
+    p.drawString(20,662,"selanjutnya dalam perjanjian ini disebut")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(180,662,"Pihak Kedua / Penerima Kredit")
+    p.setFont('Helvetica', 9)
+    p.drawString(20,652,"Dengan ini sepakat mengadakan perjanjian kredit dengan ketentuan dan syarat pada pasal-pasal sebagai berikut :")
+    
+    p.drawString(20,637,"1. Pihak pertama memberikan pinjaman uang kepada pihak kedua maksimum sebesar :")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(30,627,"Rp. %s "%(number_format(akad.nilai)))
+    p.setFont('Helvetica', 9)
+    p.drawString(115,627,"atau dalam huruf")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(183,627," (%s Rupiah)"%(tb.title()))
+    p.setFont('Helvetica', 9)
+    p.drawString(30,617,"dan penerima pinjaman harus membayar biaya sebesar :")
+    
+    p.setFont('Helvetica', 9)
+    p.drawString(42,602,"Adm")
+    p.drawString(100,602,": Rp. ")
+    p.drawRightString(175,602,"%s "%(number_format(akad.adm)))
+    p.drawString(42,592,"Bea Jasa")
+    p.drawString(100,592,": Rp. ")
+    p.drawRightString(175,592,"%s "%(number_format(akad.jasa_kwitansi())))
+    p.drawString(42,582,"Bea Simpan")
+    p.drawString(100,582,": Rp. ")
+    p.drawRightString(175,582,"%s "%(number_format(akad.biayasimpan)))
+    p.line(100,580, 200, 580)
+    p.drawString(200,582,"+")
+    
+    p.drawString(42,572,"Jumlah")
+    p.drawString(100,572,": Rp. ")
+    p.drawRightString(175,572,"%s "%(number_format(akad.jumlah_biaya_pk())))
+    p.setFont('Times-BoldItalic', 9)
+    p.drawString(180,572,"(%s rupiah) "%(tb_total))
+    
+    
+    p.setFont('Helvetica', 9)
+    p.drawString(32,557,"pada saat penandatanganan perjanjian kredit, yang tidak dapat ditarik kembali oleh penerima kredit sekalipun pada akhirnya  kredit  tidak")
+    p.drawString(32,547,"dipergunakan sebagian ataupun seluruhnya.")
+    
+    p.drawString(20,532,"2. Debitur  memahami dan  menerima  penetapan besarnya  pemberian kredit  dan jumlah  biaya yang  menjadi beban debitur sebagaimana")
+    p.drawString(32,522,"yang tercantum dalam kwitansi / tanda terima pinjaman.")
+    
+    p.drawString(20,507,"3. Kredit  ini  diberikan  untuk  jangka  waktu ")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(200,507,"%s hari, " %(akad.jangka_waktu))
+    p.setFont('Helvetica', 9)
+    p.drawString(235,507," terhitung  sejak  tanggal")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(338,507,"%s" %(akad.tanggal.strftime('%d-%m-%Y,')))
+    p.setFont('Helvetica', 9)
+    p.drawString(390,507,"sampai  dengan  tanggal ")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(495,507,"%s" %(akad.jatuhtempo.strftime('%d-%m-%Y')))
+    
+    p.setFont('Helvetica', 9)
+    p.drawString(20,492,"4. Uang pinjaman dan biaya sebagaimana yang tercantum dalam kwitansi/tanda terima pinjaman adalah sebagai bukti yang sah penerimaan")
+    p.drawString(32,482,"uang pinjaman.")
+    
+    p.drawString(20,467,"5. Barang yang diserahkan  oleh debitur sebagai  jaminan adalah baik, original, bukan bekas  reparasi/rakitan dan  benar-benar barang milik")
+    p.drawString(32,457,"debitur yang sah atau bukan milik orang lain,bukan dari hasil kejahatan atau tidak dalam objek sengketa dengan pihak lain dan / atau sita")
+    p.drawString(32,442,"jaminan.")
+    
+    p.drawString(20,427,"6. Debitur  menyatakan telah  menerima  uang  pinjaman  dari KSU RIZKY ABADI dan  berkewajiban  untuk  mengembalikan uang pinjaman")
+    p.drawString(30,417,"sesuai dengan tanggal jatuh tempo atau dapat diperpanjang sesuai kesepakatan kedua belah pihak dengan berdasarkan Perjanjian Kredit")
+    p.drawString(30,407,"yang baru.") 
+    
+    p.drawString(20,392,"7. Debitur dapat melakukan perpanjangan masa pinjaman dengan mendatangi Gerai KSU RIZKY ABADI yang bertalian dan melunasi biaya-")
+    p.drawString(32,382,"biaya yang timbul serta dicatat dalam kwitansi/tanda terima uang pinjaman yang merupakan satu kesatuan dengan perjanjian ini.")
+    
+    p.drawString(20,367,"8. KSU RIZKY ABADI akan memberikan ganti kerugian apabila barang jaminan yang berada dalam penguasaan KSU RIZKY ABADI sampai")
+    p.drawString(32,357,"dengan berakhirnya perjanjian (sampai jatuh tempo),mengalami kerusakan (bukan merupakan kerusakan software) atau hilang yang tidak")
+    p.drawString(32,347,"disebabkan oleh suatu bencana alam (force  Majeure) yang ditetapkan pemerintah. Ganti rugi diberikan sebesar nilai barang pada saat itu")
+    p.drawString(32,337,"setelah diperhitungkan dengan uang pinjaman yang telah diterima debitur.")
+    
+    p.drawString(20,322,"9. Apabila terjadi keterlambatan pada saat dilakukan pelunasan oleh debitur, maka debitur harus membayar denda sesuai dengan ketentuan")
+    p.drawString(32,312,"berlaku di KSU RIZKY ABADI.")
+    
+    p.drawString(20,297,"10.Untuk melakukan pelunasan pinjaman  dan mengambil barang jaminan, Debitur harus datang sendiri ke Gerai KSU RIZKY ABADI tempat")
+    p.drawString(32,287,"debitur melakukan  perjanjian  pinjaman. Apabila sampai  dengan tanggal jatuh tempo tidak  dilakukan pelunasan  atau tidak diperpanjang")
+    p.drawString(32,277,"lagi  perjanjian  pinjamannya, maka  debitur menyatakan telah  melepaskan hak  atas barang jaminan dan  telah menjualnya kepada KSU")
+    p.drawString(32,267,"RIZKY ABADI.")
+    
+    p.drawString(20,252,"11.KSU RIZKY ABADI berhak  melakukan penjualan  atas barang yang  dijadikan  sebagai jaminan  pinjaman, 7 ( tujuh ) hari setelah tanggal")
+    p.drawString(32,242,"jatuh tempo.Uang hasil penjualan barang jaminan digunakan  untuk melunasi hutang debitur yang tertunggak dan biaya yang timbul yang")
+    p.drawString(32,232,"menjadi beban debitur.")
+    
+    p.drawString(20,217,"12.Bilamana jumlah uang penjualan barang jaminan tidak cukup untuk melunasi hutang debitur dan biaya-biaya yang menjadi beban debitur,")
+    p.drawString(32,207,"maka debitur berkewajiban membayar kekurangan tersebut kepada KSU RIZKY ABADI.")
+    
+    p.drawString(20,192,"13.Debitur  yang  datang  ke Gerai KSU RIZKY ABADI, setelah  tanggal jatuh  tempo  sampai  dengan  hari ke 7 (tujuh) dapat melunasi uang ")
+    p.drawString(32,182,"pinjamannya  dan mengambil  barang  jaminannya  dengan  membayar biaya - biaya yang  timbul  sesuai ketentuan  yang berlaku di KSU")
+    p.drawString(32,172,"RIZKY ABADI.")
+
+    p.drawString(20,157,"14.Debitur  menyatakan  tunduk  dan  mengikuti  segala  peraturan  yang  berlaku  di  KSU RIZKY ABADI  yang berkaitan dengan pemberian")	
+    p.drawString(32,147,"pinjaman.")
+    
+    p.drawString(20,132,"15.Apabila terjadi perselisihan dikemudian hari akan diselesaikan secara musyawarah untuk mufakat dan apabila tidak tercapai kesepakatan")
+    p.drawString(32,122,"akan diselesaikan sesuai hukum yang berlaku.")
+    
+    p.drawString(20,107,"Demikian perjanjian  ini dibuat dengan  sebenarnya dan  mengikat kedua belah  pihak serta  ditandatangani oleh masing - masing  pihak dan")
+    p.drawString(32,97,"mempunyai kekuatan hukum yang sama.")
+    
+    p.setFont('Helvetica', 8)
+    p.drawString(35, 70, "Mengetahui,")
+    p.drawString(35, 62, "Area Bisnis Head ")
+    p.drawString(35, 15, "( .......................................... )")
+    p.drawString(35, 8, "Nama dan Tanggal")
+    p.drawString(155, 70, "KSU RIZKY ABADI")
+    p.drawString(155, 62, "Kepala Gerai %s"%(akad.gerai.nama_cabang))
+    p.drawString(155, 15, "( %s )"%(akad.gerai.nama_admin))
+    p.drawString(155, 8, "Nama, Tanggal dan Cap Rizky Abadi")
+    p.drawString(305, 70, "Debitur")
+    p.drawString(305, 15, "( %s )" %(akad.agnasabah.nama))
+    p.drawString(305, 8, "Nama dan Meterai")
+    p.drawString(430, 70, "Pasangan Debitur")
+    p.drawString(430, 15, "( %s )" %(akad.agnasabah.nama_pasangan))
+    p.drawString(430, 8, "Nama")
+
+    #p.setFont('Helvetica', 10)
+    # garis Paling atas
+    p.line(30,78, 550, 78)
+    #garis kedua dari atas
+    p.line(30, 60, 550, 60)
+    #garis paling bawah
+    p.line(30, 5, 550, 5)
+    #garis paling kiri
+    p.line(30,78, 30, 5)
+    #garis kedua dari kiri
+    p.line(150, 78, 150, 5)
+    #garis ketiga dari kiri
+    p.line(300, 78, 300, 5)
+    # garis keempat dari kiri
+    p.line(425, 78, 425, 5)
+    #garis paling kanan
+    p.line(550, 78, 550, 5)
+    p.showPage()
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+    return response
+
+def kwitansi(request, object_id):
+    akadgadai = AkadGadai.objects.get(id=object_id)
+    akadgadai.status_kw = '1'
+    akadgadai.save()
+
+    sekarang=datetime.datetime.now()
+    h=sekarang.day
+    m=sekarang.month
+    y=sekarang.year
+    if m+1 <= 12:
+        b=m+1
+        t=y
+    else  :
+        b=1
+        t=y+1
+        patokan=datetime.date(int(t),int(b),int(h))
+
+
+        trk=akadgadai.tanggal
+        dd=patokan.month-trk.month
+        yy=patokan.year-trk.year
+
+    response = HttpResponse(mimetype='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename= kuitansi_%s.pdf' % akadgadai.norek()
+    
+    c = canvas.Canvas(response, pagesize=(9.5*inch, 11*inch))
+
+    header0=(8.25 *inch, (5.2 + 5.5) * inch)
+    header1=(4.60 *inch, (5.35 + 5.5) * inch)
+    colom1 = (0.3*inch, (4.35 + 5.5) *inch)
+    colom2 = (6.3*inch, (4.35 + 5.5) *inch)
+    colom3 = (6.3*inch, (4.35 + 4.5) *inch)
+    c.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 0.5*inch, (4.8 + 5.5) * inch, width=28.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+
+
+    c.setFont("Courier", 7)
+    c.drawString(600, 780, "%s" % sekarang.strftime('[%-b][%Y]') )
+
+
+    c.setFont("Courier-Bold", 14)
+    c.drawString(100, 780, "KSU RIZKY ABADI" )
+    c.setFont("Courier-Bold", 16)
+    c.drawCentredString(340, 775, "KWITANSI")
+    c.line( 235 , 773, 450 ,773  ) 
+    c.setFont("Courier-Bold", 12)
+    c.drawCentredString(340, 763, "GERAI [%s]"% (akadgadai.gerai.nama_cabang))
+    c.setFont("Courier-Bold", 12)
+
+
+
+    tb=terbilang(akadgadai.terima_bersih)
+    c.setFont("Courier",8)
+    c.drawString(430, 750, "Nomor Kwitansi     : %s" % (akadgadai.nonas()))
+    c.drawString(430, 740, "Tanggal Transaksi  : %s" % akadgadai.tanggal.strftime('%d %b %Y'))
+    c.drawString(430, 730, "Tanggal Jt tempo   : %s" % akadgadai.jatuhtempo.strftime('%d %b %Y'))
+    c.drawString(430, 720, "Jangka waktu       : %s [ Hari ]" % akadgadai.jangka_waktu)
+  
+    #c.drawString(100, 742, "Validasi :")
+    c.setFont("Courier",7)
+    c.drawString(40, 725, "%s" % (akadgadai.kw_validasi()))
+    c.setFont("Courier",8)
+    # garis Paling atas
+    c.line(35, 740, 400, 740)
+    #garis Paling Bawah
+    c.line(35, 720, 400, 720)
+    #garis paling kiri
+    c.line(35, 740, 35, 720)
+    #garis paling kanan
+    c.line(400, 740, 400, 720)
+    
+    c.drawString(402, 710,"Nilai Pinjaman")
+    c.drawString(525, 710,":Rp.")
+    c.drawRightString(650, 710,"%s"% (number_format(akadgadai.nilai)))
+    c.drawString(390, 690, "Bea Simpan/Survey:Rp.")
+    c.drawRightString(610, 690, "%s"% (number_format(akadgadai.biayasimpan)))
+    c.drawString(390, 680, "Bea Administrasi :Rp.")
+    c.drawRightString(610, 680, "%s"% (number_format(akadgadai.adm)))
+    c.drawString(390, 670, "Jasa             :Rp.")
+    c.drawRightString(610, 670, "%s"% (number_format(akadgadai.jasa_kwitansi())))
+    c.drawString(390, 660, "Bea Materai      :Rp.")
+    #c.drawRightString(610, 660, "0.0")
+    c.drawRightString(610, 660, "%s"% (number_format(akadgadai.bea_materai)))
+    c.setLineWidth(.3)
+    c.line(510, 658, 650, 658)
+    c.drawString(402, 650, "Total Biaya")
+    c.drawString(502, 650, ":Rp.")
+    c.drawRightString(650, 650, "%s"%(number_format(akadgadai.jumlahbiaya_kwitansi)))
+    c.line(510, 640, 650, 640)
+    c.drawString(380, 630, "Nilai yang diterima")
+    c.drawString(525, 630, ":Rp.")
+    c.drawRightString(650, 630, "%s"%(number_format(akadgadai.terima_bersih_kwitansi)))
+    c.line(535, 627, 650, 627)
+    c.line(535, 624, 650, 624)
+
+
+    c.drawString(35,710, "Nomor Debitur")
+    c.drawString(130,710, ":%s" % akadgadai.norek())
+    c.line(135, 708, 240, 708)
+    #c.drawString(35,700, "Nomor Pinjaman")
+    #c.drawString(130,700, ":%s" % (akadgadai.nonas()))
+    #c.line(135, 698, 240, 698)
+    c.drawString(35,680, "Nama")
+    c.drawString(130,680, ":%s" %(akadgadai.agnasabah.nama))
+    c.line(135, 678, 340, 678)
+    c.drawString(35,670, "Alamat")
+    c.setFont("Courier",11)
+    c.drawString(130,670, ":%s No %s" %(akadgadai.agnasabah.alamat_domisili,akadgadai.agnasabah.no_rumah_domisili))
+    c.line(135, 668, 340, 668)
+    c.drawString(137,660, "RT/RW %s/%s %s" %(akadgadai.agnasabah.rt_domisili,akadgadai.agnasabah.rw_domisili,akadgadai.agnasabah.kelurahan_domisili,))
+    c.line(135, 658, 340, 658)
+    c.setFont("Courier",11)
+    c.drawString(35,650, "No Ktp")
+    c.drawString(130,650, ":%s " %(akadgadai.agnasabah.no_ktp))
+    c.line(135, 648, 340, 648)
+    c.drawString(35,640, "No Telp /HP")
+    c.drawString(130,640,":%s / %s " %(akadgadai.agnasabah.telepon_domisili,akadgadai.agnasabah.hp_domisili))
+    c.line(135, 638, 340, 638)
+    c.drawString(35,620, "Sudah menerima dari KSU RIZKY ABADI,")
+    c.drawString(35,610, "Pembayaran Jaminan")
+    c.setFont("Courier", 10)
+    c.drawString(160,610, ":%s|%s|%s|%s"% (akadgadai.barang.merk,akadgadai.barang.sn,akadgadai.barang.type,akadgadai.barang.accesoris_barang1, ))
+    c.setFont("Courier", 11)
+    c.line(165, 608, 525, 608)
+    c.drawString(35,600, "Jenis Pinjaman")
+    c.drawString(160,600, ": Pinjaman Baru ")
+    c.line(165, 598, 340, 598)
+    c.setFont("Courier-Bold", 11)
+    c.setLineWidth(.9)
+    c.drawString(35,585,  " ##%s Rupiah ##"  % tb.title())
+    # garis Paling atas
+    c.line(35, 595, 650, 595)
+    #garis Paling Bawah
+    c.line(35, 580, 650, 580)
+    #garis paling kiri
+    c.line(35, 595, 35, 580)
+    #garis paling kanan
+    c.line(650, 595, 650, 580)
+   
+    c.setFont("Courier-Bold", 10)
+    c.drawString(35, 570, "PERHATIAN :")
+    c.setFont("Courier", 8)
+    c.drawString(35, 560, "1. Apabila sampai dengan tanggal jatuh tempo tidak melakukan pelunasan")
+    c.drawString(50, 550,"atau tidak gadai ulang maka Koperasi berhak Menjual barang  jaminan")
+    c.drawString(50, 540,"tersebut diatas")
+    c.drawString(35, 530, "2. Apabila  akan  melakukan  gadai ulang")
+    c.setFont("Courier-Bold", 8)
+    c.drawString(230, 530, "harap menginformasikan 1 hari")
+    c.drawString(50, 520, "sebelum jatuh tempo")
+    c.setFont("Courier", 8)
+    c.drawString(35, 510, "3. Setiap melakukan Pelunasan atau gadai ulang, kwitansi ini harus")
+    c.drawString(50, 500, "diperlihatkan kepada petugas gerai")
+    c.drawString(35, 490, "4. Pelunasan atau gadai ulang")
+    c.setFont("Courier-Bold", 8)
+    c.drawString(180, 490, "harus dilakukan tepat waktu sesuai tanggal")
+    c.drawString(50, 480, "jatuh tempo")
+    c.setFont("Courier", 8)
+    c.drawString(35, 470, "5. Kwitansi ini sah apabila telah di validasi di tanda tangan dan di stample")
+    c.setFont("Courier-Bold", 11)
+    c.drawString(35, 450, "Badan Hukum No.518/BH.88-Diskop/THN.2007 Tgl. 27 Desember 2007")
+
+    c.setFont("Courier",11)
+    c.drawString(410, 560, "Kepala Gerai,")
+    c.drawString(410, 490, "%s"%(akadgadai.gerai.nama_admin))
+    c.line(410, 488, 500, 488)
+    c.drawRightString(650, 570, "Bandung, %s" % sekarang.strftime('%d %b %Y') )
+    c.drawRightString(650, 560, "Debitur,") #568
+    c.drawRightString(650, 490, "%s"%(akadgadai.agnasabah.nama)) #570
+    c.line(550, 488, 650, 488)
+    c.showPage()
+    c.save()
+    return response
+
+def kwitansi_motor(request, object_id):
+    akadgadai = AkadGadai.objects.get(id=object_id)
+    akadgadai.status_kw = '1'
+    akadgadai.save()
+
+    sekarang=datetime.datetime.now()
+    h=sekarang.day
+    m=sekarang.month
+    y=sekarang.year
+    if m+1 <= 12:
+        b=m+1
+        t=y
+    else  :
+        b=1
+        t=y+1
+        patokan=datetime.date(int(t),int(b),int(h))
+
+
+        trk=akadgadai.tanggal
+        dd=patokan.month-trk.month
+        yy=patokan.year-trk.year
+
+    response = HttpResponse(mimetype='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename= kuitansi_%s.pdf' % akadgadai.norek()
+    
+    c = canvas.Canvas(response, pagesize=(9.5*inch, 11*inch))
+
+    header0=(8.25 *inch, (5.2 + 5.5) * inch)
+    header1=(4.60 *inch, (5.35 + 5.5) * inch)
+    colom1 = (0.3*inch, (4.35 + 5.5) *inch)
+    colom2 = (6.3*inch, (4.35 + 5.5) *inch)
+    colom3 = (6.3*inch, (4.35 + 4.5) *inch)
+    
+    #c.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 0.5*inch, (4.8 + 5.8) * inch, width=24.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+    c.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 0.5*inch, (4.8 + 5.5) * inch, width=28.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+
+
+    c.setFont("Courier", 7)
+    #c.drawString(x-0.02*inch, y+0.2, "[kowil][koger][%b] [akadgadai.mu]"); y -=2*y1
+    #c.drawString(x-0.02*inch, y+0.2*inch,    "( %s )"% (akadgadai.agnasabah.nama)  ); y -=y1
+    c.drawString(600, 780, "%s" % sekarang.strftime('[%-b][%Y]') )
+
+
+    c.setFont("Courier-Bold", 14)
+    #c.setFillColorRGB(255,0,0) #warna pada huruf
+    #c.setStrokeColorRGB(0,255,0.3) #warna pada garis
+    c.drawString(100, 780, "KSU RIZKY ABADI" )
+    c.setFont("Courier-Bold", 16)
+    c.drawCentredString(340, 775, "KWITANSI")
+    c.line( 235 , 773, 450 ,773  ) 
+    c.setFont("Courier-Bold", 12)
+    c.drawCentredString(340, 763, "GERAI [%s]"% (akadgadai.gerai.nama_cabang))
+    c.setFont("Courier-Bold", 12)
+
+
+
+    tb=terbilang(akadgadai.terima_bersih_kendaraan)
+    c.setFont("Courier",8)
+    c.drawString(430, 750, "Nomor Kwitansi     : %s" % (akadgadai.nonas()))
+    c.drawString(430, 740, "Tanggal Transaksi  : %s" % akadgadai.tanggal.strftime('%d %b %Y'))
+    c.drawString(430, 730, "Tanggal Jt tempo   : %s" % akadgadai.jatuhtempo.strftime('%d %b %Y'))
+    c.drawString(430, 720, "Jangka waktu       :  %s [ BULAN ]" % akadgadai.jangka_waktu_kendaraan)
+  
+    c.drawString(100, 742, "Validasi :")
+    c.setFont("Courier",7)
+    c.drawString(40, 725, "%s" % (akadgadai.kw_validasi()))
+    c.setFont("Courier",8)
+    # garis Paling atas
+    c.line(35, 740, 400, 740)
+	#garis Paling Bawah
+    c.line(35, 720, 400, 720)
+	#garis paling kiri
+    c.line(35, 740, 35, 720)
+    #garis paling kanan
+    c.line(400, 740, 400, 720)  
+    c.drawString(402, 710,"Nilai Pinjaman")
+    c.drawString(525, 710,":Rp.")
+    c.drawRightString(650, 710,"%s"% (number_format(akadgadai.nilai)))
+    c.drawString(390, 690, "Bea Simpan/Survey:Rp.")
+    c.drawRightString(610, 690, "%s"% (number_format(akadgadai.beasimpan_kendaraan)))
+    c.drawString(390, 680, "Bea Administrasi :Rp.")
+    c.drawRightString(610, 680, "%s"% (number_format(akadgadai.adm_kendaraan)))
+    c.drawString(390, 670, "Jasa             :Rp.")
+    c.drawRightString(610, 670, "%s"% (number_format(akadgadai.jasa_kendaraan)))
+    c.drawString(390, 660, "Bea Materai      :Rp.")
+    #c.drawRightString(610, 660, "0.0")
+    c.drawRightString(610, 660, "%s"% (number_format(akadgadai.bea_materai)))
+    c.setLineWidth(.3)
+    c.line(510, 658, 650, 658)
+    c.drawString(402, 650, "Total Biaya")
+    c.drawString(502, 650, ":Rp.")
+    c.drawRightString(650, 650, "%s"%(number_format(akadgadai.jumlahbiaya_kendaraan)))
+    c.line(510, 640, 650, 640)
+    c.drawString(380, 630, "Nilai yang diterima")
+    c.drawString(525, 630, ":Rp.")
+    c.drawRightString(650, 630, "%s"%(number_format(akadgadai.terima_bersih_kendaraan)))
+    c.line(535, 627, 650, 627)
+    c.line(535, 624, 650, 624)
+
+
+    c.drawString(35,710, "Nomor Debitur")
+    c.drawString(130,710, ":%s" % akadgadai.norek())
+    c.line(135, 708, 240, 708)
+    #c.drawString(35,700, "Nomor Pinjaman")
+    #c.drawString(130,700, ":%s" % (akadgadai.nonas()))
+    #c.line(135, 698, 240, 698)
+    c.drawString(35,680, "Nama")
+    c.drawString(130,680, ":%s" %(akadgadai.agnasabah.nama))
+    c.line(135, 678, 340, 678)
+    c.drawString(35,670, "Alamat")
+    c.setFont("Courier",11)
+    c.drawString(130,670, ":%s" %(akadgadai.agnasabah.alamat_domisili))
+    c.line(135, 668, 340, 668)
+    c.drawString(137,660, "RT/RW %s/%s %s" %(akadgadai.agnasabah.rt_domisili,akadgadai.agnasabah.rw_domisili,akadgadai.agnasabah.kelurahan_domisili,))
+    c.line(135, 658, 340, 658)
+    c.setFont("Courier",11)
+    c.drawString(35,650, "No Ktp")
+    c.drawString(130,650, ":%s " %(akadgadai.agnasabah.no_ktp))
+    c.line(135, 648, 340, 648)
+    c.drawString(35,640, "No Telp /HP")
+    c.drawString(130,640, ":%s / %s " %(akadgadai.agnasabah.telepon_domisili,akadgadai.agnasabah.hp_domisili))
+    c.line(135, 638, 340, 638)
+    c.drawString(35,620, "Sudah menerima dari KSU RIZKY ABADI,")
+    c.drawString(35,610, "Pembayaran Jaminan")
+    c.setFont("Courier", 10)
+    c.drawString(160,610, ":%s/%s/%s"% (akadgadai.barang.get_jenis_kendaraan_display(),akadgadai.barang.get_merk_kendaraan_display() ,akadgadai.barang.type_kendaraan ))
+    c.setFont("Courier", 11)
+    c.line(165, 608, 525, 608)
+    c.drawString(35,600, "Jenis Pinjaman")
+    c.drawString(160,600, "Pinjaman Baru")
+    c.line(165, 598, 340, 598)
+    c.setFont("Courier-Bold", 11)
+    c.setLineWidth(.9)
+    c.drawString(35,585,  " ##%s Rupiah ##"  % tb.title())
+    # garis Paling atas
+    c.line(35, 595, 650, 595)
+	#garis Paling Bawah
+    c.line(35, 580, 650, 580)
+	#garis paling kiri
+    c.line(35, 595, 35, 580)
+    #garis paling kanan
+    c.line(650, 595, 650, 580)
+   
+    c.setFont("Courier-Bold", 10)
+    c.drawString(35, 570, "PERHATIAN :")
+    c.setFont("Courier", 8)
+    c.drawString(35, 560, "1. Apabila sampai dengan tanggal jatuh tempo tidak melakukan pelunasan")
+    c.drawString(50, 550,"atau tidak gadai ulang maka Koperasi berhak Menjual barang  jaminan")
+    c.drawString(50, 540,"tersebut diatas")
+    c.drawString(35, 530, "2. Apabila  akan  melakukan  gadai ulang harap menginformasikan 1 hari")
+    c.drawString(50, 520, "sebelum jatuh tempo")
+    c.drawString(35, 510, "3. Setiap melakukan Pelunasan atau gadai ulang, kwitansi ini harus")
+    c.drawString(50, 500, "diperlihatkan kepada petugas gerai")
+    c.drawString(35, 490, "4. Pelunasan atau gadai ulang harus dilakukan tepat waktu sesuai tanggal")
+    c.drawString(50, 480, "jatuh tempo")
+    c.drawString(35, 470, "5. Kwitansi ini sah apabila telah di validasi di tanda tangan dan di stample")
+    c.setFont("Courier-Bold", 11)
+    c.drawString(35, 450, "Badan Hukum No.518/BH.88-Diskop/THN.2007 Tgl. 27 Desember 2007")
+
+    c.setFont("Courier",11)
+    c.drawString(410, 560, "Debitur,")
+    c.drawString(410, 490, "%s"%(akadgadai.agnasabah.nama))
+    c.line(410, 488, 560, 488)
+    c.drawRightString(650, 570, "Bandung, %s" % sekarang.strftime('%d %b %Y') )
+    c.drawString(568, 560, "Kepala Gerai,")
+    c.drawString(570, 490, "%s"%(akadgadai.gerai.nama_admin))
+    c.line(570, 488, 650, 488)
+    c.showPage()
+    c.save()
+    return response
+
+def skl(request, object_id):
+    sekarang=datetime.datetime.now()
+    akad = AkadGadai.objects.get(id=object_id)
+    tb=terbilang(akad.nilai)
+    tb_total=terbilang(akad.jumlah_biaya_pk())
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename= "SKL %s_%s.pdf"' % (akad.norek(),akad.agnasabah.nama)
+    h=sekarang.day
+    m=sekarang.month
+    y=sekarang.year
+    buffer = BytesIO()
+    
+    p = canvas.Canvas(buffer)
+    #p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/kopri.png'), 0.4*inch, (5.2 + 5.7) * inch, width=33.5/17.5*0.51*inch,height=26/17.5*0.51*inch)
+    p.drawImage(os.path.join(settings.PROJECT_ROOT, 'static/img/ra2.png'), 0.4*inch, (5.25 + 5.7) * inch, width=35.5/17.5*0.51*inch,height=24/17.5*0.51*inch)
+    p.setFont("Helvetica-Bold",10)
+    p.drawCentredString(300, 810, "SURAT KETERANGAN LUNAS")
+    p.drawCentredString(300, 795, "No.__/PJB/SKL/%s" % sekarang.strftime('%b/%Y') )
+    p.line(  15 , 789, 580 ,789  ) 
+    p.setLineWidth(.3)
+    p.line(  15 , 787, 580 ,787  )
+    #p.line(580, 800, 580, 10)
+    #line batas
+    p.setFont('Helvetica', 9)
+    p.drawString(20,777,"Yang bertandatangan dibawah ini :")
+    p.drawString(30,767,"Nama")
+    p.setFont("Helvetica-Bold",9)
+    p.drawString(145,767,": %s"%(akad.gerai.nama_admin))
+    p.setFont("Helvetica",10)    
+    p.drawString(30,752,"Jabatan")
+    p.drawString(145,752,": Kepala Gerai %s KSU RIZKY ABADI"%(akad.gerai.nama_cabang))
+    p.drawString(20,739,"selanjutnya disebut Pihak Pertama / Koperasi")
+    p.drawString(20,727,"Sehubungan dengan telah dilunasi pinjaman sbb:")
+  
+    p.setFont('Helvetica', 9)
+    p.drawString(30,716,"No. Rekening")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(145,716,": %s"%(akad.norek()))
+    p.setFont('Helvetica', 9)
+    p.drawString(30,703,"Nama")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(145,703,": %s "% (akad.agnasabah.nama))
+    p.setFont('Helvetica', 9)
+    p.drawString(30,690,"Alamat")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(145,690,": %s No %s Rt %s/%s Kelurahan %s Kecamatan %s "%(akad.agnasabah.alamat_ktp,akad.agnasabah.no_rumah_ktp,akad.agnasabah.rt_ktp, akad.agnasabah.rw_ktp,akad.agnasabah.kelurahan_ktp, akad.agnasabah.kelurahan_ktp))
+    p.setFont('Helvetica', 9)
+    p.drawString(30,677,"Nomor KTP/SIM")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(145,677,": %s"%(akad.agnasabah.no_ktp))
+    
+    p.setFont('Helvetica', 9)
+    p.drawString(20,662,"selanjutnya dalam perjanjian ini disebut Pihak Kedua / Penerima Kredit")
+    p.setFont('Helvetica', 9)
+    p.drawString(20,652,"Maka bersama ini, pihak pertama menerangkan bahwa pinjaman atas nama pihak kedua di KSU RIZKY ABADI telah")
+    p.setFont('Helvetica-Bold', 9)    
+    p.drawString(488,652,"lunas")
+    p.setFont('Helvetica', 9)
+    p.drawString(20,637,"Dan dengan ini pihak kedua menyatakan telah menerima dengan lengkap dai pihak pertama, agunan barang berupa")
+    p.setFont('Helvetica-Bold', 9)
+    p.drawString(20,620, ":%s|%s|%s|%s"% (akad.barang.merk,akad.barang.sn,akad.barang.type,akad.barang.accesoris_barang1, ))
+    
+    p.setFont('Helvetica', 9)
+    p.drawString(30, 600, "Bandung, %s" % sekarang.strftime('%d %b %Y') )
+    p.drawString(30, 588, "Pihak Pertama,")
+    p.drawString(30, 540, "( .......................................... )")
+    p.drawString(430, 588, "Pihak Kedua,")
+    p.drawString(430, 540, "( .......................................... )")
+    
+
+ 
+    p.showPage()
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+    return response
+
+
+

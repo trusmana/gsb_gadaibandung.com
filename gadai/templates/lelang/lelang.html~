@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+
+Data Barang Lapur<br><a href="/lelang/arsip/?tgl={{d|date:'Y-m-d'}}">{% now "d b Y" %}</a><br />
+{% endblock %}
+{% block content %}
+<h2 align="right">:: DATA LELANG KSU RIZKYABADI ::</h2>
+
+<hr></hr>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow"><th>No</th><th>No Kwitansi</th><th>Nama Nasabah</th><th>Nilai</th><th>JW</th><th>Status</th><th>Tgl J. Tempo</th><th>GERAI</th><TH>TGL LELANG</TH><th>HARGA JUAL </th><th>NAMA PEMBELI</th><th >Laba</th><th >Rugi</th><th >MENU</th></tr>
+{% for a in lapur%}
+{% load number_format useringroup %}
+    <tr>
+    <td ALIGN="CENTER">{{ forloop.counter }}</td>
+    <td ALIGN="CENTER"><a href = "/lelang/{{a.id}}/lapur/">{{ a.norek }}</a></td>
+    <td ALIGN="LEFT">{{ a.agnasabah.nama}}</td>
+    <td ALIGN="CENTER">Rp.{{ a.nilai|number_format:0}}</td>
+    <td ALIGN="CENTER">{{ a.jangka_waktu}}</td>
+    <td ALIGN="CENTER">{{a.status_transaksi}}</td>
+    <td ALIGN="CENTER">{{ a.jatuhtempo|date:" d-M-Y"}}</td>
+    <td ALIGN="LEFT">{{a.gerai}}</td>
+    <td ALIGN="LEFT">{{a.tgllelang|date:" d-M-Y"}}</td>
+    <td ALIGN="LEFT">Rp.{{a.hargalelang|number_format:0}}</td>
+    <td ALIGN="LEFT">{{a.namalelang}}</td>
+    <td ALIGN="LEFT">Rp.{{a.nilai_lelang}}</td>
+    <td ALIGN="LEFT">Rp.{{a.rugi_lelang}}</td>
+   <td ALIGN="CENTER"><a href="/lelang/{{a.id}}/prints2/" class="lihat">Print</td>
+{%endfor%}
+
+</table>
+{% endblock %}
+
+

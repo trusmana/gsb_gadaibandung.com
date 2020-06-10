@@ -1,0 +1,19 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/akadpencairan.html" %}
+{% endblock %}
+{% block section %}akadgadai{% endblock %}
+{% block sidebar %}
+
+{% endblock %}
+{% block content %}
+<h2 align="right">INPUT PENCAIRAN KREDIT GADAI</h2>
+<form method="GET" action="." class="tabular">
+<table align="center">
+
+{{forms.as_table}}
+<td align="center"><input type ="submit" value="&raquo; Pilih "  name ='submit' class='harian'></td>
+</tr>
+</table>
+</form>
+{% endblock %}

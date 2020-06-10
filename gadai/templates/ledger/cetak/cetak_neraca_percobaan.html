@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block section %}ledger{% endblock %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+   $("#id_start_date").datepicker({dateFormat: 'yy-mm-dd'});
+   $("#id_end_date").datepicker({dateFormat: 'yy-mm-dd'});  
+});
+</script>
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2> CETAK NERACA PERCOBAAN &nbsp<small>DIV PJB</small></h2>  
+<table id="tabel" align="center">
+<br/>
+<form method="GET" action="/jurnal/cetak_neraca_percobaan/">
+   <li><label for="id_cabang">Kode Cabang</label> :
+      <select id="id_id_cabang" data-placeholder="None" class="chosen-select" name="id_cabang">
+            <option value="" selected="selected">---------</option>
+            <option value="1">BANDUNG_pjb</option> <option value="2">JAKARTA</option><option value="3">Suci</option><option value="4">DIPATIUKUR</option>
+            <option value="5">BALUBUR</option><option value="6">GERLONG GIRANG</option><option value="7">GERLONG HILIR</option><option value="8">KOPO</option>
+            <option value="9">CIBIRU</option><option value="10">CIPACING</option><option value="11">JATINANGOR</option><option value="12">CIMAHI</option>
+            <option value="13">BUAH BATU</option><option value="14">KORDON</option><option value="15">CIHANJUANG</option><option value="16">MARANATA</option>
+            <option value="17">KIARACONDONG</option><option value="18">CIREBON PERJUANGAN</option><option value="19">CIREBON </option><option value="20">CIUMBELEUIT</option>
+            <option value="113">UJUNGBERUNG - PJB</option>
+      </select>      
+   </li>
+    <li><label for="id_tgl_trans"></label> <input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> -
+    <label for="id_tgl_trans"></label> <input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
+</table>
+<p>&nbsp;<input type="submit" value="DOWNLOAD" class="cari"/></p>
+<br>
+
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}

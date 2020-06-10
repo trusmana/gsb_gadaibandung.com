@@ -1,0 +1,291 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD TML 4.01 Transitional//EN">
+<html><head>
+<title>REKAP PENCAIRAN</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center">
+<img src="/static/img/logoksu.png" width="110" height="80" align="left" hspace="20"/>
+</td>
+
+<h2 align="center">Data Penerimaan Barang Harian</h2>
+<table border="1" bordercolor="silver " style="background-color:#FFFFFF" width="100%" cellpadding="0" cellspacing="0">
+    <tr  class="tableizer-firstrow">
+        <th>ID</th>
+        <th>GERAI</th>        
+        <th>&nbsp;HP&nbsp;</th>
+        <th>Nilai (Rp)</th>        
+        <th>LAPTOP</th>        
+        <th>Nilai (Rp)</th>
+        <th>KAMERA</th>        
+        <th>Nilai (Rp)</th>
+        <th>&nbsp;PS&nbsp;</th>        
+        <th>Nilai (Rp)</th>
+        <th>TV/LCD</th>        
+        <th>Nilai (Rp)</th>
+        <th>MOTOR</th>        
+        <th>Nilai (Rp)</th>
+        <th>MOBIL</th>        
+        <th>Nilai (Rp)</th>
+	<th>Total (Rp)</th>
+	
+    </tr>
+         
+{% for w in barang %}
+    <tr>
+    <td align="center"><b>{{ w.kode_cabang }}</b></td>
+    <td align="left">{{ w.nama_cabang}}</td>
+    <td align="center">{{w.jumlah_aging_hp_filter}}</td>
+    <td align="right">{{w.total_pinjaman_aging_hp_filter|number_format:0}}</td> 
+    <td align="center">{{w.jumlah_aging_laptop_filter}}</td>    
+    <td align="right">{{w.total_pinjaman_aging_laptop_filter|number_format:0}}</td>
+    <td align="center">{{w.jumlah_aging_kamera_filter}}</td>
+    <td align="right">{{w.total_pinjaman_aging_kamera_filter|number_format:0}}</td>
+    <td align="center">{{w.jumlah_aging_ps_filter}}</td>
+    <td align="right">{{w.total_pinjaman_aging_ps_filter|number_format:0}}</td>
+    <td align="center">{{w.jumlah_aging_tv_filter}}</td>
+    <td align="right">{{w.total_pinjaman_aging_tv_filter|number_format:0}}</td>
+    <td align="center">{{w.jumlah_aging_motor_filter}}</td>
+    <td align="right">{{w.total_pinjaman_aging_motor_filter|number_format:0}}</td>
+    <td align="center">{{w.jumlah_aging_mobil_filter}}</td>
+    <td align="right">{{w.total_pinjaman_aging_mobil_filter|number_format:0}}</td>
+    <td align="right">{{w.total_aging_hari_filter|number_format:0}}</td>
+    </tr>{% endfor %}
+    <tr>
+        <td colspan="2" align="center"><b>Total</b></td>
+        <td align="center">{{tot_jumlah_aging_hp_filter}}</td>
+        <td align="right"><b>{{tot_total_pinjaman_aging_hp_filter|number_format:0}}</b></td>
+        <td align="center">{{tot_jumlah_aging_laptop_filter}}</td>
+        <td align="right"><b>{{tot_total_pinjaman_aging_laptop_filter|number_format:0}}</b></td>
+        <td align="right">{{tot_jumlah_aging_kamera_filter}}</td>
+        <td align="right"><b>{{tot_total_pinjaman_aging_kamera_filter|number_format:0}}</b></td>
+        <td align="center">{{tot_jumlah_aging_ps_filter|number_format:0}}</td>
+        <td align="right">{{tot_total_pinjaman_aging_ps_filter|number_format:0}}</td>
+        <td align="right">{{tot_jumlah_aging_tv_filter}}</td>
+        <td align="right"><b>{{tot_total_pinjaman_aging_tv_filter|number_format:0}}</b></td>
+        <td align="center">{{tot_jumlah_aging_motor_filter}}</td>
+        <td align="right">{{tot_total_pinjaman_aging_motor_filter|number_format:0}}</td>
+        <td align="center">{{tot_jumlah_aging_mobil_filter}}</td>
+        <td align="right">{{tot_total_pinjaman_aging_mobil_filter}}</td>
+        <td align="center">{{tot_total_aging_hari_filter|number_format:0}}</td>
+    </tr>
+    </tr>
+</table>
+</br></br>
+
+<h2 align="center">Data Barang Lelang Harian</h2>
+<table border="1" bordercolor="silver " style="background-color:#FFFFFF" width="100%" cellpadding="0" cellspacing="0">
+    <tr  class="tableizer-firstrow">
+        <th>ID</th>
+        <th>GERAI</th>        
+        <th>&nbsp;HP&nbsp;</th>
+        <th>Nilai (Rp)</th>        
+        <th>LAPTOP</th>        
+        <th>Nilai (Rp)</th>
+        <th>KAMERA</th>        
+        <th>Nilai (Rp)</th>
+        <th>&nbsp;PS&nbsp;</th>        
+        <th>Nilai (Rp)</th>
+        <th>TV/LCD</th>        
+        <th>Nilai (Rp)</th>
+        <th>MOTOR</th>        
+        <th>Nilai (Rp)</th>
+        <th>MOBIL</th>        
+        <th>Nilai (Rp)</th>
+	<th>Total (Rp)</th>
+      
+    </tr>
+         
+{% for w in barang %}
+    <tr>
+    <td align="center">{{ w.kode_cabang }}</td>
+    <td align="left">{{ w.nama_cabang }}</td>
+    <td align="center">{{w.lelang_aging_hp_filter}}</td>
+    <td align="right">{{w.total_lelang_aging_hp_filter|number_format:0}}</td>   
+    <td align="center">{{w.lelang_aging_laptop_filter}}</td>    
+    <td align="right">{{w.total_lelang_aging_laptop_filter|number_format:0}}</td>
+    <td align="center">{{w.lelang_aging_kamera_filter}}</td>
+    <td align="right">{{w.total_lelang_aging_kamera_filter|number_format:0}}</td>
+    <td align="center">{{w.lelang_aging_ps_filter}}</td>
+    <td align="right">{{w.total_lelang_aging_ps_filter|number_format:0}}</td>
+    <td align="center">{{w.lelang_aging_tv_filter}}</td>
+    <td align="right">{{w.total_lelang_aging_tv_filter|number_format:0}}</td>
+    <td align="center">{{w.lelang_aging_motor_filter}}</td>
+    <td align="right">{{w.total_lelang_aging_motor_filter|number_format:0}}</td>
+    <td align="center">{{w.lelang_aging_mobil_filter}}</td>
+    <td align="right">{{w.total_lelang_aging_mobil_filter|number_format:0}}</td>
+    <td align="right">{{w.total_lelangaging_hari_filter|number_format:0}}</td>
+    
+    </tr>{% endfor %}
+    <tr>
+        <td colspan="2" align="center"><b>Total</b></td>
+        <td align="center">{{tot_lelang_aging_hp_filter|number_format:0}}</td>
+        <td align="right">{{tot_total_lelang_aging_hp_filter|number_format:0}}</td>
+        <td align="center">{{tot_lelang_aging_laptop_filter|number_format:0}}</td>
+        <td align="right">{{tot_total_lelang_aging_laptop_filter|number_format:0}}</td>
+        <td align="center">{{tot_lelang_aging_kamera_filter}}</td>
+        <td align="right">{{tot_total_lelang_aging_kamera_filter|number_format:0}}</td>
+        <td align="center">{{tot_lelang_aging_ps_filter}}</td>
+        <td align="right">{{tot_total_lelang_aging_ps_filter|number_format:0}}</td>
+        <td align="center">{{tot_lelang_aging_tv_filter}}</td>
+        <td align="right">{{tot_total_lelang_aging_tv_filter|number_format:0}}</td>
+        <td align="center">{{tot_lelang_aging_motor_filter}}</td>
+        <td align="right">{{tot_total_lelang_aging_motor_filter|number_format:0}}</td>
+        <td align="center">{{tot_lelang_aging_mobil_filter}}</td>
+        <td align="right">{{tot_total_lelang_aging_mobil_filter|number_format:0}}</td>
+        <td align="right">{{tot_total_lelangaging_hari_filter|number_format:0}}</td>
+    </tr>
+    </tr>
+</table>
+
+</br></br>
+
+<h2 align="center">Data Barang Pelunasan Harian</h2>
+<table border="1" bordercolor="silver " style="background-color:#FFFFFF" width="100%" cellpadding="0" cellspacing="0">
+    <tr  class="tableizer-firstrow">
+        <th>ID</th>
+        <th>GERAI</th>        
+        <th>&nbsp;HP&nbsp;</th>
+        <th>Nilai (Rp)</th>        
+        <th>LAPTOP</th>        
+        <th>Nilai (Rp)</th>
+        <th>KAMERA</th>        
+        <th>Nilai (Rp)</th>
+        <th>&nbsp;PS&nbsp;</th>        
+        <th>Nilai (Rp)</th>
+        <th>TV/LCD</th>        
+        <th>Nilai (Rp)</th>
+        <th>MOTOR</th>        
+        <th>Nilai (Rp)</th>
+        <th>MOBIL</th>        
+        <th>Nilai (Rp)</th>
+	<th>Total (Rp)</th>
+      
+    </tr>
+         
+{% for w in barang %}
+    <tr>
+    <td align="center">{{ w.kode_cabang }}</td>
+    <td align="left">{{ w.nama_cabang }}</td>
+    <td align="center">{{w.pelunasan_aging_hp_filter}}</td>
+    <td align="right">{{w.total_pelunasan_aging_hp_filter|number_format:0}}</td>    
+    <td align="center">{{w.pelunasan_aging_laptop_filter}}</td> 
+    <td align="right">{{w.total_pelunasan_aging_laptop_filter|number_format:0}}</td>
+    <td align="center">{{w.pelunasan_aging_kamera_filter}}</td>
+    <td align="right">{{w.total_pelunasan_aging_kamera_filter|number_format:0}}</td>
+    <td align="center">{{w.pelunasan_aging_ps_filter}}</td>
+    <td align="right">{{w.total_pelunasan_aging_ps_filter|number_format:0}}</td>
+    <td align="center">{{w.pelunasan_aging_tv_filter}}</td>
+    <td align="right">{{w.total_pelunasan_aging_tv_filter|number_format:0}}</td>
+    <td align="center">{{w.pelunasan_aging_motor_filter}}</td>
+    <td align="right">{{w.total_pelunasan_aging_motor_filter|number_format:0}}</td>
+    <td align="center">{{w.pelunasan_aging_mobil_filter}}</td>
+    <td align="right">{{w.total_pelunasan_aging_mobil_filter|number_format:0}}</td>
+    <td align="right">{{w.total_lunasaging_hari_filter|number_format:0}}</td>
+    </tr>{% endfor %}
+    <tr>
+        <th colspan="2" class="r"><strong>Jumlah</strong></th>
+        <td align="center">{{tot_pelunasan_aging_hp_filter}}</td>
+        <td align="right">{{tot_total_pelunasan_aging_hp_filter|number_format:0}}</td>    
+        <td align="center">{{tot_pelunasan_aging_laptop_filter}}</td> 
+        <td align="right">{{tot_total_pelunasan_aging_laptop_filter|number_format:0}}</td>
+        <td align="center">{{tot_pelunasan_aging_kamera_filter}}</td>
+        <td align="right">{{tot_total_pelunasan_aging_kamera_filter|number_format:0}}</td>
+        <td align="center">{{tot_pelunasan_aging_ps_filter}}</td>
+        <td align="right">{{tot_total_pelunasan_aging_ps_filter|number_format:0}}</td>
+        <td align="center">{{tot_pelunasan_aging_tv_filter}}</td>
+        <td align="right">{{tot_total_pelunasan_aging_tv_filter|number_format:0}}</td>
+        <td align="center">{{tot_pelunasan_aging_motor_filter}}</td>
+        <td align="right">{{tot_total_pelunasan_aging_motor_filter|number_format:0}}</td>
+        <td align="center">{{tot_pelunasan_aging_mobil_filter}}</td>
+        <td align="right">{{tot_total_pelunasan_aging_mobil_filter|number_format:0}}</td>
+        <td align="right">{{tot_total_lunasaging_hari_filter|number_format:0}}</td>
+    </tr>
+</table>
+
+
+</br></br>
+
+<h2 align="center">Data Barang Retur Harian</h2>
+<table border="1" bordercolor="silver " style="background-color:#FFFFFF" width="100%" cellpadding="0" cellspacing="0">
+    <tr  class="tableizer-firstrow">
+        <th>ID</th>
+        <th>GERAI</th>        
+        <th>&nbsp;HP&nbsp;</th>
+        <th>Nilai (Rp)</th>        
+        <th>LAPTOP</th>        
+        <th>Nilai (Rp)</th>
+        <th>KAMERA</th>        
+        <th>Nilai (Rp)</th>
+        <th>&nbsp;PS&nbsp;</th>        
+        <th>Nilai (Rp)</th>
+        <th>TV/LCD</th>        
+        <th>Nilai (Rp)</th>
+        <th>MOTOR</th>        
+        <th>Nilai (Rp)</th>
+        <th>MOBIL</th>        
+        <th>Nilai (Rp)</th>
+	<th>Total (Rp)</th>
+    </tr>
+         
+{% for w in barang %}
+    <tr>
+    <td align="center">{{ w.kode_cabang }}</td>
+    <td align="left">{{ w.nama_cabang }}</td>
+    <td align="center">{{w.retur_aging_hp_filter}}</td>
+    <td align="right">{{w.total_retur_aging_hp_filter|number_format:0}}</td>    
+    <td align="center">{{w.retur_aging_laptop_filter}}</td> 
+    <td align="right">{{w.total_retur_aging_laptop_filter|number_format:0}}</td>
+    <td align="center">{{w.retur_aging_kamera_filter}}</td>
+    <td align="right">{{w.total_retur_aging_kamera_filter|number_format:0}}</td>
+    <td align="center">{{w.retur_aging_ps_filter}}</td>
+    <td align="right">{{w.total_retur_aging_ps_filter|number_format:0}}</td>
+    <td align="center">{{w.retur_aging_tv_filter}}</td>
+    <td align="right">{{w.total_retur_aging_tv_filter|number_format:0}}</td>
+    <td align="center">{{w.retur_aging_motor_filter}}</td>
+    <td align="right">{{w.total_retur_aging_motor_filter|number_format:0}}</td>
+    <td align="center">{{w.retur_aging_mobil_filter}}</td>
+    <td align="right">{{w.total_retur_aging_mobil_filter|number_format:0}}</td>
+    <td align="right">{{w.total_returaging_hari_filter|number_format:0}}</td>
+    </tr>{% endfor %}
+    <tr><td colspan="2" class="r"><strong>Total</strong></td>
+        <td align="center">{{tot_retur_aging_hp_filter}}</td>
+        <td align="right">{{tot_total_retur_aging_hp_filter|number_format:0}}</td>    
+        <td align="center">{{tot_retur_aging_laptop_filter}}</td> 
+        <td align="right">{{tot_total_retur_aging_laptop_filter|number_format:0}}</td>
+        <td align="center">{{tot_retur_aging_kamera_filter}}</td>
+        <td align="right">{{tot_total_retur_aging_kamera_filter|number_format:0}}</td>
+        <td align="center">{{tot_retur_aging_ps_filter}}</td>
+        <td align="right">{{tot_total_retur_aging_ps_filter|number_format:0}}</td>
+        <td align="center">{{tot_retur_aging_tv_filter}}</td>
+        <td align="right">{{tot_total_retur_aging_tv_filter|number_format:0}}</td>
+        <td align="center">{{tot_retur_aging_motor_filter}}</td>
+        <td align="right">{{tot_total_retur_aging_motor_filter|number_format:0}}</td>
+        <td align="center">{{tot_retur_aging_mobil_filter}}</td>
+        <td align="right">{{tot_total_retur_aging_mobil_filter|number_format:0}}</td>
+        <td align="right">{{tot_total_returaging_hari_filter|number_format:0}}</td>
+    </tr>
+</table>
+
+

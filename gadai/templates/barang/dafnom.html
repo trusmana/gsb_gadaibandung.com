@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> ] </p>
+<table  width="100%">
+<tr><td align="center">REKAP BARANG HARIAN</td></tr>
+<tr><td align="center">Tanggal Transaksi: {{tanggal|date:"d F Y"}}</td></tr>
+<tr><td align="center">Gerai : {{barang.0.gerai.nama}}</td></tr>
+
+</table>
+
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+        <th>No</th>
+        <th>Norek</th>
+        <th>Nama Nasabah</th>
+        <th>Barang Masuk Gudang</th>
+        <th>Barang Keluar Gudang</th>
+        <th>No Rak Gudang</th>
+        <th>Status Transaksi</th>
+        <th>Tanggal Transaksi</th>
+        <th>Jatuh Tempo</th>
+        <th>Nilai Transaksi</th>
+        <th>Terima Bersih</th>     
+    </tr>
+{% for p in barang %}
+    <tr>
+        <td>{{forloop.counter}}</td>
+        <td align="right">{{ p.norek }}</td>
+        <td>{{ p.agnasabah.nama}}</td>
+        <td>&nbsp;{{p.barang.barang_masuk|date:"d-m-Y"|default_if_none:"0"}}</td>
+        <td>&nbsp;{{p.barang.barang_keluar|date:"d-m-Y"|default_if_none:"0"}}</td>
+        <td>{{ p.gerai.kode|default_if_none:"0" }}.{{ p.barang.ruangan|default_if_none:"0" }}.{{ p.barang.no_rak|default_if_none:"0" }}.{{ p.barang.row|default_if_none:"0" }}</td>
+        <td>{{ p.status_transaksi|default_if_none:"0" }}</td>
+        <td>{{p.tanggal|date:"d-m-Y"}} </td>
+        <td>{{p.jatuhtempo|date:"d-m-Y"}}</td>
+        <td align="right">{{p.nilai|number_format:0}}</td>
+        <td align="right">{{ p.terima_bersih|number_format:0 }}</td>  
+    </tr>
+
+{% endfor %}
+    <tr>
+        <td align="center" colspan= "9"><b>Total</b></td>
+        <td align="right">{{nilai|number_format:0}}</td>
+        <td align="right">{{bersih|number_format:0}}</td>
+    </tr>
+</table>
+
+

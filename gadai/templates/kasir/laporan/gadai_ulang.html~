@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block section %}gadai ulang{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>APPROVE TRANSAKSI GADAI ULANG <small>DIV PJB</small> Gerai {{kocab}}</h2>
+{% if gr %}
+
+
+<table class="list">
+<tr>
+	<th>Norek</th>
+	<th>Debitur</th>
+	<th>Nilai Yg Diterima (Rp)</th>
+	<th>Menu</th>
+	
+</tr>
+	<tbody>
+		{% for a in gr%}
+		<tr>
+			<td>{{ a.kasir.norek }}</td>
+			<td>{{ a.kasir.agnasabah.nama|striptags  }}</td>
+			<td align="right"> {{nilai_terima_bersih}}aaa{{ a.nilai|number_format:0}}</td>
+            <td align="center"> <a href="/kasirgerai/{{a.id}}/app/" class="edit">Approve</a></td>
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% else %}
+<h3>::: Tidak ada Transaksi Gadai Ulang :::</h3>
+{% endif %}
+{% endblock %}
+

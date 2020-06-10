@@ -1,0 +1,28 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}{{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+
+{% block content %}
+
+<h2 align="right">:: Daftar Nasabah Gadai ::</h2>
+<form action='/nasabah/cari/' method='GET'><img src="/static/css/images/Search.png" alt="Search"  height="27" align="center"/><input type="text" name="cari" size="20" align="center" height="27">
+<input type = 'hidden' name = 'pilih' value = '2'>
+<a href="/nsabah/cari/"><input type ="image" src="/static/images/ktp.png" height="30px" align="center"/></a>
+</form>
+<hr></hr>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow"><th>No</th><th>Nonas</th><th>Nama</th><th>Alamat</th><th>No KTP</th><th colspan= "2">MENU</th></tr>
+{% for a in object_list%}
+    <tr>
+    <td>{{ forloop.counter }}</td>
+    <th><a href="/nasabah/{{a.id }}/show/">{{ a.nomor}}</th>
+    <td>{{ a.nama }}</a></td>
+    <td>{{ a.alamat_domisili}}</td>
+    <td>{{ a.no_ktp}}</td>
+    
+    <th align="center"> <a href="/akadgadai/{{a.id }}/show"><img src="/static/images/tampil.png" height="27px"/></th>
+    <th align="center"><a href="/nasabah/{{a.id }}/edit/"><img src="/static/images/edit.png" height="27px"/></td></th>
+{% endfor %}
+</table>
+{% endblock %}

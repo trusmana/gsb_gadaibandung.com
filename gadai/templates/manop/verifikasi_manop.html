@@ -1,0 +1,46 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}jms{% endblock %}
+{% block extrahead %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal").datepicker({dateFormat: 'yy-mm-dd'});
+});
+</script>
+{% endblock %}
+{% block content %}
+<style>
+#login_form {
+		background: #EBEBEB;
+		padding: 0.5em 1.5em 0.1em;
+		margin:0 auto 150px;
+		width: 450px;height:auto;
+		border: 1px solid #EBEBEB;
+		border-top:8px;
+		-webkit-border-radius:3px;
+		-moz-border-radius:3px;
+		border-radius:10px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.5) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+</style>
+<h2 align="center">VERIFIKASI MANOP OPS ATAS NAMA : {{ag.agnasabah.nama}}</h2>
+
+<form method="post" action="/akadgadai/{{ ag.id }}/verifikasi_manop/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table border=0 align="center" >
+<tr></td><td> {{ form.manop }}</td></tr>
+<tr><td align="left">STATUS PENCAIRAN </label></td><td>: {{ form.status }}</td></tr>  
+<tr><td align="left">TANGGAL </label></td><td>: {{form.tanggal }}</td></tr>
+<tr><td align="left">NOTE</td> <td>: <textarea name="note" cols=30 rows=2></textarea></td></tr>
+<tr><td align="center"></td><td><input type="submit" value="Simpan" class="cari" /></td></tr>
+</table></div>
+</form>
+{% endblock %} 
+

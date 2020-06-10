@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="right">:: DAFTAR AKAD MELEBIHI NILAI TAKSIR ::</h2>
+<form action='/akadgadai/cari/' method='GET'><img src="/static/css/images/Search.png" alt="Search"  height="27" align="center"/>
+<input type="text" name="rekening" size="30" >
+<input type ="submit" value="Cari ">
+</form>
+
+<div class="pagination" align="center">
+    <span class="step-links">
+        {% if akad.has_previous %}
+            <a href="?page={{ akad.previous_page_number }}">Back</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ akad.number }} of {{ akad.paginator.num_pages }}.
+        </span>
+
+        {% if akad.has_next %}
+            <a href="?page={{ akad.next_page_number }}">Next</a>
+        {% endif %}
+    </span>
+</div>
+
+
+<hr></hr>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow"><th>No</th><th>No Rek</th><th>Nama</th><th>Nilai (Rp)</th><th>JW</th><th>Transaksi</th><th>J.Tempo</th><th>Gerai</th><!--<th colspan= "5">MENU</th>--></tr>
+{% for a in manop%}{%if p.tanggal%}{%else%} {%if p.manopgadai%}
+
+    <tr>
+    <td ALIGN="CENTER">{{ forloop.counter }}</td>
+    <th ALIGN="CENTER"><a href="/akadgadai/{{a.id }}/view_verifikasi_manop">{{ a.norek }}</a></th>
+    <td ALIGN="LEFT">{{ a.agnasabah.nama}}</td>
+    <td ALIGN="RIGHT">{{ a.nilai|number_format:0}}</td>
+    <td ALIGN="CENTER">{{ a.jangka_waktu}}</td>
+    <td ALIGN="CENTER">{{a.tanggal|date:" d-m-Y"}}</td>
+    <td ALIGN="CENTER">{{ a.jatuhtempo|date:" d-m-Y"}}</td>
+    <td ALIGN="LEFT">{{a.gerai}}</td>
+    
+    <!--<th ALIGN="CENTER"><a href="/akadgadai/{{a.id}}/prints2/"><img src="/static/images/kwitansi.png" height="27px"/></th>
+    <th ALIGN="CENTER"><a href="/akadgadai/{{a.id}}/kwlunas/"><img src="/static/images/lunas.png" height="27px"/></th>
+    <th ALIGN="CENTER"><a href="/akadgadai/{{a.id}}/prints5/"><img src="/static/images/tterima.png" height="27px"/></th>-->
+    {% endif %}{% endif %}
+{% endfor %}
+</table>
+{% endblock %}

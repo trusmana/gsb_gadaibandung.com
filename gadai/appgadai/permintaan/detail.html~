@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block section %}barang{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+<h3>Ringkasan</h3>
+Total Barang : {{ object.akadgadai_set.all.count }}<br />
+Barang Lunas : {{ object.get_banyak_lunas }}<br />
+
+Total Nilai : Rp.{{ object.get_jumlah_nilai|number_format:0 }}<br />
+<h3>Laporan</h3>
+<ol>
+
+&bull; <a href="/barang/arsip/?tgl={{d|date:'Y-m-d'}}">Rekap{% now "d b Y" %}</a><br />
+</ol>
+
+<h3>Rekap Barang</h3>
+<form method="GET" action="{{ object.get_absolute_url }}rekap/">
+<select name="bulan">{% for b in month_list %}<option value="{{ b|date:"Y-m-d" }}">{{ b|date:"M Y"}}</option>{% endfor %}</select> <input type="submit" value="Tampilkan" />
+</form>
+
+{% endblock %}
+{% block content %}
+
+<h2 align="center">Gerai : {{object.nama}} :::: Jenis Barang : {{kredits.0.barang.get_jenis_barang_display}} :::: Jumlah : {{np}}</h2>
+<table align="center">
+<tr><form action="/barang/{{object.id}}/" method="POST" ">{% csrf_token %} 
+    <td><select name="barang"> {% for k,l in kelompok %}<option value="{{k}}">{{k}}__{{l}} </option>{% endfor %}</select></td>
+    <td><input type="submit" value="sortir" id="filter"/></select></form></td>
+</tr>
+</table>
+{% if object.akadgadai_set %}
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow" {% if p.lunas %} class="row_lunas"{% endif %}>
+	<th align="center">No</th>
+	<th align="center">Nama</th>
+	<th align="center">Rekening</th>
+	<th align="center">Transaksi</th>
+	<th align="center">Status</th>
+	<th align="center">JW</th>
+	<th align="center">Nilai</th>
+	<th align="center">Merk</th>
+	<th align="center">Type</th>
+	<th align="center">JB</th>
+	<th align="center">Gerai</th></tr>
+   </tr>
+{% for p in kredits %}
+    <tr>
+	<td align="center">{{forloop.counter}}</td>
+	<td align="left">{{ p.agnasabah.nama }}</td>
+	<td>{{p.norek}}</td>
+	<td>{{p.tanggal|date:"d M Y "}}</td>
+	<td align="right">{{p.status_transaksi}}</td>
+	<td align="right">{{p.jangka_waktu}}</td>
+	<td align="left" >Rp. {{p.nilai}}</td>
+	<td align="left">{{p.barang.merk}}</td>
+	<td align="left">{{p.barang.type|truncatewords:6}}</td>
+	<td align="left">{{p.barang.jenis_barang}}</td>
+	<td>{{p.gerai.nama}}</td>
+    </tr>{% endfor %}
+    
+</table>
+<H3 align="center"> DAFTAR BARANG GERAI</h3>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow">
+	<th align="center">No</th>
+	<th align="center">Nama</th>
+	<th align="center">Rekening</th>
+	<th align="center">Transaksi</th>
+	<th align="center">Status</th>
+	<th align="center">JW</th>
+	<th align="center">Nilai</th>
+	<th align="center">Merk</th>
+	<th align="center">Type</th>
+	<th align="center">JB</th>
+	<th align="center">Gerai</th></tr>
+   </tr>
+{% for p in object.akadgadai_set.all %}
+    <tr {% if p.lunas %} class="row_lunas"{% endif %}>
+	<td align="center">{{forloop.counter}}</td>
+	<td align="left">{{ p.agnasabah.nama }}</td>
+	<td>{{p.norek}}</td>
+	<td>{{p.tanggal|date:"d M Y "}}</td>
+	<td align="right">{{p.status_transaksi}}</td>
+	<td align="right">{{p.jangka_waktu}}</td>
+	<td align="left" >Rp. {{p.nilai}}</td>
+	<td align="left">{{p.barang.merk}}</td>
+	<td align="left">{{p.barang.type|truncatewords:6}}</td>
+	<td align="left">{{p.barang.jenis_barang}}</td>
+	<td>{{p.gerai.nama}}</td></tr>
+    </tr>{% endfor %}
+    
+    <tr>
+	<th colspan="6" class="r"><strong>Jumlah</strong></th>
+	<td class="r">Rp .{{ object.get_jumlah_nilai|number_format:0 }}</td>
+	<td class="r">&nbsp;</td><td colspan="6">&nbsp;</td></tr>
+</table>
+
+{% else %}<em>Tidak ada AkadGadai</em>{% endif %}
+{% endblock %}
+

@@ -1,0 +1,93 @@
+<style>
+div.img {margin: 5px;padding: 5px;border: 1px solid #0000ff;height: auto;width: auto;float: left; text-align: center;
+}
+
+div.img img {display: inline;margin: 5px;border: 1px solid #ffffff;
+}
+
+div.img a:hover img {border:1px solid #0000ff;
+}
+
+div.desc {text-align: center;font-weight: normal;width: 120px;margin: 5px;
+}
+</style>
+
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 10px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+ function printpage() { window.print(); }
+</script>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/">Kembali</a> ]</p>
+<td colspan="3" height="10"><h3 align="center">
+</br>
+</br>
+</h3>
+<tr>
+ 
+
+ <table border=0 align="center">
+
+    <td colspan="2" height="10"><h3>DATA LOAN FILE DIV PJB <small>KSU RA</small></h3></td>
+   <tr>
+       <td>NAMA NASABAH </td>
+       <td>: {{gadai.agnasabah.nama}}</td>
+      
+   </tr>
+
+    <tr>
+        <td>NOREK </td>
+        <td>: {{gadai.norek}}</td>        
+
+    </tr>
+  
+    <tr>
+        <td>NILAI PINJAMAN </td>
+        <td>: {{gadai.nilai}}</td>
+    </tr>
+
+    <tr>
+        <td>BEA JASA </td>
+        <td>: Rp. {%if gadai.jenis_transaksi = '1' %}{{gadai.jasa|number_format:0}}{%else%} {{gadai.jasa_kendaraan|number_format:0}} {%endif%}</td>
+    </tr>
+
+    <tr>
+        <td>BEA SIMPAN </td>
+        <td>: Rp. {%if gadai.jenis_transaksi = '1' %}{{gadai.biayasimpan|number_format:0}}{%else%} {{gadai.beasimpan_kendaraan|number_format:0}} {%endif%}</td>
+    </tr>
+
+    <tr>
+        <td>BEA ADM </td>
+        <td>: Rp. {%if gadai.jenis_transaksi = '1' %}{{gadai.adm|number_format:0}}{%else%} {{gadai.adm_kendaraan|number_format:0}} {%endif%}</td>
+    </tr>
+
+    <tr>
+        <td>TERIMA BERSIH </td>
+        <td>: Rp. {{gadai.terima_bersih_all|number_format:0}}</td>
+    </tr>
+
+    <tr>
+        <td>TANGGAL TRANSAKSI </td>
+        <td>: {{gadai.tanggal|date:"d-M-Y"}}</td>
+    </tr>
+  
+    <tr>
+        <td>JANGKA WAKTU </td>
+        <td>: {% if gadai.jenis_transaksi = '1'  %}{{ gadai.jangka_waktu|default_if_none:"" }} Hari{%else%}
+          {{ gadai.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{% endif %}</td>
+    </tr>
+
+
+    <tr>
+        <td>JATUHTEMPO </td>
+        <td>: {{gadai.jatuhtempo}}</td>
+
+    </tr>
+</table>

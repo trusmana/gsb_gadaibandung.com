@@ -1,0 +1,49 @@
+{%  extends "base.html" %}
+{% block title %}Jurnal | {{ block.super }}{% endblock %}
+{% block section %}jurnal{% endblock %}
+{% block extrahead %}
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#id_dari").datepicker({dateFormat: 'yy-mm-dd'});
+	$("#id_hingga").datepicker({dateFormat: 'yy-mm-dd'});
+});
+</script>
+{% endblock extrahead %}
+{% block sidebar %}<br />
+<h3>Cari Jurnal</h3>
+<form method="get" action="/jurnal/search/">
+<small><i>No Bukti atau Keterangan</i></small><br />
+<input type="text" name="q" size="20" /> <input type="submit" value="Cari" />
+</form>
+<h3>{{ tahun }}</h3>
+{% for bulan in bulan %}
+&bull; {{ bulan|date:"M" }} <a href="/jurnal/{{ bulan|date:"Y"}}/{{ bulan|date:"m"}}/">Neraca</a> | <a href="/gl/{{ bulan|date:"Y"}}/{{ bulan|date:"m" }}/">GL</a><br />
+{% endfor %}
+<h3>Lihat Jurnal</h3>
+{% for d in date_list %}
+  &middot; <a href="/jurnal/{{ d|date:"Y/m" }}/">{{ d|date:"F y" }}</a><br />
+{% endfor %}
+
+{% endblock %}
+{% load number_format %}
+{% block content %}
+
+<h2 align="right">:: Jurnal Divisi Gadai ::</h2>
+{% if jurnal_list %}
+<table width="95%" border="1" align="center">
+  <tr class="{% cycle 'odd' 'even' %}" ><th colspan="2" width="60">Tanggal</th><th>Kode Rek</th><th>Rekening & Keterangan</th><th>Debet</th><th>Kredit</th></tr>
+{% for j in jurnal_list %}
+  {% for ij in j.itemjurnal_set.all %}
+  <tr><td width="60">{% if user.is_superuser %}<a href="#" title="Hapus Jurnal ini" onclick="if (confirm('Akan menghapus Jurnal {{ j.keterangan|escapejs }}?')) { var f = document.createElement('form'); f.style.display='none'; this.parentNode.appendChild(f); f.method='POST'; f.action='/jurnal/{{ j.id }}/del/'; f.submit(); } else return false;"><img src="/static/images/bullet_red.png"></a> {% endif %}{% ifchanged j.tanggal.month %}{{ j.tanggal|date:"Y M" }}{% else %}&nbsp;{% endifchanged %}</td><td width="5">{% ifchanged %}<strong>{{ j.tanggal|date:"d"}}</strong>{% endifchanged %}</td>
+    <td>{{ ij.akun.kode }}</td>
+    <td>{% if not ij.is_debet %}<span style="padding-left: 30px;">&nbsp;</span>{% endif %}<a href="/jurnal/ledger/{{ ij.akun.id }}/">{{ ij.akun.nama }}</a> <small>({{ ij.akun.id }})</small>{% if forloop.last %}<br /><i>({{ j.keterangan }})</i>{% endif %}</td>
+    <td align="right">{% if ij.is_debet %}{{ ij.nilai|number_format:0 }}{% else %}{% endif %}</td>
+    <td align="right">{% if ij.is_debet %}{% else %}{{ ij.nilai|number_format:0 }}{% endif %}</td>
+  </tr>
+  {% endfor %}
+{% endfor %}
+</table>
+{% else %}
+<p>Tidak ada data dalam Jurnal.</p>
+{% endif %}
+{% endblock %}

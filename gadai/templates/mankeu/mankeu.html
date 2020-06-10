@@ -1,0 +1,90 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Jurnal_Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>APPROVE JURNAL TRANSAKSI  <small>DIV PJB</small></h2>  
+<table id="tabel" align="center">
+<br/>
+<form method="GET" action="/mankeu/">{% csrf_token %}
+   <li><label for="id_cabang">Kode Cabang</label> :
+      <select id="id_id_cabang" data-placeholder="None" class="chosen-select" name="id_cabang">
+            <option value="" selected="selected">---------</option>
+            <option value="0">BANDUNG_pjb</option> <option value="1">JAKARTA</option><option value="2">Suci</option><option value="3">DIPATIUKUR</option>
+            <option value="4">BALUBUR</option><option value="5">GERLONG GIRANG</option><option value="6">GERLONG HILIR</option><option value="7">KOPO</option>
+            <option value="8">CIBIRU</option><option value="9">CIPACING</option><option value="10">JATINANGOR</option><option value="11">CIMAHI</option>
+            <option value="12">BUAH BATU</option><option value="13">KORDON</option><option value="14">CIHANJUANG</option><option value="15">MARANATA</option>
+            <option value="16">KIARACONDONG</option><option value="17">CIREBON PERJUANGAN</option><option value="18">CIREBON </option><option value="19">CIUMBELEUIT</option>
+            <option value="113">UJUNGBERUNG - PJB</option>
+      </select>      
+   </li>
+    <li><label for="id_tgl_trans"></label> <input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> -
+    <label for="id_tgl_trans"></label> <input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
+	<br>
+	<li>&nbsp;<input type="submit" value="VIEW" class="cari"/>&nbsp;<!-- <a href="/jurnal/index_all/" class="cari">VIEW ALL</a></li>-->
+</form>
+</table>
+
+<br>
+
+{% if mankeu %}
+
+<h3 style='text-align: center'><b>JURNAL TRANSAKSI
+</small>GERAI 
+   {% if id_cabang = '0' %}PUSAT{%endif%}{% if id_cabang = '1' %}JAKARTA{%endif%}{% if id_cabang = '2' %}SUCI{%endif%}{% if id_cabang = '3' %}DIPATIUKUR{%endif%}
+   {% if id_cabang = '4' %}BALUBUR{%endif%}{% if id_cabang = '6' %}GERLONG HILIR{%endif%}{% if id_cabang = '7' %}KOPO{%endif%}{% if id_cabang = '8' %}CIBIRU{%endif%}
+   {% if id_cabang = '9' %}CIPACING{%endif%}{% if id_cabang = '10' %}JATINAMGOR{%endif%}{% if id_cabang = '11' %}CIMAHI{%endif%}{% if id_cabang = '12' %}BUAH BATU{%endif%}
+   {% if id_cabang = '13' %}KORDON{%endif%}{% if id_cabang = '14' %}CIHANJUANG{%endif%}{% if id_cabang = '15' %}MARANATA{%endif%}{% if id_cabang = '16' %}KIARACONDONG{%endif%}{% if id_cabang = '17' %}CIREBON PERJUANGN{%endif%}
+   {% if id_cabang = '18' %}CIREBON{%endif%}{% if id_cabang = '19' %}CIUMBELEUIT{%endif%}{% if id_cabang = '113' %}UJUNG BERUNG{%endif%}
+</small> </b>
+</h3>
+<h3 style='text-align: center'><b><small>Periode : {{start_date}} s/d {{end_date}} </small> </b></h3>
+<form method="POST" action="/mankeu/approve_mankeu_all/">{% csrf_token %}
+<input type="hidden"name="id" value="{{object.id}}" />
+<table class="list">
+
+		<tr>
+            <th><input id="select_all" type="checkbox" align="center"></th>
+			<th colspan="2" >Tanggal</th>
+			<th>COA</th>
+			<th>Rekening & Keterangan</th>
+			<th>Debet</th>
+			<th>Kredit</th>
+		</tr>
+
+  {% for j in mankeu %}{% if j.manopkeu.status != '1'%}
+	<tbody>
+         <tr {% if j.jenis = "GL_GL_NON_KAS" %} class="row_cucu" {% else %}  {% endif%}>
+            <td><input type="checkbox"  value="{{ j.id }}" class="checkbox_delete" name='id_pilih' /></td>
+			<td>{{ j.tgl_trans|date:"Y M" }}</td><td width="5">{% ifchanged %}<strong>{{ j.tgl_trans|date:"d"}}</strong>{% endifchanged %}</td>
+			<td>{{ j.kepala_coa }}.{{ j.id_coa.coa }}</td>
+			<td><span style="padding-left: 10px;">&nbsp;</span>{{ j.id_coa.deskripsi }} {{j.antar_kantor}}
+				{% if forloop.counter %}<br /><i>({{ j.jurnal.diskripsi}})</i>{% endif %}
+			</td>
+			<td align="right">{{ j.debet|number_format:0 }}</td>
+			<td align="right">{{ j.kredit|number_format:0 }}</td>
+		</tr>
+	</tbody>
+{% endif %}
+  {% endfor %}
+	  <tr>
+			<td colspan="5" align="center">TOTAL</td>
+			<td align="right">{{total_debet|number_format:0}}</td>
+			<td align="right">{{total_kredit|number_format:0}}</td>
+            <td></td>
+	  </tr>
+</table>
+<p align="right"><input type="submit" value="Simpan" class="cari" /></p>
+</form>
+{% else %}
+<p>Tidak ada data dalam Jurnal.</p>
+{% endif %}
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}

@@ -1,0 +1,1030 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Gerai{% endblock %}
+{% block sidebar %}
+
+{% include "alat/sidebar.html" %}
+{% load useringroup %}
+{% block extrahead %}
+{% load useringroup number_format %}
+{% endblock %}
+
+<div style="margin-left:10px;">
+<br>
+
+<div class="menu_list" id="secondpane">
+
+{% ifusergroup KADIV %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU KADIV PJB</span></a></li>
+
+    <li class='has-sub'><a href=''><span>MENU LAPORAN TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/manop/total_harian_filter/">REKAP ALL TRANSAKSI</a></li>
+        <li><a href="/manop/lapur_barang/" ><span>Laporan Ayda</span></a></li>
+        <li><a href="/gudang/data_gudang_barang_aktif/">DATA BARANG AKTIF</a></li>
+        <li><a href="/manop/lunasterjual_barang/" ><span>Laporan Penjualan Ayda</span></a></li>
+        <li><a href="/manop/pencairan_gerai/" ><span>Rekap Pencairan Dan Gadai Ulang</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>MENU LAPORAN KEUANGAN</span></a>
+    <ul>
+        <li><a href="/rreport/neraca_keu/" ><span>Neraca</span></a></li>
+        <li><a href="/rreport/laba_rugi_keu/" ><span>Laba / Rugi (SHU)</span></a></li>
+        <li><a href="/jurnal/laporan_kas_kecil/"><span>Laporan Kas Kecil</span></a></li>
+        <li><a href="/rreport/buku_besar_keu/" ><span>Buku Besar</span></a></li>
+        <li><a href="/rkeuangan/{{cabang.kode_cabang}}/laporan_kas_besar/" ><span>Laporan Kas</span></a></li>
+        <li><a href="/rkeuangan/{{cabang.kode_cabang}}/antar_bank_aktiva/" ><span>Laporan Bank</span></a></li>
+    </ul>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+</div>
+
+{% endifusergroup %}
+
+{% ifusergroup MUTUOPS %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU OPS MUTU</span></a></li>
+
+    <li class='has-sub'><a href=''><span>MENU TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/manop/list_cari/" ><span>Cari Nasabah</span></a></li>
+        <li><a href="/manop/rekap_noa_baru/">Rekap Noa Baru</a></li>
+    </ul>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+</div>
+
+{% endifusergroup %}
+
+{% ifusergroup GUDANGAKTIF %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU GUDANG AKTIF</span></a></li>    
+        <li class='has-sub'><a href=''><span>PENCARIAN</span></a>
+            <ul>
+                <li><a href="/akadgadai/">Data Akad + Cari</a></li>
+                <li><a href="/barang/caribarang/">Cari Barang</a></li>
+            </ul>
+        </li>
+        <li class='has-sub'><a href=''><span>GUDANG AKTIF</span></a>
+            <ul>
+                <li><a href="/gerai/filter_rekap/">Rekap Harian Pertanggal</a></li>
+                <li><a href="/barang/barang_gerai/">Barang Gerai</a></li>
+                <li><a href="/barang/">Data Barang</a></li>
+                <li><a href="/manop/rincian_barang_di_gerai/">Data Barang Di Gerai</a></li>
+                <li><a href="/report/agingharian/">R. Aging hari</a></li>
+                <li><a href="/permintaan/input_permintaan_gudang/">Pemesanan & Pengiriman</a></li>
+                <li><a href="/admgudang/data_retur_gaktif/">Permintaan Retur</a></li>
+                <li><a href="/gudang/data_gudang_barang_aktif/">Data Barang Aktif</a></li>
+                <li><a href="/manop/aktif_lapur/">Rekap Barang Aktif & Ayda</a></li>
+            </ul>
+        </li>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+</div>
+
+{% endifusergroup %}
+{% ifusergroup GUDANGLAPUR %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU GUDANG AYDA</span></a></li>
+        <li class='has-sub'><a href=''><span>LAPORAN AYDA</span></a>
+    <ul>
+            <li><a href="/manop/rincian_jatuhtempo/">DATA BARANG JTH TEMPO</a></li>
+            <!--<li><a href="/lelang/">DATA AYDA SIAP JUAL</a></li>-->
+            <li><a href="/lelang/jual/">DATA PENJUALAN AYDA</a></li>
+            <li><a href="/manop/lapur_barang/">LAPORAN AYDA</a></li>
+    </ul>
+             <li class='has-sub'><a href=''><span>LAPORAN</span></a>
+    <ul>
+            <li><a href="/manop/rincian_lainlain/">LAPORAN LAIN-LAIN</a></li>
+            <li><a href="/permintaan/input_permintaan_gudang/">Pemesanan & Pengiriman</a></li>
+    </ul>
+            <li class='has-sub'><a href=''><span>TRANSAKSI</span></a>
+    <ul>
+            <li><a href="/taksir/">Daftar Taksiran</a></li>
+    </ul>
+            <li class='has-sub'><a href=''><span>PENCARIAN</span></a>
+    <ul>
+            <li><a href="/akadgadai/">Data Akad + Cari</a></li>
+            <li><a href="/barang/caribarang/">Cari Barang</a></li>
+    </ul>
+        </li>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+</div>
+{% endifusergroup %}
+
+{% ifusergroup KEPALAGUDANG %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU KEPALA GUDANG</span></a></li>
+        <li class='has-sub'><a href=''><span>LAPORAN AYDA</span></a>
+    		<ul>
+        		<li><a href="/manop/rincian_jatuhtempo/">DATA BARANG JTH TEMPO</a></li>
+        		<li><a href="/lelang/jual/">DATA PENJUALAN AYDA</a></li>
+        		<li><a href="/manop/lapur_barang/">DATA AYDA</a></li>
+    		       <li><a href="/manop/rincian_lainlain/">LAPORAN LAIN-LAIN</a></li>
+    		</ul>
+        <li class='has-sub'><a href=''><span>TRANSAKSI</span></a>
+    		<ul>
+        		<li><a href="/taksir/">Daftar Taksiran</a></li>
+    		</ul>
+        <li class='has-sub'><a href=''><span>PENCARIAN</span></a>
+    		<ul>
+            		<li><a href="/akadgadai/">Data Akad + Cari</a></li>
+                        <li><a href="/barang/caribarang/">Cari Barang</a></li>
+    		</ul>
+        </li>
+        <li class='has-sub'><a href=''><span>GUDANG AKTIF</span></a>
+    <ul>
+        <li><a href="/gerai/filter_rekap/">Rekap Harian Pertanggal</a></li>
+        <li><a href="/barang/barang_gerai/">Barang Gerai</a></li>
+        <li><a href="/barang/">Data Barang</a></li>
+        <li><a href="/manop/rincian_barang_di_gerai/">Data Barang Di Gerai</a></li>
+        <li><a href="/report/agingharian/">R. Aging hari</a></li>
+        <li><a href="/permintaan/input_permintaan_gudang/">Pemesanan & Pengiriman</a></li>
+        <li><a href="/admgudang/data_retur_gaktif/">Permintaan Retur</a></li>
+        <li><a href="/gudang/data_gudang_barang_aktif/">Data Barang Aktif</a></li>
+        <li><a href="/manop/aktif_lapur/">Rekap Barang Aktif & Ayda</a></li>
+    </ul>
+        </li>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+</div>
+{% endifusergroup %}
+
+{% ifusergroup KEUANGAN_PJB %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU KEUANGAN PUSAT</span></a></li>
+ 
+    <li class='has-sub'><a href=''><span>JURNAL TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/rreport/index_keu/"><span>Listing Jurnal</span></a></li>
+        <li><a href="/rreport/buku_besar_all_keu/"><span>Rekap Jurnal Rincian</span></a></li>
+        <li><a href="/rreport/neraca_percobaan_keu/" ><span>Rekap Jurnal Global</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>SUB LEDGER</span></a>
+    <ul>
+        <li><a href="/rreport/buku_besar_keu/" ><span>Buku Besar</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>LAPORAN</span></a>
+    <ul>
+        <!--<li><a href="/rreport/neraca_percobaan_keu/" ><span>Neraca Saldo</span></a></li>-->
+        <li><a href="/rreport/neraca_keu/" ><span>Neraca</span></a></li>
+        <li><a href="/rreport/laba_rugi_keu/" ><span>Laba / Rugi (SHU)</span></a></li>
+    </ul>
+
+    <li class='has-sub'><a href=''><span>PARAMETER JURNAL</span></a>
+    <ul>
+        <li><a href="/parameter/pencairan_adm/"><span>Adm Pencairan</span></a></li>
+        <li><a href="/parameter/pencairan_kasir/" ><span>Kasir Pencairan (Kas)</span></a></li>
+        <li><a href="/parameter/pencairan_kasir_bank/" ><span>Kasir Pencairan (Bank)</span></a></li>
+        <li><a href="/parameter/jurnal_pelunasan_adm/"><span>Adm Pelunasan </span></a></li>
+        <li><a href="/parameter/jurnal_pelunasan_kasir/"><span>Kasir Pelunasan(Kas/Bank)</span></a></li>
+        <li><a href="/parameter/rak_kasir_plns/" ><span>Kasir Pelunasan RAK</span></a></li>
+        <!--<li><a href="/parameter/gadai_ulang_adm_beda/" ><span>Adm Gadai Ulang(Barang Beda)</span></a></li>-->
+        <li><a href="/parameter/gadai_ulang_adm/" ><span>Adm Gadai Ulang(Barang sama)</span></a></li>
+        <li><a href="/parameter/gadai_ulang/" ><span>Kasir Gadai Ulang</span></a></li>
+        <li><a href="/parameter/jurnal_pusat_kas_bank/"><span>Pusat Setoran (Kas Besar/Bank)</span></a></li>
+        <li><a href="/parameter/jurnal_penambahan_kas_bank/" ><span>Gerai Setoran (Kas Gerai/Bank)</span></a></li>
+        <!--<li><a href="/parameter/jurnal_panjar/" ><span>Gerai Uang Muka (Panjar)</span></a></li>-->
+        <li><a href="/parameter/jurnal_biaya/" ><span>Gerai/Pusat Biaya</span></a></li>
+        <!--<li><a href="/parameter/jurnal_penjualan_barang/"><span>Gerai/Pusat Penjualan</span></a></li> -->
+        <li><a href="/parameter/uangmuka_gerai/"><span>Gerai Uang Muka </span></a></li>
+        <li><a href="/parameter/materai_mapper/"><span>Materai Parameter Cabang </span></a></li>
+        <li><a href="/parameter/materai_pusat/"><span>Materai Parameter Pusat </span></a></li>
+        <li><a href="/parameter/biaya_pusat/" ><span>Pusat Gl Gl</span></a></li>
+        <li><a href="/parameter/rak_pusat/" ><span>Pusat RAK</span></a></li>
+        <li><a href="/parameter/aydamapper/" ><span>Ayda</span></a></li>
+
+       <!-- <li><a href="/parameter/rak_kasir_plns/" ><span>Kasir Pelunasan RAK</span></a></li>-->
+    </ul>
+    <li class='has-sub'><a href=''><span>PARAMETER KEUANGAN</span></a>
+    <ul>
+        <li><a href="/parameter/manage_akun/"><span>Akun</span></a></li>
+        <li><a href="/rkeuangan/saldo_gerai/" ><span>Report Saldo </span></a></li>
+    </ul>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+   </ul>
+
+</div>
+{% endifusergroup %}
+{% ifusergroup MANOP %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU MANOP</span></a></li>
+ 
+    <li class='has-sub'><a href=''><span>DATA PENYIMPANGAN</span></a>
+    <!-- <li><a href="/akadgadai/tambah_sop/">Input SOP</a></li>-->
+    <ul>
+        <li><a href="/manop/"><span>Data Lebih Taksir</span></a></li>
+        <li><a href="/rreport/buku_besar_all_keu/"><span>Data Rekap Lebih Taksir</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>MENU TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/taksir/add/"><span>Input Taksir Baru</span></a></li>
+        <li><a href="/manop/list_cari/" ><span>Cari Nasabah</span></a></li>
+        <li><a href="/manop/list_nsb/" ><span>AYDA</span></a></li>
+        <li><a href="/manop/otorisasi_pelunasan/" ><span>Otorisasi Pelunasan</span></a></li>
+        <li><a href="/manop/otorisasi_pelunasan_gu/" ><span>Otorisasi Gadai Ulang </span></a></li>
+        <li><a href="/manop/cari/" ><span>Refisi Jurnal</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>REKAP TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/taksir/" ><span>Daftar Taksiran</span></a></li>
+        <li><a href="/manop/pencairan_gerai/" ><span>Rekap Pencairan Dan Gadai Ulang</span></a></li>
+        <li><a href="/manop/pelunasan_gerai/" ><span>Rekap Pelunasan</span></a></li>
+        <li><a href="/manop/total_harian_filter/" ><span>Rekap All</span></a></li>
+        <li><a href="/manop/aktif_lapur/" ><span>Rekap Barang Ayda </span></a></li>
+        <li><a href="/manop/lapur_barang/" ><span>Data Barang Ayda </span></a></li>
+        <li><a href="/manop/lunasterjual_barang/" ><span>Data Barang Terjual </span></a></li>
+        <li><a href="/manop/rekap_noa_baru/">Rekap Noa Baru</a></li>
+        <li><a href="/manop/pencairan_gerai_saja/">Rekap Pencairan</a></li>
+        <li><a href="/permintaan/input_permintaan_gudang/">Pemesanan & Pengiriman</a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>LAPORAN</span></a>
+    <ul>
+        <li><a href="/manop/lapur_barang/" ><span>Laporan Ayda</span></a></li>
+        <li><a href="/manop/lunasterjual_barang/" ><span>Laporan Penjualan Ayda</span></a></li>
+        <li><a href="/manop/rincian_hilang/" ><span>Laporan Barang Hilang</span></a></li>
+        <li><a href="/manop/rincian_lainlain/" ><span>Laporan Lain-Lain</span></a></li>
+        <li><a href="/manop/rincian_jatuhtempo/" ><span>Laporan Jatuh Tempo </span></a></li>
+        <li><a href="/manop/laporan_rekap_dan_rinci/" ><span>Laporan Piutang</span></a></li>
+        <!-- <li><a href="/lelang/jual/" ><span>Penjualan Lapur </span></a></li>-->
+        <li><a href="/gudang/data_gudang_barang_aktif/" ><span>Data Barang AKtif </span></a></li>
+        <li><a href="/manop/rincian_barang_di_gerai/" ><span>Data Barang Di Gerai</span></a></li>
+        <!--<li><a href="/manop/laporan_rekap_dan_rinci/" ><span>Laporan Piutang</span></a></li>-->
+    </ul>
+    <li class='has-sub'><a href=''><span>MANAGE</span></a>
+    <ul>
+        <li><a href="/manop/manage_user/" ><span>Manage User</span></a></li>
+        <li><a href="/manop/manage_userprofile/" ><span>Manage User Profile</span></a></li>
+        <li><a href="/manop/manage_gerai/" ><span>Manage Gerai</span></a></li>
+        <li><a href="/gerai/aktifkan_user/" ><span>Buka User</span></a></li>
+        <li><a href="/gerai/daftar_user/" ><span>Daftar User</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>Simulasi</span></a>
+        <ul>
+            <li><a href="/gerai/simulasi/" target="_blank" ><span>Simulasi Kredit</span></a></li>
+        </ul>
+    </li>
+
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+   </ul>
+
+</div>
+{% endifusergroup %}
+
+
+{% ifusergroup ASMANPJB %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU ASMAN</span></a></li>
+
+    <li class='has-sub'><a href=''><span>DATA PENYIMPANGAN</span></a>
+    <!-- <li><a href="/akadgadai/tambah_sop/">Input SOP</a></li>-->
+    <ul>
+        <li><a href="/manop/"><span>Data Lebih Taksir</span></a></li>
+        <li><a href="/rreport/buku_besar_all_keu/"><span>Data Rekap Lebih Taksir</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>MENU TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/taksir/add/"><span>Input Taksir Baru</span></a></li>
+        <li><a href="/manop/list_cari/" ><span>Cari Nasabah</span></a></li>
+        <li><a href="/manop/list_nsb/" ><span>AYDA</span></a></li>
+        <li><a href="/manop/otorisasi_pelunasan/" ><span>Otorisasi Pelunasan</span></a></li>
+        <li><a href="/manop/otorisasi_pelunasan_gu/" ><span>Otorisasi Gadai Ulang </span></a></li>
+        <li><a href="/manop/cari/" ><span>Refisi Jurnal</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>REKAP TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/taksir/" ><span>Daftar Taksiran</span></a></li>
+        <li><a href="/manop/pencairan_gerai/" ><span>Rekap Pencairan Dan Gadai Ulang</span></a></li>
+        <li><a href="/manop/pelunasan_gerai/" ><span>Rekap Pelunasan</span></a></li>
+        <li><a href="/manop/total_harian_filter/" ><span>Rekap All</span></a></li>
+        <li><a href="/manop/aktif_lapur/" ><span>Rekap Barang Ayda </span></a></li>
+        <li><a href="/manop/lapur_barang/" ><span>Data Barang Ayda </span></a></li>
+        <li><a href="/manop/lunasterjual_barang/" ><span>Data Barang Terjual </span></a></li>
+        <li><a href="/manop/rekap_noa_baru/">Rekap Noa Baru</a></li>
+        <li><a href="/manop/pencairan_gerai_saja/">Rekap Pencairan</a></li>
+        <li><a href="/permintaan/input_permintaan_gudang/">Pemesanan & Pengiriman</a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>LAPORAN</span></a>
+    <ul>
+        <li><a href="/manop/lapur_barang/" ><span>Laporan Ayda</span></a></li>
+        <li><a href="/manop/lunasterjual_barang/" ><span>Laporan Penjualan Ayda</span></a></li>
+        <li><a href="/manop/rincian_hilang/" ><span>Laporan Barang Hilang</span></a></li>
+        <li><a href="/manop/rincian_lainlain/" ><span>Laporan Lain-Lain</span></a></li>
+        <li><a href="/manop/rincian_jatuhtempo/" ><span>Laporan Jatuh Tempo </span></a></li>
+        <li><a href="/manop/laporan_rekap_dan_rinci/" ><span>Laporan Piutang</span></a></li>
+        <!-- <li><a href="/lelang/jual/" ><span>Penjualan Lapur </span></a></li>-->
+        <li><a href="/gudang/data_gudang_barang_aktif/" ><span>Data Barang AKtif </span></a></li>
+        <li><a href="/manop/rincian_barang_di_gerai/" ><span>Data Barang Di Gerai</span></a></li>
+        <!--<li><a href="/manop/laporan_rekap_dan_rinci/" ><span>Laporan Piutang</span></a></li>-->
+    </ul>
+    <li class='has-sub'><a href=''><span>MANAGE</span></a>
+    <ul>
+        <li><a href="/manop/manage_user/" ><span>Manage User</span></a></li>
+        <li><a href="/manop/manage_userprofile/" ><span>Manage User Profile</span></a></li>
+        <li><a href="/manop/manage_gerai/" ><span>Manage Gerai</span></a></li>
+        <li><a href="/gerai/aktifkan_user/" ><span>Buka User</span></a></li>
+        <li><a href="/gerai/daftar_user/" ><span>Daftar User</span></a></li>
+    </ul>
+
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+   </ul>
+
+</div>
+{% endifusergroup %}
+
+{% ifusergroup staffops %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU MAN SALES</span></a></li> 
+    
+    <li class='has-sub'><a href=''><span>MENU TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/manop/list_cari/" ><span>Cari Nasabah</span></a></li>        
+    </ul>
+    <li class='has-sub'><a href=''><span>REKAP TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/manop/pencairan_gerai/" ><span>Rekap Pencairan Dan GU</span></a></li>
+        <li><a href="/manop/pelunasan_gerai/" ><span>Rekap Pelunasan</span></a></li>
+        <li><a href="/manop/lunasterjual_barang/" ><span>Data Barang Terjual </span></a></li>
+        <li><a href="/manop/rekap_noa_baru/">REKAP NOA BARU</a></li>
+        <li><a href="/manop/pencairan_gerai_saja/">REKAP PENCAIRAN</a></li>
+        <li><a href="/manop/total_harian_filter/">REKAP ALL TRANSAKSI</a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>LAPORAN</span></a>
+    <ul>
+        <li><a href="/manop/rincian_jatuhtempo/" ><span>Laporan Jatuh Tempo </span></a></li>
+        <li><a href="/gudang/data_gudang_barang_aktif/" ><span>Data Barang AKtif </span></a></li>
+        <li><a href="/manop/lunasterjual_barang/" ><span>Data Barang Terjual </span></a></li>
+        <li><a href="/manop/lapur_barang/" ><span>Laporan Ayda</span></a></li>
+        <li><a href="/manop/lunasterjual_barang/" ><span>Laporan Penjualan Ayda</span></a></li>
+        <li><a href="/manop/rincian_barang_di_gerai/" ><span>Data Barang Di Gerai</span></a></li>
+        <li><a href="/gudang/data_gudang_barang_aktif/" ><span>Data Barang Aktif </span></a></li> 
+    </ul>
+    <li class='has-sub'><a href=''><span>MANAGE USER</span></a>
+    <ul>
+    <li><a href="/gerai/aktifkan_user/" ><span>Buka User</span></a></li>
+    </ul>
+   <li class='has-sub'><a href=''><span>TAKSIR</span></a>
+       <ul>
+            <li><a href="/taksir/">Daftar Taksiran</a></li>
+            <li><a href="/taksir/add/"><span>Input Taksir Baru</span></a></li>
+       </ul>
+    <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+   </ul>
+</div>
+{% endifusergroup %}
+
+{% ifusergroup admops %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU OPRASIONAL</span></a></li>
+        <li class='has-sub'><a href=''><span>Menu Rekap</span></a>
+    <ul>
+        <li><a href="/manop/rincian_barang_di_gerai/">DATA BARANG DI GERAI</a></li>
+        <li><a href="/manop/rincian_jatuhtempo/">DATA BARANG JTH TEMPO</a></li>
+        <li><a href="/manop/rincian_lainlain/">DATA BARANG LAIN-LAIN</a></li>
+        <li><a href="/barang/daftarjatuhtempo/">Data Jatuh Tempo</a></li>
+        <li><a href="/manop/pencairan_gerai/">PENCAIRAN GERAI</a></li>
+        <li><a href="/manop/pelunasan_gerai/">PELUNASAN GERAI</a></li>
+        <li><a href="/manop/perpanjangan_gerai/">PERPANJANGAN GERAI</a></li>
+        <li><a href="/manop/total_harian_filter/">ALL TRANSAKSI</a></li>
+        <li><a href="/manop/lapur_barang/">LAPORAN AYDA</a></li>
+        <li><a href="/manop/laporan_rekap_dan_rinci/">LAPORAN PIUTANG</a></li>
+        <li><a href="/report/report_teguran/">LAPORAN S. TEGURAN</a></li>
+        <li><a href="/manop/pencairan_perpanjangan/">PENCAIRAN TRHDP TARGET</a></li>
+    </ul>
+        </li>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+</div>
+{% endifusergroup %}
+
+
+
+{% ifusergroup KEUANGAN2 %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU KEUANGAN 3</span></a></li>
+        <li class='has-sub'><a href=''><span>Input Transaksi</span></a>
+    <ul>
+        <li><a href="/keuangan/{{cabang.kode_cabang}}/add/">Penyetoran & Penerimaan</span></a></li>
+        <li><a href="/jurnal/{{cabang.kode_cabang}}/{{user.id}}/add_baru_h/">Transaksi Gl Gerai</a></li>
+        <li><a href="/jurnal/{{cabang.kode_cabang}}/{{user.id}}/gl_gl_pusat/">Transaksi GL Pusat</a></li>
+        <li><a href="/manop/menu_penjualan_ayda/" ><span>Penjualan AYDA</span></a></li>
+        <!--<li><a href="/rreport/refisi_jurnal_harian/" ><span>Refisi Jurnal Harian</span></a></li>-->
+        <li><a href="/kasirgerai/list_app_keu_gu/" ><span>App Titipan Gu</span></a></li>
+    </ul>
+        </li>
+        <li class='has-sub'><a href=''><span>Laporan Transaksi</span></a>
+   <ul>
+        <li><a href="/kasirgerai/laporan_permintaan_titipan_gu/" ><span>Laporan Pengembalian GU</span></a></li>
+        <li><a href="/rkeuangan/{{cabang.kode_cabang}}/laporan_kas_besar/" ><span>Laporan Kas</span></a></li>
+        <li><a href="/rkeuangan/{{cabang.kode_cabang}}/antar_bank_aktiva/" ><span>Laporan Bank</span></a></li>
+        <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_ayda_pusat/"><span>Mastertiket Ayda</span></a></li>
+        <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_penjualan_ayda/"><span>Mastertiket Penjualan Ayda</span></a></li>
+        <li class='last'><a href="/keuangan/{{cabang.kode_cabang}}/{{user.id}}/mastertiket_gl_gl_pusat/">Mastertiket Transaksi GL & Biaya</a></li>
+        <li><a href="/rkeuangan/{{cabang.kode_cabang}}/mastertiket_rak_pusat/" ><span>Mastertiket Transaksi Antar Kantor</span></a></li>
+   </ul>
+        </li>
+    <li class='has-sub'><a href=''><span>SUB LEDGER</span></a>
+    <ul>
+        <li><a href="/rreport/buku_besar_keu/" ><span>Buku Besar</span></a></li>
+    </ul>
+        <li class='has-sub'><a href=''><span>Input Transaksi</span></a>
+    <ul>
+        <li><a href="/rreport/rekapitulasi_transaksi_pusat/">Posting Transaksi Pusat</span></a></li>
+    </ul>
+        </li>
+        <li class='has-sub'><a href=''><span>Possting</span></a>
+    <ul>
+            <li><a href="/rkeuangan/posting_gerai_count/">Posting Pusat</a></li>
+            <li><a href="/rkeuangan/posting_akhir_tahun/">Posting Akhir Tahun</a></li>
+            <li><a href="/rkeuangan/revisiposting/">Revisi Posting</a></li>
+    </ul>
+        </li>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+</div>
+{% endifusergroup %}
+{% ifusergroup baranglapur %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU ADM PINJAMAN</span></a></li>
+        <li class='has-sub'><a href=''><span>Menu Pencairan </span></a>
+    <ul>
+        <li><a href="/barang/caribarang/">Cari Barang</a></li>
+        <li><a href="/akadgadai/">Data Akad + Cari</a></li>
+    </ul>
+        </li>
+    <li class='has-sub'><a href=''><span>Transaksi</span></a>
+   	<ul>
+		<li><a href="/manop/list_cari/">PERUBAHAN STATUS</a></li>
+                <li><a href="/permintaan/input_permintaan_gudang/">Pemesanan & Pengiriman</a></li>
+   	</ul>
+    </li>
+    <li class='has-sub'><a href=''><span>Data Transaksi</span></a>
+        <ul>
+           <li><a href="/manop/rincian_barang_di_gerai/">DATA BARANG DI GERAI</a></li>
+           <li><a href="/manop/pencairan_gerai/">REKAP PENCAIRAN DAN GU</a></li>
+           <li><a href="/manop/pelunasan_gerai/">REKAP PELUNASAN GERAI</a></li>
+           <li><a href="/manop/total_harian_filter/">REKAP ALL TRANSAKSI</a></li>
+           <li><a href="/manop/aktif_lapur/">REKAP BRG AKTIF & AYDA</a></li>
+           <li><a href="/manop/rekap_noa_baru/">REKAP NOA BARU</a></li>
+           <li><a href="/manop/pencairan_gerai_saja/">REKAP PENCAIRAN</a></li>
+           <li><a href="/manop/all_data_cair/">RINCI HISTORY PENCAIRAN</a></li>
+
+        </ul>
+    </li>
+    <li class='has-sub'><a href=''><span>Data Barang / Piutang</span></a>
+        <ul>
+            <li><a href="/manop/rincian_barang_di_gerai/">DATA BARANG DI GERAI</a></li>
+            <li><a href="/manop/lapur_barang/">DATA AYDA</a></li>
+            <li><a href="/manop/rincian_hilang/">DATA BARANG HILANG</a></li>
+            <li><a href="/manop/rincian_jatuhtempo/">DATA BARANG JTH TEMPO</a></li>
+            <li><a href="/lelang/">DATA AYDA SIAP JUAL</a></li>
+            <li><a href="/lelang/jual/">DATA PENJUALAN AYDA</a></li>
+            <li><a href="/gudang/data_gudang_barang_aktif/">DATA BARANG AKTIF</a></li>
+            <!--<li><a href="/manop/rincian_piutang/">PIUTANG</a></li>-->
+            <li><a href="/manop/laporan_rekap_dan_rinci/" ><span>PIUTANG</span></a></li>
+            <li><a href="/gerai/neracagabungan/">NERACA GABUNGAN</a></li>
+        </ul>
+    </li>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+</div>
+{% endifusergroup %}
+
+{% ifusergroup KEUANGAN1 %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU KEUANGAN 2</span></a></li>
+        <li class='has-sub'><a href=''><span>Input Transaksi</span></a>
+    <ul>
+        <li><a href="/keuangan/{{cabang.kode_cabang}}/add_pusat/">Biaya</span></a></li>
+        <li><a href="/keuangan/{{cabang.kode_cabang}}/add_gerai/">Biaya Gerai</span></a></li>
+        <li><a href="/jurnal/{{cabang.kode_cabang}}/{{user.id}}/gl_gl_pusat/">Transaksi GL Pusat</a></li>
+        <li><a href="/jurnal/{{cabang.kode_cabang}}/{{user.id}}/add_baru_h/">Transaksi Gl Gerai</a></li>
+    </ul>
+        </li>
+        <li class='has-sub'><a href=''><span>Laporan Transaksi</span></a>
+   <ul>
+        <li><a href="/rkeuangan/{{cabang.kode_cabang}}/laporan_materai/" ><span>Laporan Materai</span></a></li>
+        <li><a href="/rkeuangan/range_laporan_materai/" ><span>Range Laporan Materai</span></a></li>
+        <li><a href="/jurnal/laporan_kas_kecil/"><span>Laporan Kas Kecil</span></a></li>
+        <li><a href="/jurnal/laporan_kas_uang_muka/"><span>Laporan Uang Muka Pusat</span></a></li>
+        <li><a href="/mankeu/rekapitulasi_transaksi_gl_gl/">Rekapitulasi Transaksi GL Tunai</a></li>
+        <!--<li class='last'><a href="/keuangan/{{cabang.kode_cabang}}/{{user.id}}/mastertiket_gl_gl_pusat/">Mastertiket Transaksi GL & Biaya</a></li>
+    --> 
+    </ul>
+        </li>
+        <!--<li class='has-sub'><a href=''><span>Posting</span></a>
+        <ul>
+            <li><a href="/rkeuangan/posting_gerai_count/">Posting Pusat</a></li>
+        </ul>-->
+    <li class='has-sub'><a href=''><span>SUB LEDGER</span></a>
+    <ul>
+        <li><a href="/rreport/buku_besar_keu/" ><span>Buku Besar</span></a></li>
+    </ul>
+ <li class='has-sub'><a href=''><span>Input Transaksi</span></a>
+    <ul>
+        <li><a href="/rreport/rekapitulasi_transaksi_pusat/">Posting Transaksi Pusat</span></a></li>
+    </ul>
+        </li>
+        <li class='has-sub'><a href=''><span>Possting</span></a>
+    <ul>
+            <li><a href="/rkeuangan/posting_gerai_count/">Posting Pusat</a></li>
+            <li><a href="/rkeuangan/posting_akhir_tahun/">Posting Akhir Tahun</a></li>
+            <li><a href="/rkeuangan/revisiposting/">Revisi Posting</a></li>
+    </ul>
+        </li>
+
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+</div>
+
+{% endifusergroup %}
+
+
+
+
+{% ifusergroup AKUNTANSI %}
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU AKUNTANSI</span></a></li>
+        <li class='has-sub'><a href=''><span>Transaksi Pusat</span></a>
+    <ul>
+        <li><a href="/jurnal/add_baru_h/">Transaksi Tunai</a></li>
+        <li><a href="/kplgerai/{{cabang.kode_cabang}}/tutup_saldo_gerai/"><span>Posting Transaksi (Akhir Hari)</span></a></li>
+        <li><a href="/jurnal/add_baru_h/">Posting Bulanan</a></li>
+    </ul>
+        </li>
+        <li class='has-sub'><a href=''><span>Laporan Transaksi</span></a>
+    <ul>
+        <li class='last'><a href="/jurnal/index/"> Listing Jurnal</a></li>
+        <li><a href="/jurnal/buku_besar_all/" ><span> Rekap Jurnal</span></a></li>
+        <li><a href="/jurnal/buku_besar/" ><span> Buku Besar</span></a></li>
+        <li><a href="/jurnal/neraca_percobaan/"><span> Neraca Saldo</span></a></li>
+        <li><a href="/jurnal/neraca_pjb/"> <span> Neraca</span></a></li>
+        <li><a href="/jurnal/laba_rugi/"><span> Laba Rugi</span></a></li>
+    </ul>
+</li>
+     <li class='has-sub'><a href=''><span>Seting Parameter Jurnal</span></a>
+        <ul>
+            <li><a href="/parameterjurnal/jurnal_biaya/"><span> Jurnal Biaya</span></a></li>
+            <li><a href="/parameterjurnal/jurnal_panjar/"><span> Jurnal Antar Kantor</span></a></li>
+            <li><a href="/parameterjurnal/jurnal_materai/"><span> Jurnal Materai</span></a></li>
+        </ul>
+      </li>
+            <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+    </ul>
+</div>
+{% endifusergroup %}
+
+{% ifusergroup KPLGERAI %}
+
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU KEPALA GERAI</span></a></li>
+        <li class='has-sub'><a href=''><span>Menu Report</span></a>
+			<ul>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/buku_besar_cabang/">Buku Besar Cabang</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/neraca_percobaan/"><span>Neraca Percobaan Gerai</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/neraca/"><span>Neraca</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/labarugi/"><span>Laba Rugi</span></a></li>
+                                <li><a href="/akadgadai/cari_sop/">Lihat SOP</a></li>
+				<!--<li><a href="/kplgerai/{{cabang.kode_cabang}}/list/"><span>Approve Transaksi Gl to Gl</span></a></li>-->
+			</ul>
+		</li>
+                          <li class='has-sub'><a href=''><span>Laporan Transaksi</span></a>
+			<ul>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/pencairan_gerai/" ><span> Laporan Pencairan</span></a></li>
+
+				<!--<li><a href="/kplgerai/{{cabang.kode_cabang}}/pelunasan_gerai/"><span>Laporan Pelunasan</span></a></li>
+				<li><a href="/kplgerai/all_transaksi/"><span>Laporan Transaksi All</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/tutup_saldo_gerai/"><span>Posting Transaksi</span></a></li> -->
+			</ul>
+		</li>
+              		<li class='has-sub'><a href=''><span>Menu Input</span></a>
+			<ul>
+                             <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/show/"  title="Permintaan"><span>Input Permintaan</span></a></li>
+                             <li><a href="/kplgerai/price_list/">Price List</span></a></li>
+                                <!---
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/data_approve_kplg/" ><span> Approve Data </span></a></li>
+				<li><a  href="/kplgerai/{{cabang.kode_cabang}}/data_kplg/"><span> TEST</span></a></li>
+                                -->
+			</ul>
+		</li>
+                        <li class='has-sub'><a href=''><span>Simulasi</span></a>
+                           <ul>
+                               <li><a href="/gerai/simulasi/" target="_blank" ><span>Simulasi Kredit</span></a></li>             
+                             </ul>
+                         </li>
+
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+    </ul>
+                         </div>
+
+{% endifusergroup %}
+
+{% ifusergroup KEUANGAN %}
+<div id='cssmenu'>
+    <ul>
+       <li class='active'><a href=''><span>MENU KEUANGAN 1</span></a></li>
+	   <li class='has-sub'><a href=''><span>Input Transaksi</span></a>
+    <ul>
+        <li><a href="/rreport/rekapitulasi_transaksi_pusat/">Posting Transaksi Pusat</a></li>
+        <li><a href="/jurnal/{{cabang.kode_cabang}}/{{user.id}}/add_baru_h/">Transaksi Gl Gerai</a></li>
+        <li><a href="/jurnal/{{cabang.kode_cabang}}/{{user.id}}/gl_gl_pusat/">Transaksi GL Pusat</a></li>
+        <li><a href="/jurnal/{{cabang.kode_cabang}}/{{user.id}}/jurnal_koreksi/">Transaksi GL Koreksi</a></li>
+    </ul>
+        </li>
+        </li>
+        <li class='has-sub'><a href=''><span>Laporan Transaksi</span></a>
+    <ul>
+        <li><a href="/rkeuangan/{{cabang.kode_cabang}}/laporan_kas_besar/" ><span>Laporan Kas</span></a></li>
+        <li><a href="/rkeuangan/{{cabang.kode_cabang}}/antar_bank_aktiva/" ><span>Laporan Bank</span></a></li>
+        <li><a href="/mankeu/rekapitulasi_transaksi_gl_gl/">Rekapitulasi Transaksi GL Tunai</a></li>
+        <li class='last'><a href="/jurnal/index/"> Listing Jurnal</a></li>
+        <li><a href="/jurnal/buku_besar_all/" ><span> Rekap Jurnal</span></a></li>
+        <li><a href="/jurnal/buku_besar/" ><span> Buku Besar</span></a></li>
+        <li><a href="/jurnal/neraca_pjb/"> <span> Neraca</span></a></li>
+        <li><a href="/jurnal/laba_rugi/"><span> Laba Rugi</span></a></li>
+        <li><a href="/manop/total_harian_filter/" ><span>Rekap All</span></a></li>
+    </ul> 
+    </li>
+        <li class='has-sub'><a href=''><span>Possting</span></a>
+    <ul>
+	    <li><a href="/rkeuangan/posting_gerai_count/">Posting Pusat</a></li>						   
+            <li><a href="/rkeuangan/posting_akhir_tahun/">Posting Akhir Tahun</a></li>	
+            <li><a href="/rkeuangan/revisiposting/">Revisi Posting</a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>JURNAL TRANSAKSI</span></a>
+    <ul>
+        <li><a href="/rreport/index_keu/"><span>Listing Jurnal</span></a></li>
+        <li><a href="/rreport/buku_besar_all_keu/"><span>Rekap Jurnal Rincian</span></a></li>
+        <li><a href="/rreport/neraca_percobaan_keu/" ><span>Rekap Jurnal Global</span></a></li>
+        <li><a href="/rreport/refisi_jurnal_harian/" ><span>Refisi Jurnal Harian</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>SUB LEDGER</span></a>
+    <ul>
+        <li><a href="/rreport/buku_besar_keu/" ><span>Buku Besar</span></a></li>
+    </ul>
+    <li class='has-sub'><a href=''><span>LAPORAN</span></a>
+    <ul>
+        <!--<li><a href="/rreport/neraca_percobaan_keu/" ><span>Neraca Saldo</span></a></li>-->
+        <li><a href="/rreport/neraca_keu/" ><span>Neraca</span></a></li>
+        <li><a href="/rreport/laba_rugi_keu/" ><span>Laba / Rugi (SHU)</span></a></li>
+        <li><a href="/rreport/laporan_kembaligu/" ><span>Kelebihan Gadai Ulang</span></a></li>
+    </ul>
+
+    <li class='has-sub'><a href=''><span>PARAMETER JURNAL</span></a>
+    <ul>
+        <li><a href="/parameter/pencairan_adm/"><span>Adm Pencairan</span></a></li>
+        <li><a href="/parameter/pencairan_kasir/" ><span>Kasir Pencairan (Kas)</span></a></li>
+        <li><a href="/parameter/pencairan_kasir_bank/" ><span>Kasir Pencairan (Bank)</span></a></li>
+        <li><a href="/parameter/jurnal_pelunasan_adm/"><span>Adm Pelunasan </span></a></li>
+        <li><a href="/parameter/jurnal_pelunasan_kasir/"><span>Kasir Pelunasan(Kas/Bank)</span></a></li>
+        <li><a href="/parameter/rak_kasir_plns/" ><span>Kasir Pelunasan RAK</span></a></li>
+        <!--<li><a href="/parameter/gadai_ulang_adm_beda/" ><span>Adm Gadai Ulang(Barang Beda)</span></a></li>-->
+        <li><a href="/parameter/gadai_ulang_adm/" ><span>Adm Gadai Ulang(Barang sama)</span></a></li>
+        <li><a href="/parameter/gadai_ulang/" ><span>Kasir Gadai Ulang</span></a></li>
+        <li><a href="/parameter/jurnal_pusat_kas_bank/"><span>Pusat Setoran (Kas Besar/Bank)</span></a></li>
+        <li><a href="/parameter/jurnal_penambahan_kas_bank/" ><span>Gerai Setoran (Kas Gerai/Bank)</span></a></li>
+        <!--<li><a href="/parameter/jurnal_panjar/" ><span>Gerai Uang Muka (Panjar)</span></a></li>-->
+        <li><a href="/parameter/jurnal_biaya/" ><span>Gerai/Pusat Biaya</span></a></li>
+        <!--<li><a href="/parameter/jurnal_penjualan_barang/"><span>Gerai/Pusat Penjualan</span></a></li> -->
+        <li><a href="/parameter/uangmuka_gerai/"><span>Gerai Uang Muka </span></a></li>
+        <li><a href="/parameter/materai_mapper/"><span>Materai Parameter Cabang </span></a></li>
+        <li><a href="/parameter/materai_pusat/"><span>Materai Parameter Pusat </span></a></li>
+        <li><a href="/parameter/biaya_pusat/" ><span>Pusat Gl Gl</span></a></li>
+        <li><a href="/parameter/rak_pusat/" ><span>Pusat RAK</span></a></li>
+        <li><a href="/parameter/aydamapper/" ><span>Ayda</span></a></li>
+
+       <!-- <li><a href="/parameter/rak_kasir_plns/" ><span>Kasir Pelunasan RAK</span></a></li>-->
+    </ul>
+    <li class='has-sub'><a href=''><span>PARAMETER KEUANGAN</span></a>
+    <ul>
+        <li><a href="/parameter/manage_akun/"><span>Akun</span></a></li>
+        <li><a href="/rkeuangan/saldo_gerai/" ><span>Report Saldo </span></a></li>
+    </ul>    
+    <li class='has-sub'><a href=''><span>MANAGE USER</span></a>
+    <ul>
+        <li><a href="/gerai/aktifkan_user/" ><span>Buka User</span></a></li>
+    </ul>
+
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+   </ul>
+
+</div>
+
+{% endifusergroup %}
+{% ifusergroup ADM_GERAI%}
+
+			<div id='cssmenu'>
+				  <ul>
+					 <li class='active'><a href=''><span>MENU ADM GERAI</span></a></li>
+					 <li class='has-sub'><a href=''><span>Menu Input</span></a>
+						<ul>
+						   <li><a href="/akadgadai/add/" title="Akad Baru" ><span>Input New Akad</span></a></li>
+                                                   <!--<li><a href="/pencairan/produk/" title="Akad Parameter" ><span>New Akad Parameter</span></a></li>-->
+						   <li><a href="/akadgadai/lunas/" title="Input Pelunasan" ><span>Input Pelunasan</span></a></li>
+						   <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/show/"  title="Permintaan"><span>Input Permintaan</span></a></li>
+						   
+						</ul>
+					 </li>
+					 <li class='has-sub'><a href=''><span>Menu Report </span></a>
+                                             <ul>
+                                              <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_gabungan/"><span>Master Tiket Gabungan</span></a></li>
+                                              <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket/"><span>Master Tiket Pencairan</span></a></li>
+                                              <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_adm_pelunasan/"><span>Master Tiket Pelunasan</span></a></li>	  
+                                              <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_adm_pelunasan_gadai_ulang/"><span>Master Tiket Pelunasan GU</span></a></li>
+                                              <!--<li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_adm_penjualan_pelelangan/"><span>Master Tiket Penjualan Pelelangan</span></a></li>-->
+                                              <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_ayda_gerai/" ><span>Master Tiket Ayda Gerai</span></a></li>
+					      <li><a href="/gerai/{{cabang.kode_cabang}}/suratjalan/" title="surat jalan"><span>Cetak Surat Jalan</span></a></li>
+					      <li><a href="/barang/barangnonlunas/" title="Nasabah JT"><span>Nasabah Jatuh Tempo</span></a></li>
+					      <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/cetakminta/"><span>Cetak Permintaan</span></a></li>
+                                              <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/rekap/"><span>Cetak Rekap Harian</span></a></li>
+                                              <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/plan_gerai/">Plan Jatuh Tempo</span></a></li>
+                                              <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/status_barang_gerai/">Laporan Barang Di Gerai</span></a></li>
+                                              <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/cetak_status_barang/">Cetak Laporan Barang Di Gerai</span></a></li>
+                                              <li><a href="/gerai/{{cabang.kode_cabang}}/status_pencairan_gerai/"><span>Status Aprrove Transaksi</span></a></li>
+					     </ul>
+					 </li>
+					 <li class='has-sub'><a href=''><span>Menu Data Gerai</span></a>
+						<ul>
+						   <li><a href="/kasirgerai/{{cabang.kode_cabang}}/lunas/"><span>Data Nasabah Lunas</span></a></li>
+						   <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/data_approve/"><span>Data Nasabah Approve</span></a></li>
+						   <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/kwitansi_gu_adm/"><span>Kw GU</span></a></li>
+                                                   <li><a href="/akadgadai/{{cabang.kode_cabang}}/data_tolak/"><span>Data Pending / Tolak</span></a></li>
+                                                   <li><a href="/akadgadai/cari_sop/">Lihat SOP</a></li>
+						</ul>
+					 </li>
+					 <li class='has-sub'><a href=''><span>Menu Approve</span></a>
+						<ul>
+						<li><a href="/kplgerai/{{cabang.kode_cabang}}/data_approve_kplg/" ><span> Approve Data Kredit</span></a></li>				
+						</ul>
+					</li>
+				       	<li class='has-sub'><a href=''><span>Simulasi</span></a>
+                        			<ul>
+                            			<li><a href="/gerai/simulasi/" target="_blank" ><span>Simulasi Kredit</span></a></li>               
+                        			</ul>
+                    			</li>
+				  </ul>
+			 </div>
+
+		{% endifusergroup %}
+
+		{% ifusergroup KASIR_GERAI%}
+			<div id='cssmenu'>
+				  <ul>
+				<li class='active'><a href=''><span>MENU KASIR</span></a></li>
+				
+				<li class='has-sub'><a href=''><span>Menu Input</span></a>
+					<ul>
+                                         <li class='active'><a href="/jurnal/{{cabang.kode_cabang}}/gl_glcabang/"><span>Input GL to GL</span></a></li>
+				 	 <li class='last'><a  href="/biaya/{{cabang.kode_cabang}}/add/">Transaksi Kasir</a></li>
+                                         <!--<li class='last'><a  href="/rreport/{{cabang.kode_cabang}}/denominasi/">Input DENOMINASI</a></li>-->
+					 <li><a href="/kasirgerai/lunas_kasir/" title="Input Pelunasan" ><span>Input Pelunasan</span></a></li>
+                                         <li><a href="/kasirgerai/cari/" title="Input Pelunasan" ><span>Input Pengembalian Pelunasan</span></a></li>
+                                         <li><a href="/kasirgerai/{{cabang.kode_cabang}}/kembaligu/" title="Input Pengembalian " ><span>Input Pengembalian Gadai Ulang</span></a></li>
+                                         <li><a href="/kasirgerai/{{cabang.kode_cabang}}/app_gu/" title="Input Pelunasan" ><span>Transaksi Gadai Ulang</span></a></li>
+					</ul>
+				</li>
+                                <li class='has-sub'><a href=''><span>Menu Laporan Kasir</span></a>
+                           	    <ul>
+                               		<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/all_transaksi_kas/" ><span>Rekapitulasi Transaksi Kas</span></a></li>
+                                        <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/all_transaksi_bank/"><span>Rekapitulasi Transaksi Bank</span></a></li>
+                                        <li class='last'><a href="/materaicabang/{{cabang.kode_cabang}}/biaya_materai/" ><span>Report Materai</span></a></li>
+
+                                        <li class='last'><a  href="/kasirgerai/{{kocab.kode_cabang}}/cetak_all_transaksi_kas/" ><span>Rekapitulasi Transaksi Teler</span></a></li>
+					<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/uangmuka/" ><span>Rekapitulasi Transaksi Uang Muka</span></a></li>
+					<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/laporan_pencairan/" ><span>Laporan Pencairan</span></a></li>
+					<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/laporan_pelunasan/" ><span>Laporan Pelunasan</span></a></li>
+					<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/laporan_pelunasan_titipan/" ><span>Laporan Titipan Pelunasan</span></a></li>
+                             	   </ul>
+                               </li>
+                               <li class='has-sub'><a href=''><span>Menu Data Kasir</span></a>
+                               <ul>
+                                    <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/data_lunas_kasir/" ><span>Data Pelunasan</span></a></li>
+                                <li class='last'><a href="/rreport/{{cabang.kode_cabang}}/kembali_gu/" ><span>Data Titipan Gu</span></a></li>
+                                    <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/data_titipan_pelunasan/" ><span>Data Titipan Pelunasan</span></a></li>
+                               </ul>
+                                </li>
+                                </li>
+                                    <li class='has-sub'><a href=''><span>Menu Master Tiket Kasir</span></a>
+					<ul>
+                                            <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_gabungan_kasir/" ><span>Mastertiket Gabungan Kasir</span></a></li>
+					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_pencairan_kasir/" ><span>Mastertiket Pencairan Kasir</span></a></li>
+					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/master_tiket_kasir_pelunasan/" ><span>Mastertiket Pelunasan Kasir</span></a></li>
+                                            <!-- <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_kasir_penjualan_pelelangan/"><span>Master Tiket Penjualan Pelelangan</span></a></li>-->
+		 			    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_gl_gl/" ><span>Mastertiket Transaksi Kas</span></a></li>
+                                            <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_uangmuka/" ><span>Mastertiket Transaksi Uang Muka</span></a></li>
+ 					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_antargerai/" ><span>Mastertiket Transaksi Antar Kantor</span></a></li>
+                                            <li><a href="/jurnal/{{cabang.kode_cabang}}/master_tiket_pelunasan_gadai_ulang_kasir/" ><span>Mastertiket Transaksi Gadai Ulang</span></a></li>
+                                            <!-- <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_ayda_gerai/" ><span>Mastertiket Ayda Gerai</span></a></li>-->
+                                        </ul>
+				</li>
+					<li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+				</ul>
+			 </div>
+
+	{% endifusergroup %}
+  </div>      
+
+
+
+</div>
+{% endblock %}
+{% load number_format humanize %}
+{% block content %}
+
+
+{% ifusergroup ADM_GERAI|NONKAS %}
+<div align="center" style="font-size:20px;font-weight:bolder;font-family: serif;"><legend>DAFTAR PENCAIRAN GERAI</legend></div>
+<table align="center">
+<td>
+<form action='/akadgadai/cari/' method='GET'>
+<input type="text" name="rekening" size="30"  placeholder="Cari berdasarkan KWITANSI">
+<input type ="submit" value="Cari " class="simpan" >
+</form></td>
+<td>
+ 
+<form action='/nasabah/cari/' method='GET' >
+<input type="text" name="cari" size="20" align="center" height="27" placeholder="Cari berdasarkan KTP" >
+<input type = 'hidden' name = 'pilih' value = '2' >
+<a href="/nasabah/cari/">
+<input type ="submit" value="Cari " class="perpanjang"></a>
+</form></td>
+<td>
+
+    {% if error %}
+        <p style="color: red;">Please submit a search term.</p>
+    {% endif %}
+    <form action="/nasabah/cari_nama/" method="get" size="10" align="center" height="27" >
+        <input type="text" name="q" placeholder="Cari berdasarkan Nama">
+        <input type="submit" value="Cari " class="harian">
+    </form>
+    </td>
+</table>
+{% endifusergroup %}
+<table class="list">
+{% ifusergroup KPLGERAI%}
+<h2>DAFTAR PENCAIRAN GERAI</legend></h2>
+<tr>
+        <th>NOREK</th>
+        <th>NASABAH</th>
+        <th>PLAFON (Rp)</th>
+        <th>TANGGAL CAIR</th>
+        <th>JW</th>
+        <th>JATUH TEMPO</th>
+        <th colspan="5" align="center">MENU</th>
+</tr>
+{% endifusergroup %}
+
+{% ifusergroup ADM_GERAI|NONKAS %} 
+<tr>
+	<th>No KW</th>
+	<th>Nasabah</th>
+	<th>JW</th>
+    	<th>Nilai(Rp)</th>
+	<th>Tanggal</th>
+    	<th>Jatuh Tempo</th>
+	<th colspan= "6">Menu</th>
+</tr>
+{% endifusergroup %}
+{% ifusergroup KASIR_GERAI%} 
+<h2>DAFTAR PENCAIRAN GERAI</legend></h2>
+<tr>
+	<th>NOREK</th>
+	<th>NASABAH</th>
+	<th>PLAFON (Rp)</th>
+	<th>TANGGAL CAIR</th>
+	<th>JW</th>
+	<th>JATUH TEMPO</th>
+	<th colspan="5" align="center">MENU</th> 
+</tr>
+{% endifusergroup %}
+{% ifusergroup ADM_GERAI|NONKAS %}
+{% for p in akad_list.object_list %}{% if p.kepalagerai.status == '1'%}
+<tr class="{% cycle 'row1' 'row2' %}">
+  <td>{{ p.norek }}</a></td>
+  <td><a href="/nasabah/{{p.agnasabah.id}}/show/" >{% csrf_token %}{{ p.agnasabah.nama|striptags  }}</a></td>
+  <td>{% if p.jenis_transaksi = '1'  %}{{ p.jangka_waktu|default_if_none:"" }} Hari{%else%}
+	  {{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan</td>{% endif %}
+  <td>{{ p.nilai|number_format:0 }}</td>
+  <td><abbr title="{{ p.cdate }}">{{ p.tanggal|date:" d-M-Y"}}</abbr></td>
+  <td><abbr title="{{ p.cdate }}">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+  {% if p.agnasabah.klik_keanggotaan = '1' %} {% else %}
+  <td><a href="/akadgadai/{{p.agnasabah.id}}/keanggotaan/" class="kwitansi" >Form Keanggotaan</a></td>
+   {%endif%}
+  {% if p.status_kw = '0' %}
+  <td><a href="/kasirgerai/{{ p.id }}/mcc/" ><small><button class="lihat" >MCC</button></small></a></span></td>
+  {% endif %}
+  {% if p.status_label = 1 %}{% else %}
+  <td><a href="/akadgadai/{{ p.id }}/label/" class="label">Label</a></td>
+  {% endif %}
+   {% if p.status_mcc = '0' and p.status_kw = '0' %}  
+  <td><a href="/akadgadai/{{p.id}}/pk/" class="simpan">PK</a></td>
+  <td>{%if p.status_taksir = '2' %}MELEBIHI NILAI TAKSIR{%else%}
+		  
+  {% if p.status_kw = '0' %}  
+      {% if p.jenis_transaksi = '1' %}
+          <a href="/akadgadai/{{p.id}}/prints2/" class="kwitansi" >Elektronik</a>
+      {% else %}
+          <a href="/akadgadai/{{p.id}}/motor/" class="kwitansi" >Kendaraan</a>
+      {% endif %}
+          <a href="/akadgadai/{{p.id}}/prints1/" class="kwitansi" >SBG</a>
+  {% endif %}
+  {% endif %}
+  {% endif %}</td>  
+    <td>{% if p.status_kw = '1' %}<a href="{{ p.get_absolute_url }}" class="back">Lihat</a>{% endif%}</td>
+  <td>{% if p.status_kondisi_barang = 1 %} {% else %}<a href="/akadgadai/{{p.id}}/tampil_kondisi_barang/" class="harian">Kondisi Barang</a>{% endif %}</td>
+  </tr>{% endif %}
+  {% endfor %}
+  {% endifusergroup %}
+
+
+{% ifusergroup KASIR_GERAI%}    
+{% for p in akad_list.object_list %}{% if p.kasirgerai.val = '1' %}{%else%} {% if p.kepalagerai.status == '1'%}
+{% if p.jns_gu = '1' %} 
+{%else%}
+<tr class="{% cycle 'row1' 'row2' %}">
+  <td>{{ p.norek }}</a></td>
+  <td>{{ p.agnasabah.nama|striptags}}</td>	
+  <td>{{ p.nilai|number_format:0 }}</td>
+  <td><abbr title="{{ p.cdate }}">{{ p.tanggal|date:" d-M-Y"}}</abbr></td>
+  <td>{% if p.jenis_transaksi = '2' %}{{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+      {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+  <td><abbr title="{{ p.cdate }}">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+  <td>{%if p.cekkasirgerai%}{%else%}{%if p.jenis_transaksi%}
+	<a href="/kasirgerai/{{ p.id }}/kasir/" ><small><button class="cari" >Pencairan</button></small></a></span>{% endif %}{% endif %}
+{% if p.kasirgerai.val = '0' %}
+	<a href="/kasirgerai/{{ p.kasirgerai.id }}/slip_validasi/" ><small><button class="cari" >Cetak Validasi</button></small></a></span>
+{%endif%}
+  </td>
+  <td>{%if p.status_taksir = '2' %}MELEBIHI NILAI TAKSIR{%endif%}</td>	  
+  
+</tr>{%endif%}{%endif%}{%endif%}
+{% endfor %}{% endifusergroup %}
+{% ifusergroup KPLGERAI%}
+{% for p in akad_list.object_list %}
+{% if p.kepalagerai.status == '1' or p.kepalagerai.status = '2' %} {% else %}
+<tr class="{% cycle 'row1' 'row2' %}">
+  <td>{{ p.norek }}</a></td>
+  <td>{{ p.agnasabah.nama|striptags}}</td>
+  <td>{{ p.nilai|number_format:0 }}</td>
+  <td><abbr title="{{ p.cdate }}">{{ p.tanggal|date:" d-M-Y"}}</abbr></td>
+  <td>{% if p.jenis_transaksi != '1' %}{{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+      {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+  <td><abbr title="{{ p.cdate }}">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+  <td></td>
+  <!--<td>{%if p.status_taksir = '2' %}MELEBIHI NILAI TAKSIR{%endif%}</td>-->
+  {% if p.jns_gu == '0' %}
+  {% if p.kepala_gerai%}{%else%}{% if p.kepala_gerai_tolak %}{%else%}{%if p.jenis_transaksi%}
+  <td>{%if p.status_taksir = '2' %}TIDAK DAPAT DI PROSES HUB MANOP KARENA MELEBIHI NILAI TAKSIR{%else%} <a href="/kplgerai/{{ p.id }}/approve_pencairan/" ><button class="back"> APPROVE</button> </a>{%endif%}</td>{%endif%}{%endif%}{%endif%}
+  {%endif%}
+
+   {% if p.jns_gu == "1" %}
+   {% if p.kepala_gerai%}{%else%}{% if p.kepala_gerai_tolak %}{%else%}{%if p.jenis_transaksi%}
+  <td>{%if p.status_taksir = '2' %}MELEBIHI NILAI TAKSIR{%else%}<a href="/kplgerai/{{ p.id }}/approve_gu/" ><button class="edit"> APPROVE GU</button> </a>{%endif%}</td>{%endif%}{%endif%}{%endif%}
+{% endif %} {% endif %}
+{% endfor %}{% endifusergroup %}
+</tr>
+</table>
+
+{% ifusergroup KPLGERAI|KASIR_GERAI|ADM_GERAI%}
+<div class="pagination" align="center">
+    <span class="step-links">
+        {% if akad_list.has_previous %}
+            <a href="?page={{ akad_list.previous_page_number }}" class="next">Back</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ akad_list.number }} of {{ akad_list.paginator.num_pages }}.
+        </span>
+
+        {% if akad_list.has_next %}
+            <a href="?page={{ akad_list.next_page_number }}" class="next">Next</a>
+        {% endif %}
+    </span>
+</div>
+{% endifusergroup %}
+
+{% ifusergroup MANOP|KEUANGAN|KEUANGAN_PJB|KEUANGAN1|KEUANGAN2%}
+<h2 align="center">KOPERASI SIMPAN PINJAM RIZKY ABADI</h2>
+<H3 align="center">Selamat Datang Dan Selamat Beraktifitas , <strong>Bpk / Ibu {{ user.first_name }} {{ user.last_name }}</strong> </h3>
+<h4 align="center">Sesungguhnya Alloh tdk akan Merubah suatu kaum,Hingga mereka mengubah diri mereka sendiri (Q.S Ar-Rad:11)</h4>
+<p align="center"><span style="font-family:arial; font-size: 14px; font-weight:bold; color:#FF9933;">PJB MAKIN JAYA</span><p>
+{% endifusergroup %}
+
+{% endblock %}

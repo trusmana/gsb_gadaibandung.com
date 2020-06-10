@@ -1,0 +1,14 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}kas{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/">Home</a> &gt; <a href="/kas/">Kas</a> &gt; Rekening</p>
+{% if perms.apps.add_kasbank %}<span class="contextual"><a href="/kas/rekening/add/">Tambah Rekening</a></span>{%endif %}
+<h2>Rekening Bank/POS</h2>
+<table class="list">
+    <tr>
+        <th>Bank</th><th>No Rekening</th><th>Users</th>
+    </tr>
+{% for object in object_list %}
+    <tr><td>{{ object.bisnis }}</td><td><a href="{{ object.get_absolute_url }}">{{ object.norek }}</a></td><td>{% for user in object.users.all %}{{ user.username }}{% endfor %}</td>{% endfor %}</tr>
+</table>
+{% endblock %}

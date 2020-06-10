@@ -1,0 +1,87 @@
+from django import forms
+from django.forms import ModelForm
+from gadai.appgadai.models import *
+from chosen import forms as chosenforms
+from django.utils.safestring import mark_safe
+
+class Verifikasi_Pelunasan_ManOpForm(ModelForm):
+    class Meta:
+        model = ManopGadai
+
+
+GERAI_PILIH =(
+    ('500','( GABUNGAN )'),('2','JAKARTA'),('3','SUCI'),('4','DIPATIUKUR'),('5','BALUBUR'),
+    ('7','GERLONG HILIR'),('8','KOPO'),('9','CIBIRU'),('10','CIPACING'),('11','JATINANGOR'),
+    ('12','CIMAHI'),('13','BUAH BATU'),('14','KORDON'),('15','CIHANJUANG'),('16','MARANATA'),('17','KIARACONDONG'),
+    ('18','CIREBON'),('10','CIUMBULEUIT'),('21','UJUNGBERUNG'),
+)
+
+JENIS_REPORT =(
+    ('1','EXCEL'),('2','PDF'),('3','VIEW'),
+)
+
+JENIS_LAPORAN =(
+    ('1','RINCIAN PIUTANG'),('2','REKAP PIUTANG')
+)
+class HorizRadioRenderer(forms.RadioSelect.renderer):
+    def render(self):
+        return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+
+class Filter_PencairanForm(forms.Form):
+    report = forms.ChoiceField(widget = forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'id_report'}), choices = JENIS_REPORT)
+    id_cabang = chosenforms.ChosenChoiceField(widget=chosenforms.ChosenSelect({'class': 'id_cabang'}),choices = GERAI_PILIH) 
+    start_date = forms.DateField(initial= datetime.date.today,widget=forms.widgets.DateInput(attrs={'size': 12,'readonly':'false'}, format="%Y-%m-01"))
+    end_date = forms.DateField(initial= datetime.date.today,widget=forms.widgets.DateInput(attrs={'size': 12,'readonly':'false'}, format="%Y-%m-%d"))
+    jenis_laporan = chosenforms.ChosenChoiceField(widget=chosenforms.ChosenSelect({'class':'id_jenis_laporan'}),choices = JENIS_LAPORAN)
+
+class BarangLelangForm(forms.ModelForm):
+    aglelang =forms.ModelChoiceField(queryset=AkadGadai.objects.all())
+    tgl_lelang = forms.DateTimeField(label = "Tanggal Pelelangan", widget=forms.TextInput(attrs={'size': 10},format="%d-%m-%Y"))
+    harga_jual = forms.IntegerField(label="Nilai Penjualan",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    nama_pembeli =forms.CharField(widget=forms.TextInput(attrs={'size': 20}))
+    no_identitas =forms.CharField(widget=forms.TextInput(attrs={'size': 16}))
+    alamat_pembeli =forms.CharField(widget=forms.TextInput(attrs={'size': 20}))
+    no_telp =forms.CharField(widget=forms.TextInput(attrs={'size': 20}))
+    class Meta:
+        model = BarangLelang
+
+        
+class PelunasanManopForm(ModelForm):
+    pelunasan = forms.ModelChoiceField(queryset=AkadGadai.objects.filter(lunas__isnull=True),widget=forms.HiddenInput())
+    tanggal = forms.DateField(widget=forms.TextInput(attrs={'size': 8}))
+    nilai = forms.DecimalField(widget=forms.TextInput(attrs={'readonly':'True','size': 8}))
+    denda = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8,'value':0}))
+    terlambat = forms.IntegerField(widget=forms.TextInput(attrs={'size': 2,'value': '0'}))
+    bea_jasa = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8,'value':0}))
+    jenis_barang =forms.ChoiceField(choices=CHOICES_JENIS_TRANSAKSI,widget=forms.RadioSelect(attrs={'class':'rad'}))
+    denda_kendaraan = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8,'value': '0'}))
+    terlambat_kendaraan = forms.IntegerField(widget=forms.TextInput(attrs={'size': 2}))
+    bea_jasa_kendaraan = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8,'value':0}))
+    gerai = forms.ModelChoiceField(queryset=Tbl_Cabang.objects.all(),widget=forms.HiddenInput())
+    #status_transaksi =forms.ChoiceField(widget=forms.Select(),choices=CHOICES_TRANSAKSI) 
+    #lunas = forms.BooleanField(required=False)
+    
+    class Meta:
+        model = Pelunasan    
+
+class MyForm(forms.ModelForm):
+    tanggal = forms.DateField(initial = datetime.date.today,widget=forms.widgets.DateInput(attrs={'readonly':'true'}, format="%d-%m-%Y"))
+    nilai = forms.IntegerField(widget=forms.TextInput(attrs={'size': 9, 'alt': 'integer', 'class': 'rp_nilai uang'}))
+    denda = forms.IntegerField(widget=forms.TextInput(attrs={'size': 9, 'alt': 'integer', 'class': 'rp_nilai uang'}))
+    bea_jasa = forms.IntegerField(widget=forms.TextInput(attrs={'size': 9, 'alt': 'integer', 'class': 'rp_nilai uang'}))
+    terlambat = forms.IntegerField(widget=forms.TextInput(attrs={'size': 9,'readonly':'true'}))
+    status =forms.ChoiceField(choices=STATUS_OTORISASI,initial = '1')
+    jenis_barang =forms.ChoiceField(choices=CHOICES_JENIS_TRANSAKSI,widget=forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'rad'}))
+    class Meta:
+        model = Pelunasan
+        fields = ('tanggal','nilai','gerai','jenis_barang','nilai','denda','bea_jasa','terlambat','comment')
+        widgets = {
+            #'comment': Textarea(attrs={'cols': 80, 'rows': 20}),
+            'status_pelunasan' : forms.HiddenInput(),'nilai_lebih'  : forms.HiddenInput(),
+            'pelunasan' : forms.HiddenInput(),'status' : forms.HiddenInput(),
+            'val' : forms.HiddenInput(),
+            'status_kwlunas'  : forms.HiddenInput(),
+            'nocoa_titipan'  : forms.HiddenInput(),
+            'nocoa_kas'  : forms.HiddenInput(),
+        }
+

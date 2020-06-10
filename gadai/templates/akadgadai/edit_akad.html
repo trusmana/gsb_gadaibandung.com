@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block section %}{% endblock %}
+{% block extrahead %}
+
+
+{% endblock %}{% load useringroup %}
+{% block content %}
+
+
+
+<form class ="tabular" method='POST' action="/kplgerai/{{nas.id}}/edit_akad/" enctype="multipart/form-data" >{% csrf_token %} 
+<table width="80%">
+{{ form.as_table }}
+</form>
+
+</table>
+	<tr><td><label ></td><td><input type="submit" value="Simpan" class="simpan"/></td></tr>	
+{% endblock %}
+

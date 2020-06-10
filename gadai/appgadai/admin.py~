@@ -1,0 +1,128 @@
+from django.contrib import admin
+import datetime
+from gadai.appgadai.models import *
+from django.contrib import admin
+from import_export import resources
+from import_export.admin import ImportExportMixin, ExportActionModelAdmin
+
+class AkadGadaiAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_filter = ['agnasabah','gerai']
+    list_display =('id','tanggal','agnasabah','gerai')
+    search_fields =['id']
+
+class NasabahAdmin(ImportExportMixin,ExportActionModelAdmin):
+    list_display=('id','nama','alamat_ktp','rt_ktp')
+    search_fileds =['id']
+    pass
+
+class BarangAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display =('id','merk','barang_masuk','barang_keluar','no_rak')
+    search_fields = ['id']
+
+
+class TaksirAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display=('id','spesifikasi','harga_baru','harga_pasar','maxpinjaman')
+    search_fields =['id']
+    
+class Tbl_UnitAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display =('id','kode_unit',)
+    search_fields =['id']
+    
+class Tbl_CabangAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ['id', 'kode_cabang','nama_cabang','parent','kode_unit','nama_unit']
+    fieldsets = (
+        (None, {
+            'fields': ('kode_cabang','nama_cabang','parent','kode_unit','nama_unit')}),
+        ('Isian Lanjut', {
+            'classes': ('collapse',),
+            'fields': ('alamat','no_telp','nama_admin','init_cabang')
+        }),
+    )
+
+class Tbl_AkunAdmin(ImportExportMixin,admin.ModelAdmin):
+    list_display =('id','coa','header_parent','kode_guna','deskripsi','status','jenis','view_unit','view_cabang')
+    search_fields =['id','coa']
+    
+admin.site.register(Tbl_Akun, Tbl_AkunAdmin)
+admin.site.register(Tbl_Cabang,Tbl_CabangAdmin)
+admin.site.register(Tbl_Unit, Tbl_UnitAdmin)    
+admin.site.register(Taksir,TaksirAdmin)
+admin.site.register(Barang,BarangAdmin)
+admin.site.register(AkadGadai, AkadGadaiAdmin)
+admin.site.register(Nasabah,NasabahAdmin)
+
+
+class LunasTerjualAdmin(admin.ModelAdmin):
+    list_display =('id','aglunas')
+    search_fields = ['id']
+admin.site.register(LunasTerjual,LunasTerjualAdmin)
+
+class KepalaGeraiAdmin(admin.ModelAdmin):
+    list_display = ['id','status']
+    search_fields = ['id']
+admin.site.register(KepalaGerai, KepalaGeraiAdmin)
+
+class KplGeraiAdmin(admin.ModelAdmin):
+    list_display = ['id','status']
+    search_fields = ['id']
+admin.site.register(KplGerai, KplGeraiAdmin)
+
+class BerkasGadaiAdmin(admin.ModelAdmin):
+    list_display = ['id','upload']
+    search_fields = ['id']
+admin.site.register(BerkasGadai, BerkasGadaiAdmin)
+
+class ManopKeuAdmin(admin.ModelAdmin):
+    list_display = ['id','status']
+    search_fields = ['id']
+admin.site.register(ManopKeu, ManopKeuAdmin)
+
+
+class JurnalAdmin(admin.ModelAdmin):
+    list_display =['id','nobukti',]
+    search_fields =['id']
+admin.site.register(Jurnal, JurnalAdmin)
+
+class Tbl_TransaksiAdmin(admin.ModelAdmin):
+    list_display =['id','id_coa',]
+    search_fields =['id']
+admin.site.register(Tbl_Transaksi, Tbl_TransaksiAdmin)
+
+
+
+class Tbl_ProductAdmin(admin.ModelAdmin):
+    list_display =('id','kode_produk',)
+    search_fields =['id']
+admin.site.register(Tbl_Product, Tbl_ProductAdmin)
+
+class KasirGeraiAdmin(admin.ModelAdmin):
+    list_display =['id',]
+    search_fields =['id']
+admin.site.register(KasirGerai, KasirGeraiAdmin)
+
+class ManopGadaiAdmin(admin.ModelAdmin):
+    list_display =('id','tanggal','manop')
+    search_fields =['id']
+admin.site.register(ManopGadai, ManopGadaiAdmin)
+
+
+class BarangLelangAdmin(admin.ModelAdmin):
+    list_display = ('id','aglelang','tgl_lelang','harga_jual')
+    search_fields = ['id']
+admin.site.register(BarangLelang,BarangLelangAdmin)
+
+
+class PelunasanAdmin(admin.ModelAdmin):
+    list_display=('id','tanggal','nilai')
+    search_fields =['id']
+admin.site.register(Pelunasan,PelunasanAdmin)
+
+class BiayaAdmin(admin.ModelAdmin):
+    list_display=('id','gerai','tanggal')
+    search_fields =['id']
+admin.site.register(Biaya,BiayaAdmin)
+
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display=('id','user','rekening','gerai')
+    search_list = ['id']
+admin.site.register(UserProfile,UserProfileAdmin)

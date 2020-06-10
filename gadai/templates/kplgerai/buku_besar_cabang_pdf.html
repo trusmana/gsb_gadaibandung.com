@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Buku Besar</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 10px; font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+    line-height: 8px;vertical-align: top;border-bottom:
+    1px solid #eee;padding: 5px;
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+function printpage() { window.print(); }
+</script>
+{% include "alat/ledger.html" %}
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/kplgerai/{{kocab}}/buku_besar_cabang/">Kembali</a> ]</p>
+<tr><td width="100" align="center">
+<img src="/static/images/logoksu.png" width="70" height="50" align="left" hspace="10" />
+
+{% for p in ledger %}
+{% ifchanged p.id_coa %}{% if not forloop.first %}</table>{% endif %}
+{% if forloop.first %}
+
+   <h3 style='text-align: center'><b><small>BUKU BESAR KSU RIZKY ABADI</small> </b></h3>  
+   <h3 style='text-align: center'><b><small>UNIT PJB <small><small><small>{{id_cabang}}</small>
+   </small>GERAI 
+   {% if id_cabang = '0' %}PUSAT{%endif%}{% if id_cabang = '1' %}JAKARTA{%endif%}{% if id_cabang = '2' %}SUCI{%endif%}{% if id_cabang = '3' %}DIPATIUKUR{%endif%}
+   {% if id_cabang = '4' %}BALUBUR{%endif%}{% if id_cabang = '6' %}GERLONG HILIR{%endif%}{% if id_cabang = '7' %}KOPO{%endif%}{% if id_cabang = '8' %}CIBIRU{%endif%}
+   {% if id_cabang = '9' %}CIPACING{%endif%}{% if id_cabang = '10' %}JATINAMGOR{%endif%}{% if id_cabang = '11' %}CIMAHI{%endif%}{% if id_cabang = '12' %}BUAH BATU{%endif%}
+   {% if id_cabang = '13' %}KORDON{%endif%}{% if id_cabang = '14' %}CIHANJUANG{%endif%}{% if id_cabang = '15' %}MARANATA{%endif%}{% if id_cabang = '16' %}KIARACONDONG{%endif%}{% if id_cabang = '17' %}CIREBON PERJUANGN{%endif%}
+   {% if id_cabang = '18' %}CIREBON{%endif%}{% if id_cabang = '19' %}CIUMBELEUIT{%endif%}{% if id_cabang = '113' %}UJUNG BERUNG{%endif%}
+   </small> </b>
+   </h3>
+    <h3 style='text-align: center'><b><small><small>Periode : {{start_date }} s/d {{end_date}}</small></small> </b></h3>
+{%endif%}
+<p align = "left">Akun : {{ p.id_coa }}<small>( {{ p.id_coa.tbl_transaksi_set.all.count }} )</small> saldo: {{p.id_coa.saldo_pjb}}</p>
+<table align ="center" border="1" bordercolor="silver "  width="90%" cellpadding="0" cellspacing="0" border-bottom-style:outset;>
+    <tr align="center" style="background-color:#C0C0C0;" >
+	  <th>Tanggal</th>
+	  <th>NO BUKTI</th>
+          <th>Keterangan</th>
+	  <th>Debet (Rp.)</th>
+	  <th>Kredit (Rp.)</th>
+	  <th>Saldo (Rp.)</th>
+    </tr>
+{% endifchanged %}
+
+<tr>
+   <td>{{ p.tgl_trans|date:'d-M-Y' }}</td>
+   <td>{{p.nobukti}}</td>
+   <td>{{ p.diskripsi }}</td>	
+   <td class="kredit uang r" style='text-align: right'>{{ p.debet|number_format:0 }}</td>
+   <td class="debet uang r" style='text-align: right'>{{ p.kredit|number_format:0 }}</td>
+   <td class="saldo uang r" style='text-align: right'>{{ p.saldo_akhir|number_format:0 }}</td>
+</tr>{% if forloop.last %}
+</table>{% endif %}{% endfor %}
+

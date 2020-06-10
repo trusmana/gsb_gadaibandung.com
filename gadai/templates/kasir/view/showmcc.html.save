@@ -1,0 +1,246 @@
+<style>
+div.img {margin: 5px;padding: 5px;border: 1px solid #0000ff;height: auto;width: auto;float: left; text-align: center;
+}
+
+div.img img {display: inline;margin: 5px;border: 1px solid #ffffff;
+}
+
+div.img a:hover img {border:1px solid #0000ff;
+}
+
+div.desc {text-align: center;font-weight: normal;width: 120px;margin: 5px;
+}
+</style>
+
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 10px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+ function printpage() { window.print(); }
+</script>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/">Kembali</a> ]</p>
+<td colspan="3" height="10"><h3 align="center">
+<tr>MEMO CREDIT COMMITEE PJB</tr></td>
+</br>
+</br>
+</h3>
+<tr>
+ 
+
+ <table border=0 align="center">
+
+<td colspan="2" height="10"><h3>DATA NASABAH</h3></td>
+ <td  height="10" align ="left"'><h3>DATA NASABAH DOMISILI</h3></td>
+<div class="img">
+    <ul>
+        <li><a href="/static/media/berkasttd/{{ gadai.berkasgadai_set.all.0.tanda_tangan }}" title=" {{ gadai.agnasabah.nama }}">
+            <img src="/static/media/berkasttd/{{ gadai.berkasgerai_set.all.0.tanda_tangan }}" /></a></li>		
+        <li><a href="/static/media/berkasfoto/{{ gadai.berkasgerai_set.all.0.foto_nasabah }}" title=" {{ gadai.agnasabah.nama }}"><img src="/static/media/berkasfoto/priview_foto.png" /></a></li>
+        <li><a href="/static/media/barang/{{ gadai.berkasgerai_set.all.0.barang }}" title=" {{ gadai.agnasabah.nama }}"><img src="/static/media/berkasbarang/priview_barang.png" /></a></li>
+   </ul>
+</div>
+<div class="img">
+    <img src="/static/{{ gadai.berkasgadai_set.all.0.tanda_tangan }}" width="90" height="70">
+  <div class="desc"></div>
+</div>
+
+    <tr>
+        <td>NAMA </td>
+        <td>: {{gadai.agnasabah.nama}}</td>        
+    </tr>
+    <tr>
+        <td>TEMPAT LAHIR </td>
+        <td>: {{gadai.agnasabah.tempat}}</td>
+        <td>JENIS KELAMIN </td>
+        <td>: {{gadai.agnasabah.get_jenis_kelamin_display}}</td>
+    </tr>
+    <tr>
+        <td>TANGGAL LAHIR </td>
+        <td>: {{gadai.agnasabah.tgl_lahir}}</td>
+        <td>PEKERJAAN</td>
+        <td>: {{gadai.agnasabah.get_jenis_pekerjaan_display}}</td>
+    </tr>
+    <tr>        
+        <td>ALAMAT KTP</td>
+        <td>: {{gadai.agnasabah.alamat_ktp}} {{gadai.agnasabah.no_rumah_ktp}}</td>
+        <td>ALAMAT DOMISILI</td>
+        <td>: {{gadai.agnasabah.alamat_domisili}} {{gadai.agnasabah.no_rumah_domisili}}</td>
+    </tr>
+    
+    <tr>
+        <td>RT - RW KTP </td>
+        <td>: {{gadai.agnasabah.rt_ktp}} / {{gadai.agnasabah.rw_ktp}}</td>
+        <td>RT - RW DOMISILI </td>
+        <td>: {{gadai.agnasabah.rt_domisili}} / {{gadai.agnasabah.rw_domisili}}</td>
+    </tr>
+    <tr>
+        <td>KELURAHAN KTP </td>
+        <td>: {{gadai.agnasabah.kelurahan_ktp}}</td>
+        <td>KELURAHAN DOMISILI </td>
+        <td>: {{gadai.agnasabah.kelurahan_domisili}}</td>
+    </tr>   
+    
+    <tr>
+        <td>KECAMATAN KTP </td>
+        <td>: {{gadai.agnasabah.kecamatan_ktp}}</td>
+        <td>KECAMATAN DOMISILI </td>
+        <td>: {{gadai.agnasabah.kecamatan_domisili}}</td>
+    </tr>
+    
+    <tr>
+        <td>STATUS  </td>
+        <td>: {{gadai.agnasabah.get_jenis_pekerjaan_display}}</td>
+        
+        <td>KODEPOS</td>
+        <td>: {{gadai.agnasabah.kode_pos}}</td>
+    </tr>
+
+    <tr>
+        <td>KOTAMADYA KTP </td>
+        <td>: {{gadai.agnasabah.kotamadya_ktp}}</td>
+        <td>KOTAMADYA DOMISILI </td>
+        <td>: {{gadai.agnasabah.kotamadya_domisili}}</td>
+    </tr>
+
+    <tr>
+       <td>KABUPATEN KTP</td>
+       <td>: {{gadai.agnasabah.kabupaten_ktp}}</td>
+       <td>KABUPATEN DOMISILI</td>
+       <td>: {{gadai.agnasabah.kabupaten_domisili}}</td>
+    </tr>
+    
+    <tr>
+        <td>TELEPON KTP</td>
+        <td>: {{gadai.agnasabah.telepon_ktp}}</td>
+        <td>TELEPON DOMISILI</td>
+        <td>: {{gadai.agnasabah.telepon_domisili}}</td>
+    </tr>
+
+    <tr>
+        <td>HP KTP</td>
+        <td>: {{gadai.agnasabah.hp_ktp}}</td>
+        <td>HP DOMISIL</td>
+        <td>: {{gadai.agnasabah.hp_domisili}}</td>
+    </tr>
+
+    <tr>
+        <td>NO KTP  </td>
+        <td>: {{gadai.agnasabah.no_ktp}}</td>
+        
+    </tr>
+    
+    <tr>
+        <td>ALAMAT PEKERJAAN  </td>
+        <td>: {{gadai.agnasabah.alamat_kantor}}</td>
+        
+        <td>EMAIL</td>
+        <td>: {{gadai.agnasabah.email}}</td>
+    </tr>   
+
+  <td colspan="3" height="10" ><b>DATA LOAN FILE</b></td><td ><b>DATA JAMINAN</b></td>
+ 
+
+    <tr>
+        <td>TANGGAL </td>
+        <td>: {{gadai.tanggal|date:"d-M-Y"}}</td>
+        
+        <td>JENIS BARANG JAMINAN </td>
+        <td>: {% if gadai.jenis_transaksi = '1'  %}{{ gadai.barang.get_jenis_barang_display }} {%else%}
+	  {{ gadai.barang.get_jenis_kendaraan_display }} Bulan{% endif %}</td>
+    </tr>
+
+    <tr>
+   
+       <td>NILAI PLAFON</td>
+        <td>:  Rp. {{gadai.nilai|number_format:0}}</td>
+        <td>MERK BARANG JAMINAN </td>
+        <td>: {{gadai.barang.merk}}</td>
+    </tr>
+    <tr>
+        <td>JANGKA WAKTU </td>
+        <td>: {% if gadai.jenis_transaksi = '1'  %}{{ gadai.jangka_waktu|default_if_none:"" }} Hari{%else%}
+	  {{ gadai.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{% endif %}</td>
+        <td>TAHUN PEMBUATAN</td>
+        <td>: {% if gadai.jenis_transaksi = '1' %} {{gadai.barang.tahun_pembuatan}}{%else%} {{gadai.barang.tahun_pembuatan_kendaraan}}{%endif%}</td>
+        
+    </tr>
+    
+    <tr> 
+        <td>JATUH TEMPO</td>
+        <td>: {{gadai.jatuhtempo|date:"d-M-Y"}} KALI</td>
+        <td>TYPE BARANG JAMINAN</td>
+        <td>: {% if gadai.jenis_transaksi = '1'  %} {{gadai.barang.type}}{%else%}{{gadai.barang.type_kendaraan|date:"d-M-Y"}}{%endif%}</td>
+        
+    </tr>
+
+    <tr>
+        <td>NILAI JASA (Rp)</td>
+        <td>: {%if gadai.jenis_transaksi = '1' %}{{gadai.jasa|number_format:0}}{%else%} {{gadai.jasa_kendaraan|number_format:0}} {%endif%}</td>
+        <td>NILAI TAKSIR (Rp)</td><td>: {{gadai.taksir.maxpinjaman|number_format:0}}</td>
+    </tr>
+    
+
+    <tr>
+        <td>NILAI BIAYA SIMPAN </td>
+        <td>: Rp. {%if gadai.jenis_transaksi = '1' %}{{gadai.biayasimpan|number_format:0}}{%else%} {{gadai.beasimpan_kendaraan|number_format:0}} {%endif%}</td>
+    </tr>
+    
+    <tr>
+     <td>NILAI ADM  </td><td>: Rp. Rp. {%if gadai.jenis_transaksi = '1' %}{{gadai.adm|number_format:0}}{%else%} {{gadai.adm_kendaraan|number_format:0}} {%endif%}</td>
+    </tr>
+    
+    <tr>
+     <td>GERAI  </td><td>: <b>{{gadai.gerai.nama_cabang}}</b></td>
+    </tr>   
+
+
+</table>
+
+<br /><br />
+
+<table  width="50%" class="no-break" align = "center">
+<tr  align = "center">
+  <td align="left"> Bandung, {% now "d-m-Y" %}<br />Yang Membuat,
+<br /><br />
+<br /><br />
+<br /><br />
+<u><b>________________</b></u><br>
+<b>ADM CABANG</b>
+</td>
+  
+<td align="left">Disposisi,<br />  
+<br /><br />
+<br /><br />
+<br /><br />
+<u><b>________________</b></u><br>
+<b>KEPALA GERAI</b>
+</td>
+
+<td align="left"><br />  
+<br /><br />
+<br /><br />
+<br /><br />
+<u><b>________________</b></u><br>
+<b>ABH</b>
+</td>
+
+<td align="left"><br />
+<br /><br />
+<br /><br />
+<br /><br />
+<u><b>________________</b></u><br>
+<b>MAN OPRASIONAL</b>
+</td>
+
+
+
+</tr>
+</table>
+

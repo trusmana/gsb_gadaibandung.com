@@ -1,0 +1,199 @@
+{% extends "base_aplikasi.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+
+<p>Harian</p>
+<ol>
+{% for d in list_hari %}
+<li><a href = "/gerai/list_hari/?tgl={{d|date:'Y-m-d'}}">{{ d|date:"d M Y"}}</a></li>{% endfor %}
+</ol>
+<p>Bulanan</p>
+<ol>
+{% for m in month_list %}
+<li><a href = "/gerai/list_bulan/?tgl={{m|date:'Y-m-1'}}">{{ m|date:"M Y"}}</a></li>{% endfor %}
+</ol>
+<p>Tahunan</p>
+<ol>
+{% for y in year_list %}
+<li><a href = "/gerai/list_tahun/?tgl={{y|date:'Y-1-1'}}">{{ y|date:"Y"}}</a></li>{% endfor %}
+</ol>
+{% endblock %}
+{% load number_format useringroup %}
+{% block content %}
+
+<h3 align="center">KOPERASI SERBA USAHA RIZKY ABADI DIVISI USAHA GADAI</br>
+DAFTAR REKAPITULASI TRANSAKSI HARIAN GERAI </br>
+HARI/TANGGAL : {% now "d F Y" %}</h3>
+
+<style type="text/css">
+table.tableizer-table {
+	border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+} 
+.tableizer-table td {
+	padding: 4px;
+	margin: 3px;
+	border: 1px solid #ccc;
+}
+.tableizer-table th {
+	background-color: #104E8B; 
+	color: #FFF;
+	font-weight: bold;
+}
+</style>
+<table>
+<tr><th colspan= "17"><a href="rekap_pendapatan_gerai/">Pendapatan<a></th></tr>
+</table>
+<!--mamam-->
+<table class="tableizer-table">
+<tr class="tableizer-firstrow">
+<th rowspan= "2">No</th>
+<th rowspan= "2">Gerai</th>
+<th rowspan= "2">Transaksi kemarin</th>
+<th rowspan= "2">Saldo Kemarin</th>
+<th colspan = "4">Droping Pusat</th>
+<th rowspan= "2">Pelunasan Pinjaman</th>
+<th colspan = "5">Pendapatan</th>
+<th rowspan= "2">Penerimaan Pos Pay</th>
+<th rowspan= "2">Pendapatan Lain</th>
+<th rowspan= "2">Transaksi hari ini</th></tr>
+ <tr>
+    <th>Tunai</th><th>Bank</th><th>Dari Gerai</th><th>Total</th><th>Bea Simpan</th><th>Adm</th><th>Jasa</th><th>Denda</th><th>Total</th>
+ </tr>
+{% for a in kp%}
+    <tr><td>{{a.kode}}</td>
+        <td>{{a.nama}}</td>
+        <td>&nbsp;</td>
+        <td>{{a.saldo_akhir_hari|number_format:0}}</td> 
+        <td>{{a.tunai|number_format:0}}</td>
+        <td>{{a.bank}}</td>
+        <td>{{a.dari_gerai|number_format:0}}</td>
+        <td>{{a.totalkas_setoran|number_format:0}}</td>
+        <td>&nbsp;</td>
+        <td>{{a.total_harian_beasimpan|number_format:0}}</td>
+        <td>{{a.total_harian_adm|number_format:0}}</td>
+        <td>{{a.total_harian_jasa|number_format:0}}</td>
+        <td>{{a.total_harian_denda|number_format:0}}</td>
+        <td>&nbsp;</td>
+        <td>{{a.totalpospay|number_format:0}}</td>
+        <td>{{a.pendapatan_dll|number_format:0}}</td>
+        <td>&nbsp;</td>
+    </tr>
+{%endfor%} 
+ <tr><td>Total</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td></td></tr></table>
+
+<!--mamam-->
+<style type="text/css">
+table.tableizer-table {
+	border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+} 
+.tableizer-table td {
+	padding: 4px;
+	margin: 3px;
+	border: 1px solid #ccc;
+}
+.tableizer-table th {
+	background-color: #104E8B; 
+	color: #FFF;
+	font-weight: bold;
+}
+</style>
+
+
+</br><style type="text/css">
+table.tableizer-table {
+	border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+} 
+.tableizer-table td {
+	padding: 4px;
+	margin: 3px;
+	border: 1px solid #ccc;
+}
+.tableizer-table th {
+	background-color: #104E8B; 
+	color: #FFF;
+	font-weight: bold;
+}
+</style>
+
+<table>
+<tr><th colspan= "17"><a href="rekap_pengeluaran_gerai">Pengeluaran<a></th></tr>
+</table>
+<!--mamam-->
+<table class="tableizer-table">
+<tr class="tableizer-firstrow">
+<th rowspan= "2">No</th>
+<th rowspan= "2">Gerai</th>
+<th rowspan= "2">Transaksi kemarin</th>
+<th rowspan= "2">H.Pencairan pinjaman</th>
+<th colspan = "12">I.BIAYA-BIAYA</th>
+<th colspan= "5">J.SETORAN KE PUSAT</th>
+<th colspan = "7">K.SALDO KAS HARI INI </th>
+ <tr>
+<th>Listrik</th>
+<th>PDAM</th>
+<th>Telpon/HP</th>
+<th>Photo Copy</th>
+<th>Majalah / Koran</th>
+<th>Iuran Keamanan</th>
+<th>Iuran Kebersihan</th>
+<th>Promosi</th>
+<th>Air Minum</th>
+<th>Sewa Gedung Gerai</th>
+<th>Lainnya</th>
+<th>JUMLAH PENGELUARAN (H+I)</th>
+
+<th>Bank</th>
+<th>Tunai/Pick-Up</th>
+<th>Ke Gerai</th>
+<th>Jumlah Dikirim Ke Pusat</th>
+<th>JUMLAH PENGELUARAN & UANG DIKIRIM</th>
+
+<th> JUMLAH PENGELUARAN </th>
+<th>PERMINTAAN DANA ESOK HARI</th>
+<th>SISA PRANGKO</th>
+<th>SISA METERAI</th>
+<th> JUMLAH TRANSAKSI HR INI </th>
+<th> PUSAT </th>
+<th>JUMLAH S.D HARI INI</th>
+ </tr>
+{% for a in kp%}
+    <tr><td>{{a.kode}}</td>
+        <td>{{a.nama}}</td>
+        <td>&nbsp;</td>
+        <td>{{a.saldo_akhir_hari|number_format:0}}</td> 
+        <td>{{a.listrik|number_format:0}}</td>
+        <td>{{a.pdam|number_format:0}}</td>
+        <td>{{a.telpon|number_format:0}}</td>
+        <td>{{a.foto_copy|number_format:0}}</td>
+        <td>{{a.majalah|number_format:0}}</td>
+        <td>{{a.iuran_keamanan|number_format:0}}</td>
+        <td>{{a.iuran_kebersihan|number_format:0}}</td>
+        <td>{{a.promosi|number_format:0}}</td>
+        <td>{{a.air_minum|number_format:0}}</td>
+        <td>{{a.sewa_gedung_gerai|number_format:0}}</td>
+        <td>{{a.pendapatan_dll|number_format:0}}</td>
+        <td>{{a.jumlah_pengeluaran_gerai|number_format:0}}</td>
+        <td>{{a.setoran_bank|number_format:0}}</td>
+        <td>{{a.tunai_pickup|number_format:0}}</td>
+        <td>{{a.ke_gerai|number_format:0}}</td>
+        <td>{{a.jumlah_dikirim_ke_pusat|number_format:0}}</td>
+        <td>{{a.jumlah_pengeluaran_dan_uang_dikirim|number_format:0}}</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+
+    </tr>
+{%endfor%} 
+ <tr><td>Total</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></table>
+
+{%endblock%}
+

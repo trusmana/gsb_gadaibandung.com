@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>pencairan</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/manop/pencairan_gerai/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center">
+<img src="/static/img/logoksu.png" width="105" height="110" align="left" hspace="20"/>
+<h3>REKAP PENCAIRAN DAN GADAI ULANG</h3>
+<small>
+   {% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA{%endif%} 
+   {% if id_cabang = '302' %}GERAI SUCI{%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR{%endif%}
+   {% if id_cabang = '304' %}GERAI BALUBUR{%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
+   {% if id_cabang = '307' %}GERAI KOPO{%endif%} {% if id_cabang = '308' %}GERAI CIBIRU{%endif%}
+   {% if id_cabang = '309' %}GERAI CIPACING {%endif%} {% if id_cabang = '310' %}GERAI JATINANGOR{%endif%}
+   {% if id_cabang = '327' %}GERAI CIMAHI  {%endif%} {% if id_cabang = '312' %}GERAI BUAH BATU{%endif%}
+   {% if id_cabang = '313' %}GERAI KORDON  {%endif%} {% if id_cabang = '314' %}GERAI CIHANJUANG{%endif%}
+   {% if id_cabang = '315' %}GERAI MARANATA{%endif%} {% if id_cabang = '316' %}GERAI KIARACONDONG{%endif%}
+   {% if id_cabang = '317' %}GERAI CIREBON PERJUANGN {%endif%} {% if id_cabang = '318' %}GERAI CIREBON {%endif%}
+   {% if id_cabang = '319' %}GERAI CIUMBELEUIT {%endif%} {% if id_cabang = '113' %}GERAI UJUNG BERUNG{%endif%}
+   {% if id_cabang = '322' %}GERAI BOJONGSOANG{%endif%}{% if id_cabang = '300' %}KANTOR PUSAT{%endif%}
+   {% if id_cabang = '329' %}GERAI LEWIGAJAH{%endif%}{% if id_cabang = '333' %}GADAI NIGHT DU{%endif%}
+   {% if id_cabang = '331' %}GADAI NIGHT JAKARTA{%endif%}{% if id_cabang = '311' %}GARAI BUAHBATU{%endif%}
+   {% if id_cabang = '320' %}GERAI UJUNGBERUNG{%endif%}{% if id_cabang = '324' %}GERAI KATAPANG SAYATI{%endif%}
+   {% if id_cabang = '325' %}GERAI CIMINDI{%endif%}{% if id_cabang = '326' %}GERAI CEMARA{%endif%}
+   {% if id_cabang = '332' %}GERAI TURANGGA{%endif%}{% if id_cabang = '328' %}GADAI NIGHT CIBIRU{%endif%}
+   {% if id_cabang = '330' %}GADAI NIGHT BALUBUR{%endif%}
+</small> </b>
+<h4>Periode : {{start_date}} s.d {{end_date}}</h4></td></tr>
+</table>
+<p>&nbsp;</p>
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+    <th rowspan= "2">No</th>
+    <th rowspan= "2">No Rekening</th>
+    <th rowspan= "2">Gerai</th>
+    <th rowspan= "2">Nama</th>
+    <th rowspan= "2">Tanggal</th>
+    <th rowspan= "2">JW (hari)</th>
+    <th rowspan= "2">Jatuh Tempo</th>
+    <th rowspan = "2">Status</th>
+    <th rowspan = "2">SK</th>
+    <th rowspan= "2">Pinjaman (Rp)</th>
+    <th colspan = "4" >Pendapatan (Rp)</th>
+</tr>
+<tr>
+    <th>Jasa</th>
+    <th>Adm</th>
+    <th>Bea Simpan</th>
+    <th>Total</th>
+<tr>
+{% for p in tes %}	
+<tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ p.norek }}</td>
+    <td>{{ p.gerai.nama_cabang }}</td>
+    <td>{{ p.agnasabah.nama|truncatewords:2 }}</td>
+    <td>{{ p.tanggal|date:"d-M-Y"}}</td>
+    <td align="center">{% if p.jenis_transaksi = '2' or p.jenis_transaksi = '3' %}
+                        {{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+                       {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+    <td align="center">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+    <td align="center">{{ p.get_status_transaksi_display|default_if_none:"Aktif"}}</td>
+    <td align="center">{{ p.get_jns_gu_display}}</abbr></td>
+    <td align="right">{{ p.nilai|number_format:0|default_if_none:"0" }}</td>
+    <td align = "right">{% if p.jenis_transaksi = '2' or p.jenis_transaksi = '3' %}
+                      {{p.jasa_kendaraan|number_format:0}}{%else%}
+                      {{p.jasa|number_format:0}}</td>{%endif%}
+    <td align = "right">{% if p.jenis_transaksi = '2' or p.jenis_transaksi = '3'%}
+                      {{p.adm_kendaraan|number_format:0}}{%else%}{{p.adm|number_format:0}}</td>{%endif%}
+    <td align = "right">{% if p.jenis_transaksi = '2' or p.jenis_transaksi = '3' %}
+                      {{p.beasimpan_kendaraan|number_format:0}}{%else%}
+                      {{p.biayasimpan|number_format:0}}</td>{%endif%}
+    <td align = "right">{{p.jumlah_biaya|number_format:0|default_if_none:"0"}}</td>
+</tr>
+{% endfor %}
+<tr>
+    <th colspan="9" class="r"><strong>Jumlah</strong></th>
+    <th align="right" >{{nilai|number_format:0}}</th>
+    <th align="right" >{{jasa|number_format:0}}</th>
+    <th align="right" >{{adm|number_format:0}}</th>
+    <th align="right" >{{simpan|number_format:0}}</th>
+    <th align="right" >{{bersih|number_format:0}}</th>
+</tr>
+</table>
+<br/>
+<br/>
+<table  width="100%" class="no-break">
+<tr>
+  <td align="center">KEPALA GERAI<br/>
+<br />
+<br />
+<br />
+<br />
+<br />
+
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+KANIT PJB
+<br />
+<br />
+<br />
+<br />
+<br />
+IQBAL YUSMANSYAH
+</td></tr>
+</table>
+

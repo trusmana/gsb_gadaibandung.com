@@ -1,0 +1,1767 @@
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.template import RequestContext
+from django.shortcuts import render_to_response, get_object_or_404
+from gadai.appgadai.gerai.views import*
+from gadai.appgadai.models import *
+import datetime
+from gadai.appgadai.templatetags.number_format import number_format
+from gadai.appgadai.models import Tbl_Cabang,AkadGadai
+from django import forms
+from gadai.appgadai.templatetags.terbilang import terbilang
+from django.contrib import messages
+from gadai.appgadai.gerai.forms import BarangBedaForm,AKADBARANGForm,PelunasanForm
+
+def barang_beda(request, object_id):
+    nsb = Nasabah.objects.get(id = object_id)
+    ag = nsb.akadgadai_set.all().latest()
+    searang = datetime.date.today()
+    form = AKADBARANGForm(initial={'agnasabah': nsb.id,'gerai':nsb.geraigadai,'tanggal':searang,'ag':ag,'jenis_barang':ag.jenis_transaksi})
+    form_pelunasan = PelunasanForm(initial={'agnasabah': nsb.id,'gerai':nsb.geraigadai,'tanggal':searang,'ag':ag})
+    form.fields['agnasabah'].widget = forms.HiddenInput()
+    form.fields['gerai'].widget = forms.HiddenInput()
+    template = 'gerai/add/input_barang_beda.html'
+    variables = RequestContext(request, {'object':nsb,'form':form,'form_pelunasan':form_pelunasan})
+    return render_to_response(template,variables)
+
+def baru_beda_barang(request):
+    #nsb = Nasabah.objects.get(id = object_id)
+    form = AKADBARANGForm(prefix="sch")
+    form_pelunasan = PelunasanForm(prefix="sch")
+    if request.method == "POST":
+        form = AKADBARANGForm(request.POST,prefix="sch")
+        form_pelunasan = PelunasanForm(request.POST,prefix="loc")
+        if form.is_valid() and form_pelunasan.is_valid():
+            agnasabah = form.cleaned_data['agnasabah']
+            tanggal = form.cleaned_data['tanggal']
+            gerai = form.cleaned_data['gerai']
+            taksir = form.cleaned_data['taksir'] 
+            nilai = form.cleaned_data['nilai']            
+            bea_materai = form.cleaned_data['bea_materai']
+            jenis_transaksi = form.cleaned_data['jenis_transaksi']
+            
+            jangka_waktu = form.cleaned_data['jangka_waktu']
+            jangka_waktu_kendaraan = form.cleaned_data['jangka_waktu_kendaraan'] 
+            jenis_kendaraan = form.cleaned_data['jenis_kendaraan']
+            jenis_barang = form.cleaned_data['jenis_barang']
+            
+            charger = form.cleaned_data['charger']
+            kondisi_charger = form.cleaned_data['kondisi_charger']   
+            batre = form.cleaned_data['batre']
+            kondisi_batre = form.cleaned_data['kondisi_batre']
+            keybord = form.cleaned_data['keybord']
+            kondisi_keybord = form.cleaned_data['kondisi_keybord']   
+            cassing = form.cleaned_data['cassing']
+            kondisi_cassing = form.cleaned_data['kondisi_cassing']   
+            layar = form.cleaned_data['layar']
+            kondisi_layar = form.cleaned_data['kondisi_layar']  
+            lensa = form.cleaned_data['lensa']
+            kondisi_lensa = form.cleaned_data['kondisi_lensa']
+            batre_kamera = form.cleaned_data['batre_kamera']
+            kondisi_batre_kamera = form.cleaned_data['kondisi_batre_kamera']
+            cassing_kamera = form.cleaned_data['cassing_kamera']
+            kondisi_cassing_kamera = form.cleaned_data['kondisi_cassing_kamera']
+            
+            password = form.cleaned_data['password']
+            password_barang = form.cleaned_data['password_barang']            
+            optik_ps = form.cleaned_data['optik_ps']
+            kondisi_optik_ps = form.cleaned_data['kondisi_optik_ps']            
+            harddisk  = form.cleaned_data['harddisk']
+            kondisi_harddisk = form.cleaned_data['kondisi_harddisk']
+            stick  = form.cleaned_data['stick']
+            kondisi_stick = form.cleaned_data['kondisi_stick']
+            hdmi  = form.cleaned_data['hdmi']
+            kondisi_hdmi = form.cleaned_data['kondisi_hdmi']
+            remote = form.cleaned_data['remote']
+            kondisi_remote = form.cleaned_data['kondisi_remote']
+            dus = form.cleaned_data['dus']
+            tas = form.cleaned_data['tas']
+            layar_tv = form.cleaned_data['layar_tv']
+            kondisi_layar_tv = form.cleaned_data['kondisi_layar_tv']
+            accesoris_barang1 = form.cleaned_data['accesoris_barang1']
+            bpkb = form.cleaned_data['bpkb']
+            stnk = form.cleaned_data['stnk']
+            faktur = form.cleaned_data['faktur']
+            gesek_nomesin = form.cleaned_data['gesek_nomesin']
+            gesek_norangka = form.cleaned_data['gesek_norangka']
+            sn= form.cleaned_data['sn']
+            warna = form.cleaned_data['warna']
+            tahun_pembuatan =form.cleaned_data['tahun_pembuatan']
+            bulan_produksi = form.cleaned_data['bulan_produksi']
+            lampiran_dokumen = form.cleaned_data['lampiran_dokumen']  
+            merk_kendaraan = form.cleaned_data['merk_kendaraan']
+            type_kendaraan = form.cleaned_data['type_kendaraan']
+            tahun_pembuatan_kendaraan = form.cleaned_data['type_kendaraan']
+            no_polisi = form.cleaned_data['no_polisi']
+            no_rangka = form.cleaned_data['no_rangka']
+            no_mesin = form.cleaned_data['no_mesin']
+            warna_kendaraan = form.cleaned_data['warna_kendaraan']
+            no_bpkb = form.cleaned_data['no_bpkb']
+            stnk_atas_nama = form.cleaned_data['stnk_atas_nama']
+            no_faktur = form.cleaned_data['no_faktur']
+            
+            barang = Barang(sn=sn,warna=warna,tahun_pembuatan=tahun_pembuatan,bulan_produksi=bulan_produksi,
+                lampiran_dokumen=lampiran_dokumen,accesoris_barang1=accesoris_barang1,jenis_barang=jenis_barang,
+                merk_kendaraan=merk_kendaraan,no_polisi=no_polisi,no_rangka=no_rangka,no_mesin=no_mesin,warna_kendaraan=warna_kendaraan,
+                no_bpkb=no_bpkb,stnk_atas_nama=stnk_atas_nama,no_faktur=no_faktur,jenis_kendaraan=jenis_kendaraan,
+                type_kendaraan=type_kendaraan,\
+                charger=charger,kondisi_charger=kondisi_charger,batre=batre,kondisi_batre=kondisi_batre,keybord=keybord,
+                kondisi_keybord=kondisi_keybord,cassing=cassing,kondisi_cassing = kondisi_cassing,layar=layar,
+                kondisi_layar=kondisi_layar,lensa=lensa,kondisi_lensa=kondisi_lensa,optik_ps=optik_ps,kondisi_optik_ps=kondisi_optik_ps,
+                bpkb=bpkb,stnk=stnk,faktur=faktur,gesek_nomesin=gesek_nomesin,gesek_norangka=gesek_norangka,
+                layar_tv=layar_tv,kondisi_layar_tv = kondisi_layar_tv,
+                harddisk = harddisk,kondisi_harddisk = kondisi_harddisk,stick  = stick,kondisi_stick = kondisi_stick,hdmi  = hdmi,kondisi_hdmi = kondisi_hdmi,
+                remote = remote,kondisi_remote = kondisi_remote,dus = dus,tas = tas,
+                batre_kamera = batre_kamera,kondisi_batre_kamera = kondisi_batre_kamera,cassing_kamera = cassing_kamera,
+                kondisi_cassing_kamera = kondisi_cassing_kamera,password = password,password_barang =password_barang)
+            barang.save()
+            
+            akad = AkadGadai (tanggal = tanggal,agnasabah=agnasabah, gerai=gerai, jangka_waktu=jangka_waktu,
+                nilai=nilai,cu=request.user, mu=request.user,taksir=taksir,barang=barang,
+                bea_materai=bea_materai, jangka_waktu_kendaraan=jangka_waktu_kendaraan,
+                jenis_transaksi=jenis_transaksi)
+                
+            if nilai > taksir.maxpinjaman :
+                akad.status_taksir = 2
+                akad.jatuhtempo = akad.coba_jw()
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')
+            if nilai <= taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.jatuhtempo = akad.coba_jw()
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')             
+            akad.save()
+            brg = Barang.objects.all()
+            banding = brg.filter(id = akad.barang_id)
+            print banding
+            banding.update(merk = akad.taksir.type,type = akad.taksir.type ) 
+            return HttpResponseRedirect('/')
+    else:
+        form = AKADBARANGForm()
+    template='gerai/add/input_barang_beda.html'
+    variable = RequestContext(request, {'form':form,'form_pelunasan':form_pelunasan})
+    return render_to_response(template,variable)
+
+def barang_sama(request, object_id):
+    searang = datetime.date.today()
+    nsb = Nasabah.objects.get(id = object_id)
+    ag = nsb.akadgadai_set.all().latest()
+    ag.status_transaksi = 1
+    ag.lunas = searang
+    ag.status_kwlunas = 0
+    ag.status_mcc = 0
+    ag.status_kw = 0
+    ag.jns_gu = 1
+    ag.save()
+    plns=Pelunasan(nilai=ag.nilai,tanggal=searang,denda = int(ag.denda_elektronik()),bea_jasa=int(ag.hitung_jasa_pelunasan_elektronik()),pelunasan_id=ag.id,
+        denda_kendaraan=int(ag.denda_kendaraan()),val= 0,bea_jasa_kendaraan=int(ag.hitung_jasa_pelunasan_kendaraan()),status_pelunasan =1,jenis_barang = ag.jenis_transaksi,
+        gerai=ag.gerai,nocoa_titipan='21.03.01',nocoa_kas='11.01.04',status_kwlunas = 0,status=1)
+    plns.save()
+    
+    form = BarangBedaForm(initial={'agnasabah': nsb.id,'gerai':nsb.geraigadai,'barang':nsb.baranggerai(),'taksir':nsb.taksir,'tanggal':searang,\
+        'jenis_transaksi':nsb.jenis_transaksi,'jenis_barang':nsb.jenis_barang,'sn':nsb.sn,'nilai_gu':int(plns.nilai),
+        'denda_gu':int(plns.denda) + int(plns.denda_kendaraan),
+        'kewajiban_pelunasan' :(int(ag.nilai) + int(ag.denda_elektronik()) + int(ag.hitung_jasa_pelunasan_elektronik()) + int(ag.denda_kendaraan()) + int(ag.hitung_jasa_pelunasan_kendaraan())),
+        'jasa_gu':int(plns.bea_jasa_kendaraan) + int(plns.bea_jasa)})
+    form.fields['agnasabah'].widget = forms.HiddenInput()
+    form.fields['denda_gu'].widget = forms.HiddenInput()   
+    form.fields['nilai_gu'].widget = forms.HiddenInput()
+    form.fields['jasa_gu'].widget = forms.HiddenInput()
+    template = 'gerai/add/input_barang_sama.html'
+    variables = RequestContext(request, {'object':nsb,'form':form,'ag':ag})
+    return render_to_response(template,variables)
+
+
+def baru(request):
+    D = decimal.Decimal
+    sekarang = datetime.date.today()
+    if request.method == "POST":
+        form = BarangBedaForm(request.POST)
+        if form.is_valid():
+            agnasabah = form.cleaned_data['agnasabah']
+            tanggal = form.cleaned_data['tanggal']
+            gerai = form.cleaned_data['gerai']
+            jenis_transaksi = form.cleaned_data['jenis_transaksi']
+                        
+            taksir = form.cleaned_data['taksir'] 
+            jangka_waktu = form.cleaned_data['jangka_waktu']
+            nilai = form.cleaned_data['nilai']
+            jenis_kendaraan = form.cleaned_data['jenis_kendaraan']
+            barang = form.cleaned_data['barang']
+            jangka_waktu_kendaraan = form.cleaned_data['jangka_waktu_kendaraan']
+            bea_materai = form.cleaned_data['bea_materai']
+            jenis_barang = form.cleaned_data['jenis_barang']   
+    ###new input 1 april
+            charger = form.cleaned_data['charger']
+            kondisi_charger = form.cleaned_data['kondisi_charger']    
+            batre = form.cleaned_data['batre']
+            kondisi_batre = form.cleaned_data['kondisi_batre']        
+            keybord = form.cleaned_data['keybord']
+            kondisi_keybord = form.cleaned_data['kondisi_keybord']        
+            cassing = form.cleaned_data['cassing']
+            kondisi_cassing = form.cleaned_data['kondisi_cassing']        
+            layar = form.cleaned_data['layar']
+            kondisi_layar = form.cleaned_data['kondisi_layar']
+            password = form.cleaned_data['password']
+            password_barang = form.cleaned_data['password_barang']            
+            
+            lensa = form.cleaned_data['lensa']
+            kondisi_lensa = form.cleaned_data['kondisi_lensa']
+            batre_kamera = form.cleaned_data['batre_kamera']
+            kondisi_batre_kamera = form.cleaned_data['kondisi_batre_kamera']
+            cassing_kamera = form.cleaned_data['cassing_kamera']
+            kondisi_cassing_kamera = form.cleaned_data['kondisi_cassing_kamera']
+            
+            optik_ps = form.cleaned_data['optik_ps']
+            kondisi_optik_ps = form.cleaned_data['kondisi_optik_ps']
+            harddisk  = form.cleaned_data['harddisk']
+            kondisi_harddisk = form.cleaned_data['kondisi_harddisk']
+            stick  = form.cleaned_data['stick']
+            kondisi_stick = form.cleaned_data['kondisi_stick']
+            hdmi  = form.cleaned_data['hdmi']
+            kondisi_hdmi = form.cleaned_data['kondisi_hdmi']
+            remote = form.cleaned_data['remote']
+            kondisi_remote = form.cleaned_data['kondisi_remote']
+            dus = form.cleaned_data['dus']
+            tas = form.cleaned_data['tas']
+            accesoris_barang1 = form.cleaned_data['accesoris_barang1']
+            bpkb = form.cleaned_data['bpkb']
+            stnk = form.cleaned_data['stnk']
+            faktur = form.cleaned_data['faktur']
+            gesek_nomesin = form.cleaned_data['gesek_nomesin']
+            gesek_norangka = form.cleaned_data['gesek_norangka']
+            kewajiban_pelunasan = form.cleaned_data['kewajiban_pelunasan']
+            nilai_gu = form.cleaned_data['nilai_gu']
+            jasa_gu = form.cleaned_data['jasa_gu']   
+            denda_gu = form.cleaned_data['denda_gu']
+            
+            akad = AkadGadai (tanggal = tanggal,agnasabah=agnasabah, gerai=gerai, jangka_waktu=jangka_waktu,
+                nilai=nilai,cu=request.user, mu=request.user,taksir=taksir,barang=barang,
+                bea_materai=bea_materai, jangka_waktu_kendaraan=jangka_waktu_kendaraan,
+                nilai_gu=nilai_gu,denda_gu=denda_gu,jasa_gu =jasa_gu,
+                jenis_transaksi=jenis_transaksi,kewajiban_pelunasan = kewajiban_pelunasan)
+            ###111
+            if  akad.agnasabah.jenis_keanggotaan == u'1' and akad.nilai <= akad.nilai_gu and akad.jenis_transaksi == u'1' and \
+                akad.nilai > akad.taksir.maxpinjaman :
+                akad.status_taksir = 2
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(round(akad.jasa))
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()                
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')                 
+                jurnal_akad_barang_sama_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_anggota(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Terposting Dengan baik 1')
+            ###222
+            elif akad.agnasabah.jenis_keanggotaan == u'1' and akad.nilai > akad.nilai_gu and akad.jenis_transaksi == u'1' and \
+                akad.nilai > akad.taksir.maxpinjaman :
+                akad.status_taksir = 2
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(round(akad.jasa))
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()                
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')                 
+                jurnal_akad_barang_sama_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_anggota_lebih(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Terposting Dengan baik 2')
+            ###333
+            elif  akad.agnasabah.jenis_keanggotaan == u'1' and akad.nilai > akad.nilai_gu and akad.jenis_transaksi != u'1' and \
+                akad.nilai > akad.taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(round(akad.jasa_kendaraan))
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()                 
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')                 
+                jurnal_akad_barang_sama_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_anggota_lebih(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Terposting Dengan baik 3')
+            ###444
+            elif  akad.agnasabah.jenis_keanggotaan == u'1' and akad.nilai <= akad.nilai_gu and akad.jenis_transaksi != u'1' and \
+                akad.nilai > akad.taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(round(akad.jasa_kendaraan))
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()               
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')                 
+                jurnal_akad_barang_sama_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_anggota(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Terposting Dengan baik 1')
+            ###555
+            elif akad.agnasabah.jenis_keanggotaan == u'1' and akad.nilai > akad.nilai_gu and akad.jenis_transaksi != u'1' and \
+                akad.nilai <= akad.taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(round(akad.jasa_kendaraan))
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()               
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')                 
+                jurnal_akad_barang_sama_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_anggota_lebih(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Terposting Dengan baik 1')
+            ###666
+            elif akad.agnasabah.jenis_keanggotaan == u'1' and akad.nilai <= akad.nilai_gu and akad.jenis_transaksi == u'1' and \
+                akad.nilai <= akad.taksir.maxpinjaman :
+                akad.status_taksir = 2
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(round(akad.jasa))
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()                
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')                 
+                jurnal_akad_barang_sama_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_anggota(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Terposting Dengan baik 1')
+            ###777
+            elif  akad.agnasabah.jenis_keanggotaan == u'1' and akad.nilai <= akad.nilai_gu and akad.jenis_transaksi != u'1' and \
+                akad.nilai <= akad.taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(round(akad.jasa_kendaraan))
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()               
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Melebihi Nilai Taksir')                 
+                jurnal_akad_barang_sama_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_anggota(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Terposting Dengan baik 1')
+            
+            ###taksiran
+            ####888
+            elif akad.agnasabah.jenis_keanggotaan == u'2' and akad.nilai <= akad.nilai_gu and akad.jenis_transaksi == u'1'\
+                and akad.nilai <=  akad.taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(round(akad.jasa))
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                akad.save()
+                jurnal_akad_barang_sama_non_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_non_anggota(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Terposting Dengan baik 2')
+            ###999
+            elif akad.agnasabah.jenis_keanggotaan == u'2' and akad.nilai > akad.nilai_gu and akad.jenis_transaksi == u'1'\
+                and akad.nilai >  akad.taksir.maxpinjaman :
+                akad.status_taksir = 2
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(round(akad.jasa))
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                akad.save()
+                jurnal_akad_barang_sama_non_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_non_anggota_lebih(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Terposting Dengan baik 2') 
+            ####10
+            elif akad.agnasabah.jenis_keanggotaan == u'1' and akad.nilai > akad.nilai_gu and akad.jenis_transaksi == u'1'\
+                and akad.nilai <=  akad.taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(round(akad.jasa))
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()
+                jurnal_akad_barang_sama_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_anggota_lebih(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Akad Lebih Terposting Dengan Baik 3') 
+            ####11
+            elif akad.agnasabah.jenis_keanggotaan == u'2' and akad.nilai > akad.nilai_gu and akad.jenis_transaksi == u'1'\
+                and akad.nilai <=  akad.taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(round(akad.jasa))
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                akad.save()
+                jurnal_akad_barang_sama_non_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_non_anggota_lebih(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Akad Lebih Terposting dengan Baik 4')
+            ####12
+            elif akad.agnasabah.jenis_keanggotaan == u'2' and akad.nilai <= akad.nilai_gu and akad.jenis_transaksi == u'1'\
+                and akad.nilai >  akad.taksir.maxpinjaman :
+                akad.status_taksir = 2
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm = D(akad.adm)
+                akad.nilai_jasa = D(round(akad.jasa))
+                akad.nilai_biayasimpan = D(akad.biayasimpan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                akad.save()
+                jurnal_akad_barang_sama_non_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_non_anggota(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Akad Lebih Terposting dengan Baik 4') 
+            ####13
+            elif akad.agnasabah.jenis_keanggotaan == u'2' and akad.nilai > akad.nilai_gu and akad.jenis_transaksi != u'1'\
+                and akad.nilai <=  akad.taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(round(akad.jasa_kendaraan))
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                jurnal_akad_barang_sama_non_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_non_anggota_lebih(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Akad Lebih Terposting dengan Baik 4')  
+
+            ####14
+            elif akad.agnasabah.jenis_keanggotaan == u'2' and akad.nilai > akad.nilai_gu and akad.jenis_transaksi != u'1'\
+                and akad.nilai >  akad.taksir.maxpinjaman :
+                akad.status_taksir = 2
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(round(akad.jasa_kendaraan))
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                jurnal_akad_barang_sama_non_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_non_anggota_lebih(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Akad Lebih Terposting dengan Baik 4')  
+            ###15
+            elif akad.agnasabah.jenis_keanggotaan == u'2' and akad.nilai <= akad.nilai_gu and akad.jenis_transaksi != u'1'\
+                and akad.nilai <=  akad.taksir.maxpinjaman :
+                akad.status_taksir = 1
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(round(akad.jasa_kendaraan))
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                jurnal_akad_barang_sama_non_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_non_anggota(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Akad Lebih Terposting dengan Baik 4')  
+            ###16
+            elif akad.agnasabah.jenis_keanggotaan == u'2' and akad.nilai <= akad.nilai_gu and akad.jenis_transaksi != u'1'\
+                and akad.nilai >  akad.taksir.maxpinjaman :
+                akad.status_taksir = 2
+                akad.asumsi_jasa = round(akad.asumsi_pendapatan_jasa())
+                akad.os_pokok = akad.nilai
+                akad.jatuhtempo = akad.menu_hitung_jt()
+                akad.nilai_adm_kendaraan = D(akad.adm_kendaraan)
+                akad.nilai_jasa_kendaraan = D(round(akad.jasa_kendaraan))
+                akad.nilai_beasimpan_kendaraan = D(akad.beasimpan_kendaraan)
+                akad.nilai_asuransi = 0
+                akad.nilai_provisi = 0
+                akad.save()
+                messages.add_message(request, messages.INFO, 'Nilai Pinjaman Sesuai Nilai Taksir')
+                jurnal_akad_barang_sama_non_anggota(akad, request.user)
+                jurnal_pelunasan_barang_sama_non_anggota(akad, request.user)
+                messages.add_message(request, messages.INFO, 'Jurnal Akad Lebih Terposting dengan Baik 4')  
+            #lunas = akad.agnasabah.akadgadai_set.all().latest()
+            #lunas = akad.agnasabah.akadgadai_set.all().latest()
+            #lunas.update(status_transaksi = 1,lunas = datetime.date.today)
+            kasir = KasirGerai(kasir_id = akad.id,nilai = int(akad.nilai_gu) + int(akad.denda_gu) + int(akad.jasa_gu) + \
+                int(akad.jurnal_titipan),tanggal = sekarang ,status=2)
+            kasir.save()
+            barang = Barang.objects.all()
+            banding = barang.filter(id = akad.barang_id)
+            banding.update(charger = charger,kondisi_charger = kondisi_charger,   
+            batre = batre,kondisi_batre = kondisi_batre,keybord = keybord,kondisi_keybord = kondisi_keybord,
+            cassing = cassing,kondisi_cassing = kondisi_cassing,layar = layar,kondisi_layar = kondisi_layar,lensa = lensa,kondisi_lensa = kondisi_lensa,
+            batre_kamera = batre_kamera,kondisi_batre_kamera = kondisi_batre_kamera,cassing_kamera = cassing_kamera,kondisi_cassing_kamera = kondisi_cassing_kamera,
+            optik_ps = optik_ps,kondisi_optik_ps = kondisi_optik_ps,harddisk  = harddisk,kondisi_harddisk = kondisi_harddisk,stick  = stick,kondisi_stick = kondisi_stick,
+            hdmi  = hdmi,kondisi_hdmi = kondisi_hdmi,remote = remote,kondisi_remote = kondisi_remote,dus = dus,tas = tas,accesoris_barang1 = accesoris_barang1,
+            bpkb=bpkb,stnk=stnk,faktur=faktur,gesek_nomesin=gesek_nomesin,gesek_norangka=gesek_norangka,password = password,password_barang =password_barang)
+            
+            return HttpResponseRedirect('/')
+    else:
+        form = BarangBedaForm()
+    template='gerai/add/input_barang_sama.html'
+    variable = RequestContext(request, {'form':form})
+    return render_to_response(template,variable)
+
+def jurnal_akad_barang_sama_non_anggota(akad, user):
+    D = decimal.Decimal
+    a_non_anggota = get_object_or_404(Tbl_Akun, id=166L)
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_pendapatan_jasa = get_object_or_404(Tbl_Akun, id=383L)
+    a_pendapatan_adm = get_object_or_404(Tbl_Akun, id=430L)
+    a_pdp_bea_simpan = get_object_or_404(Tbl_Akun, id=429L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pencairan: NoRek: %s an: %s  ' % (akad.norek(), akad.agnasabah.nama),
+        tgl_trans = akad.tanggal,nobukti=akad.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_non_anggota,
+        kredit = 0,debet = D(akad.nilai),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_pendapatan_jasa,
+        debet = 0,kredit = D(float(akad.jasa_all())),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_pendapatan_adm,
+        debet = 0,kredit = D(float(akad.adm_all())),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_pdp_bea_simpan,
+        debet = 0,kredit = D(float(akad.beasimpan_all())),id_product = '4',status_jurnal ='2',tgl_trans  = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = round(D(akad.nilai) - D(akad.adm_all()) - D(akad.jasa_all())- D(akad.beasimpan_all()) ),
+        id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang =akad.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_akad_barang_sama_anggota(akad, user):
+    D = decimal.Decimal
+    a_anggota = get_object_or_404(Tbl_Akun, id=163L)
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_pendapatan_jasa = get_object_or_404(Tbl_Akun, id=383L)
+    a_pendapatan_adm = get_object_or_404(Tbl_Akun, id=430L)
+    a_pdp_bea_simpan = get_object_or_404(Tbl_Akun, id=429L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pencairan: NoRek: %s an: %s  ' % (akad.norek(), akad.agnasabah.nama),
+        tgl_trans = akad.tanggal,nobukti=akad.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_anggota,
+        kredit = 0,debet = D(akad.nilai),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_pendapatan_jasa,
+        debet = 0,kredit = D(float(akad.jasa_all())),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_pendapatan_adm,
+        debet = 0,kredit = D(float(akad.adm_all())),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_pdp_bea_simpan,
+        debet = 0,kredit = D(float(akad.beasimpan_all())),id_product = '4',status_jurnal ='2',tgl_trans  = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_Barang_sama"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = round(D(akad.nilai) - D(akad.adm_all()) - D(akad.jasa_all())- D(akad.beasimpan_all()) ),
+        id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang =akad.gerai.kode_cabang,id_unit= 300)
+
+
+##9 & 11 13 & 14 JURNAL JENIS TRANSAKSI KENDARaAN DAN ELEKTRONIK NILAI > NILAI GU
+def jurnal_pelunasan_barang_sama_non_anggota_lebih(akad, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_anggota = get_object_or_404(Tbl_Akun, id=166L)
+    a_pendapatan_denda = get_object_or_404(Tbl_Akun, id=443L)
+    a_pendapatan_jasa = get_object_or_404(Tbl_Akun, id=416L)
+
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pelunasan: NoRek: %s an: %s  ' % (akad.norek(), akad.agnasabah.nama),
+        tgl_trans = akad.tanggal,nobukti=akad.norek())
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_titipan_pencairan,
+        debet = D(akad.nilai_gu) + D(float(akad.denda_gu)) + D(float(akad.jasa_gu)),kredit = 0,
+        id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang =akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_anggota,
+        kredit = D(akad.nilai_gu) ,debet =0  ,id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_pendapatan_denda,
+        debet = 0,kredit = D(float(akad.denda_gu)),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_pendapatan_jasa,
+        debet = 0,kredit = D(float(akad.jasa_gu)),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+###8 & 12 & 15 & 16## Jurnal Non ANggota ELEKTRONIK KENDARAAN NILAI > NILAI_GU
+def jurnal_pelunasan_barang_sama_non_anggota(akad, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_titipan_pelunasan = get_object_or_404(Tbl_Akun, id=287L)
+    a_anggota = get_object_or_404(Tbl_Akun, id=166L)
+    a_pendapatan_denda = get_object_or_404(Tbl_Akun, id=443L)
+    a_pendapatan_jasa = get_object_or_404(Tbl_Akun, id=416L)
+
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pelunasan: NoRek: %s an: %s  ' % (akad.norek(), akad.agnasabah.nama),
+        tgl_trans = akad.tanggal,nobukti=akad.norek())
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_titipan_pencairan,
+        debet =round(D(akad.nilai) - D(akad.adm_all()) - D(akad.jasa_all())- D(akad.beasimpan_all()) ),kredit =  0,
+        id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang =akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_titipan_pelunasan,
+        debet =((D(akad.nilai_gu)) + D((akad.denda_gu)) + D((akad.jasa_gu))) - (D(akad.nilai) - D(akad.adm_all()) - D(akad.jasa_all())- D(akad.beasimpan_all()) ),kredit = 0,
+        id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang =akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_anggota,
+        kredit = D(akad.nilai_gu),debet = 0 ,id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_pendapatan_denda,
+        debet = 0,kredit = D(float(akad.denda_gu)),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_pendapatan_jasa,
+        debet = 0,kredit = D(float(akad.jasa_gu)),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+###1 & 4 & 6 & 7###JURNAL ANGGOTA JENIS ELEKTRONIK NILAI <= NILAI_GU
+def jurnal_pelunasan_barang_sama_anggota(akad, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_titipan_pelunasan = get_object_or_404(Tbl_Akun, id=287L)
+    a_anggota = get_object_or_404(Tbl_Akun, id=163L)
+    a_pendapatan_denda = get_object_or_404(Tbl_Akun, id=443L)
+    a_pendapatan_jasa = get_object_or_404(Tbl_Akun, id=416L)
+
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pelunasan: NoRek: %s an: %s  ' % (akad.norek(), akad.agnasabah.nama),
+        tgl_trans = akad.tanggal,nobukti=akad.norek())
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_titipan_pencairan,
+        debet =round(D(akad.nilai) - D(akad.adm_all()) - D(akad.jasa_all())- D(akad.beasimpan_all()) ),kredit =  0,
+        id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang =akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_titipan_pelunasan,
+        debet =((D(akad.nilai_gu)) + D((akad.denda_gu)) + D((akad.jasa_gu))) - (D(akad.nilai) - D(akad.adm_all()) - D(akad.jasa_all())- D(akad.beasimpan_all()) ),kredit = 0,
+        id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang =akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_anggota,
+        kredit = D(akad.nilai_gu),debet =0  ,id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_pendapatan_denda,
+        debet = 0,kredit = D(float(akad.denda_gu)),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_pendapatan_jasa,
+        debet = 0,kredit = D(float(akad.jasa_gu)),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+##2 & 3 & 5 & 10### JURNAL ANGGOTA ELEKTRONIK KENDARAAN  NILAI > NILAI_GU
+def jurnal_pelunasan_barang_sama_anggota_lebih(akad, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_anggota = get_object_or_404(Tbl_Akun, id=163L)
+    a_pendapatan_denda = get_object_or_404(Tbl_Akun, id=443L)
+    a_pendapatan_jasa = get_object_or_404(Tbl_Akun, id=416L)
+
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Pelunasan: NoRek: %s an: %s  ' % (akad.norek(), akad.agnasabah.nama),
+        tgl_trans = akad.tanggal,nobukti=akad.norek())
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_titipan_pencairan,
+        debet = D(akad.nilai_gu) + D(float(akad.denda_gu)) + D(float(akad.jasa_gu)),kredit = 0,
+        id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang =akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_anggota,
+        kredit = D(akad.nilai_gu) ,debet =0  ,id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_pendapatan_denda,
+        debet = 0,kredit = D(float(akad.denda_gu)),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_Barang_sama"), id_coa = a_pendapatan_jasa,
+        debet = 0,kredit = D(float(akad.jasa_gu)),id_product = '4',status_jurnal ='2',tgl_trans = akad.tanggal,
+        id_cabang = akad.gerai.kode_cabang,id_unit= 300)
+
+def cetak_status_barang(request, object_id):
+    gr = GeraiGadai.objects.get(id = object_id)
+    start_date = datetime.date(2015,03,18)
+    end_date = datetime.date.today()
+    gerai = gr.akadgadai_set.filter(sts_tdr__isnull = True).filter(tanggal_permintaan__range =(start_date,end_date)).filter(status_permintaan__in=('3'))
+        
+    template = 'gerai/status/cetak_status_barang.html'
+    variables = RequestContext(request, {
+        'gr':gr,'total':len(gerai),
+        'gerai':gerai,'end_date':end_date,
+    })
+    return render_to_response(template,variables)
+
+def status_barang_gerai(request, object_id):
+    gr = GeraiGadai.objects.get(id = object_id)
+    start_date = datetime.date(2015,03,18)
+    end_date = datetime.date.today()
+    gerai = gr.akadgadai_set.filter(sts_tdr__isnull = True).filter(tanggal_permintaan__range =(start_date,end_date)).filter(status_permintaan__in=('3'))
+        
+    template = 'gerai/status/status_barang_gerai.html'
+    variables = RequestContext(request, {
+        'gr':gr,'total':len(gerai),
+        'gerai':gerai,
+        'nilai': sum([b.terima_bersih for b in gerai ]),
+        'jasa': sum([b.jasa for b in gerai ]),
+        'adm': sum([b.adm for b in gerai ]),
+        'simpan': sum([b.biayasimpan for b in gerai ]),
+    })
+    return render_to_response(template,variables)
+
+def neracagabungan(request):
+    now = datetime.date.today()
+    #gr = GeraiGadai.objects.all()
+    #ag = gr.akadgadai_set.filter(tanggal=now) 
+    #prpj = gr.perpanjang_set.filter(tanggal=now)
+    #lunas= gr.pelunasan_set.filter(tanggal=now)    
+    #bea = gr.biaya_set.filter(tanggal=now)
+    ######gr = GeraiGadai.objects.all()
+    ag = AkadGadai.objects.filter(tanggal=now)
+    prpj = Perpanjang.objects.filter(tanggal=now)
+    lunas= Pelunasan.objects.filter(tanggal=now)
+    bea = Biaya.objects.filter(tanggal=now)
+
+    template = 'gerai/rekapneracagabungan.html'
+    variable = RequestContext(request, {
+        #'gr':gr,
+        'ag':ag,
+        'prpj':prpj,
+        'lunas':lunas,
+        'nilai': sum([b.nilai for b in ag ]),
+        'jasa': sum([b.tot_jasa_kend_elek for b in ag ]),
+        'adm': sum([b.tot_adm_kend_elek for b in ag ]),
+        'simpan': sum([b.tot_simpan_kend_elek for b in ag ]),
+        'jumlah_biaya' : sum([b.jumlah_biaya for b in ag ]),
+        'simpanprpj': sum([b.bea_simpan_total for b in prpj ]),
+        'jasaprpj': sum([b.bea_jasa_total for b in prpj ]),
+        'dendaprpj': sum([b.denda_total for b in prpj ]), 
+        'jumlahbiaya': sum([b.pndptan_prpj_total for b in prpj ]),  
+        'terlambat': sum([b.terlambat for b in lunas ]),  
+        'denda': sum([b.denda_total for b in lunas ]),  
+        'jumlah_lunas': sum ([b.jumlah_pelunasan for b in lunas]), 
+        'nilai': sum ([b.nilai for b in lunas]),
+        'bea_jasa': sum ([b.bea_jasa_total for b in lunas]),
+        'jumlahjasa_lunas': sum ([b.jasa_denda for b in lunas]),
+        'tunai_pusat' : sum ([b.tunai for b in bea]),
+        'bank' : sum ([b.bank for b in bea]), 
+        'dari_gerai':sum([b.dari_gerai for b in bea]),
+        'jml_pospay':sum([b.jml_pospay for b in bea]),
+
+        'pln': sum([b.listrik for b in bea]),
+        'pdam':sum([b.pdam for b in bea]),
+        'tlp':sum([b.telpon for b in bea]),
+        'foto_copy':sum([b.foto_copy for b in bea]),
+        'majalah':sum([b.majalah for b in bea]),
+        'keamanan':sum([b.iuran_keamanan for b in bea]),
+        'kebersihan':sum([b.iuran_kebersihan for b in bea]),
+        'promosi':sum([b.promosi for b in bea]),
+        'air_minum':sum([b.air_minum for b in bea]),
+        'sewa':sum([b.sewa_gedung_gerai for b in bea]),
+        'setoran_bank':sum([b.setoran_bank for b in bea]),
+        'tunai':sum([b.tunai_pickup for b in bea]),
+        'kegerai':sum([b.ke_gerai for b in bea]),
+
+        'prangko':sum ([b.prangko for b in bea]), 
+        'surat_kilat_khusus': sum ([b.surat_kilat_khusus for b in bea]),
+        'paket_pos_standar': sum([b.paket_pos_standar for b in bea]),
+        'paket_kilat_khusus': sum([b.paket_kilat_khusus for b in bea]),
+        'pos_express':sum([b.pos_express for b in bea]),
+        'materai' : sum([b.materai for b in bea]),
+        'ems' : sum([b.ems for b in bea]),
+        'pendapatan': sum([b.pendapatan_lain for b in bea]), 
+        #'total': jumlah_biaya + jumlahjasa_lunas + jumlahbiaya,
+    })
+    return render_to_response(template,variable)
+
+
+def hapus_permintaan(request,object_id):
+    ag = AkadGadai.objects.get(id=object_id)
+    ag.tanggal_permintaan =None
+    ag.tanggal_pengiriman =None
+    ag.klik_permintaan = None
+    ag.status_permintaan =None
+    ag.save()
+    return HttpResponseRedirect("/gerai/%s/show/" % ag.gerai.id)
+###Permintaan Gerai###
+def permintaan(request):
+    try :
+        f = forms.DateField()
+        tanggal_permintaan = f.clean(request.POST.get('tanggal_permintaan',''))
+        a = forms.DateTimeField()
+        klik_permintaan = a.clean(request.POST.get('klik_permintaan',''))
+        form = forms.CharField()
+        status_permintaan = form.clean(request.POST.get('status_permintaan',''))
+    except :
+        return HttpResponseRedirect('/gerai/%s/show/' % (request.POST.get('id', '')))
+    for i in request.POST.getlist('id_minta'):
+        pk = AkadGadai.objects.get(id=int(i))
+        pk.tanggal_permintaan = tanggal_permintaan
+        pk.klik_permintaan = klik_permintaan
+        pk.status_permintaan = status_permintaan
+        pk.tanggal_pengiriman = None
+        messages.add_message(request, messages.INFO,' Permintan telah di inputkan.')
+        pk.save()
+
+    return HttpResponseRedirect('/gerai/%s/show/' % pk.gerai.id)
+
+def cetakminta(request, object_id):
+    try :
+        f = forms.DateField()
+    except :
+        try:
+            tanggal = AkadGadai.objects.filter(tanggal__month=tanggal_permintaan.month).filter(tanggal_permintaan=True)
+        except:
+            tanggal = AkadGadai.objects.filter(tanggal__month=tanggal_permintaan.month)
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.get(id = object_id)
+    gerai = gr.akadgadai_set.filter(tanggal_permintaan=now).filter(status_permintaan='1').order_by('gerai')
+    rekap_jenis = dict([[k, 0] for k,v in JENIS_BARANG])
+    for ag in gerai:
+        rekap_jenis[ag.barang.jenis_barang] += 1
+    template = 'gerai/permintaan.html'
+    variables = RequestContext(request, {
+        'gr':gr,
+        'gerai':gerai,'rekap_jenis': [(dict(JENIS_BARANG)[k], v) for k,v in rekap_jenis.iteritems()],
+    })
+    return render_to_response(template,variables)
+###End Permintaan Gerai###
+
+def show(request,object_id):
+    sekarang = datetime.date.today()
+    sekarang1 = datetime.datetime.now()
+    aa = GeraiGadai.objects.get(id=object_id)
+    #gr = aa.akadgadai_set.filter(status_transaksi__isnull=True)
+    gr =  aa.akadgadai_set.filter(sts_tdr__isnull = True)
+    variables = RequestContext(request, {'object':gr,'sekarang':sekarang,'sekarang1':sekarang1})
+    return render_to_response('gerai/detail.html', variables)
+###cetak Rekap Harian###
+def cetak_rekap(request, object_id):
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.get(id = object_id)
+    ag = gr.akadgadai_set.filter(tanggal=now) 
+    prpj = gr.perpanjang_set.filter(tanggal=now)
+    lunas= gr.pelunasan_set.filter(tanggal=now)
+
+    template = 'gerai/pendapatan.html'
+    variable = RequestContext(request, {
+        'gr':gr,
+        'ag':ag,
+        'prpj':prpj,
+        'lunas':lunas,
+        'nilai_pencairan': sum([b.nilai for b in ag ]),
+        'jasa': sum([b.tot_jasa_kend_elek for b in ag ]),
+        'adm': sum([b.tot_adm_kend_elek for b in ag ]),
+        'simpan': sum([b.tot_simpan_kend_elek for b in ag ]),
+        'jumlah_biaya' : sum([b.jumlah_biaya for b in ag ]),
+        'nilaiprpj': sum([b.nilai for b in prpj ]),
+        'simpanprpj': sum([b.bea_simpan_total for b in prpj ]),
+        'jasaprpj': sum([b.bea_jasa_total for b in prpj ]),
+        'dendaprpj': sum([b.denda_total for b in prpj ]), 
+        'terlambat_prpj': sum ([b.terlambat_total for b in prpj]),
+        'jumlahbiayaprpj': sum([b.pndptan_prpj_total for b in prpj ]),  
+        'terlambat': sum([b.terlambat for b in lunas ]),  
+        'denda': sum([b.denda_total for b in lunas ]),  
+        'jumlah_lunas': sum ([b.tot_jasa_denda_plns for b in lunas]),
+        #'jumlah_lunas': sum ([b.gerai.total_jasa_pelunasan_harian for b in lunas]),
+        'jasalunas': sum([b.bea_jasa_total for b in lunas]), 
+        'nilai': sum ([b.nilai for b in lunas]),     
+    })
+    return render_to_response(template,variable)
+###cetak Rekap bulanan###
+def rekap_bulan(request, object_id):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    #tanggal = forms.DateField()
+    gr = GeraiGadai.objects.get(id = object_id)
+    gerai = gr.akadgadai_set.filter(tanggal__month = tanggal.month).filter(tanggal__year=tanggal.year).order_by('gerai')
+        
+    template = 'gerai/bulan.html'
+    variables = RequestContext(request, {
+        'gr':gr,
+        'gerai':gerai,
+        'tanggal':tanggal,
+        'nilai': sum([b.terima_bersih for b in gerai ]),
+        'jasa': sum([b.jasa for b in gerai ]),
+        'adm': sum([b.adm for b in gerai ]),
+        'simpan': sum([b.biayasimpan for b in gerai ]),
+    })
+    return render_to_response(template,variables)
+
+###cetak Rekap bulanan###
+def piutang_bulan(request, object_id):
+    sekarang = datetime.date.today() 
+    gr =GeraiGadai.objects.get(id = object_id)
+    gerai = gr.akadgadai_set.order_by('gerai').filter(lunas__isnull = True).filter(lelang__isnull = True)
+        
+    template = 'gerai/piutang.html'
+    variables = RequestContext(request, {
+        'gr':gr,
+        'gerai':gerai,'tanggal':sekarang,
+        'nilai': sum([b.terima_bersih for b in gerai ]),
+        'jasa': sum([b.jasa for b in gerai ]),
+        'adm': sum([b.adm for b in gerai ]),
+        'simpan': sum([b.biayasimpan for b in gerai ]),
+        'bersih': sum([b.terima_bersih for b in gerai ]),
+        #'simpanprpj': sum([b.bea_simpanprpj for b in gerai]),
+    })
+    return render_to_response(template,variables)
+
+def rekap_piutang(request, object_id):
+    sekarang = datetime.date.today() 
+    gr =GeraiGadai.objects.get(id = object_id)
+    gerai = gr.akadgadai_set.order_by('gerai').filter(lunas__isnull = True).filter(lelang__isnull = True)
+        
+    template = 'gerai/rekappiutang.html'
+    variables = RequestContext(request, {
+        'gr':gr,
+        'gerai':gerai,'tanggal':sekarang,
+        'nilai': sum([b.terima_bersih for b in gerai ]),
+        'jasa': sum([b.jasa for b in gerai ]),
+        'adm': sum([b.adm for b in gerai ]),
+        'simpan': sum([b.biayasimpan for b in gerai ]),
+        'bersih': sum([b.terima_bersih for b in gerai ]),
+        #'simpanprpj': sum([b.bea_simpanprpj for b in gerai]),
+    })
+    return render_to_response(template,variables)
+
+
+###cetak Rekap Unit###
+def rekapunit(request):
+    rekap = GeraiGadai.objects.all()
+    kp = []
+    for k in rekap:
+        if k.akadgadai_set.filter(lunas__isnull= True).count() > 0:
+            kp.append(k)
+    
+    total_aktif = total_pk=total_jasa=total_adm=total_beasimpan=total_materai=total_nilai=total_terimabersih=  0
+    
+    for k in kp :
+        
+        total_aktif += k.aktif()
+        total_pk += k.aktif()
+        total_jasa += k.get_jumlah_jasa()
+        total_adm += k.get_jumlah_adm()
+        total_beasimpan += k.get_jumlah_beasimpan()
+        #total_materai += k.get_jumlah_materai()
+        total_nilai += k.get_jumlah_nilai()
+        total_terimabersih += k.get_jumlah_terimabersih()
+
+    template = 'gerai/rekap.html'
+    variables = RequestContext(request, {
+    'kp': kp ,
+    'nkp' : len(kp),
+    'npk' : total_pk,
+    'aktif' : total_aktif,
+    'jasa' : total_jasa,
+    'adm':total_adm,
+    'simpan':total_beasimpan,
+    #'materai':total_materai,
+    'nilai':total_nilai,
+    'terima_bersih':total_terimabersih,
+    })
+    return render_to_response(template, variables)
+
+def neracaunit(request, object_id):
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.get(id = object_id)
+    ag = gr.akadgadai_set.filter(tanggal=now) 
+    prpj = gr.perpanjang_set.filter(tanggal=now)
+    lunas= gr.pelunasan_set.filter(tanggal=now)    
+    bea = gr.biaya_set.filter(tanggal=now)    
+
+    template = 'gerai/rekapneraca.html'
+    variable = RequestContext(request, {
+        'gr':gr,
+        'ag':ag,
+        'prpj':prpj,
+        'lunas':lunas,
+        'nilai': sum([b.nilai for b in ag ]),
+        'jasa': sum([b.tot_jasa_kend_elek for b in ag ]),
+        'adm': sum([b.tot_adm_kend_elek for b in ag ]),
+        'simpan': sum([b.tot_simpan_kend_elek for b in ag ]),
+        'jumlah_biaya' : sum([b.jumlah_biaya for b in ag ]),
+        'simpanprpj': sum([b.bea_simpan_total for b in prpj ]),
+        'jasaprpj': sum([b.bea_jasa_total for b in prpj ]),
+        'dendaprpj': sum([b.denda_total for b in prpj ]), 
+        'jumlahbiaya': sum([b.pndptan_prpj_total for b in prpj ]),  
+        'terlambat': sum([b.terlambat for b in lunas ]),  
+        'denda': sum([b.denda_total for b in lunas ]),  
+        'jumlah_lunas': sum ([b.jumlah_pelunasan for b in lunas]), 
+        'nilai': sum ([b.nilai for b in lunas]),
+        'bea_jasa': sum ([b.bea_jasa_total for b in lunas]),
+        'jumlahjasa_lunas': sum ([b.jasa_denda for b in lunas]),
+        'tunai_pusat' : sum ([b.tunai for b in bea]),
+        'bank' : sum ([b.bank for b in bea]), 
+        'dari_gerai':sum([b.dari_gerai for b in bea]),
+        'jml_pospay':sum([b.jml_pospay for b in bea]),
+
+        'pln': sum([b.listrik for b in bea]),
+        'pdam':sum([b.pdam for b in bea]),
+        'tlp':sum([b.telpon for b in bea]),
+        'foto_copy':sum([b.foto_copy for b in bea]),
+        'majalah':sum([b.majalah for b in bea]),
+        'keamanan':sum([b.iuran_keamanan for b in bea]),
+        'kebersihan':sum([b.iuran_kebersihan for b in bea]),
+        'promosi':sum([b.promosi for b in bea]),
+        'air_minum':sum([b.air_minum for b in bea]),
+        'sewa':sum([b.sewa_gedung_gerai for b in bea]),
+        'setoran_bank':sum([b.setoran_bank for b in bea]),
+        'tunai':sum([b.tunai_pickup for b in bea]),
+        'kegerai':sum([b.ke_gerai for b in bea]),
+
+        'prangko':sum ([b.prangko for b in bea]), 
+        'surat_kilat_khusus': sum ([b.surat_kilat_khusus for b in bea]),
+        'paket_pos_standar': sum([b.paket_pos_standar for b in bea]),
+        'paket_kilat_khusus': sum([b.paket_kilat_khusus for b in bea]),
+        'pos_express':sum([b.pos_express for b in bea]),
+        'materai' : sum([b.materai for b in bea]),
+        'ems' : sum([b.ems for b in bea]),
+        'pendapatan': sum([b.pendapatan_lain for b in bea]), 
+        #'total': jumlah_biaya + jumlahjasa_lunas + jumlahbiaya,
+    })
+    return render_to_response(template,variable)
+
+def sjalan(request, object_id):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    #tanggal = forms.DateField()
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.get(id = object_id)
+    gerai = gr.akadgadai_set.filter(tanggal=now) .filter(tanggal__year=tanggal.year).order_by('gerai')
+    brg_retur = gr.akadgadai_set.filter(tanggal_permintaan=now).filter(status_permintaan="2").order_by('gerai')
+    rekap_jenis = dict([[k, 0] for k,v in JENIS_BARANG])
+    #rekap_retur = dict([[k, 0] for k,v in JENIS_BARANG])
+    
+    for ag in gerai:
+        rekap_jenis[ag.barang.jenis_barang] += 1
+
+    #for ret in brg_retur:
+        #rekap_retur[ret.barang.jenis_barang] += 1
+        
+        
+    template = 'gerai/suratjalan.html'
+    variables = RequestContext(request, {
+        'gr':gr,
+        'gerai':gerai,
+        'tanggal':tanggal,
+        'rekap_jenis': [(dict(JENIS_BARANG)[k], v) for k,v in rekap_jenis.iteritems()],
+        'brg_retur': brg_retur,
+    })
+    return render_to_response(template,variables)
+
+###Rekap Transaksi Harian All Gerai###  
+def rekap_allgerai_harian(request):
+    now = datetime.date.today()
+    rekap = GeraiGadai.objects.all()
+    pk = []
+    for k in rekap:
+        if k.akadgadai_set.filter(tanggal=now).filter(lunas__isnull= True).count() > 0:
+            pk.append(k)
+    
+    total_aktif = total_pk=total_jasa=total_adm=total_beasimpan=total_nilai=total_pendapatan=  0
+    
+    for k in pk :
+        
+        total_aktif += k.aktif_harian()
+        total_pk += k.aktif_harian()
+        total_jasa += k.get_jumlah_jasa_harian()
+        total_adm += k.get_jumlah_adm_harian()
+        total_beasimpan += k.get_jumlah_beasimpan_harian()
+        total_nilai += k.get_jumlah_nilai_harian()
+        total_pendapatan += k.total_pendapatan_harian()
+        
+    template = 'gerai/rekap_allgerai_harian.html'
+    variables = RequestContext(request, {
+    'pk': pk ,
+    'nkp' : len(pk),
+    'npk' : total_pk,
+    'aktif' : total_aktif,
+    'jasa' : total_jasa,
+    'adm':total_adm,
+    'simpan':total_beasimpan,
+    'nilai':total_nilai,
+    'total_pendapatan_harian':total_pendapatan,
+    })
+    return render_to_response(template, variables)
+
+def prpj_allgerai_harian(request):
+    now = datetime.date.today()
+    rekap = GeraiGadai.objects.all()
+    ppj = []
+    for k in rekap:
+        if k.perpanjang_set.filter(tanggal=now).count() > 0:
+            ppj.append(k)
+    
+    total_aktif_ppj = total_ppj=total_jasa_ppj=total_beasimpan_ppj=total_denda_ppj=total_nilai_ppj=total_pendapatan_ppj=  0
+    
+    for k in ppj :
+        
+        total_aktif_ppj += k.aktif_prpj_harian()
+        total_ppj += k.aktif_prpj_harian()
+        #total_jasa_ppj += k.prpj_jasa_harian()
+        total_beasimpan_ppj += k.prpj_beasimpan_harian()
+        total_denda_ppj += k.prpj_denda_harian()
+        total_nilai_ppj += k.prpj_nilai_harian()
+        total_pendapatan_ppj += k.total_prpj_pendapatan_harian()
+        
+    template = 'gerai/prpj_allgerai_harian.html'
+    variables = RequestContext(request, {
+    'ppj': ppj ,
+    'nkp' : len(ppj),
+    'npk' : total_ppj,
+    'aktif' : total_aktif_ppj,
+    #'jasa' : total_jasa_ppj,
+    'simpan':total_beasimpan_ppj,
+    'denda':total_denda_ppj,
+    'nilai':total_nilai_ppj,
+    'total_pendapatan_ppj':total_pendapatan_ppj,
+    })
+    return render_to_response(template, variables)
+    
+def pelunasan_allgerai_harian(request):
+    now = datetime.date.today()
+    rekap = GeraiGadai.objects.all()
+    plns = []
+    for k in rekap:
+        if k.pelunasan_set.filter(tanggal=now).count() > 0:
+            plns.append(k)
+    
+    total_aktif_plns = total_plns=total_jasa_plns=total_denda_plns=total_nilai_plns=total_pendapatan_plns=  0
+    
+    for k in plns :
+        
+        total_aktif_plns += k.aktif_plns_harian()
+        total_plns += k.aktif_plns_harian()
+        total_jasa_plns += k.plns_jasa_harian()
+        total_denda_plns += k.plns_denda_harian()
+        total_nilai_plns += k.plns_nilai_harian()
+        total_pendapatan_plns += k.total_pelunasan_jasa_harian()
+        
+    template = 'gerai/pelunasan_allgerai_harian.html'
+    variables = RequestContext(request, {
+    'plns': plns ,
+    'nkp' : len(plns),
+    'npk' : total_plns,
+    'aktif' : total_aktif_plns,
+    'jasa' : total_jasa_plns,
+    'denda':total_denda_plns,
+    'nilai':total_nilai_plns,
+    'total_pendapatan_plns':total_pendapatan_plns,
+    })
+    return render_to_response(template, variables)
+ ###End Rekap Transaksi Harian All Gerai###     
+
+####modifikasi####
+def list(request):    
+    tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    return HttpResponseRedirect("/gerai/arsip/?tgl=%s" % tanggal.strftime('%Y-%m-%d') )
+
+
+def list_day(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    gerai = []
+    
+    
+    for (b,k) in GERAI:
+        
+        bn = AkadGadai.objects.filter(gerai = b ).filter(tanggal = tanggal).order_by('no').order_by('jangka_waktu')
+    
+        for akadgadai in bn :
+            gerai.append(akadgadai)    
+           
+        
+        
+    template = 'gerai/list_day.html'
+    variables = RequestContext(request, {
+        'tanggal' : tanggal,
+        'day_list' : AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__year=tanggal.year).filter(tanggal__month=tanggal.month),
+        'month_list': AkadGadai.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'year_list' : AkadGadai.objects.dates('tanggal', 'year', order="DESC"),
+        'gerai' : gerai,
+    })    
+    return render_to_response(template, variables)
+
+def gerai_bulan(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    gerai = []
+    
+    
+    for (b,k) in GERAI:
+        
+        bn = AkadGadai.objects.filter(gerai = b ).filter(tanggal__month=tanggal.month).filter(tanggal__year=tanggal.year).order_by('no').order_by('cu')
+    
+        for akadgadai in bn :
+            gerai.append(akadgadai)    
+           
+        
+        
+    template = 'gerai/list_month.html'
+    variables = RequestContext(request, {
+        'tanggal' : tanggal,
+        'day_list' : AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month),
+        'month_list': AkadGadai.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'year_list' : AkadGadai.objects.dates('tanggal', 'year', order="DESC"),
+        'gerai' : gerai,
+    })    
+    return render_to_response(template, variables)
+
+def rekaphari(request, object_id):
+    tanggal = forms.DateField().clean(request.GET.get('tgl',''))
+            
+    barang = AkadGadai.objects.filter(gerai= str(object_id)).filter(tanggal = tanggal).order_by('gerai')
+    
+    template = 'gerai/rekaphari.html'
+    variables = RequestContext(request, {
+        'barang': barang,
+        'tanggal' : tanggal,
+        'nilai': sum([b.nilai for b in barang ]),
+        'jasa': sum([b.jasa for b in barang ]),
+        'adm': sum([b.adm for b in barang ]),
+        'simpan': sum([b.biayasimpan for b in barang ]),
+        'bersih' : sum([b.jumlah_biaya for b in barang ]),
+    })    
+    return render_to_response(template, variables)
+
+def rekapbulan(request, object_id):    
+    tanggal = forms.DateField().clean(request.GET.get('tgl',''))
+            
+    barang = AkadGadai.objects.filter(gerai= str(object_id)).filter(tanggal__month = tanggal.month).filter(tanggal__year=tanggal.year).order_by('gerai')
+    template = 'gerai/rekapbulan.html'
+    variables = RequestContext(request, {
+        'barang': barang,
+        'tanggal' : tanggal,
+        'nilai': sum([b.nilai for b in barang ]),
+        'jasa': sum([b.jasa for b in barang ]),
+        'adm': sum([b.adm for b in barang ]),
+        'simpan': sum([b.biayasimpan for b in barang ]),
+        'bersih' : sum([b.terima_bersih for b in barang ]),
+    })    
+    return render_to_response(template, variables)
+
+def list_year(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    gerai = []
+    
+    for (b,k) in GERAI:
+        
+        bn = AkadGadai.objects.filter(gerai = b ).filter(tanggal__year=tanggal.year).order_by('no').order_by('cu')
+    
+        for akadgadai in bn :
+            gerai.append(akadgadai)  
+        
+    
+    template = 'gerai/list_year.html'
+
+    variables = RequestContext(request, {
+        'tanggal' : tanggal,
+        'day_list' : AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month),
+        'month_list': AkadGadai.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'year_list' : AkadGadai.objects.dates('tanggal', 'year', order="DESC"),
+        'gerai' : gerai ,
+        })    
+    return render_to_response(template, variables)
+
+#total transaksi harian,pelunasan,perpanjangan,pencairan
+def total_harian(request):
+    now = datetime.date.today()
+    rekap = GeraiGadai.objects.all()
+    plns = []
+    for k in rekap:
+        if k.akadgadai_set.filter(tanggal=now).count()>=0:
+            plns.append(k)
+    
+    total_harian_jasa = total_harian_denda=total_harian_beasimpan=akumulasi_pendapatan_harian=aktif_nasabah_harian=total_harian_adm=nilai_pencairan_harian=prpj_nilai_harian=plns_nilai_harian=total_prpj_beaterlambat_all= 0
+    for k in plns :
+        
+        aktif_nasabah_harian += k.aktif_nasabah_harian()
+        total_harian_jasa += k.total_harian_jasa()
+        total_harian_denda += k.total_harian_denda()
+        total_harian_beasimpan += k.total_harian_beasimpan()
+        total_harian_adm +=k.adm_harian()
+        akumulasi_pendapatan_harian += k.akumulasi_pendapatan_harian()
+        prpj_nilai_harian += k.prpj_nilai_harian()
+        plns_nilai_harian += k.plns_nilai_harian()
+        nilai_pencairan_harian += k.nilai_pencairan_harian()
+        total_prpj_beaterlambat_all += k.total_prpj_beaterlambat_all()
+                
+    template = 'gerai/total_harian.html'
+    variables = RequestContext(request, {
+    'plns': plns ,
+    'total' : aktif_nasabah_harian,
+    'adm' : total_harian_adm,
+    'aktif_nasabah_harian' : aktif_nasabah_harian,####tedi
+    'jasa' : total_harian_jasa,
+    'denda':total_harian_denda,
+    'beasimpan':total_harian_beasimpan,
+    'akumulasi_pendapatan_harian':akumulasi_pendapatan_harian,
+    'akumulasi_pencairan_harian':nilai_pencairan_harian,
+    'akumulasi_perpanjangan_harian':prpj_nilai_harian,
+    'akumulasi_pelunasan_harian':plns_nilai_harian,
+    'total_terlambat':total_prpj_beaterlambat_all,
+    })
+    return render_to_response(template, variables)
+
+def simulasi(request):
+    tb = terbilang
+    template = 'gerai/simulasi.html'
+    variables = RequestContext(request, {'tb':tb})
+    return render_to_response(template,variables)
+
+
+####END REQUEST MANOP GADAI REKAP PENCAIRAN PRPJ PLNS ALL GERAI (PAK DEDI) (02 APRIL 2013)####
+###Rekap Pencairan Bulanan  All Gerai###  
+def pencairan_bulanan_allgerai(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+
+    
+    rekap = GeraiGadai.objects.all()
+    pk = []
+    for k in rekap:
+        if k.akadgadai_set.filter(tanggal__month = tanggal.month).filter(tanggal__year=tanggal.year).count() > 0:
+            pk.append(k)
+    
+    total_aktif = total_pk=total_jasa=total_adm=total_beasimpan=total_nilai=total_pendapatan=  0
+    
+    for k in pk :
+        
+        total_aktif += k.all_aktif_bulanan()
+        total_pk += k.all_aktif_bulanan()
+        total_jasa += k.get_jumlah_jasa_bulanan()
+        total_adm += k.get_jumlah_adm_bulanan()
+        total_beasimpan += k.get_jumlah_beasimpan_bulanan()
+        total_nilai += k.get_jumlah_nilai_bulanan()
+        total_pendapatan += k.total_pendapatan_bulanan()
+        
+    template = 'gerai/pencairan_bulanan_allgerai.html'
+    variables = RequestContext(request, {
+    'pk': pk ,
+    'nkp' : len(pk),
+    'npk' : total_pk,
+    'aktif' : total_aktif,
+    'jasa' : total_jasa,
+    'adm':total_adm,
+    'simpan':total_beasimpan,
+    'nilai':total_nilai,
+    'total_pendapatan_bulanan':total_pendapatan,
+    })                                                                                                                                                                                                                  
+    return render_to_response(template, variables)
+###End Rekap Pencairan Bulanan  All Gerai###  
+    
+    
+###Rekap Perpanjangan Bulanan  All Gerai###  
+def prpj_bulanan_allgerai(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  Perpanjang.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  Perpanjang.objects.dates('tanggal', 'day', order="DESC")[0] 
+
+    
+    rekap = GeraiGadai.objects.all()
+    pk = []
+    for k in rekap:
+        if k.perpanjang_set.filter(tanggal__month = tanggal.month).filter(tanggal__year=tanggal.year).count() > 0:
+            pk.append(k)
+    
+    total_aktif = total_pk=total_jasa=total_jasaterlambat=total_denda=total_beasimpan=total_nilai=total_pendapatan=  0
+    
+    for k in pk :
+        
+        total_aktif += k.aktif_prpj_bulanan()
+        total_pk += k.aktif_prpj_bulanan()
+        total_jasa += k.prpj_jasa_bulanan()
+        total_jasaterlambat += k.prpj_jasaterlambat_bulanan()
+        total_denda += k.prpj_denda_bulanan()
+        total_beasimpan += k.prpj_beasimpan_bulanan()
+        total_nilai += k.prpj_nilai_bulanan()
+        total_pendapatan += k.total_prpj_pendapatan_bulanan()
+        
+    template = 'gerai/prpj_bulanan_allgerai.html'
+    variables = RequestContext(request, {
+    'pk': pk ,
+    'nkp' : len(pk),
+    'npk' : total_pk,
+    'aktif' : total_aktif,
+    'jasa' : total_jasa,
+    'jasaterlambat' : total_jasaterlambat,
+    'denda':total_denda,
+    'simpan':total_beasimpan,
+    'nilai':total_nilai,
+    'total_pendapatan_bulanan':total_pendapatan,
+    })                                                                                                                                                                                                                  
+    return render_to_response(template, variables)
+###End Rekap Perpanjangan Bulanan  All Gerai###   
+ 
+###Rekap Perpanjangan Bulanan  All Gerai###  
+def plns_bulanan_allgerai(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  Pelunasan.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  Pelunasan.objects.dates('tanggal', 'day', order="DESC")[0] 
+
+    
+    rekap = GeraiGadai.objects.all()
+    pk = []
+    for k in rekap:
+        if k.pelunasan_set.filter(tanggal__month = tanggal.month).filter(tanggal__year=tanggal.year).count() > 0:
+            pk.append(k)
+    
+    total_aktif = total_pk=total_jasa=total_denda=total_nilai=total_pendapatan=  0
+    
+    for k in pk :
+        
+        total_aktif += k.aktif_plns_bulanan()
+        total_pk += k.aktif_plns_bulanan()
+        total_jasa += k.plns_jasa_bulanan()
+        total_denda += k.plns_denda_bulanan()
+        total_nilai += k.plns_nilai_bulanan()
+        total_pendapatan += k.total_plns_pendapatan_bulanan()
+        
+    template = 'gerai/plns_bulanan_allgerai.html'
+    variables = RequestContext(request, {
+    'pk': pk ,
+    'nkp' : len(pk),
+    'npk' : total_pk,
+    'aktif' : total_aktif,
+    'jasa' : total_jasa,
+    'denda':total_denda,
+    'nilai':total_nilai,
+    'total_pendapatan_bulanan':total_pendapatan,
+    })                                                                                                                                                                                                                  
+    return render_to_response(template, variables)
+###End Rekap Perpanjangan Bulanan  All Gerai###  
+####END REQUEST MANOP GADAI REKAP PENCAIRAN PRPJ PLNS ALL GERAI (PAK DEDI) (02 APRIL 2013)####
+###firman 15 april 2013
+def rekap_biaya_harian(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl'))
+    except :
+        try:
+            tanggal =  Biaya.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  Biaya.objects.dates('tanggal', 'day', order="DESC")[0] 
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.all()
+    kp = []
+    for k in gr:
+        if k.biaya_set.filter(tanggal=now):
+            kp.append(k)
+    totalbiaya_harian = totalpospay = saldo_awal_gerai = totalkas_setoran =total_harian_jasa = total_harian_denda=total_harian_beasimpan=total_harian_adm = akumulasi_pendapatan_harian =0   
+    for k in kp:
+        totalbiaya_harian = k.totalbiaya_harian() 
+        totalpospay = k.totalpospay()
+        totalkas_setoran =k.totalkas_setoran()
+        total_harian_jasa += k.total_harian_jasa()
+        total_harian_denda += k.total_harian_denda()
+        total_harian_beasimpan += k.total_harian_beasimpan()
+        total_harian_adm +=k.adm_harian()
+        akumulasi_pendapatan_harian += k.akumulasi_pendapatan_harian()
+    template = 'biaya/list_biaya_gerai.html'
+    variable = RequestContext(request, {
+        'kp':kp,
+        'list_hari' : Biaya.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month),
+        'month_list': Biaya.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'year_list' : Biaya.objects.dates('tanggal', 'year', order="DESC"),
+        #'tunai_pusat' : sum ([b.tunai for b in k]),
+         
+    })
+    return render_to_response(template,variable)
+
+def rekap_pendapatan_gerai(request):
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.all()
+    kp = []
+    for k in gr:
+        if k.biaya_set.filter(tanggal=now):
+            kp.append(k)
+    totalbiaya_harian = totalpospay = saldo_awal_gerai = totalkas_setoran =total_harian_jasa = total_harian_denda=total_harian_beasimpan=total_harian_adm = akumulasi_pendapatan_harian =0   
+    for k in kp:
+        totalbiaya_harian = k.totalbiaya_harian() 
+        totalpospay = k.totalpospay()
+        totalkas_setoran =k.totalkas_setoran()
+        total_harian_jasa += k.total_harian_jasa()
+        total_harian_denda += k.total_harian_denda()
+        total_harian_beasimpan += k.total_harian_beasimpan()
+        total_harian_adm +=k.adm_harian()
+        akumulasi_pendapatan_harian += k.akumulasi_pendapatan_harian()
+    template = 'biaya/list_pendapatan_gerai.html'
+    variable = RequestContext(request, {
+        'kp':kp,
+        #'tunai_pusat' : sum ([b.tunai for b in k]),
+         
+    })
+    return render_to_response(template,variable)
+
+def rekap_pengeluaran_gerai(request):
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.all()
+    kp = []
+    for k in gr:
+        if k.biaya_set.filter(tanggal=now):
+            kp.append(k)
+    totalbiaya_harian = totalpospay = saldo_awal_gerai = totalkas_setoran =total_harian_jasa = total_harian_denda=total_harian_beasimpan=total_harian_adm = akumulasi_pendapatan_harian =0   
+    for k in kp:
+        totalbiaya_harian = k.totalbiaya_harian() 
+        totalpospay = k.totalpospay()
+        totalkas_setoran =k.totalkas_setoran()
+        total_harian_jasa += k.total_harian_jasa()
+        total_harian_denda += k.total_harian_denda()
+        total_harian_beasimpan += k.total_harian_beasimpan()
+        total_harian_adm +=k.adm_harian()
+        akumulasi_pendapatan_harian += k.akumulasi_pendapatan_harian()
+    template = 'biaya/list_pengeluaran_gerai.html'
+    variable = RequestContext(request, {
+        'kp':kp,
+        #'tunai_pusat' : sum ([b.tunai for b in k]),
+         
+    })
+    return render_to_response(template,variable)
+
+def list_hari(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl'))
+    except :
+        try:
+            tanggal =  Biaya.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  Biaya.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.all()
+    kp = []
+    for k in gr:
+        if k.biaya_set.filter(tanggal=tanggal):
+            kp.append(k)
+    totalbiaya_harian = totalpospay = saldo_awal_gerai = totalkas_setoran =total_harian_jasa = total_harian_denda=total_harian_beasimpan=total_harian_adm = akumulasi_pendapatan_harian =0   
+    for k in kp:
+        totalbiaya_harian = k.totalbiaya_harian() 
+        totalpospay = k.totalpospay()
+        totalkas_setoran =k.totalkas_setoran()
+        total_harian_jasa += k.total_harian_jasa()
+        total_harian_denda += k.total_harian_denda()
+        total_harian_beasimpan += k.total_harian_beasimpan()
+        total_harian_adm +=k.adm_harian()
+        akumulasi_pendapatan_harian += k.akumulasi_pendapatan_harian()
+  
+    template = 'biaya/list_biaya_gerai.html'
+    variable = RequestContext(request, {
+        'kp':kp,
+        'tanggal' : tanggal,
+        'list_hari' : Biaya.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month),
+        'list_bulan': Biaya.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'list_tahun' : Biaya.objects.dates('tanggal', 'year', order="DESC"),
+        #'tunai_pusat' : sum ([b.tunai for b in k]),
+         
+    })
+    return render_to_response(template,variable)
+
+def list_bulan(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl'))
+    except :
+        try:
+            tanggal =  Biaya.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  Biaya.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.all()
+    kp = []
+    for k in gr:
+        if k.biaya_set.filter(tanggal__month = tanggal.month).filter(tanggal__year=tanggal.year).count() > 0:
+            kp.append(k)
+    totalbiaya_harian = totalpospay = saldo_awal_gerai = totalkas_setoran =total_harian_jasa = total_harian_denda=total_harian_beasimpan=total_harian_adm = akumulasi_pendapatan_harian =0   
+    for k in kp:
+        totalbiaya_harian = k.totalbiaya_harian() 
+        totalpospay = k.totalpospay()
+        totalkas_setoran =k.totalkas_setoran()
+        total_harian_jasa += k.total_harian_jasa()
+        total_harian_denda += k.total_harian_denda()
+        total_harian_beasimpan += k.total_harian_beasimpan()
+        total_harian_adm +=k.adm_harian()
+        akumulasi_pendapatan_harian += k.akumulasi_pendapatan_harian()
+    template = 'biaya/list_biaya_gerai.html'
+    variable = RequestContext(request, {
+        'kp':kp,
+        'tanggal' : tanggal,
+        'day_list' : Biaya.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month),
+        'month_list': Biaya.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'year_list' : Biaya.objects.dates('tanggal', 'year', order="DESC"),
+        #'tunai_pusat' : sum ([b.tunai for b in k]),
+         
+    })
+    return render_to_response(template,variable)
+    
+def list_tahun(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl'))
+    except :
+        try:
+            tanggal =  Biaya.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  Biaya.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.all()
+    kp = []
+    for k in gr:
+        if k.biaya_set.filter(tanggal__year=tanggal.year).count() > 0:
+            kp.append(k)
+    totalbiaya_harian = totalpospay = saldo_awal_gerai = totalkas_setoran =total_harian_jasa = total_harian_denda=total_harian_beasimpan=total_harian_adm = akumulasi_pendapatan_harian =0   
+    for k in kp:
+        totalbiaya_harian = k.totalbiaya_harian() 
+        totalpospay = k.totalpospay()
+        totalkas_setoran =k.totalkas_setoran()
+        total_harian_jasa += k.total_harian_jasa()
+        total_harian_denda += k.total_harian_denda()
+        total_harian_beasimpan += k.total_harian_beasimpan()
+        total_harian_adm +=k.adm_harian()
+        akumulasi_pendapatan_harian += k.akumulasi_pendapatan_harian()
+    template = 'biaya/list_biaya_gerai.html'
+    variable = RequestContext(request, {
+        'kp':kp,
+        'tanggal' : tanggal,
+        'day_list' : Biaya.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month),
+        'month_list': Biaya.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'year_list' : Biaya.objects.dates('tanggal', 'year', order="DESC"),
+        #'tunai_pusat' : sum ([b.tunai for b in k]),
+         
+    })
+    return render_to_response(template,variable)

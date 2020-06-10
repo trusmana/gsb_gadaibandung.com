@@ -1,0 +1,871 @@
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.template import RequestContext
+from django.shortcuts import render_to_response, get_object_or_404
+from gadai.appgadai.models import *
+from django import forms
+import os, string
+from django.conf import settings
+from gadai.appgadai.templatetags.terbilang import terbilang
+from gadai.appgadai.templatetags.number_format import number_format
+from gadai.appgadai.keuangan.forms import BiayasForm
+import datetime
+import decimal
+from gadai.appgadai.templatetags.number_format import number_format
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User,Group
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.contrib import messages
+
+	
+def cari(request):
+	rekening=request.GET['rekening']
+
+	try:
+		ag=AkadGadai.objects.get(id=int(rekening))
+		return HttpResponseRedirect("/biaya/%s/show/" % ag.id)
+	except:
+		request.user.message_set.create(message="No rekening tidak ditemukan.")
+		return HttpResponseRedirect("/biaya/")
+
+def edit(request,object_id):
+	biy=Biaya.objects.get(id=object_id)
+
+	template='biaya/edit.html'
+	variable = RequestContext(request,{'biy': biy})
+	return render_to_response(template,variable)
+
+def hapus_jurnal(request,object_id):
+	tbl = Tbl_Transaksi.objects.get(id=object_id)
+	tbl.delete()
+	messages.add_message(request, messages.INFO, 'Penghapusan Jurnal Berhasil')
+	return HttpResponseRedirect(tbl.get_absolute_url_biaya_keuangan() )
+
+def biaya_post(request):
+	for i in request.POST.getlist('id_pilih'):
+		gl = Tbl_Transaksi.objects.get(id=(i))
+		gl.status_jurnal = 1
+		#gl.jenis = 'GL_GL_CABANG'
+		messages.add_message(request, messages.INFO,' Input GL cabang Terposting.')
+		gl.save()
+	return HttpResponseRedirect('/')
+
+def show(request,object_id):
+	ag = Biaya.objects.get(id=object_id)
+	sekarang = datetime.datetime.now()
+	template = 'biaya/show.html'
+	variable = RequestContext(request, {
+		'ag': ag})
+	return render_to_response(template,variable)
+
+def list(request):
+	bea = Biaya.objects.all()
+	paginator = Paginator(bea, 50)
+
+	try:
+		page = int(request.GET.get('page', '1'))
+	except ValueError:
+		page = 1
+	try:
+		bea = paginator.page(page)
+	except (EmptyPage, InvalidPage):
+		bea = paginator.page(paginator.num_pages)
+
+	template='biaya/index.html'
+	variable = RequestContext(request,{'bea': bea})
+	return render_to_response(template,variable)
+
+def add(request,object_id):
+    sekarang = datetime.date.today()
+    c = object_id
+    bea = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal = 1L).\
+    filter(jenis__in= (u'GL_GL_PENAMBAHAN_PUSAT_BANK',u'GL_GL_PENAMBAHAN_PUSAT_KAS',u'GL_GL_PENGELUARAN_PUSAT_BANK',u'GL_GL_PENGELUARAN_PUSAT_KAS'))
+	
+    user = request.user
+    if request.method == "POST":
+        form = BiayasForm(request.POST)
+        if form.is_valid():
+            penambahan_saldo = form.cleaned_data['penambahan_saldo']
+            ket_penambahan_saldo = form.cleaned_data['ket_penambahan_saldo']
+            pengembalian_saldo = form.cleaned_data['pengembalian_saldo']
+            ket_pengembalian_saldo = form.cleaned_data['ket_pengembalian_saldo']
+            js_trans = form.cleaned_data['js_trans']
+            antar_gerai = form.cleaned_data['antar_gerai']
+            js_trans_kembali = form.cleaned_data['js_trans_kembali']
+            antar_gerai_kembali = form.cleaned_data['antar_gerai_kembali']
+            tanggal = form.cleaned_data['tanggal']
+            gerai = form.cleaned_data['gerai']
+	
+	    biaya = Biaya(gerai=gerai,tanggal=tanggal,penambahan_saldo = penambahan_saldo,ket_penambahan_saldo =ket_penambahan_saldo,pengembalian_saldo = pengembalian_saldo,ket_pengembalian_saldo=ket_pengembalian_saldo,js_trans = js_trans,antar_gerai = antar_gerai,js_trans_kembali =js_trans_kembali,antar_gerai_kembali = antar_gerai_kembali)
+	    biaya.save()
+        #####penerimaan Pusat Bank
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'JAKARTA' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'SUCI'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'DIPATIUKUR' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)		
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'BALUBUR' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+	        jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'HILIR'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'KOPO' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)	
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIBIRU' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIPACING'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+      	        jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'JATINANGOR' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)		
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'BALUBUR' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIMAHI'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'BUAHBATU' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)	
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'MARANATA' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIREBON'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIUMBULEUIT' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)		
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'UJUNGBERUNG' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIWASTRA'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_bank(biaya, request.user)
+		
+        #####penerimaan Pusat Kas
+	    if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'JAKARTA' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_penambahan_saldo_pusat_jkt_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'SUCI' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_suci_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'DIPATIUKUR' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_du_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'BALUBUR' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_balubur_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'HILIR' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_hilir_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'KOPO' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_kopo_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIBIRU' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_cibiru_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIPACING' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_cipacing_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'JATINANGOR' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_jatinangor_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIMAHI' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_cimahi_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'BUAH BATU' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_buahbatu_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'MARANATA' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_maranata_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIREBON' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_cirebon_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIUMBEULIT' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_ciumbeleuit_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'UJUNGBERUNG' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_ujungberung_kas(biaya, request.user)
+            if biaya.penambahan_saldo > 0 and biaya.antar_gerai == 'CIWASTRA' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_penambahan_saldo_pusat_ciwastra_kas(biaya, request.user)
+
+            #####pengeluaran Pusat Bank
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'JAKARTA' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'SUCI'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'DIPATIUKUR' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)		
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'BALUBUR' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+	        jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'HILIR'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'KOPO' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)	
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIBIRU' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIPACING'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+      	        jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'JATINANGOR' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)		
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'BALUBUR' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIMAHI'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'BUAHBATU' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)	
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'MARANATA' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIREBON'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIUMBULEUIT' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)		
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'UJUNGBERUNG' and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIWASTRA'and biaya.js_trans == 'BANK' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, request.user)
+		
+        #####Pengeluaran Pusat Kas
+	    if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'JAKARTA' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+		jurnal_biaya_pengembalian_saldo_pusat_jkt_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'SUCI' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_suci_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'DIPATIUKUR' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_du_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'BALUBUR' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_balubur_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'HILIR' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_hilir_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'KOPO' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_kopo_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIBIRU' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_cibiru_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIPACING' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_cipacing_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'JATINANGOR' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_jatinangor_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIMAHI' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_cimahi_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'BUAH BATU' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_buahbatu_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'MARANATA' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_maranata_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIREBON' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_cirebon_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIUMBEULIT' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_ciumbeleuit_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'UJUNGBERUNG' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_ujungberung_kas(biaya, request.user)
+            if biaya.pengembalian_saldo > 0 and biaya.antar_gerai == 'CIWASTRA' and biaya.js_trans == 'KAS' and biaya.gerai.kode_cabang =='0' :#
+                jurnal_biaya_pengembalian_saldo_pusat_ciwastra_kas(biaya, request.user)
+
+
+	    messages.add_message(request, messages.INFO,"JURNAL TELAH TERSIMPAN")
+	    return HttpResponseRedirect('/keuangan/%s/add/' % (object_id))
+        else:
+  	    form  = BiayasForm()
+	    form.fields['gerai'].queryset = Tbl_Cabang.objects.filter(kode_cabang=object_id)
+  	variables = RequestContext(request, {'form': form,'bea':bea,'c':object_id,'total_kredit': sum([p.kredit for p in bea]),'total_debet': sum([p.kredit for p in bea])})
+	return HttpResponseRedirect('/keuangan/%s/add/' % (object_id))
+    else:
+        form  = BiayasForm()
+	form.fields['gerai'].queryset = Tbl_Cabang.objects.filter(kode_cabang=object_id)
+    variables = RequestContext(request, {'form': form,'bea':bea,'c':object_id,'total_kredit': sum([p.kredit for p in bea]),'total_debet': sum([p.kredit for p in bea])})
+    return render_to_response('keuangan/tambah_biaya.html', variables)
+
+#####penerimaan Pusat Bank
+def jurnal_biaya_penambahan_saldo_pusat_bank(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=132L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_BANK"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_BANK"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+###Penambahan pusat Kas
+def jurnal_biaya_penambahan_saldo_pusat_jkt_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=7L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_penambahan_saldo_pusat_suci_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=609L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_penambahan_saldo_pusat_du_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=610L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_penambahan_saldo_pusat_balubur_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=611L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_penambahan_saldo_pusat_hilir_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=613L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_penambahan_saldo_pusat_kopo_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=614L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_penambahan_saldo_pusat_cibiru_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=615L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_penambahan_saldo_pusat_cipacing_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=616L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_penambahan_saldo_pusat_jatinangor_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=617L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_penambahan_saldo_pusat_cimahi_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=618L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_penambahan_saldo_pusat_buahbatu_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=619L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_penambahan_saldo_pusat_maranata_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=622L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_penambahan_saldo_pusat_cirebon_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=624L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_penambahan_saldo_pusat_ciumbeleuit_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=626L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def	jurnal_biaya_penambahan_saldo_pusat_ujungberung_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=627L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def	jurnal_biaya_penambahan_saldo_pusat_ciwastra_kas(biaya, user):
+	D = decimal.Decimal
+	a_penambahan_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_penambahan_saldo_kredit = get_object_or_404(Tbl_Akun, id=628L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai,biaya.js_trans),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_penambahan_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_debet,
+		kredit = 0,debet = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENAMBAHAN_PUSAT_KAS"), id_coa = a_penambahan_saldo_kredit,
+		debet = 0,kredit = D((biaya.penambahan_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+				
+
+#####Pengeluaran Pusat Bank
+def jurnal_biaya_pengembalian_saldo_pusat_bank(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=132L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_BANK"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_BANK"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+###Penambahan pusat Kas
+def jurnal_biaya_pengembalian_saldo_pusat_jkt_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=7L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_pengembalian_saldo_pusat_suci_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=609L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_pengembalian_saldo_pusat_du_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=610L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_pengembalian_saldo_pusat_balubur_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=611L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_pengembalian_saldo_pusat_hilir_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=613L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_pengembalian_saldo_pusat_kopo_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=614L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_pengembalian_saldo_pusat_cibiru_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=615L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_pengembalian_saldo_pusat_cipacing_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=616L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_pengembalian_saldo_pusat_jatinangor_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=617L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_pengembalian_saldo_pusat_cimahi_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=618L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def jurnal_biaya_pengembalian_saldo_pusat_buahbatu_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=619L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_pengembalian_saldo_pusat_maranata_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=622L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_pengembalian_saldo_pusat_cirebon_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=624L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def jurnal_biaya_pengembalian_saldo_pusat_ciumbeleuit_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=626L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+		
+def	jurnal_biaya_pengembalian_saldo_pusat_ujungberung_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=627L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+def	jurnal_biaya_pengembalian_saldo_pusat_ciwastra_kas(biaya, user):
+	D = decimal.Decimal
+	a_pengembalian_saldo_debet = get_object_or_404(Tbl_Akun, id=4L)
+	a_pengembalian_saldo_kredit = get_object_or_404(Tbl_Akun, id=628L)
+	jurnal = Jurnal.objects.create(
+		diskripsi= 'Penerimaan Setoran dari %s melalui %s ' % (biaya.antar_gerai_kembali ,biaya.js_trans_kembali ),
+		tgl_trans = biaya.tanggal,cu = user, mu = user,nobukti=biaya.ket_pengembalian_saldo)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_debet,
+		kredit = 0,debet = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+
+	jurnal.tbl_transaksi_set.create(
+		jenis = '%s' % ("GL_GL_PENGELUARAN_PUSAT_KAS"), id_coa = a_pengembalian_saldo_kredit,
+		debet = 0,kredit = D((biaya.pengembalian_saldo)),id_product = '4',status_jurnal ='2',tgl_trans =biaya.tanggal,
+		id_cabang =biaya.gerai.kode_cabang,id_unit= 300)
+				

@@ -1,0 +1,240 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Neraca Gerai</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 10px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 5px;} .tableizer-table td {padding: 0px; margin: 0px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #104E8B; color: #FFF; }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+    
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center" >
+<img src="/static/img/logoksu.png" width="110" height="80" align="left" hspace="10"/>
+</td><td align="center">
+<h4>KOPERASI SERBA USAHA RIZKY ABADI<br /></h4>
+<h4>DAFTAR REKAPITULASI TRANSAKSI HARIAN GERAI {{ gr.nama }}											
+<br /></h4>
+<h4>Pada tanggal : {% now "d F Y" %}</h4></td></tr>
+</table>
+<table class="tableizer-table"  align="center">
+<tr class="tableizer-firstrow"><th>No.</th><th colspan = "7">JENIS TRANSAKSI</th><th>BESAR UANG</th><th>No.</th><th colspan = "2">JENIS TRANSAKSI</th><th>BESAR UANG</th></tr>
+<tr>
+    <td>A.</td><td colspan = "7">SALDO KAS HARI KEMARIN (Rp)</td><td>Rp.{{gr.saldo_awal|number_format:0}} </td>
+    <td>H</td><td>PENCAIRAN PINJAMAN</td><td> {{gr.aktif_nasabah_harian }} </td><td> Rp.{{gr.nilai_pencairan_harian|number_format:0}} </td>
+</tr> 
+
+<tr>
+    <td>B.</td><td colspan = "7">DROPING DANA DARI PUSAT / GERAI LAIN (Rp)</td><td>&nbsp;</td>
+    <td>I</td><td colspan = "2">BIAYA BIAYA</td><td>&nbsp;</td>
+</tr>
+
+<tr>
+    <td>&nbsp;</td><td colspan = "5">- Tunai</td><td colspan = "2">Rp. {{tunai_bank|number_format:0}}</td>
+    <td>&nbsp;</td><td>&nbsp;</td><td>- Listrik</td><td> Rp.{{pln|number_format:0}} </td><td>&nbsp;</td>
+</tr>
+
+<tr>
+    <td>&nbsp;</td><td colspan = "5">- Bank .................................</td><td colspan="2">Rp.{{bank|number_format:0}}</td>
+    <td>&nbsp;</td><td>&nbsp;</td><td>- PDAM</td><td> Rp.{{pdam|number_format:0}} </td><td>&nbsp;</td>
+</tr> 
+
+<tr>
+    <td>&nbsp;</td><td colspan = "5">- Dari Gerai ......................</td><td td colspan="2">Rp.{{materai|number_format:0}}</td>
+    <td>&nbsp;</td><td>&nbsp;</td><td>- Telpon / HP</td><td>Rp.{{tlp|number_format:0}} </td><td>&nbsp;</td>
+</tr> 
+
+<tr>
+    <td>&nbsp;</td><td colspan = "7">Jumlah</td><td>Rp.{{gr.totalkas|number_format:0}}  </td>
+    <td>&nbsp;</td><td>- Photo Copy</td><td> Rp. {{foto_copy|number_format:0}}</td><td >&nbsp;</td>
+</tr> 
+
+<tr>
+    <td colspan ="9">&nbsp;</td></td><td>&nbsp;</td><td>- Majalah / Koran</td><td>Rp.{{majalah|number_format:0}}  </td>
+    <td>&nbsp;</td>
+</tr>
+ 
+<tr>
+    <td>C.</td><td colspan ="5">PELUNASAN POKOK ( Trans & Rp)</td><td> {{gr.aktif_plns_harian}} </td>
+    <td>&nbsp;</td><td>Rp. {{gr.plns_nilai_harian|number_format:0}} </td>
+    <td>&nbsp;</td><td>- Iuran Keamanan </td><td>Rp.{{keamanan|number_format:0}}  </td><td>&nbsp;</td>
+</tr>
+
+<tr>
+    <td colspan="8">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>- Iuran Kebersihan </td><td>Rp.{{kebersihan|number_format:0}}  </td>
+    <td>&nbsp;</td>
+</tr> 
+
+<tr>
+    <td>D</td><td>PENDAPATAN</td><td colspan="2">Pencairan</td><td colspan="2">Pelunasan</td>
+    <td colspan="2">Perpanjangan</td><td>&nbsp;</td><td>&nbsp;</td>
+    <td>- Promosi</td><td> Rp.{{promosi|number_format:0}} </td><td >&nbsp;</td>
+</tr>
+
+<tr>
+    <td>&nbsp;</td><td>&nbsp;</td><td>Trs</td><td>Rp.{{gr.nilai_pencairan_harian|number_format:0}}</td>
+    <td>Trs</td><td>Rp.{{nilai|number_format:0}}</td>
+    <td>Trs</td><td>Rp.</td><td>&nbsp;</td><td>&nbsp;</td>
+    <td>- Air Minum</td><td> Rp.{{air_minum|number_format:0}}</td><td>&nbsp;</td>
+</tr> 
+
+<tr>
+    <td>&nbsp;</td><td>- Bea Survey / Simpan</td><td>&nbsp;</td><td>Rp.{{simpan|number_format:0}}</td>
+    <td>&nbsp;</td><td>Rp. </td><td>&nbsp;</td><td>Rp.{{simpanprpj|number_format:0}} </td>
+    <td>&nbsp;</td><td>&nbsp;</td><td>- Sewa Gedung Gerai</td><td>Rp.{{sewa|number_format:0}}</td><td>&nbsp;</td>
+</tr>
+ 
+<tr>
+    <td>&nbsp;</td><td>- Bea Administrasi</td><td>&nbsp;</td><td>Rp.{{adm|number_format:0}}</td><td>&nbsp;</td>
+    <td>Rp.</td><td>&nbsp;</td><td>Rp.</td><td>&nbsp; </td><td>&nbsp;</td>
+    <td>- Lainnya</td><td> - </td><td>&nbsp;</td>
+</tr>
+ 
+<tr>
+    <td>&nbsp;</td><td>- Jasa</td><td>&nbsp;</td><td> Rp.{{jasa|number_format:0}} </td>
+    <td>&nbsp;</td><td> Rp.{{bea_jasa|number_format:0}} </td>
+    <td>&nbsp;</td><td> Rp. {{jasaprpj|number_format:0}} </td>
+    <td>&nbsp;</td><td>&nbsp;</td><td> Jumlah Biaya</td>
+    <td>&nbsp;</td><td> Rp. {{gr.totalbiaya_harian|number_format:0}}</td>
+</tr> 
+
+<tr>
+    <td>&nbsp;</td><td>- Denda</td><td>&nbsp;</td><td> - </td><td>&nbsp;</td><td>Rp.{{denda|number_format:0}} </td>
+    <td>&nbsp;</td><td>Rp.{{dendaprpj|number_format:0}}  </td><td>&nbsp;</td><td>&nbsp;</td>
+    <td>Jumlah Pengeluran</td><td>&nbsp;</td><td>Rp.</td>
+</tr> 
+
+<tr>
+    <td>&nbsp;</td><td>Jumlah Pendapatan</td><td>{{gr.aktif_nasabah_harian}}</td>
+    <td>Rp.{{jumlah_biaya|number_format:0}} </td>
+    <td> {{gr.aktif_plns_harian}} </td>
+    <td> Rp.{{jumlahjasa_lunas|number_format:0}}</td>
+    <td>{{gr.aktif_prpj_harian}}</td>
+    <td>Rp.{{jumlahbiaya|number_format:0}} </td>
+    <td> Rp. {{gr.akumulasi_pendapatan_harian|number_format:0}}</td>
+    <td>J</td><td>DIKIRIM KE PUSAT/GERAI LAIN</td><td>&nbsp;</td><td>&nbsp;</td>
+</tr>
+
+
+<tr>
+    <td colspan="7">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+    <td>- Bank</td><td> Rp.{{setoran_bank|number_format:0}}</td><td>&nbsp;</td>
+</tr>
+
+<tr>
+    <td>E</td><td colspan="5">POSPAY  ( Trans & Rp)</td><td>{{jml_pospay}}</td><td>&nbsp;</td>
+    <td>Rp.{{gr.npospay|number_format:0}} </td><td>&nbsp;</td>
+    <td>- Tunai/pick-up</td><td> Rp.{{tunai|number_format:0}} </td><td>&nbsp;</td>
+</tr> 
+
+<tr>
+    <td colspan="8">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+    <td>- Ke Gerai ......................</td><td> Rp. {{kegerai|number_format:0}}</td><td>&nbsp;</td>
+</tr> 
+
+<tr>
+    <td>F</td><td colspan="8">PENDAPATAN AGEN POS (Rp)</td><td>&nbsp;</td>
+    <td colspan="2">Jumlah Dikirim</td><td>Rp.{{gr.totalkas_setoran|number_format:0}} </td>
+</tr>
+
+<tr>
+    <td>&nbsp;</td><td colspan="5">- Prangko</td><td colspan="2">Rp.{{prangko|number_format:0}}  </td><td>&nbsp;</td><td>&nbsp;</td>
+    <td colspan="2">Jumlah Dikirim Ke Pusat</td><td>Rp.{{gr.total_pengeluaran|number_format:0}}</td>
+</tr>
+
+<tr>
+    <td>&nbsp;</td><td colspan="5">- Surat Kilat Khusus</td>
+    <td colspan="2">Rp.{{surat_kilat_khusus|number_format:0}} </td>
+    <td>&nbsp;</td><td></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+</tr>
+
+<tr>
+    <td>&nbsp;</td><td colspan="5">- Paketpos Standar</td><td colspan="2">Rp.{{paket_pos_standar|number_format:0}}</td><td>&nbsp;</td>
+    <td>K</td><td colspan="2">SALDO KAS HARI INI</td><td> Rp.{{gr.saldo_akhir_hari|number_format:0}} </td>
+</tr>
+
+<tr>
+    <td>&nbsp;</td><td colspan="5">- Paketpos Kilat khusus</td><td colspan="2">Rp.{{paket_kilat_khusus|number_format:0}}  </td>
+    <td>&nbsp;</td><td>&nbsp;</td><td>SISA PANJAR PRANGKO</td><td> Rp. </td><td>&nbsp;</td>
+</tr> 
+
+<tr>
+    <td>&nbsp;</td><td colspan="5">- Pos Express</td><td colspan="2">Rp.{{pos_express|number_format:0}} </td>
+    <td>&nbsp;</td><td>&nbsp;</td><td>SISA PANJAR METERAI</td><td> Rp. </td><td>&nbsp;</td>
+</tr> 
+
+<tr>
+    <td>&nbsp;</td><td colspan="5">- Express Mail Service (EMS)</td><td colspan="2">Rp.{{ems|number_format:0}}  </td>
+    <td>&nbsp;</td><td>&nbsp;</td><td colspan="3">&nbsp;</td>
+</tr> 
+
+<tr>
+    <td>&nbsp;</td><td colspan="5">- Meterai</td><td colspan="2">Rp.{{materai|number_format:0}}  </td>
+    <td>&nbsp;</td><td>&nbsp;</td><td colspan="3">&nbsp;</td>
+</tr>
+
+<tr>
+    <td>&nbsp;</td><td colspan="7">Jumlah</td><td>Rp.{{gr.totalpospay|number_format:0}}</td>
+    <td>&nbsp;</td><td colspan="3">&nbsp;</td>
+</tr> 
+
+<tr>
+    <td>G</td><td colspan="7">PENDAPATAN LAIN-LAIN</td><td>Rp. {{gr.pendapatan_dll|number_format:0}}</td>
+    <td>&nbsp;</td><td colspan="3">&nbsp;</td>
+</tr>
+
+<tr align="center">
+    <td colspan="8" >JUMLAH</td><td>Rp.{{gr.jumlah_biaya_harian_a|number_format:0}}  </td>
+    <td>&nbsp;</td><td colspan="2">JUMLAH</td><td> Rp.{{gr.jumlah_biaya_harian_b|number_format:0}} </td>
+</tr>
+
+</table>
+<table  width="100%" class="no-break">
+<tr>
+  <td align="center">CATATAN<br />
+    Estimasi kebutuhan dana esok hari : Rp.
+<br />
+<br />
+<br />
+<br />
+<br />
+
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+{{gr.nama}}
+<br />
+<br />
+<br />
+<br />
+<br />
+({{gr.adm_gadai}})
+</td>
+  <td align>Bandung, {% now "d F Y" %}<br />
+KADIV Gerai
+<br />
+<br />
+<br />
+<br />
+<br />
+(      ERYNALDI                        )
+</td>
+</tr>
+</table>

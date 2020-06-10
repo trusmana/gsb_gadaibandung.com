@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Barang {{ block.super }}
+{% endblock %}{% load useringroup %}
+{% block section %}barang{% endblock %}
+{% block sidebar %}<h3>Cari konsumen</h3>
+<form action='/customer/cari/' method='GET'>
+<h3>Barang/Nama</h3>
+<form action='/customer/cari/' method='GET'>
+<p>Nama<br /><input type="text" name="cari" size="10" >
+<input type = 'hidden' name = 'pilih' value = '2'>
+<input type ="submit" value="Cari...">
+</form></p>
+{% endblock %}
+{% block content %}
+
+
+<h2>Data Barang</h2>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow"><th>No</th><th>Nama</th><th>Nonas</th><th>Barang</th><th>Jatuh tempo</th><th>SN</th><th>Merk</th><th>Gerai</th></th></tr>
+
+{% for a in object_list%}
+    <tr>
+    <td>{{ forloop.counter }}</td>
+    <td> <a href="{{a.get_absolute_url }}">{{ a.nasabah}}</a></td>
+    <td>{{ a.nasabah.nomor}}</td>
+    <td>{{ a.jenis_barang}}</td>
+    <td>{{ a.jw|date:"d M Y "}}</td>
+    <td>{{ a.sn}}</td>
+    <td>{{ a.merk}}</td>
+    <td>{{ a.nama}}</td>
+    {% endfor %}
+</table>
+{% endblock %}
+
+
+

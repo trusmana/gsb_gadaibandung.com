@@ -1,0 +1,136 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup hitung %}
+<h2>DATA ALL TRANSAKSI  <small>DIV PJB</small></h2>  
+<table id="tabel" align="center">
+<br/>
+<form method="GET" action=".">{% csrf_token %}
+    <li><label for="id_tgl_trans"></label> <input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> -
+    <label for="id_tgl_trans"></label> <input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
+	<br>
+	    
+    <li>
+      <input type="submit" value="VIEW" class="cari" name="submit_satu" value="Add"/>
+      <input type="submit" value="CETAK PDF" class="cari" name="submit_dua"/>
+	  <input type="submit" value="CETAK XLS" class="cari" name="submit_tiga"/>
+	</li>
+
+</form>
+</table>
+
+<br>
+
+{% if plns %}
+
+<h3 style='text-align: center'><b>DATA ALL TRANSAKSI DIV PJB </b>
+<b><small>&nbsp;UNIT PJB </small></b><small>{{id_cabang}}</small>
+</h3>
+<h3 style='text-align: center'><b><small>Periode : {{start_date}} s/d {{end_date}} </small> </b></h3>
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%">
+<tr class="tableizer-firstrow">
+    <th rowspan= "2">KODE</th>
+    <th rowspan= "2">GERAI</th>
+    <th colspan = "2" align="center">PENCAIRAN</th>
+    <th colspan = "6" align="center">PELUNASAN</th>
+    <th colspan = "2" align="center">REAL AYDA</th>
+    <th rowspan = "2" >Penjualan Ayda (Rp)</th>
+    <th colspan = "7" align="center">PENDAPATAN (Rp)</th>
+    <th rowspan = "2">PIUTANG (Rp)</th>
+<tr>
+        <!--Pencairan-->
+    	<th>NOA PNCR</th>
+        <th>NILAI PNCR (Rp)</th>
+        <!--Akhir Pencairan-->
+        <!--Pelunasan-->
+      	<th>NOA PLNS</th>
+        <th>NILAI PLNS (Rp)</th>
+        <th>NOA AYDA HISTORY</th>
+        <th>NILAI AYDA HISTORY(Rp)</th>
+        <th>TOTAL NOA PLNS</th>
+        <th>TOTAL NILAI PLNS</th>
+        <!--REAL AYDA --> 
+        <th>NOA AYDA HISTORY</th>
+        <th>NILAI AYDA HISTORY(Rp)</th>
+        <!--AKHIR REAL AYDA -->
+        <!--Akhir Pelunasan-->
+	<th>JASA (Rp)</th>
+        <th>JASA TERLAMBAT(Rp)</th>
+	<th>DENDA (Rp)</th>
+	<th>BEASIMPAN (Rp)</th>
+	<th>ADM (Rp)</th>
+        <th>LABA PENJUALAN AYDA(Rp)</th>
+        <th>T.PENDAPATAN (Rp)</th>
+	</tr>
+</tr>
+{% regroup plns by nama_cabang as plns_list %}
+{% for k in plns %}
+		<tr>
+            <!--Kode dan Nama Cabang-->
+            <td align="center">{{k.kode_cabang}}</td>
+	    <td>{{k.nama_cabang}} </td>
+            <!--Akhir Kode dan Nama Cabang-->
+	    <!--Pencairan-->
+	    <td align = "right">{{k.noa_cair}}</td>
+	    <td align = "right">{{k.nilai_cair|number_format:0}}</td>
+            <!--Akhir Pencairan-->
+            <!--Pelunasan-->
+	    <td align = "center">{{k.noa_lunas}}</td>
+	    <td align = "right">{{k.nilai_pelunasan|number_format:0}}</td>
+            <td align = "center">{{k.noa_ayda_history|number_format:0}}</td>
+            <td align = "center">{{k.nilai_ayda_history|number_format:0}}</td>
+            <td align = "center">{{k.total_noa_ayda_lunas|number_format:0}}</td>
+            <td align = "center">{{k.total_nilai_ayda_lunas|number_format:0}}</td>
+            <!--Akhir Pelunasan-->
+            <!--Ayda Real -->
+            <td align = "center">{{k.noa_ayda|number_format:0}}</td>
+            <td align = "center">{{k.nilai_ayda|number_format:0}}</td>
+            <!--Penjualan-->
+            <td align = "right">{{k.nilai_jual_ayda|number_format:0}}</td>
+            <!--Akhir Penjualan-->
+            <!--Pendapatan-->
+	    <td align = "right">{{k.t_jasa|number_format:0}}</td>
+            <td align = "right">{{k.nilai_jasa_terlambat_plns|number_format:0}}</td>
+	    <td align = "right">{{k.t_denda|number_format:0}}</td>
+	    <td align = "right">{{k.t_beasimpan|number_format:0}}</td>	    
+	    <td align ="right">{{k.t_adm|number_format:0}}</td>
+            <td align = "right">{{k.t_jual|number_format:0|default_if_none:"0" }}</td>
+	    <td align = "right">{{k.t_akumulasi|number_format:0}}</td>
+            <td align = "right">{{k.piutang|number_format:0}}</td>
+            <!--Akhir Pendapatan-->
+       </tr>
+  {% endfor %}
+   	  <tr>
+	<td colspan="2" align="center"><b>Total</b> </td>
+                <td align="center"><b>{% ttl_noa_cair plns %}</b></td>
+		<td align="right"><b>{% ttl_nilai_cair plns %} </b></td>
+                <td align="right"><b>{% ttl_noa_lunas plns %} </b></td>
+                <td align="right"><b>{% ttl_nilai_lunas plns %} </b></td>
+                <td align="right"><b>{% ttl_noa_ayda_history plns %} </b></td>
+                <td align="right"><b>{% ttl_nilai_ayda_history plns %} </b></td>
+                <td align="right"><b>{% ttl_noa_ayda_lunas plns %} </b></td>
+                <td align="right"><b>{% ttl_nilai_ayda_lunas plns %} </b></td>
+                <td align="right"><b>{% ttl_noa_ayda plns %} </b></td>
+                <td align="right"><b>{% ttl_nilai_ayda plns %} </b></td>
+                <td align="right"><b>{% ttl_nilai_jual_ayda plns %} </b></td>
+                <td align="right"><b>{% ttl_t_jasa plns %} </b></td>
+                <td align="right"><b>{% ttl_nilai_jasa_terlambat_plns plns %} </b></td>
+                <td align="right"><b>{% ttl_t_denda plns %} </b></td>
+                <td align="right"><b>{% ttl_t_beasimpan plns %} </b></td>
+                <td align="right"><b>{% ttl_t_adm plns %} </b></td>
+                <td align="right"><b>{% ttl_t_jual plns %} </b></td>
+                <td align="right"><b>{% ttl_t_akumulasi plns %} </b></td>
+                <td align="right"><b>{% ttl_piutang plns %} </b></td>
+</tr>
+</table>
+
+{% else %}
+
+<p>Tidak ada Transaksi Pencairan.</p>
+{% endif %}
+{% endblock %}
+

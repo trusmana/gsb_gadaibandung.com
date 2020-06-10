@@ -1,0 +1,188 @@
+from django import forms
+from django.forms import ModelForm
+from gadai.appgadai.models import *
+from django.core.exceptions import ValidationError
+from chosen import forms as chosenforms
+from django.utils.safestring import mark_safe
+from django.forms import ModelForm,Select
+
+class PelunasanForm(ModelForm):
+    pelunasan = forms.ModelChoiceField(queryset=AkadGadai.objects.filter(lunas__isnull=True),widget=forms.HiddenInput())
+    status_pelunasan = forms.ChoiceField(choices=STATUS_LUNAS,widget=forms.RadioSelect(attrs={'class':'rad'}),initial=1,)
+    tanggal = forms.DateField(widget=forms.TextInput(attrs={'size': 8}))
+    nilai = forms.DecimalField(widget=forms.TextInput(attrs={'readonly':'True','size': 8}))
+    denda = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8,'value':0}))
+    terlambat = forms.IntegerField(widget=forms.TextInput(attrs={'size': 2,'value': '0'}))
+    bea_jasa = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8,'value':0}))
+    jenis_barang = forms.ChoiceField(choices=CHOICES_JENIS_TRANSAKSI,widget=forms.RadioSelect(attrs={'class':'rad'}))
+    denda_kendaraan = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8,'value': '0'}))
+    terlambat_kendaraan = forms.IntegerField(widget=forms.TextInput(attrs={'size': 2}))
+    bea_jasa_kendaraan = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8,'value':0}))
+    gerai = forms.ModelChoiceField(queryset=Tbl_Cabang.objects.all(),widget=forms.HiddenInput())
+
+    
+    class Meta:
+        model = Pelunasan 
+
+class HorizRadioRenderer(forms.RadioSelect.renderer):
+    def render(self):
+        return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+
+class BarangBedaForm(forms.Form):
+    agnasabah = forms.ModelChoiceField(label = "NAMA NASABAH",queryset=Nasabah.objects.filter(id__isnull=False))
+    tanggal = forms.DateField(initial=datetime.date.today,widget=forms.widgets.DateInput(attrs={'readonly':'false'}, format="%d-%m-%Y"))
+    gerai = forms.ModelChoiceField(queryset=Tbl_Cabang.objects.all())
+    
+    nilai = forms.IntegerField(label="Nilai",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    kewajiban_pelunasan = forms.IntegerField(label="Nilai",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    #taksir = forms.ModelChoiceField(queryset=Taksir.objects.all(),empty_label="----PILIH----",widget=forms.Select(attrs={'readonly':'readonly'}))
+    taksir = chosenforms.ChosenModelChoiceField(label = "Data Taksir",queryset=Taksir.objects.all(),widget=chosenforms.ChosenMultipleChoiceField({'class': 'kode_account'}))
+    barang = forms.ModelChoiceField(label="Nama Barang",queryset=Barang.objects.all(),widget=forms.Select(attrs={'readonly':'readonly'}))
+    bea_materai = forms.IntegerField(widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+
+    jenis_transaksi=forms.ChoiceField(choices=CHOICES_JENIS_TRANSAKSI,widget=forms.RadioSelect(attrs={'class':'rad'}))
+    
+    jangka_waktu = forms.ChoiceField( widget = forms.Select(), choices = JANGKA_WAKTU,initial='31')
+    ###KENDARAAN
+    jangka_waktu_kendaraan = forms.ChoiceField( widget = forms.Select(), choices = JANGKA_WAKTU_KENDARAAN)
+    jenis_kendaraan = forms.ChoiceField(widget=forms.Select(), choices=JENIS_KENDARAAN)
+    
+    #jenis_barang = forms.ChoiceField(widget = forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'barang'}), choices = JENIS_BARANG,initial ='0',required=False)
+    
+
+    ### Barang ELEKTRONIK###
+    jenis_barang = forms.ChoiceField(widget = forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'barang'}), choices = JENIS_BARANG,required=False)
+    
+    ###new input 1 april
+    charger = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_charger = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formhp formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')    
+    batre = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang formkamera'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_batre = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formhp formbarang formkamera'}), choices=CHOICES_KONDISI_BARANG,initial='5')        
+    keybord = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_keybord = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formhp formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')        
+    cassing = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_cassing = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')        
+    layar = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang '}), choices=CHOICES_BARANG, initial='2')
+    kondisi_layar = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formhp formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    password = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang '}), choices=CHOICES_BARANG, initial='2')
+    password_barang = forms.CharField(label="PASSWORD ", widget=forms.TextInput( attrs={'size': 15,'class':'formhp formbarang ','placeholder':'Isi Sesuai Password','value': '0'}))
+    
+    lensa = forms.ChoiceField(widget =forms.Select(attrs={'class':'formkamera formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_lensa = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formkamera formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    batre_kamera = forms.ChoiceField(widget =forms.Select(attrs={'class':'formkamera formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_batre_kamera = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formkamera formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    cassing_kamera = forms.ChoiceField(widget =forms.Select(attrs={'class':'formkamera formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_cassing_kamera = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formkamera formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    
+    optik_ps = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formps'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_optik_ps = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formps'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    harddisk  = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formps'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_harddisk = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formps'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    stick  = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formps'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_stick = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formps'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    hdmi  = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formps'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_hdmi = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formps'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    remote = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formtv'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_remote = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formbarang formtv'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    dus = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang'}), choices=CHOICES_BARANG, initial='2')
+    tas = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang'}), choices=CHOICES_BARANG, initial='2')
+    layar_tv = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formtv'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_layar_tv = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formbarang formtv'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    
+    accesoris_barang1=forms.CharField(max_length=150,widget=forms.Textarea(attrs={'value': '0'}))
+    
+    bpkb = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    stnk = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    faktur = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    gesek_nomesin = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    gesek_norangka = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    denda_gu = forms.IntegerField(label="Nilai",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    nilai_gu = forms.IntegerField(label="Nilai",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    jasa_gu = forms.IntegerField(label="Nilai",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    jns_gu =forms.CharField(max_length=2)
+    
+class AKADBARANGForm(forms.Form):
+    agnasabah = forms.ModelChoiceField(label = "NAMA NASABAH",queryset=Nasabah.objects.filter(id__isnull=False))
+    tanggal = forms.DateField(label = "Tanggal Akad",widget=forms.TextInput(attrs={'size': 10,'readonly':'True'}))
+    gerai = forms.ModelChoiceField(queryset=Tbl_Cabang.objects.all(),empty_label="--- PILIH ---")    
+    nilai = forms.IntegerField(label="Nilai",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}),\
+        error_messages={'required': 'NILAAI SALAH'})
+    taksir = chosenforms.ChosenModelChoiceField(label = "Data Taksir",queryset=Taksir.objects.all(),widget=chosenforms.ChosenMultipleChoiceField({'class': 'kode_account'}))    
+    bea_materai = forms.IntegerField(widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    jenis_transaksi=forms.ChoiceField(choices=CHOICES_JENIS_TRANSAKSI,widget=forms.RadioSelect(attrs={'class':'rad'}))
+  
+    jangka_waktu = forms.ChoiceField( widget = forms.Select(), choices = JANGKA_WAKTU, initial='31')
+    ###KENDARAAN
+    jangka_waktu_kendaraan = forms.ChoiceField( widget = forms.Select(), choices = JANGKA_WAKTU_KENDARAAN)
+    jenis_kendaraan = forms.ChoiceField(widget=forms.Select(), choices=JENIS_KENDARAAN)
+    ### Barang ELEKTRONIK###
+    
+    
+    ###new input 1 april
+    charger = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_charger = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formhp formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')    
+    batre = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang formkamera'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_batre = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formhp formbarang formkamera'}), choices=CHOICES_KONDISI_BARANG,initial='5')        
+    keybord = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_keybord = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formhp formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')        
+    cassing = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_cassing = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')        
+    layar = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang '}), choices=CHOICES_BARANG, initial='2')
+    kondisi_layar = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formhp formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    password = forms.ChoiceField(widget =forms.Select(attrs={'class':'formhp formbarang '}), choices=CHOICES_BARANG, initial='2')
+    password_barang = forms.CharField(label="PASSWORD ", widget=forms.TextInput( attrs={'size': 15,'class':'formhp formbarang ','placeholder':'Isi Sesuai Password','value': '0'}))
+    
+    lensa = forms.ChoiceField(widget =forms.Select(attrs={'class':'formkamera formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_lensa = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formkamera formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    batre_kamera = forms.ChoiceField(widget =forms.Select(attrs={'class':'formkamera formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_batre_kamera = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formkamera formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    cassing_kamera = forms.ChoiceField(widget =forms.Select(attrs={'class':'formkamera formbarang'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_cassing_kamera = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formkamera formbarang'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    
+    optik_ps = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formps'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_optik_ps = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formps'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    harddisk  = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formps'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_harddisk = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formps'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    stick  = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formps'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_stick = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formps'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    hdmi  = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formps'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_hdmi = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formps'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    remote = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formtv'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_remote = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formbarang formtv'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    dus = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang'}), choices=CHOICES_BARANG, initial='2')
+    tas = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang'}), choices=CHOICES_BARANG, initial='2')
+    layar_tv = forms.ChoiceField(widget =forms.Select(attrs={'class':'formbarang formtv'}), choices=CHOICES_BARANG, initial='2')
+    kondisi_layar_tv = forms.ChoiceField(widget =forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'formbarang formtv'}), choices=CHOICES_KONDISI_BARANG,initial='5')
+    
+    accesoris_barang1=forms.CharField(max_length=150,widget=forms.Textarea(attrs={'value': '0'}))
+    
+    bpkb = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    stnk = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    faktur = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    gesek_nomesin = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    gesek_norangka = forms.ChoiceField(widget =forms.Select(), choices=CHOICES_BARANG, initial='2')
+    
+    ### Barang ELEKTRONIK###
+    jenis_barang = forms.ChoiceField(widget = forms.RadioSelect(renderer=HorizRadioRenderer,attrs={'class':'barang'}), choices = JENIS_BARANG,initial ='0',required=False)
+    
+    sn = forms.CharField(label="S/N - Imei  ", widget=forms.TextInput( attrs={'size': 30,'value': '0'}))
+    warna = forms.CharField(max_length=30,widget=forms.TextInput(attrs={'value': '0'}))
+    tahun_pembuatan=forms.CharField(max_length=10,widget=forms.TextInput(attrs={'value': '0'}))
+    bulan_produksi =forms.CharField(max_length=10,widget=forms.TextInput(attrs={'value': '0'}))
+    lampiran_dokumen = forms.ChoiceField(widget =forms.Select(), choices=JENIS_DOKUMEN)    
+    
+    
+    ### KENDARAAN ####
+    merk_kendaraan = forms.ChoiceField(widget=forms.Select(), choices=MERK_KENDARAAN_CHOICES)
+    type_kendaraan =forms.CharField(max_length=20,widget=forms.TextInput(attrs={'value': '0'}))
+    tahun_pembuatan_kendaraan =forms.ChoiceField(widget=forms.Select(), choices=TAHUN_KENDARAAN_CHOICES)
+    no_polisi = forms.CharField(max_length=15,widget=forms.TextInput(attrs={'value': '0'}))
+    no_rangka = forms.CharField(max_length=15,widget=forms.TextInput(attrs={'value': '0'}))
+    no_mesin  = forms.CharField(max_length=15,widget=forms.TextInput(attrs={'value': '0'}))
+    warna_kendaraan = forms.CharField(max_length=10,widget=forms.TextInput(attrs={'value': '0'}))
+    no_bpkb = forms.CharField(max_length=30,widget=forms.TextInput(attrs={'value': '0'}))
+    stnk_atas_nama = forms.CharField(max_length=30,widget=forms.TextInput(attrs={'value': '0'}))
+    no_faktur = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'value': '0'}))
+    
+    
+

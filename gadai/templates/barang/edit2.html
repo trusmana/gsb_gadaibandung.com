@@ -1,0 +1,11 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}customer{% endblock %}
+{% block title %}Edit {{ object.nama }} - {{ block.super }}{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/">Dashboard</a> &gt; <a href="/customer/">Konsumen</a> &gt; Edit</p>
+<h2>Edit Konsumen</h2>
+<form method="POST" action="." class="tabular">
+{{ form.as_p }}
+<p><label></label><input type="submit" value="Simpan" /> <a href="/customer/" class="batal">batal</a></p>
+</form>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}barang{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+<h3>DATA PENCAIRAN</h3>
+<p>Harian</p>
+<ol>
+{% for d in day_list %}
+<li><a href = "/gerai/arsip/?tgl={{d|date:'Y-m-d'}}">{{ d|date:"d M Y"}}</a></li>{% endfor %}
+</ol>
+
+<p>Bulanan</p>
+<ol>
+{% for m in month_list %}
+<li><a href = "/gerai/rekapbulan/?tgl={{m|date:'Y-m-1'}}">{{ m|date:"M Y"}}</a></li>{% endfor %}
+</ol>
+<p>Tahunan</p>
+<ol>
+{% for y in year_list %}
+<li><a href = "/gerai/rekap_tahun/?tgl={{y|date:'Y-1-1'}}">{{ y|date:"Y"}}</a></li>{% endfor %}
+</ol>
+<h3> KETERANGAN
+<h5>&bull; MERAH = NASABAH LUNAS</h5>
+<h5>&bull; BIRU = NASABAH JATUH TEMPO</h5>
+<h5>&bull; KUNING = NASABAH LEWAT JATUH TEMPO</h5>
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="center">Rekap Pencairan Gerai  {{tanggal|date:"d F Y "}}</h2>
+<span class="contextual"></span>
+{% for p in gerai %}
+ {% ifchanged p.gerai %}
+ <br/>
+ {% endifchanged %} 
+ {% ifchanged  p.gerai %}
+ {% if not forloop.first %}</table></form><br /><br /><br />{% else %}{% endif %}
+   <p align="center"> 
+	<b>{{p.get_barang_display|upper}}</b>
+	<a href ="/gerai/{{p.gerai.id}}/rekapbulan/?tgl={{tanggal|date:'Y-m-d'}}">
+	 Gerai :<b> {{ p.gerai}}</b> </a> 
+	
+</p>
+
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%">
+<tr class="tableizer-firstrow">
+    <th>Norek</th>
+    <th>Nasabah</th>
+    <th>JW</th>
+    <th>Nilai (Rp)</th>
+    <th>Status</th>
+    <th>SN</th>
+    <th>Barang</th>
+    <th>Tanggal</th>
+    <th>Jatuh Tempo</th>
+    <th>Jasa(Rp)</th>
+    <th>Adm(Rp)</th>
+    <th>Bea Simpan(Rp)</th>
+    <th>Terima Bersih(Rp)</th>
+    
+ {% else %}
+ {% endifchanged %}
+ <tr {% if p.lunas %} class="row_lunas"{% endif %} {% if p.status_gadai %} class="row_status_gadai"{% endif %}{% if p.lewat_jw %} class="row_lewat_jw"{% endif %}>
+     
+    <td align="center"><a href="{{ p.get_absolute_url }}">{{ p.nonas }}</a></td>
+    <td align ="left">{{ p.agnasabah.nama }}</td>
+    <td>{{ p.jangka_waktu }}</td>
+    <td align="right">{{ p.nilai|number_format:0 }}</td>
+    <td align="center"> {% if p.lunas %}{{ p.status_transaksi|default_if_none:""}}  {% endif %}{{ p.prpj_status|default_if_none:""}}</td>
+    <td> {%if p.jangka_waktu_kendaraan %} {{p.barang.no_mesin}} {%else%}{{ p.barang.sn }}{%endif%}</td>
+    <td>{%if p.jangka_waktu_kendaraan %}{{ p.barang.type_kendaraan}}{%else%} {{p.barang.merk}} {%endif%}</td>        
+    <td align="center">{{ p.tanggal|date:"d-m-Y " }}</td>
+    <td align="center">{{ p.jatuhtempo|date:"d-m-Y " }}</td>
+    <td align = "right">{% if p.jangka_waktu_kendaraan%}{{p.jasa_kendaraan|number_format:0}}{%else%}{{p.jasa|number_format:0}}</td>{%endif%}
+    <td align = "right">{% if p.jangka_waktu_kendaraan%}{{p.adm_kendaraan|number_format:0}}{%else%}{{p.adm|number_format:0}}</td>{%endif%}
+    <td align = "right">{% if p.jangka_waktu_kendaraan%}{{p.beasimpan_kendaraan|number_format:0}}{%else%}{{p.biayasimpan|number_format:0}}</td>{%endif%}
+    <td align = "right">{% if p.jangka_waktu_kendaraan%}{{p.jumlahbiaya_kendaraan|number_format:0}}{%else%}{{p.jumlah_biaya|number_format:0}}</td>{%endif%}
+
+
+    
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %} 
+

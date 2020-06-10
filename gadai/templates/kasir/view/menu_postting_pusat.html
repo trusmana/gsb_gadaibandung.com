@@ -1,0 +1,50 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}pusat Posting{% endblock %}
+{% block extrahead %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2>REKAPITULASI TRANSAKSI  PUSAT <small>DIV PJB</small>{{cabang}}&nbsp;<small><small>{{postingon}} &nbsp {{postingonoff}} &nbsp {{postingoff}}</small>{{tampil}}</small>
+<a href="/rreport/{{cabang}}/posting_tanggal_pusat/"  onclick="if (confirm('YAKIN  AKAN MELAKUKAN POSSTING HARIAN TRANSAKSI PUSAT ??')) { var f = document.createElement('form');f.csrfmiddlewaretoken= csrftoken; f.style.display = 'None'; this.parentNode.appendChild(f);  f.action = this.href; f.submit(); }; return false;">{% csrf_token %}<button class ="next" align="center">POSTING TRANSAKSI HARIAN</button></a>
+<a href="/kasirgerai/{{cabang}}/cetak_all_transaksi_kas/" ><img src="/static/printer.png"  height="22" width="22" title="Transaksi Tunai"></a>
+</h2>
+
+<h3 style='text-align: center'><b> LAPORAN TRANSAKSI PUSAT</b></h3>
+<h3 style='text-align: center'><b><small>Periode : {{start_date|date:"d-M-Y"}}</small> </b></h3>
+
+{% for p in ledger %}
+{% ifchanged p.id_coa and p.id_coa.saldo_pjb %}{% if not forloop.first %}</table>{% endif %}
+{% if forloop.first %}
+   
+{%endif%}
+<p>Akun : {{ p.id_coa }}<small>( {{ p.id_coa.tbl_transaksi_set.all.count }} )</small></p>
+<table class="list">
+    <tr>
+      <th>Tanggal</th>
+      <th>Tiket Jurnal</th>
+      <th>Keterangan</th>
+      <th>Debet (Rp.)</th>
+      <th>Kredit (Rp.)</th>
+      <th>Saldo (Rp.)</th><th>User</th>
+    </tr>
+    <tr> 
+         <td></td><td></td><td>Saldo Awal</td><td></td><td></td><td>{{p.saldo_pusat|default_if_none:"0"|number_format:0}}</td><td></td>
+</tr>
+{% endifchanged %}
+
+
+<tr class="{% cycle 'row1' 'row2' %}">
+    <td>{{ p.tgl_trans|date:'d-M-Y' }}</td>
+    <td>{{p.tiket}}</td>
+    <td>{{ p.diskripsi }}</td>
+    <td class="kredit uang r">{{ p.debet|number_format:0 }}</td>
+    <td class="debet uang r">{{ p.kredit|number_format:0 }}</td>
+    <td class="saldo uang r">{{ p.saldo_akhir|number_format:0 }} </td><td>{{p.cu}}</td>          
+</tr>
+ {% if forloop.last %}</table>{% endif %}{% endfor %}
+
+{% endblock %}

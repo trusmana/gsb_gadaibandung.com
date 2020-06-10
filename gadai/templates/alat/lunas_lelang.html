@@ -1,0 +1,57 @@
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#id_tgl_lelang").datepicker({dateFormat: 'yy-mm-dd'});
+    $('input:text').setMask();
+       $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+    if ($("input[name='lunas']:checked").val() == '1')
+    { $("p#id_status_transaksi").show(); } else
+    { $("p#id_status_transaksi").hide(); }
+    $("input[name='lunas']").change(function() {
+        var lunas = $("input[name='lunas']:checked").val();
+        if (lunas == '1') { $("#id_status_transaksi").show(); } else { $("id_status_transaksi").hide(); }
+    });
+});
+</script>
+</script>
+<script type='text/javascript'>
+$(document).ready(function(){$(&#39;.notification&#39;).hover(function(){$(this).css(&#39;cursor&#39;,&#39;auto&#39;);});
+$(&#39;.notification span&#39;).click(function(){$(this).parent().fadeOut(800);});});
+</script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+	function startCalc(){
+	interval = setInterval("calc()",1);
+}
+function calc(){
+nilai = document.frmAdd.nilai.value;
+terlambat = document.frmAdd.terlambat.value;
+document.frmAdd.denda.value =  (parseInt(nilai) *  0.05/30) * document.frmAdd.terlambat.value;
+document.frmAdd.bea_jasa.value = (parseInt(nilai) *  0.02/7)*document.frmAdd.terlambat.value;
+
+terlambat_kendaraan = document.frmAdd.terlambat_kendaraan.value;
+document.frmAdd.denda_kendaraan.value =  (parseInt(nilai) *  0.05/30) * document.frmAdd.terlambat_kendaraan.value;
+document.frmAdd.bea_jasa_kendaraan.value = (parseInt(nilai) *  0.04/30)*document.frmAdd.terlambat_kendaraan.value;
+}
+function stopCalc(){
+clearInterval(interval);
+}
+</script>
+<script type="text/javascript" href="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+    $(":radio.rad").click(function(){
+    $(".formbarang, .formkendaraan").hide()
+    if($(this).val() == "1"){
+    $(".formbarang").show();
+    }else{
+    $(".formkendaraan").show();
+    }
+    });
+    });
+</script>

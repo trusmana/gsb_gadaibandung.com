@@ -1,0 +1,37 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Jurnal_Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}{% include "alat/neraca.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2>POSTING TRANSAKSI PJB   <small>DIV PJB</small></h2>
+<div id="jeding">
+  <img id="loading_gambar" src="/static/images/jeding.gif" alt="Load" />
+</div>
+
+<h3 style='text-align: center'><b><small>&nbsp;Periode : {{sekarang|date:"d-M-Y"}}</small> </b></h3>
+<table class="list">
+<tr>
+    <th>Kode Cabang </th>
+    <th>Gerai</th>
+    <th>Status Post</th>
+</tr>
+
+{% for a in cbg%}
+	<tr>
+        <td>{{ a.kode_cabang }}</td>
+        <td>{{a.nama_cabang}}  {{a.kode_cabang}} </td>
+        <td align="right">         
+            <a href='/rkeuangan/{{a.kode_cabang}}/input_posting_akhir_tahun/'  class='harian' >POSTING AKHIR TAHUN</a>  
+        </td>
+    </tr>
+{% endfor%}
+
+</table>
+{% endblock %}
+

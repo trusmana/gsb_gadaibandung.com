@@ -1,0 +1,80 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}nasabah{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<script type='text/javascript'>
+$(document).ready(function(){$(&#39;.notification&#39;).hover(function(){$(this).css(&#39;cursor&#39;,&#39;auto&#39;);});
+$(&#39;.notification span&#39;).click(function(){$(this).parent().fadeOut(800);});});
+</script>
+{% load number_format useringroup %}
+<h2 align="right">:: DATA NASABAH  {{ ag.nasabah.nama }}::</h2>
+
+<table width="90%">
+<tr>
+    <td><STRONG>Nama</STRONG></td><td>: {{nsb.nama}}</td>
+{% ifusergroup ADM_GERAI %}
+    <td><a href="/gerai/{{nsb.id}}/barang_beda/" class ="harian" title="AKAD DENGAN BARANG BEDA">AKAD BARU</a></td>
+{% endifusergroup %}
+</tr>
+<tr><td><STRONG>Alamat      </STRONG></td><td>: {{nsb.alamat_ktp}}  </td></tr>
+<tr><td><strong>No Identitas     </strong> </td><td width="50%">: {{nsb.no_ktp}}  </td></tr>
+<tr> <td><strong>RT / RW  <strong> </td><td>: {{nsb.rt_ktp}}  / {{nsb.rw_ktp}}</td></tr>
+</table>
+
+
+<h3 align="center">:: Data Pinjaman Barang Sebelumnya ::</h3>
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%" align="center">
+    <tr class="tableizer-firstrow">
+    <th>No Rek</th>
+    <th>No Barang</th>
+    <th>Transaksi</th>
+    <th>Gerai</th>
+    <th>Nama</th>
+    <th>JW</th>
+    <th>Jatuh Tempo</th>
+    <th>Nilai</th>
+    <th>Barang</th>
+    <th>Status Akad</th>
+
+    <th colspan = '2'>MENU</th>
+    <th>Keterangan Akad</th>
+    </tr>
+
+    {% for p in ag %}
+
+<tr>
+    <td><a href="{{p.get_absolute_url}}" class="lihat" title="Lihat Data Akad" >{{ p.norek}}</a></td>
+    <td><a href="/nasabah/{{p.barang.id}}/history_gu/" class="lihat" title="Lihat Data Akad">{{p.barang.id}}</a></td>
+    <td>{{p.tanggal|date:"d M Y "}}</td>
+    <td>{{p.gerai.nama_cabang}}</td>
+    <td>{{p.agnasabah.nama}}</td>
+    <td>{% if p.jenis_transaksi = '2' %} {{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+    {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+    <td><abbr title="{{ p.cdate }}">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+    <td >Rp. {{p.nilai|number_format:0}}</td>
+    <td >{% if ag.jenis_transaksi = 1 %}{{p.barang.no_polisi}}|{{p.barang.no_rangka}}{%else%}{{p.barang.merk|truncatewords:3}}|{{p.barang.type|truncatewords:3}}{%endif%}</td>
+    <td>{%if p.status_transaksi == 'HILANG' %} {%else%}{{ p.get_status_transaksi_display|default_if_none:"AKTIF"}}{%endif%}</td>    
+    <td>{% if p.status_oto_akad_gu == '1' %} <b> OTIRISASI MANOP </b>{%endif%}
+        {% if p.status_oto_akad_gu == '2' %}<td>
+
+
+    {% ifusergroup ADM_GERAI %}
+    <a href="/gerai/{{p.agnasabah.id}}/barang_sama_oto_manop/{{p.barang.id}}/{{p.taksir.id}}/" title="PELUNASAN OTO MANOP" class="cari" method="post">GU OTO MANOP</a>
+    {% endifusergroup %} {%endif%}
+    {% if p.barang.akad_ulang >= p.param_tombol and p.barang.buka_tutup_gu == 99 %}
+    MAAF AKAD SADAH MELEBIHI BATAS
+    {% else %}
+    {% if p.status_transaksi == None or p.status_transaksi == '3'%}
+    {% ifusergroup ADM_GERAI %}
+    <a href="/gerai/{{p.agnasabah.id}}/barang_sama/{{p.barang.id}}/{{p.taksir.id}}/" title="AKAD DENGAN BARANG SAMA" class="next" method="post">GADAI ULANG</a>{% endifusergroup %}{% endif %}{% endif %}</td>
+    {% ifusergroup MANOP|ASMANPJB|staffops %}
+    {% if p.barang.akad_ulang >= p.param_tombol and p.barang.buka_tutup_gu == 99 %}
+    <td><a href="/nasabah/{{p.barang.id}}/edit_barang/" title="Buka Tombol" class="next">Buka Tombol</a></td>
+    {% else %}<td>&nbsp;</td>{% endif %}{% endifusergroup %}</td>
+    <td> {{ p.barang.akad_ulang }} x GU | {{p.manopgadai.note}}</td>
+</tr>
+    {% endfor %}
+</table>
+{% endblock %}
+

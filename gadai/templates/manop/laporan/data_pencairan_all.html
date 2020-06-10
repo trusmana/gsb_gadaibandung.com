@@ -1,0 +1,30 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}pencairan{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right"> Rekap All Pencairan Pencairan Gerai </h2>  
+<form method="GET" action="/manop/all_data_cair/">{% csrf_token %}
+   <table id="tabel" align="center">
+    <li><label for="id_cabang">Kode Cabang</label> :
+      {{form.id_cabang}}      
+   </li>
+   <br>
+   <li><label for="id_tgl_trans">Tanggal </label> :{{form.start_date}} 
+   <label for="id_tgl_trans">Tanggal </label> :{{form.end_date}}</li>
+   <br>
+   <li>
+       <input type="submit" value="&#187;Cetak Xls" class="simpan" name="submit_satu" value="Add"/>
+
+   </li>
+   </table>
+</form>
+
+</table>
+{% endblock %}
+
+
+

@@ -1,0 +1,27 @@
+{% extends "base_aplikasi.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<h2 align="right">:: DATA LELANG KSU RIZKYABADI ::</h2>
+
+<hr></hr>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow"><th>No</th><th>No Rek</th><th>Nama</th><th>Nama Barang</th><th>JW</th><th>Status</th><th>Tgl J.Tempo</th><th>Gerai</th><th>Gerai</th><th>Gerai</th></tr>
+{% for a in lapur%}
+{% load number_format useringroup %}
+    <tr>
+    <th ALIGN="CENTER">{{ forloop.counter }}</th>
+    <td ALIGN="CENTER"><a href = "/lelang/lapur/">{{ a.norek }}</a></td>
+    <td ALIGN="LEFT">{{ a.agnasabah.nama}}</td>
+    <td ALIGN="CENTER">{{ a.nilai|number_format:0}}</td>
+    <td ALIGN="CENTER">{{ a.jangka_waktu}}</td>
+    <td ALIGN="CENTER">{{a.status_transaksi}}</td>
+    <td ALIGN="CENTER">{{ a.jatuhtempo|date:" d-M-Y"}}</td>
+    <td ALIGN="LEFT">{{a.gerai}}</td>
+
+{% endfor %}
+</table>
+{% endblock %}

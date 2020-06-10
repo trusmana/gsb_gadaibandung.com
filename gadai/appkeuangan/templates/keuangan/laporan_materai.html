@@ -1,0 +1,51 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}{{ block.super }}{% endblock %}
+{% block section %}Materai{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="left">BYDD PERSEDIAAN MATERAI</h2>
+<br/>
+<h3 align="right" ><b>TRANSAKSI PERSEDIAAN MATERAI</b></h3>
+<table class="list">
+    <tr >
+        <th>Gerai</th>
+        <th>Pembelian</th>
+        <th>Saldo Awal</th>
+        <th>Penjualan</th>
+        <th>Pengiriman Materai</th>
+        <th>Pemakaian Materai</th>
+        <th>Persediaan Materai</th>
+        <th>Pcs</th>
+    </tr>
+    {% for c in cabang%}
+    </tr>    
+    <tr class="{% cycle 'row1' 'row2' %}">
+        <td align="left" >- {{c.nama_cabang}}</td>
+        <td align="right">{{c.pembelian_materai_pusat|number_format:0}}</td>
+        <td align="right">{{c.saldo_materai|number_format:0}}</td>
+        <td align="right">{{c.penjualan_materai_pusat|number_format:0}}</td>
+        <td align="right">{{c.permintaan_materai|number_format:0}}</td>
+        <td align="right">{{c.pemakaian_materai|number_format:0}}</td>
+        <td align="right">{{c.saldo_akhir_materai|number_format:0}}</td>
+        <td align="right">{{c.pcs_materai_1|number_format:0}}</td>
+    </tr>
+ {% endfor%}
+    <tr> 
+        <th align="center">Total</th>
+        <th align="right"><b>{{total_beli|number_format:0}}</b></th>
+        <th align="right"><b>{{total_saldo|number_format:0}}</b></th>
+        <th align="right"><b>{{total_jual|number_format:0}}</b></th>
+        <th align="right"><b>{{total_permintaan|number_format:0}}</b></th>
+	<th align="right"><b>{{total_pemakaian|number_format:0}}</b></th>
+        <th align="right"><b>{{total_saldo_akhir|number_format:0}}</b></th>
+        <th align="right"><b></b></th>
+
+    </tr>
+</table>
+</br></br>
+{% endblock %}
+

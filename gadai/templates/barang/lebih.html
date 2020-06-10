@@ -1,0 +1,34 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}Barang {{ block.super }}
+{% endblock %}{% load useringroup %}
+{% block section %}barang{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="center">HISTORY TRANSAKSI DEBITUR  <small>Gerai {{gr.nama}}</small></h2>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow">
+        <th>No</th>
+        <th>Nama</th>
+        <th>Jatuh tempo</th>
+        <th>Nilai (Rp)</th>
+        <th>History Transaksi</th>
+        <th>History Barang Sama</th>
+    </tr>
+
+{% for a in ag%}
+    <tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td> <a href="/nasabah/{{a.agnasabah.id}}/show/">{{ a.agnasabah.nama}}</a></td>
+    <td>{{a.jatuhtempo|date:" d-M-Y"}}</td>
+    <td align="right">{{ a.nilai|number_format:0}}</td>
+    <td align="center">{{ a.agnasabah.lebih}}</td>    
+    <td align="center">{{ a.barang.totallebih}}</td>
+    {% endfor %}
+</table>
+{% endblock %}
+
+
+

@@ -1,0 +1,34 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+
+{% endblock %}
+{% block section %}Parameter{% endblock %}
+{% block sidebar %}{% load number_format %}
+<div class="menu_list" id="secondpane">
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU ADD</span></a></li>
+        <li class='last'><a href='/parameterjurnal/add_panjar/'><span>ADD PARAMETER</span></a></li>
+    </ul>
+</div>
+</div>
+{% endblock %}
+{% block content %}
+
+<h2 align="right">:: PARAMETER BIAYA PENGEMBALIAN ::</h2>
+
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%">
+    <tr>
+        <th>No</th><th>ITEM</th><th>JENIS</th><th>COA DEBET</th><th>COA KREDIT</th><th>CABANG ASAL</th><th>CABANG DITUJU</th>
+    </tr>
+    {% for object in biaya%}
+    <tr>
+        <td><a href='/parameterjurnal/{{object.id}}/hapus_jurnal_panjar/' title ="Hapus Jurnal">{{object.id}}</a></td>
+        <td><a href='/parameterjurnal/{{object.id}}/edit_panjar/' title ="EDIT Jurnal">{{ object.get_item_display}}</a></td>
+        <td>{{object.jenis}}</td>
+        <td>{{ object.coa }}</td> <td>{{ object.coa_kredit }}</td>      
+        <td>{{ object.cabang}}</td> <td>{{ object.ke_cabang}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

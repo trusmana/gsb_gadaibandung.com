@@ -1,0 +1,50 @@
+from django import forms
+from django.forms import ModelForm
+from gadai.appgadai.models import *
+from chosen import forms as chosenforms
+from django.utils.safestring import mark_safe
+
+AKUN_PILIH = (
+	('519','Beban Transportasi & Perjalan Dinas'),('520','Beban Sewa'),('521','Beban Perlengkapan'),
+	('523','Beban Dokumentasi'),('525','Beban Pembinaan Lingkungan'),('526','Beban Konsumsi'),('527','Beban Sumbangan'),
+	('528','Beban Iuran & Ijin Lembaga Pemerintah'),('529','Beban Pemeliharaan & Perbaikan Peralatan Kantor'),('530','Beban Pemeliharaan & Perbaikan Peralatan Gedung'),
+	('531','Transportasi'),('532','Beban Pemeliharaan & perbaikan Gedung'),('537','Beban Promosi'),('539','Beban Adm % Umum Lain-Lain')
+)
+
+JENIS_TRANSAKSI =(
+	('1','KAS'),
+	('2','UANG MUKA'),
+)
+
+JS_TRANSAKSI =(
+	('BANK','BANK'),
+	('KAS','KAS'),
+)
+
+GERAI_PILIH =(
+	('---Pilih---','---Pilih---'),('JAKARTA','JAKARTA'),('SUCI','SUCI'),('DIPATIUKUR','DIPATIUKUR'),('BALUBUR','BALUBUR'),
+	('HILIR','GERLONG HILIR'),('KOPO','KOPO'),('CIBIRU','CIBIRU'),('CIPACING','CIPACING'),('JATINANGOR','JATINANGOR'),
+	('CIMAHI','CIMAHI'),('BUAHBATU','BUAHBATU'),
+	('MARANATA','MARANATA'),
+	('CIREBON','CIREBON PERJUANGAN'),('CIUMBULEUIT','CIUMBULEUIT'),('UJUNGBERUNG','UJUNGBERUNG'),('CIWASTRA','CIWASTRA'),
+)
+
+
+class HorizRadioRenderer(forms.RadioSelect.renderer):
+	def render(self):
+		return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+
+class BiayasForm(forms.Form):
+    gerai = forms.ModelChoiceField(queryset=Tbl_Cabang.objects.all())
+    tanggal = forms.DateField(initial = datetime.date.today,widget=forms.widgets.DateInput(attrs={'readonly':'true'}, format="%d-%m-%Y"))
+    penambahan_saldo = forms.IntegerField(widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang','value':0,'size':10}),required = False)
+    ket_penambahan_saldo = forms.CharField( widget=forms.TextInput(attrs={'size':25,'placeholder':'Keterangan'}),required = False)
+    pengembalian_saldo = forms.IntegerField(widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang','value':0,'size':10}))
+    ket_pengembalian_saldo = forms.CharField( widget=forms.TextInput(attrs={'size':25,'placeholder':'Keterangan'}),required = False)
+    antar_gerai = chosenforms.ChosenChoiceField(widget=forms.Select(), choices=GERAI_PILIH,required = False)
+    js_trans = forms.ChoiceField(widget=forms.Select(),choices=JS_TRANSAKSI)
+    antar_gerai_kembali = chosenforms.ChosenChoiceField(widget=forms.Select(), choices=GERAI_PILIH,required = False)
+    js_trans_kembali = forms.ChoiceField(widget=forms.Select(),choices=JS_TRANSAKSI)
+	#class Meta:
+		#model = Biaya
+

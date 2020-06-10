@@ -1,0 +1,57 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="/static/tedi/css/jquery.dataTables.css">
+<script type="text/javascript" language="javascript" src="/static/tedi/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/tedi/js/jquery.dataTables.js"></script>
+<script type="text/javascript" language="javascript" class="init">  
+$(document).ready(function() {
+    $('#example').DataTable();
+} );
+    $(document).ready(function() {
+        $('#menuinput').click(function() {
+            $('.chosen-container-single').trigger("liszt:updated");
+            $('.tampil').slideToggle("fast");
+
+        });
+    });
+</script>
+{% endblock %}
+{% block section %}Parameter{% endblock %}
+{% block sidebar %}{% load number_format %}
+{% endblock %}
+{% block content %}
+
+<h2 align="right">:: PARAMETER BIAYA PENGEMBALIAN ::</h2>
+    <div id="menuinput"><button class="neraca">+TAMBAH</button></div>
+    <div class="tampil" >
+    <form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %}
+        <table>
+            {{form.as_table}}
+        </table>
+        <li><input  type="submit" name="submit" value="@Simpan" class="simpan"></li>
+    </form>
+    </div>
+<br>
+<table id="example" class="display" cellspacing="0" >
+<thead>
+    <tr>
+        <th>ITEM</th><th>CABANG</th><th>DEBET PENGEMBALIAN </th><th>KREDIT PENGEMBALIAN</th><th>DEBET PENGAMBILAN</th>
+        <th>KREDIT PENGAMBILAN</th><th>Menu</th>
+    </tr>
+</thead>
+<tbody>
+    {% for object in gu %}
+    <tr>
+        <td>{{ object.get_item_display}}</a></td>
+        <td>{{object.cabang}}</td>
+        <td>{{ object.debet_pengembalian_uk }}</td>
+        <td>{{ object.kredit_pengembalian_uk }}</td>      
+        <td>{{ object.debet_pengambilan_uk}}</td> 
+        <td>{{ object.kredit_pengambilan_uk}}</td>
+        <td><a href='/parameter/{{object.id}}/edit_uangmuka_gerai/' title ="EDIT Jurnal" class="neraca">@Edit</a></td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+{% endblock %}
+

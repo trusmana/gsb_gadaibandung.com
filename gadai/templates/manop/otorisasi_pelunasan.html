@@ -1,0 +1,27 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}OTO PLNS{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="right">:: DAFTAR OTORISASI PELUNASAN ::</h2>
+
+<table class="list">
+    <tr><th>No</th><th>No Rek</th><th>Nama</th><th>Nilai (Rp)</th><th>JW</th><th>Transaksi</th><th>J.Tempo</th><th>Gerai</th><!--<th colspan= "5">MENU</th>--></tr>
+{% for a in manop%}
+
+    <tr>
+    <td ALIGN="CENTER">{{ forloop.counter }}</td>
+    <td ALIGN="CENTER">  <a href="/kasirgerai/{{a.pelunasan.id }}/mcc/" title="Menu Otorisasi Pelunasan" class="perpanjang"> {{ a.pelunasan.norek }}</button>
+        <a href="/manop/{{a.id }}/edit_view/" class="back" title="Menu Otorisasi Pelunasan" >OTORISASI</a></td>
+    <td ALIGN="LEFT">{{ a.pelunasan.agnasabah.nama}}</td>
+    <td ALIGN="RIGHT">{{ a.pelunasan.nilai|number_format:0}}</td>
+    <td ALIGN="CENTER">{{ a.pelunasan.jangka_waktu}}</td>
+    <td ALIGN="CENTER">{{a.pelunasan.tanggal|date:" d-m-Y"}}</td>
+    <td ALIGN="CENTER">{{ a.pelunasan.jatuhtempo|date:" d-m-Y"}}</td>
+    <td ALIGN="LEFT">{{a.pelunasan.gerai}}</td>
+    
+{% endfor %}
+</table>
+{% endblock %}

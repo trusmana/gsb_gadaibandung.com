@@ -1,0 +1,73 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}{{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right">:: Daftar Taksiran Barang Gadai ::</h2><body>
+    {% if error %}
+        <p style="color: red;">Please submit a search term.</p>
+    {% endif %}
+    <form action="/taksir/cari/" method="get">
+        <input type="text" name="q">
+        <input type="submit" value="Search">
+    </form>
+    <br/>
+</body>
+<table align = "center">
+<div class="pagination" align="center">
+    <span class="step-links">
+        {% if taksir.has_previous %}
+            <a href="?page={{ taksir.previous_page_number }}" class="next">Back</a>
+        {% endif %}
+
+        <span class="current">
+            Halaman {{ taksir.number }} Dari {{ taksir.paginator.num_pages }}.
+        </span>
+
+        {% if taksir.has_next %}
+            <a href="?page={{ taksir.next_page_number }}" class="next">Next</a>
+        {% endif %}
+    </span>
+</div>
+</table>
+
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow"><th>No</th><th>Kode Barang</th><th>Type</th><th>Nama barang</th><th>Harga Baru</th><th>Harga Pasar</th><th>Max Pinjaman</th><th>Tanggal</th><th>Status</th><th>Menu</th></tr>
+{% for taksir in taksir.object_list%}
+    <tr>
+    <td>{{ forloop.counter }}</td>
+    <th><a href="/taksir/{{taksir.id}}/show/">{{ taksir.kobar}}</a></th>
+    <td>{{ taksir.type }}</td>
+    <td>{{ taksir.spesifikasi }}</td>
+    <td>{{ taksir.harga_baru|number_format:0}}</td>
+    <td>{{ taksir.harga_pasar|number_format:0}}</td>
+    <td>{{ taksir.maxpinjaman|number_format:0}}</td>
+    <td>{{ taksir.tglupdate|date:" d-M-Y"}}</td>
+    <td>{{taksir.get_status_display}}</td>
+    <td>{% ifusergroup pusat|staffops%} <a href="/taksir/{{taksir.id }}/edit/"><img src="/static/images/edit.png" height="27px"/>{% endifusergroup %}
+{% endfor %}</td>
+</table>
+ <table align = "center">
+<div class="pagination" align="center">
+    <span class="step-links">
+        {% if taksir.has_previous %}
+            <a href="?page={{ taksir.previous_page_number }}" class="next">Back</a>
+        {% endif %}
+
+        <span class="current" class="next">
+            Halaman {{ taksir.number }} Dari {{ taksir.paginator.num_pages }}.
+        </span>
+
+        {% if taksir.has_next %}
+            <a href="?page={{ taksir.next_page_number }}" class="next">Next</a>
+        {% endif %}
+    </span>
+</div>
+</table>
+ 
+
+{% endblock %}

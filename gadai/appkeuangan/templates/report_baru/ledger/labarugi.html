@@ -1,0 +1,149 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}SHU{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2> Laporan Selisih Hasil Usaha (SHU)</h2>  
+<table id="tabel" align="center">
+<br/>
+<form method="GET" action="/rreport/laba_rugi_keu/">
+   <li><label for="id_cabang">Kode Cabang</label> : {{form.id_cabang}}
+   </li>
+    <li><label for="id_tgl_trans">Posisi Tanggal</label> : {{form.end_date}}</li>
+    <li>
+	<input type="submit" value="@Non Posting" class="posting" name="submit_satu"/>&nbsp;
+<!--	<input type="submit" value="#Posting" class="nonposting" name="submit_dua"/>&nbsp;  -->
+   </li> 
+
+</table>
+      
+<br>
+{% if akun %}
+<p style='text-align: center'><b>UNIT PJB 
+   {% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA      {%endif%} 
+   {% if id_cabang = '302' %} GERAI SUCI    {%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR   {%endif%}
+   {% if id_cabang = '304' %}GERAI BALUBUR  {%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
+   {% if id_cabang = '307' %}GERAI KOPO     {%endif%} {% if id_cabang = '308' %}GERAI CIBIRU       {%endif%}
+   {% if id_cabang = '309' %}GERAI CIPACING {%endif%} {% if id_cabang = '310' %}GERAI JATINANGOR  {%endif%}
+   {% if id_cabang = '327' %}GERAI CIMAHI  {%endif%} {% if id_cabang = '312' %}GERAI BUAH BATU   {%endif%}
+   {% if id_cabang = '313' %}GERAI KORDON  {%endif%} {% if id_cabang = '314' %}GERAI CIHANJUANG  {%endif%}
+   {% if id_cabang = '315' %}GERAI MARANATA{%endif%} {% if id_cabang = '316' %}GERAI KIARACONDONG{%endif%}
+   {% if id_cabang = '317' %}GERAI CIREBON PERJUANGN {%endif%} {% if id_cabang = '318' %}GERAI CIREBON {%endif%}
+   {% if id_cabang = '319' %}GERAI CIUMBELEUIT {%endif%} {% if id_cabang = '113' %}GERAI UJUNG BERUNG{%endif%}
+   {% if id_cabang = '322' %}GERAI BOJONGSOANG{%endif%}{% if id_cabang = '300' %}KANTOR PUSAT{%endif%}
+   {% if id_cabang = '329' %}GERAI LEWIGAJAH{%endif%}{% if id_cabang = '333' %}GADAI NIGHT DU{%endif%}
+   {% if id_cabang = '331' %}GADAI NIGHT JAKARTA{%endif%}{% if id_cabang = '311' %}GARAI BUAHBATU{%endif%}
+   {% if id_cabang = '320' %}GERAI UJUNGBERUNG{%endif%}{% if id_cabang = '324' %}GERAI KATAPANG SAYATI{%endif%}
+   {% if id_cabang = '325' %}GERAI CIMINDI{%endif%}{% if id_cabang = '326' %}GERAI CEMARA{%endif%}
+   {% if id_cabang = '332' %}GERAI TURANGGA{%endif%}{% if id_cabang = '328' %}GADAI NIGHT CIBIRU{%endif%}
+   {% if id_cabang = '330' %}GADAI NIGHT BALUBUR{%endif%}
+
+</b></p>
+
+<p style='text-align: center'><b>LAPORAN SELISIH HASIL USAHA</b></p>
+<p style='text-align: center'><b>Periode : {{end_date}}</b></p>
+<table class="list">
+	<thead>
+    <tr>
+		<th><b>Coa</b></th>
+		<th><b>Description</b></th>
+		<th><b>Saldo Awal</b></th>
+		<th><b>Nominal</b></th>
+	</tr>
+	</thead>
+{% for d in akun%}   
+	<tbody>  
+	<tr {% if d.header_parent.id = 1%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id %}  {% else %} class="row_nenek" {% endif%}
+	      {% if '266,388' in d.header_parent.id %} class="row_anak" {% else %}{% endif%}
+	      {% if d.header_parent.id = 406%} class="row_anak" {% else %}{% endif%}
+	      {% if d.header_parent.id = 449%} class="row_anak" {% else %}{% endif%}
+	      {% if d.header_parent.id = 540%} class="row_anak" {% else %}{% endif%}
+	      {% if d.header_parent.id = 547%} class="row_anak" {% else %}{% endif%}
+	      {% if d.header_parent.id = 555%} class="row_anak" {% else %}{% endif%}
+	      {% if d.header_parent.id = 560%} class="row_anak" {% else %}{% endif%}
+	      {% if d.header_parent.id = 2%} class="row_cucu" {% else %}{% endif%}
+	      {% if d.header_parent.id = 191%} class="row_cucu" {% else %}{% endif%}
+	      {% if d.header_parent.id = 207%} class="row_cucu" {% else %}{% endif%}
+	      {% if d.header_parent.id = 267%} class="row_cucu" {% else %}{% endif%}
+	      {% if d.header_parent.id = 337%} class="row_cucu" {% else %}{% endif%} 	 
+	      {% if d.header_parent.id = 381%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 407%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 450%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 2%} class="row_cucu" {% else %}  {% endif%}>
+              {% if d.saldo_akhir > 0%}
+		<td>
+		 	{% if d.header_parent.id = 406%} &nbsp;&nbsp; {% else %}{% endif%}
+		 	{% if d.header_parent.id = 449%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 540%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 547%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 555%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 560%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 2%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 191%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 207%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 267%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 337%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%} 	 
+	      	{% if d.header_parent.id = 381%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}
+	      	{% if d.header_parent.id = 407%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}
+	      	{% if d.header_parent.id = 450%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}
+	      	{% if d.header_parent.id = 2%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}
+		 	{% if d.header_parent.id = 408 or d.header_parent.id = 417 or d.header_parent.id = 430 or d.header_parent.id = 441 or d.header_parent.id = 451 or d.header_parent.id = 460 or d.header_parent.id = 464 or d.header_parent.id = 474 or d.header_parent.id = 478 or d.header_parent.id = 480 or d.header_parent.id = 486 or d.header_parent.id = 491 or d.header_parent.id = 496 or d.header_parent.id = 509 or d.header_parent.id = 515 or d.header_parent.id = 541 or d.header_parent.id = 548%} 
+		 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}		 	
+		 	{{d.id_cabang}}.{{d.coa}}
+		</td>
+		 <td>
+		 {% if d.header_parent.id = 406%} &nbsp;&nbsp; {% else %}{% endif%}
+		 	{% if d.header_parent.id = 449%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 540%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 547%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 555%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 560%} &nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 2%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 191%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 207%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 267%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%}
+	      	{% if d.header_parent.id = 337%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}{% endif%} 	 
+	      	{% if d.header_parent.id = 381%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}
+	      	{% if d.header_parent.id = 407%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}
+	      	{% if d.header_parent.id = 450%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}
+	      	{% if d.header_parent.id = 2%} &nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}
+		 	{% if d.header_parent.id = 408 or d.header_parent.id = 417 or d.header_parent.id = 430 or d.header_parent.id = 441 or d.header_parent.id = 451 or d.header_parent.id = 460 or d.header_parent.id = 464 or d.header_parent.id = 474 or d.header_parent.id = 478 or d.header_parent.id = 480 or d.header_parent.id = 486 or d.header_parent.id = 491 or d.header_parent.id = 496 or d.header_parent.id = 509 or d.header_parent.id = 515 or d.header_parent.id = 541 or d.header_parent.id = 548%} 
+		 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {% else %}  {% endif%}	
+                 
+
+		 {{ d.deskripsi }}<small><small> {{d.id}}.{{d.header_parent.id}}.{{d.get_jenis_display}}</small></small></td>
+		 <td style="text-align:right">{{ d.saldo_awal|number_format:0}}</td>
+		 <td style="text-align:right">{{ d.saldo_akhir|number_format:0}}</td>{%endif%}
+	</tr>
+	</tbody>
+{% endfor %}
+        <tr>
+            <th colspan='3'>Pendapatan</th>
+            
+            <th style="text-align: right">{{total_lr_pdp_saldo_akhir|number_format:0}}</th>
+        </tr>
+
+        <tr>
+            <th colspan='3'>Beban</th>
+            <th style="text-align: right">{{total_lr_beban_saldo_akhir|number_format:0}}</th>
+         </tr>
+
+         <tr>
+            <th colspan='3'>Laba rugi</th>
+            <th style="text-align: right"> {{total_lr_pdp_beban_saldo_akhir|number_format:0}}</th>
+         </tr>
+
+
+</table>
+{% else %}
+<p>Tidak ada data Laba Rugi (SHU)</p>
+{% endif %}
+
+{% endblock %}
+
+

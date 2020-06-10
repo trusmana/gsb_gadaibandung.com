@@ -1,0 +1,51 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}barang{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+
+
+<table align="center">
+<H3 align="center"> DAFTAR BARANG GERAI</h3>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow">
+	<th align="center">No</th>
+	<th align="center">Nama</th>
+	<th align="center">Rekening</th>
+	<th align="center">Transaksi</th>
+	<th align="center">Jatuh Tempo</th>
+	<th align="center">Status</th>
+	<th align="center">Status Gadai</th>
+	<th align="center">JW</th>
+	<th align="center">Nilai</th>
+	<th align="center">Merk</th>
+	<th align="center">Type</th>
+	<th align="center">JB</th>
+	<th align="center">Gerai</th></tr>
+   </tr>
+{% for p in object.akadgadai_set.all %}
+    <tr {% if p.lunas %} class="row_lunas"{% endif %} {% if p.status_gadai %} class="row_status_gadai"{% endif %}{% if p.lewat_jw %} class="row_lewat_jw"{% endif %}>
+	<td align="center">{{forloop.counter}}</td>
+	<td align="left">{{ p.agnasabah.nama }}</td>
+	<td>{{p.norek}}</td>
+	<td>{{p.tanggal|date:"d M Y "}}</td>
+	<td align="right">{{p.jatuhtempo|date:"d M Y "}}</td>
+	<td align="right">{{p.status_transaksi|default_if_none:"0" }}</td>
+	<td align="right">{{p.status_gadai|default_if_none:"0" }}</td>	
+	<td align="right">{{p.jangka_waktu}}</td>
+	<td align="left" >{{p.nilai}}</td>
+	<td align="left">{{p.barang.merk}}</td>
+	<td align="left">{{p.barang.type|truncatewords:6}}</td>
+	<td align="left">{{p.barang.jenis_barang}}</td>
+	<td>{{p.gerai.nama}}</td></tr>
+    </tr>{% endfor %}
+    
+    <tr>
+	<th colspan="8" class="r"><strong>Jumlah</strong></th>
+	<td class="r">Rp .{{ object.get_jumlah_nilai|number_format:0 }}</td>
+	<td class="r">&nbsp;</td><td colspan="6">&nbsp;</td></tr>
+</table>
+
+{% endblock %}
+

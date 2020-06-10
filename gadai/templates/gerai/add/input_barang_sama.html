@@ -1,0 +1,263 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/gadai_barang.html" %}
+
+<script type="text/javascript" language="javascript" class="init">	
+    $(document).ready(function() {
+        $('#menuinput').click(function() {
+        	$('.chosen-container-single').trigger("liszt:updated");
+        	$('.tampil').slideToggle("fast");
+
+        });
+    });
+</script>
+{% endblock %}
+{% block sidebar %}
+<div id="menuinput"><button class="otorisasi">Otorisasi</button></div>
+<div class="tampil" style="display:none">
+<h3>Menu Otorisasi Pelunasan</h3>
+    <form class="tabular" action="/gerai/{{ plns.id }}/pelunasan_gu_sbl/" method="POST">{% csrf_token %}
+	    <tr>
+	    	<td></td><td>{{form_oto.tanggal_manop }}</td></tr>
+	    <tr>
+	    	<td></td><td>{{form_oto.comment}}</td>
+		</tr>
+		<tr>
+			<td><input type="submit" value="Simpan" class="simpan" onclick="if (confirm('APAKAH ANDA YAKIN AKAN MELAKUKAN TRANSAKSI INI??')) { var f = document.createElement('form');f.csrfmiddlewaretoken= csrftoken; f.style.display = 'None'; this.parentNode.appendChild(f);  f.action = this.href; f.submit(); }; return false;">{% csrf_token %} </input></td>
+		</tr>
+	</form>
+</div>
+{% endblock %}
+{% block content %}
+<h2 align="center">AKAD BARU BARANG SAMA ATAS NAMA : {{object.nama}} {{ag.id}}</h2>
+<h3 align="center">Nama Barang : {{ag.barang.merk}}</h3>
+
+<div id="jeding">
+  <img id="loading_gambar" src="/static/images/jeding.gif" alt="Load" />
+</div>
+{% if objects.lunas%}
+*********DATA KREDIT YANG SEBELUMNYA BELUM LUNAS,NASABAH DENGAN BARANG YANG SAMA, BLM BISA DI JALANKAN*********
+{% else %}
+
+<form class="tabular" action="/gerai/baru/" method="POST">{% csrf_token %}
+
+<table align="left" >
+    <tr>
+		<td></td><td>{{form.agnasabah}}</td>
+	</tr>
+	<tr>
+		<td></td><td>{{form.nilai_gu}}</td>
+	</tr>
+    <tr>
+		<td></td><td>{{form.jasa_gu}}</td>
+	</tr>
+	<tr>
+		<td></td><td>{{form.denda_gu}}</td>
+	</tr>
+    <tr>
+        <td></td><td>{{form.barang}}</td>
+    </tr>
+
+    <tr>
+        <td>GERAI </td><td>: {{form.gerai}}</td>
+    </tr>
+    <tr>
+        <td>TANGGAL </td><td>: {{form.tanggal}}</td>
+    </tr>
+    <tr>
+        <td>TAKSIRAN</td><td>: {{form.taksir}}</td>
+    </tr>
+        
+    <tr>
+        <td>JENIS TRANSAKSI </td><td> {{form.jenis_transaksi}}<span style = " color : red ; ">&nbsp;&nbsp;<b>Wajib Diisi</b></span></td>
+    </tr>
+    <tr class="formkendaraan" style="display:none">
+        <td> <!--PILIH JASA:--> </td><td> {{form.pilih_jasa}}</td>
+    </tr>
+    
+    <tr class ="formbarang" style= "display:none">
+		<td>JENIS BARANG</td>
+		<td>:{{form.jenis_barang}}
+		</td>
+	</tr>
+    
+    <tr class ="formhp " style= "display:none">
+		<td>CHARGE<span style = " color : red ; " >*<span></td>
+		<td>: {{form.charger}} &nbsp KONDISI : {{form.kondisi_charger}} {% if form.charger.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{%else%}{% if form.kondisi_charger.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{%endif%}</td>
+	</tr>
+	
+	
+	
+	<tr class ="formhp" style= "display:none">
+		<td>BATRE <span style = " color : red ; " >*<span></td>
+		<td>: {{form.batre}} &nbsp KONDISI : {{form.kondisi_batre}} {% if form.kondisi_batre.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.batre.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formhp" style= "display:none">
+		<td>KEYBORD / KEYPATH <span style = " color : red ; " >*<span></td>
+		<td>: {{form.keybord}} &nbsp KONDISI : {{form.kondisi_keybord}} {% if form.kondisi_keybord.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.keybord.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	<tr class ="formhp" style= "display:none">
+		<td>PASSWORD <span style = " color : red ; " >*<span></td>
+		<td>: {{form.password}} &nbsp KEY PASSWORD : {{form.password_barang}}{% if form.password_barang.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.keybord.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		&nbsp;&nbsp;  <span style = " color : red ; " >ISI SESUAI DENGAN PASS JAMINAN</span>
+		</td>
+    </tr>
+	<tr class ="formhp" style= "display:none">
+		<td>CASSING <span style = " color : red ; " >*<span></td>
+		<td>: {{form.cassing}} &nbsp KONDISI : {{form.kondisi_cassing}} {% if form.kondisi_cassing.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.cassing.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formhp" style= "display:none">
+		<td>LAYAR <span style = " color : red ; " >*<span></td>
+		<td>: {{form.layar}} &nbsp KONDISI : {{form.kondisi_layar}} {% if form.kondisi_layar.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.layar.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formtv" style= "display:none">
+		<td>LAYAR TV<span style = " color : red ; " >*<span></td>
+		<td>: {{form.layar_tv}} &nbsp KONDISI : {{form.kondisi_layar_tv}} {% if form.kondisi_layar_tv.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.layar.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formtv" style= "display:none">
+		<td>REMOTE<span style = " color : red ; " >*<span></td>
+		<td>: {{form.remote}} &nbsp KONDISI : {{form.kondisi_remote}} {% if form.kondisi_remote.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.remote.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formkamera" style= "display:none">
+		<td>LENSA <span style = " color : red ; " >*<span></td>
+		<td>: {{form.lensa}} &nbsp KONDISI : {{form.kondisi_lensa}} {% if form.kondisi_lensa.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.lensa.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formkamera" style= "display:none">
+		<td>BATRE KAMERA <span style = " color : red ; " >*<span></td>
+		<td>: {{form.batre_kamera}} &nbsp KONDISI : {{form.kondisi_batre_kamera}} {% if form.kondisi_batre_kamera.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.batre_kamera.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formkamera" style= "display:none">
+		<td>CASSING KAMERA <span style = " color : red ; " >*<span></td>
+		<td>: {{form.cassing_kamera}} &nbsp KONDISI : {{form.kondisi_cassing_kamera}} {% if form.kondisi_cassing_kamera.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.cassing_kamera.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+		
+	<tr class ="formps" style= "display:none">
+		<td>OPTIK PS <span style = " color : red ; " >*<span></td>
+		<td>: {{form.optik_ps}} &nbsp KONDISI : {{form.kondisi_optik_ps}} {% if form.kondisi_optik_ps.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.optik_ps.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formps" style= "display:none">
+		<td>STICK PS <span style = " color : red ; " >*<span></td>
+		<td>: {{form.stick}} &nbsp KONDISI : {{form.kondisi_stick}} {% if form.kondisi_stick.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.stick.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formps" style= "display:none">
+		<td>HDMI <span style = " color : red ; " >*<span></td>
+		<td>: {{form.hdmi}} &nbsp KONDISI : {{form.kondisi_hdmi}} {% if form.kondisi_hdmi.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.hdmi.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formps" style= "display:none">
+		<td>HARDDISK <span style = " color : red ; " >*<span></td>
+		<td>: {{form.harddisk}} &nbsp KONDISI : {{form.kondisi_harddisk}} {% if form.kondisi_harddisk.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.harddisk.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+
+	<tr class ="formbarang" style= "display:none">
+		<td>Dus <span style = " color : red ; " >*<span></td>
+		<td>: {{form.dus}} {% if form.dus.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formbarang" style= "display:none">
+		<td>Tas <span style = " color : red ; " >*<span></td>
+		<td>: {{form.tas}} {% if form.tas.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}
+		</td>
+    </tr>
+    
+    
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_bpkb"  width="200px" height="25px" >BPKB<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.bpkb}} {% if form.bpkb.errors %}<span style = " color : red ; " >BPKB BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_stnk"  width="200px" height="25px" >STNK<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.stnk}} {% if form.stnk.errors %}<span style = " color : red ; " >STNK BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_faktur"  width="200px" height="25px" >FAKTUR<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.faktur}} {% if form.faktur.errors %}<span style = " color : red ; " >FAKTUR BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_gesek_nomesin"  width="200px" height="25px" >GESEKAN NOMOR MESIN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.gesek_nomesin}} {% if form.gesek_nomesin.errors %}<span style = " color : red ; " >GESEKAN NOMESIN BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_gesek_nomesin"  width="200px" height="25px" >GESEKAN NOMOR RANGKA<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.gesek_norangka}} {% if form.gesek_norangka.errors %}<span style = " color : red ; " >GESEKAN NO RANGKA BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    
+    <tr>
+        <td><label for="id_accesoris_barang1"  width="200px" height="25px" >CATATAN KONDISI BARANG<span style = " color : red ; " >*<span></label></td>
+        <td>&nbsp; {{form.accesoris_barang1}} {% if form.accesoris_barang1.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}<span style = " color : red ; ">&nbsp;&nbsp;<b>Wajib Diisi</b></span></td>
+    </tr>
+	
+    
+    
+    <tr class ="formkendaraan" style= "display:none"><td> JANGKA WAKTU KENDARAAN</td><td>: {{form.jangka_waktu_kendaraan}}
+        <span style = " color : red ; ">&nbsp;&nbsp;<b>Wajib Diisi</b></span></td></tr>	
+    <tr class="formkendaraan" style="display:none"><td>JENIS KENDARAAN </td><td>: {{form.jenis_kendaraan}}
+        <span style = " color : red ; ">&nbsp;&nbsp;<b>Wajib Diisi</b></span></td></tr>
+    <tr><td></td><td><b> KEWAJIBAN PINJAMAN LAMA</b></td></tr>
+    <tr><td>POKOK<span style = " color : red ; " >*<span></td><td>: {{form.pokok}}</td> </tr>
+    <tr><td>DENDA<span style = " color : red ; " >*<span></td><td>: {{form.denda}}</td> </tr>
+    <tr><td>DENDA KETERLAMBATAN<span style = " color : red ; " >*<span></td><td>: {{form.denda_keterlambatan}}</td> </tr>
+    <tr><td>KEWAJIBAN PELUNASAN LAMA<span style = " color : red ; " >*<span></td><td>: {{form.kewajiban_pelunasan}}</td> </tr>	
+    <tr><td></td><td><b> KEWAJIBAN PINJAMAN BARU</b></td></tr>
+ 
+   <tr class ="formbarang" style= "display:none"><td> JANGKA WAKTU </td>
+        <td>: {{form.jangka_waktu}} <span style = " color : red ; ">&nbsp;&nbsp;<b>Wajib Diisi</b></span></td>
+    </tr>
+
+    <tr><td>NILAI PINJAMAN BARU<span style = " color : red ; " >*<span></td><td>: {{form.nilai}}
+        <span style = " color : red ; ">&nbsp;&nbsp;<b>Wajib Diisi</b></span></td>
+    </tr>
+    <tr><td>JASA<span style = " color : red ; " >*<span></td><td>: {{form.jasa_baru}}</td> </tr>
+    <tr><td>BEA SIMPAN<span style = " color : red ; " >*<span></td><td>: {{form.beasimpan_baru}}</td> </tr>
+    <tr><td>ADM<span style = " color : red ; " >*<span></td><td>: {{form.adm_baru}}</td> </tr>
+    <tr><td> MATERAI</td><td>: {{form.bea_materai}}</td></tr>
+    <tr><td> <b>KEWAJIBAN PINJAMAN BARU</b> </td><td>: {{form.kewajiban_total_baru}}</td></tr>
+    <tr><td> <b>TOTAL PEMBAYARAN</b> </td><td type="A" style="font-weight: bold;">: {{form.total_all}}</td></tr>
+    <!--{{form.as_table}}-->
+    <tr>
+    	<td></td>
+    	<td><input type="submit" value="Simpan" class="simpan" onclick="if (confirm('APAKAH ANDA YAKIN AKAN MELAKUKAN TRANSAKSI INI??')) { var f = document.createElement('form');f.csrfmiddlewaretoken= csrftoken; f.style.display = 'None'; this.parentNode.appendChild(f);  f.action = this.href; f.submit(); }; return false;">{% csrf_token %}</input>    		
+    	</td>
+    </tr>
+</table>
+
+
+{%endif%}
+</form>
+<p class="ex1"><a href="/gerai/{{ ag.id }}/batal_lunas_barangsama/{{ag.barang.id}}/{{ag.taksir.id}}/" /><button class="batal">Batal Gadai Ulang</button></a>
+   
+</p>
+{% endblock %}
+
+
+

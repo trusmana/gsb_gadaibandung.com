@@ -1,0 +1,132 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}ledger{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>REKAPITULASI PINJAMAN <small>DIV PJB</small></h2>  
+<table id="tabel" align="center">
+<br/>
+<form method="GET" action="/manop/laporan_rekap_dan_rinci/">{% csrf_token %}
+   <table id="tabel" align="center">
+   
+        <tr>
+	    <td><label for ="cabang">Gerai PJB</label></td>
+	    <td>: {{form.id_cabang}}</td>
+	 </tr>
+        <tr>
+	    <td><label for ="jenis">Jenis Laporan</label></td>
+	    <td>: {{form.jenis_laporan}}</td>
+	 </tr>
+	 <tr>
+	    <td><label for ="start_date">Dari Tanggal</label></td>
+	    <td>: {{form.start_date}}
+	    <label for ="end_date" >Hingga Tanggal</label>: {{form.end_date}}</td>
+	 </tr>
+	 <tr>
+	    <td><label for ="format">Format Laporan</label></td>
+	    <td>: {{form.report}}</td>
+	 </tr>
+
+   <tr>
+	  <td><input type="submit" value="CETAK" class="cari" name="cetak"/></td>
+   </tr>
+   </table>
+</form>
+
+<br>
+
+{% if plns %}
+
+<h3 style='text-align: center'><b>REKAPITULASI PINJAMAN</b>
+<b><small>&nbsp;UNIT PJB </small></b><small>{{id_cabang}}</small>
+</h3>
+<h3 style='text-align: center'><b><small>Periode : {{start_date}} s/d {{end_date}} </small> </b></h3>
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%">
+<tr class="tableizer-firstrow">
+	<th rowspan= "2">KODE</th>
+	<th rowspan= "2">GERAI</th>
+	<th colspan= "16">AKTIF</th>
+
+<tr>
+                <!--- AKtif ---> 
+	    <th>Jml Barang</th>
+		<th>Nominal Barang</th>
+		<th>HP</th>
+		<th>Nominal HP</th>
+		<th>Laptop</th>
+		<th>Nominal Laptop</th>
+		<th>Kamera</th>
+		<th>Nominal Kamera</th>
+		<th>PS</th>
+		<th>Nominal PS</th>
+		<th>TV</th>
+		<th>Nominal TV</th>
+		<th>Motor</th>
+		<th>Nominal Motor</th>
+		<th>Mobil</th>
+		<th>Nominal Mobil</th>
+		<!--- Akhir AKtif --->
+
+	</tr>
+</tr>
+
+{% for k in plns %}
+		<tr>
+			<td align="center">{{k.kode_cabang}}</td>
+			<td>{{k.nama_cabang}} </td>
+			
+			<td align ="right">{{k.all_barang|number_format:0}} </td>
+			<td align = "right">{{k.nominal_all_barang|number_format:0}}</td>
+			<td align = "right">{{k.hp|number_format:0}}</td>
+			<td align = "right">{{k.nominal_hp|number_format:0}}</td>
+			<td align = "right">{{k.laptop|number_format:0}}</td>
+			<td align = "right">{{k.nominal_laptop|number_format:0}}</td>
+			<td align = "right">{{k.kamera|number_format:0}}</td>
+			<td align = "right">{{k.nominal_kamera|number_format:0}}</td>
+			<td align = "right">{{k.ps|number_format:0}}</td>
+			<td align = "right">{{k.nominal_ps|number_format:0}}</td>
+			<td align = "right">{{k.tv|number_format:0}}</td>	    
+			<td align ="right">{{k.nominal_tv|number_format:0}}</td>
+                        <td align = "right">{{k.motor|number_format:0}}</td>
+			<td align = "right">{{k.nominal_motor|number_format:0}}</td>
+			<td align = "right">{{k.mobil|number_format:0 }}</td>
+			<td align = "right">{{k.nominal_mobil|number_format:0}}</td>
+		</tr>
+  {% endfor %}
+   	  <tr>
+		<td colspan="2">Total </td>
+		<td align="right">{{total_barang|number_format:0}}</td>
+        <td align="right">{{total_nominal_all_barang|number_format:0}}</td>
+		<td align="right">{{total_hp|number_format:0}}</td>
+		<td align="right">{{total_nominal_hp|number_format:0}}</td>
+        <td align="right">{{total_laptop|number_format:0}}</td>
+		<td align="right">{{total_nominal_laptop|number_format:0}}</td>
+		<td align="right">{{total_kamera|number_format:0}}</td>
+		<td align="right">{{total_nominal_kamera|number_format:0}}</td>
+		<td align="right">{{total_ps|number_format:0}}</td>
+		<td align="right">{{total_nominal_ps|number_format:0}}</td>
+        <td align="right">{{total_tv|number_format:0}}</td>
+		<td align="right">{{total_nominal_tv|number_format:0}}</td>
+		<td align="right">{{total_motor|number_format:0}}</td>
+		<td align="right">{{total_nominal_motor|number_format:0}}</td>
+        <td align="right">{{total_mobil|number_format:0}}</td>
+		<td align="right">{{total_nominal_mobil|number_format:0}}</td>
+	  </tr>
+</table>
+</br>
+
+
+{% else %}
+
+<p>Tidak ada Transaksi Pencairan.</p>
+{% endif %}
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}
+
+

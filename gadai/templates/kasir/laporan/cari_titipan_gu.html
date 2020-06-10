@@ -1,0 +1,33 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}nasabah{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<script type='text/javascript'>
+$(document).ready(function(){$(&#39;.notification&#39;).hover(function(){$(this).css(&#39;cursor&#39;,&#39;auto&#39;);});
+$(&#39;.notification span&#39;).click(function(){$(this).parent().fadeOut(800);});});
+</script>
+{% load number_format useringroup %}
+<h2 align="right">::LAPORAN KELEBIHAN TITIPAN GERAI::</h2>
+<form method="GET" action="/rreport/laporan_kembaligu/">{%csrf_token%}
+   <table id="tabel" align="left">
+
+    <tr>
+    <td>Cabang </td> <td>: {{form.id_cabang}}</td>
+    </tr><tr>
+    <td>Hingga Tanggal </td> <td>: {{form.end_date}}</td>
+    </tr><tr>
+    <td>Jenis </td> <td>: {{form.jenis}}</td>
+    </tr>
+    <tr><td>
+	<input type="submit" value="Cetak" class="posting" name="submit_satu"/>&nbsp;  
+    </td>
+    </tr>
+ </table>
+
+</form>
+{% endblock %}
+
+
+
+

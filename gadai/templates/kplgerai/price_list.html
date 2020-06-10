@@ -1,0 +1,15 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}{% include "alat/sidebar.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>DAFTAR PRICE LIST </h2>  
+<table class="list">
+  <tr>
+		<td>Price List</td><td>{{ form.taksir }}</td>
+  </tr>
+</table>
+{% endblock %}

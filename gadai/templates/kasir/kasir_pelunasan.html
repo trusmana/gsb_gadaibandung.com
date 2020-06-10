@@ -1,0 +1,116 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}kasirgerai{% endblock %}
+<script type="text/javascript" href="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+    $(":radio.rad").click(function(){
+    $(".formkas, .formbank").hide()
+    if($(this).val() == "1"){
+    $(".formkas").show();
+    }else{
+    $(".formbank").show();
+    }
+    });
+    });
+</script> 
+{% block section %}kasir{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+
+{% if titip%}
+<table align="left">
+   <tr>
+	  <th>Ke</th><th>Tanggal </th><th>NILAI TITIPAN</th>
+   </tr>
+</table>
+{% endif%}
+{% for a in titip%}
+<table align="left">
+   <tr>
+	  <th>{{forloop.counter}}</th><th align="center">{{a.tanggal|date:" d-m-Y"}} </th><th>{{a.nilai|number_format:0}}</th>
+   </tr>
+</table>
+{% endfor%}
+{% endblock %} 
+
+{% block extrahead %}
+{% include "alat/kasir.html" %}
+{% include "alat/sidebar.html" %}
+<style>
+#login_form {
+		background: #EFE;
+		padding: 0.1em 0.0em 0.1em;
+		margin:0 auto 150px;
+		width: auto;height:auto;
+		border: 1px solid #EFE;
+		border-top:8px;
+		-webkit-border-radius:0px;
+		-moz-border-radius:0px;
+		border-radius:3px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.2) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+</style>
+
+<style type="text/css">
+.formbank { display: none }
+</style>
+{% load useringroup number_format %}
+{% endblock %}
+
+
+{% block content %}			
+<h2 align="center">PELUNASANAN ATAS NAMA:<small>  {{kasir.agnasabah.nama}} </small>&nbsp;&nbsp; NOREK : <small>{{kasir.norek}}</small></h2>
+{% if kasir.lunas %} 
+<h2 align="center" style="color:orange;"><marquee>Nasabah ini Sudah Lunas Tgl {{kasir.lunas}} di Gerai {{kasir.kasirgeraipelunasan.cu.profile.gerai}}</marquee></h2> 
+{% elif kasir.kasirgeraipelunasan.selisih_lunas > -999 and kasir.kasirgeraipelunasan.selisih_lunas < 0%}
+<h3 align="center" style="color:orange;"><marquee>Nasabah ini Sudah Lunas</marquee></h2>
+<div id="jeding">
+  <img id="loading_gambar" src="/static/images/jeding.gif" alt="Load" />
+</div>
+<h4 align="left">History Pembayaran Pelunasan</h4>
+<div id="login_form">
+<table align="left">
+   <tr>
+	  <th>PEMBAYARAN KE </th><th>TANGGAL</th><th>NILAI TITIPAN PELUNASAN</th>
+   </tr>
+   <tbody>
+   {% for a in pembayaran%}
+   <tr>
+	  <td align="center">{{forloop.counter}}</td><td align="center">{{a.tanggal|date:" d-M-Y"}}</td><td align="right">{{a.nilai|number_format:0}}</td>
+   </tr></tbody>
+{%endfor%}
+   <tr>
+	  <td colspan= 2 align="center">Total Pembayaran Pelunasan</td><td align="right"><b>{{total|number_format:0}}</b></td>
+   </tr>
+</table>
+</div>
+{% else %}{% if kasir.lunas %}
+<h2 align="center" style="color:orange;"><marquee>Nasabah ini Sudah Lunas</marquee></h3>
+{%else%}
+{% if bayar < nilai_titipan %} 
+<h3 align="center">NILAI TITIPAN PELUNASAN {{kasir.agnasabah.nama}} TELAH MELEBIHI NILAI PINJAMAN </h2>
+<h3 align="center">Titipan {{nilai_titipan|number_format:0}} > Nilai Pelunasan {{bayar|number_format:0}} </h2>
+<h3 align="center">Yang Harus Dikembalikan Ke Nasabah {{pengembalian|number_format:0}} </h2>
+{%else%}
+{%endif%}
+{% endif %}
+ {% if kasir.cekkasirgeraipelunasan and nilai_titipan = 0 %} 
+ <h2 align="center" style="color:grean;"><marquee >Anda melakukan eksekusi kasir lebih dari satu kali</marquee></h2>
+{%else%}
+<form method="post" action="/kasirgerai/{{ kasir.id }}/inputkasir_pelunasan/" class="tabular">{% csrf_token %}
+<div id="login_form">
+  <table align="left">
+      {{form.as_table}}
+  <td></td><td>{% include "alat/save.html" %}</td>
+</tr>
+</form>
+</table>
+</div>
+{% endif %}{% endif %}
+{% endblock %} 
+

@@ -1,0 +1,95 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}ledger{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2> NERACA PERCOBAAN<small>&nbsp;Div PJB</small></h2>  
+<table id="tabel" align="center">
+<br/>
+<form method="GET" action="/kplgerai/{{kocab}}/neraca_percobaan/">{% csrf_token %}
+    <li><label for="id_tgl_trans"></label> <input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> -
+    <label for="id_tgl_trans"></label> <input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
+	<li>&nbsp;<input type="submit" value="VIEW" class="perpanjang" name="submit_satu" />
+		&nbsp;<input type="submit" value="CERAT PDF" class="neraca" name="submit_dua" /></li>
+</form>
+</table>
+
+<br>
+{% if akun %}
+<h3 style='text-align: center'><b> NERACA PERCOBAAN</b></h3>
+<h3 style='text-align: center'><b><small>UNIT PJB <small><small><small>{{kocab}}</small>
+</small>GERAI 
+   {% if kocab = '0' %}PUSAT{%endif%}{% if kocab = '1' %}JAKARTA{%endif%}{% if kocab = '2' %}SUCI{%endif%}{% if kocab = '3' %}DIPATIUKUR{%endif%}
+   {% if kocab = '4' %}BALUBUR{%endif%}{% if kocab = '6' %}GERLONG HILIR{%endif%}{% if kocab = '7' %}KOPO{%endif%}{% if kocab = '8' %}CIBIRU{%endif%}
+   {% if kocab = '9' %}CIPACING{%endif%}{% if kocab = '10' %}JATINAMGOR{%endif%}{% if kocab = '11' %}CIMAHI{%endif%}{% if kocab = '12' %}BUAH BATU{%endif%}
+   {% if kocab = '13' %}KORDON{%endif%}{% if kocab = '14' %}CIHANJUANG{%endif%}{% if kocab = '15' %}MARANATA{%endif%}{% if kocab = '16' %}KIARACONDONG{%endif%}{% if kocab = '17' %}CIREBON PERJUANGN{%endif%}
+   {% if kocab = '18' %}CIREBON{%endif%}{% if kocab = '19' %}CIUMBELEUIT{%endif%}{% if kocab = '113' %}UJUNG BERUNG{%endif%}
+</small> </b>
+</h3>
+<h3 style='text-align: center'><b><small>Periode : {{start_date}} s/d {{end_date}} </small> </b></h3>
+
+<table id="list1">
+	<thead>
+    <tr>
+    <th>Coa</th>
+	<th>Account</th>		
+	<th>Saldo Sebelumnya</th>
+	<th>Debet(Rp)</th>
+	<th>Kredit(Rp)</th>
+	<th>Saldo Akhir</th>
+    </tr>
+	</thead>
+{% for d in akun%}   
+	<tbody>
+	 
+	
+	 <tr {% if d.header_parent.id = 1%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id %}  {% else %} class="row_nenek" {% endif%}
+	      {% if d.header_parent.id = 266%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 388%} class="row_anak" {% else %}  {% endif%}	 
+	      {% if d.header_parent.id = 406%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 449%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 540%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 547%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 555%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 560%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 2%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 191%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 207%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 267%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 337%} class="row_cucu" {% else %}  {% endif%} 	 
+	      {% if d.header_parent.id = 381%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 407%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 450%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 2%} class="row_cucu" {% else %}  {% endif%}>
+	    
+	 	 <td>{{d.id_cabang}}.{{d.coa}}</td>
+		 <td>{{ d.deskripsi }}<small> {{d.id}}</small></td>		 
+		 <td align="center">{{ d.saldo_awal|number_format:0 }}</td>				
+		 <td style="text-align:right">{{ d.debet|number_format:0 }}</td>
+		 <td style="text-align:right">{{ d.kredit|number_format:0 }}</td>		 
+		 <td style="text-align:right">{{ d.saldo_akhir|number_format:0}}</td>
+	</tr>
+	
+{% endfor %}
+	 
+	 
+	 <tr>
+		 <th colspan='3'>SELISIH</th>
+		 <th style="text-align: right">{{total_debet|number_format:0}}</th>
+		 <th style="text-align: right">{{ total_kredit|number_format:0 }}</th>
+		 <th style="text-align: right"> {{selisih|number_format:0}}</th>
+	 </tr>
+</table>
+{% else %}
+<p>Tidak ada data neraca</p>
+{% endif %}
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}

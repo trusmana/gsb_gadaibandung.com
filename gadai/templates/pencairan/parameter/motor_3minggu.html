@@ -1,0 +1,426 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/param/akadpencairan.html" %}
+{% endblock %}
+{% block section %}akadgadai{% endblock %}
+{% block content %}
+<h2 align="right">INPUT PENCAIRAN KREDIT GADAI</h2>
+<div id="jeding">
+  <img id="loading_gambar" src="/static/images/jeding.gif" alt="Load" />
+</div>
+<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %} 
+<table align="left" width="ancho"> 
+    
+    <td colspan="3" height="10"><h3>IDENTITAS NASABAH</td>
+    
+    <tr>
+        <td>KEANGGOTAAN<span style = " color : red ; " >*</span></td>
+        <td>: {{form.jenis_keanggotaan}}{% if form.jenis_keanggotaan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr>
+        <td><label for="id_nama"  width="200px" height="25px">NAMA <span style = " color : red ; " >*</span></label></td>
+        <td>: {{form.nama}} {% if form.nama.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_tgl_lahir"  width="200px" height="25px">TANGGAL LAHIR<span style = " color : red ; " >*<span></label></td>
+        <td>: {{ form.tgl_lahir }} {% if form.tgl_lahir.errors %}<span style = " color : red ; " >FORMAT INPUTAN SALAH </span>{% endif %}</td>
+    </tr>
+    
+    
+    <tr>
+        <td><label for="id_tempat"  width="200px" height="25px">TEMPAT LAHIR <span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.tempat}}{% if form.tempat.errors %}<span style = " color : red ; " >KOLOM TEMPAT LAHIR INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <td><label for="jenis_identitas"  width="200px" height="25px" >JENIS IDENTITAS<span style = " color : red ; " >*<span></label></td>
+    <td><ul>
+        <li><input value="2" type="radio" class="identitas" name="jenis_identitas" id="id_jenis_identitas_1" />KTP</li>
+        <li><input value="1" type="radio" class="identitas" name="jenis_identitas" id="id_jenis_identitas_0" />SIM</li>
+        </ul></td>
+    </tr>
+    
+    <tr class="formktp" style="display:none">
+        <td><label for="id_no_ktp"  width="200px" height="25px">NOMOR KTP<span style = " color : red ; " >*<span></label></td>
+        <td> : {{form.no_ktp}}  {% if form.no_ktp.errors %}  <span style = " color : red ; "  >PENGAJUAN ATAS NO KTP INI SUDAH ADA</span>{% endif %}</td>
+    </tr>
+   
+    <tr class="formktp" style="display:none">
+        <td><label for="id_alamat_ktp"  width="200px" height="25px">ALAMAT / NO RUMAH (KTP)<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.alamat_ktp}} {% if form.alamat_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}
+        
+        {{form.no_rumah_ktp}} {% if form.no_rumah_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formktp" style="display:none">
+        <td><label for="id_rt_ktp"  width="200px" height="25px">RT/RW (KTP)<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.rt_ktp}} / {{form.rw_ktp}} {% if form.rw_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>   
+   
+    <tr class="formktp" style="display:none">
+        <td><label for="id_telepon_ktp"  width="200px" height="25px">TELPON (KTP)<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.telepon_ktp}} {% if form.telepon_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>   
+    
+    <tr class="formktp" style="display:none">
+       <td><label for="id_hp_ktp"  width="200px" height="25px">HP (KTP)<span style = " color : red ; " >*<span></label></td>
+       <td>: {{form.hp_ktp}} {% if form.hp_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formktp" style="display:none">
+        <td><label for="id_kelurahan_ktp"  width="200px" height="25px" >KELURAHAN (KTP)<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.kelurahan_ktp}} {% if form.kelurahan_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formktp" style="display:none">
+        <td><label for="id_kecamatan_ktp"  width="200px" height="25px" >KECAMATAN (KTP)<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.kecamatan_ktp}} {% if form.kecamatan_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formktp" style="display:none">
+        <td><label for="id_kotamadya_ktp"  width="200px" height="25px" >KOTAMADYA (KTP)<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.kotamadya_ktp}} {% if form.kotamadya_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formktp" style="display:none">
+        <td><label for="id_kabupaten_ktp"  width="200px" height="25px" >KABUPATEN (KTP)<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.kabupaten_ktp}} {% if form.kabupaten_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formsim" style="display:none">
+        <td><label for="id_no_sim"  width="200px" height="25px">NOMOR (SIM) <span style = " color : red ; " >*<span>:</label></td>
+        <td>: {{form.no_sim}}
+        {% if form.no_sim.errors %}
+        <span style = " color : red ; "  >PENGAJUAN ATAS NO SIM INI SUDAH ADA</span>{% endif %} </td></td>
+    </tr>
+   
+    <tr class="formsim" style="display:none">
+        <td><label for="id_alamat_sim"  width="200px" height="25px">ALAMAT (SIM)<span style = " color : red ; " >*<span>:</label></td>
+        <td>: {{form.alamat_sim}} {% if form.alamat_sim.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formsim" style="display:none">
+        <td><label for="id_rt_sim"  width="200px" height="25px">RT/RW (SIM)<span style = " color : red ; " >*<span>:</label></td>
+        <td>: {{form.rt_sim}} / {{form.rw_sim}} {% if form.rt_sim.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>   
+   
+    <tr class="formsim" style="display:none">
+        <td><label for="id_kelurahan_sim"  width="200px" height="25px" >KELURAHAN (SIM)<span style = " color : red ; " >*<span>:</label></td>
+        <td>: {{form.kelurahan_sim}} {% if form.kelurahan_sim.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formsim" style="display:none">
+        <td><label for="id_kecamatan_sim"  width="200px" height="25px" >KECAMATAN (SIM)<span style = " color : red ; " >*<span>:</label></td>
+        <td>: {{form.kecamatan_sim}}{% if form.kecamatan_sim.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    <!--data sim--> 
+
+    
+    <tr>
+        <td><label for="id_alamat_domisili"  width="200px" height="25px">ALAMAT /NO RUMAH (DOMISILI) <span style = " color : red ; " >*</span></label></td>
+        <td>: {{form.alamat_domisili}} {% if form.alamat_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}
+        {{form.no_rumah_domisili}} {% if form.no_rumah_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        
+    </tr>
+    
+    <tr>
+        <td><label for="id_rt_domisili"  width="200px" height="25px">RT/RW (DOMISILI)<span style = " color : red ; " >*</span></label></td>
+        <td>: {{form.rt_domisili}} {% if form.rt_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}
+        / {{form.rw_domisili}} {% if form.rw_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    
+    
+    <tr>
+        <td><label for="id_telepon_domisili"  width="200px" height="25px">TELEPON DOMISILI <span style = " color : red ; " >*</span></label></td>
+        <td>: {{form.telepon_domisili}} {% if form.telepon_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_hp_domisili"  width="200px" height="25px">HP DOLISILI <span style = " color : red ; " >*</span></label></td>
+        <td>: {{form.hp_domisili}} {% if form.hp_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_kelurahan_domisili"  width="200px" height="25px">KELURAHAN DOMISILI <span style = " color : red ; " >*</span></label></td>
+        <td>: {{form.kelurahan_domisili}} {% if form.kelurahan_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_kecamatan_domisili"  width="200px" height="25px">KECAMATAN DOMISILI <span style = " color : red ; " >*</span></label></td>
+        <td>: {{form.kecamatan_domisili}} {% if form.kecamatan_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_kotamadya_domisili"  width="200px" height="25px">KOTAMADYA DOMISILI <span style = " color : red ; " >*</span></label></td>
+        <td>: {{form.kotamadya_domisili}} {% if form.kotamadya_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_kabupaten_domisili"  width="200px" height="25px">KABUPATEN DOMISILI<span style = " color : red ; " >*</span></label></td>
+        <td>: {{form.kabupaten_domisili}} {% if form.kabupaten_domisili.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr>
+       <td><label for="id_jenis_pekerjaan"  width="200px" height="25px" >JENIS PEKERJAAN<span style = " color : red ; " >*<span></label></td>
+       <td >: {{form.jenis_pekerjaan}}</td>
+    </tr>
+    
+    <tr>
+       <td><label for="id_alamat_kantor"  width="200px" height="25px" >ALAMAT KANTOR</label></td>
+       <td>: {{form.alamat_kantor}} {% if form.alamat_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_telepon_kantor"  width="200px" height="25px" >TELEPON KANTOR</label></td>
+        <td>: {{form.telepon_kantor}} {% if form.telepon_kantor.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>   
+    
+    <tr>
+        <td><label for="id_kode_pos"  width="200px" height="25px" >KODE POS<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.kode_pos}} {% if form.kode_pos.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_email"  width="200px" height="25px" >EMAIL</label></td>
+        <td>: {{form.email}} {% if form.email.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_jenis_kelamin"  width="200px" height="25px" >JENIS_KELAMIN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.jenis_kelamin}} {% if form.jenis_kelamin.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr>
+    <td><label for="id_lampiran_dokumen"  width="200px" height="25px" >LAMPIRAN DOKUMEN<span style = " color : red ; " >*<span></label></td>
+    <td>: {{form.lampiran_dokumen}} {% if form.lampiran_dokumen.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <td colspan="3" height="10"><h3>IDENTITAS PASANGAN NASABAH</td>
+     </tr>
+
+     <tr>
+        <td><label for="id_nama_pasangan"  width="200px" height="25px" >NAMA PASANGAN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.nama_pasangan}}</td>
+    </tr>
+
+    <tr>
+        <td><label for="id_jenis_kelamin"  width="200px" height="25px" >JENIS KELAMIN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.jekel_pasangan}}</td>
+    </tr>   
+
+    <tr>
+        <td><label for="id_alamat"  width="200px" height="25px" >ALAMAT : No<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.alamat_pasangan}} {{form.no_rumah_pas}}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_no_telp"  width="200px" height="25px" >NO TELEPON<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.tlp_pasangan}}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_rt_pas"  width="200px" height="25px" >RT - RW<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.no_rt_pas}} {{form.no_rw_pas}}</td>
+    </tr>
+
+    <tr >    
+        <td colspan="3" height="10"><h3>DATA JAMINAN BARANG</h3></td>
+    </tr>
+    <tr>
+        <td><label for="id_gudang"  width="200px" height="25px" >TAKSIRAN NILAI BARANG<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.taksir}} {% if form.taksir.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+ 
+    
+     <tr style="display:none">
+        <td><label for="id_sn"  width="200px" height="25px" >SN /IMAY<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.sn}} {% if form.sn.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>   
+
+    <tr style="display:none">
+        <td><label for="id_warna"  width="200px" height="25px" >WARNA<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.warna}} {% if form.telepon_ktp.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+   
+    <tr style="display:none">
+        <td><label for="id_tahun_pembuatan"  width="200px" height="25px" >TAHUN PEMBUATAN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.tahun_pembuatan}} {% if form.tahun_pembuatan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>   
+
+    <tr style="display:none">
+        <td><label for="id_bukan_produksi"  width="200px" height="25px" >BULAN PRODUKSI<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.bulan_produksi}} {% if form.bulan_produksi.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr style="display:none">
+        <td>CHARGE<span style = " color : red ; " >*<span></td>
+        <td>: {{form.charger}} &nbsp KONDISI : {{form.kondisi_charger}} {% if form.charger.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{%else%}{% if form.kondisi_charger.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{%endif%}</td>
+    </tr>
+    
+    
+    
+    <tr style="display:none">
+        <td>BATRE <span style = " color : red ; " >*<span></td>
+        <td>: {{form.batre}} &nbsp KONDISI : {{form.kondisi_batre}} {% if form.kondisi_batre.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.batre.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+        </td>
+    </tr>
+    
+    <tr style="display:none">
+        <td>KEYBAORD / KEYPATH <span style = " color : red ; " >*<span></td>
+        <td>: {{form.keybord}} &nbsp KONDISI : {{form.kondisi_keybord}} {% if form.kondisi_keybord.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.keybord.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+        </td>
+    </tr >
+    <tr style="display:none">
+        <td>PASSWORD <span style = " color : red ; " >*<span></td>
+        <td>: {{form.password}} &nbsp KEY PASSWORD : {{form.password_barang}}</span>
+        &nbsp;&nbsp;  <span style = " color : red ; " >ISI SESUAI DENGAN PASS JAMINAN</span>
+        </td>
+    </tr>
+    <tr style="display:none">
+        <td>CASSING <span style = " color : red ; " >*<span></td>
+        <td>: {{form.cassing}} &nbsp KONDISI : {{form.kondisi_cassing}} {% if form.kondisi_cassing.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.cassing.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+        </td>
+    </tr>
+    
+    <tr style="display:none">
+        <td>LAYAR <span style = " color : red ; " >*<span></td>
+        <td>: {{form.layar}} &nbsp KONDISI : {{form.kondisi_layar}} {% if form.kondisi_layar.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.layar.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+        </td>
+    </tr>
+    
+    
+    <tr style="display:none">
+        <td>Dus <span style = " color : red ; " >*<span></td>
+        <td>: {{form.dus}} {% if form.dus.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}
+        </td>
+    </tr>
+    
+    <tr style="display:none">
+        <td>Tas <span style = " color : red ; " >*<span></td>
+        <td>: {{form.tas}} {% if form.tas.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}
+        </td>
+    </tr>
+
+     <tr class="formkendaraan">
+        <td><label for="id_merk_kendaraan"  width="200px" height="25px" >MERK KENDARAAN </label></td>
+        <td>: {{form.merk_kendaraan}} {% if form.merk_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan">
+        <td><label for="id_jenis_kendaraan"  width="200px" height="25px" >JENIS KENDARAAN</label></td>
+        <td>: {{form.jenis_kendaraan}} {% if form.jenis_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan">
+        <td><label for="id_type_kendaraan" width="200px" height="25px">TYPE KENDARAAN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.type_kendaraan}} {% if form.type_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formkendaraan">
+        <td><label for="id_tahun_pembuatan_kendaraan"  width="200px" height="25px" >TAHUN PEMBUATAN KENDARAAN:</label></td>
+        <td>: {{form.tahun_pembuatan_kendaraan}} {% if form.tahun_pembuatan_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan">
+        <td><label for="id_no_polisi"  width="200px" height="25px">NOMOR POLISI<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.no_polisi}} {% if form.no_polisi.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan">
+        <td><label for="id_no_rangka"  width="200px" height="25px" >NOMOR RANGKA<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.no_rangka}} {% if form.no_rangka.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan">
+        <td><label for="id_no_mesin" width="200px" height="25px">NOMOR MESIN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.no_mesin}} {% if form.no_mesin.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formkendaraan">
+        <td><label for="id_warna_kendaraan"  width="200px" height="25px" >WARNA KENDARAAN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.warna_kendaraan}} {% if form.warna_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan">
+        <td><label for="id_no_bpkb"  width="200px" height="25px" >NOMOR BPKB<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.no_bpkb}} {% if form.no_bpkb.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan">
+       <td><label for="id_no_faktur"  width="200px" height="25px" >NOMOR FAKTUR<span style = " color : red ; " >*<span></label></td>
+       <td>: {{form.no_faktur}} {% if form.no_faktur.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan">
+        <td><label for="id_stn_atas_nama"  width="200px" height="25px" >STNK ATAS NAMA<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.stnk_atas_nama}} {% if form.stnk_atas_nama.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+    <td><label for="id_accesoris_barang1"  width="200px" height="25px" >CATATAN KONDISI BARANG<span style = " color : red ; " >*<span></label></td>
+        <td>&nbsp; {{form.accesoris_barang1}} {% if form.accesoris_barang1.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    <tr><td colspan="3" height="10"><h3>PENILAIAN DAN PERSETUJUAN</h3></td></tr>
+    
+    <tr>
+    <td><label for="id_tanggal"  width="200px" height="25px" >TANGGAL TRANSAKSI<span style = " color : red ; " >*<span></label></td>
+    <td>: {{form.tanggal}} </td>
+    </tr>
+
+    <tr>
+    <td>SETTING PRODUK<span style = " color : red ; " >*<span></label></td>
+    <td>: {{form.jenis_transaksi}}
+    &raquo;{{form.jenis}}&raquo;{{form.jenis_barang}}</td>
+    </tr>
+        
+    <tr>
+    <td><label for="id_JANGKA_WAKTU"  width="200px" height="25px" >JANGKA WAKTU<span style = " color : red ; " >*<span></label></td>
+    <td>: {{form.jangka_waktu}}{% if form.jangka_waktu.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formkendaraan" style="display:none">
+    <td><label for="id_jangka_waktu_kendaraan"  width="200px" height="25px" >JANGKA WAKTU KENDARAAN<span style = " color : red ; " >*<span></label></td>
+    <td>: {{form.jangka_waktu_kendaraan}}  {% if form.jangka_waktu_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr>
+        <td><label for="id_nilai"  width="200px" height="25px" >NILAI PINJAMAN<span style = " color : red ; " >*<span></label></td>
+    <td>: {{form.nilai}} {% if form.nilai.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>   
+        
+
+    <tr><td>JASA<span style = " color : red ; " >*<span></td><td>: {{form.jasa_baru}} {{form.nilai_jasa}}{{form.nilai_pembagi}}</td> </tr>
+    <tr><td>BEA SIMPAN<span style = " color : red ; " >*<span></td><td>: {{form.beasimpan_baru}} {{form.nilai_biayasimpan}}</td> </tr>
+    <tr><td>ADM<span style = " color : red ; " >*<span></td><td>: {{form.adm_baru}} {{form.nilai_adm}}</td> </tr>
+    <tr><td> MATERAI</td><td>: {{form.bea_materai}} {{form.nilai_materai}}</td></tr>
+    <tr><td> <b>TOTAL PEMBAYARAN</b> </td><td type="A" style="font-weight: bold;">: {{form.total_all}}</td></tr>
+    </tr>
+        <tr>
+        <td>UPLOAD FOTO NASABAH<span style = " color : red ; " ></span></td>
+        <td>: {{form.foto_nasabah}}{% if form.foto_nasabah.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr>
+        <td>UPLOAD KTP/TANDA TANGAN<span style = " color : red ; " ></span></td>
+        <td>: {{form.tanda_tangan}}{% if form.tanda_tangan.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+     <tr>
+        <td>UPLOAD BERKAS BARANG<span style = " color : red ; " ></span></td>
+        <td>: {{form.berkas_barang}}{% if form.berkas_barang.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    <!--{{form.as_table}}-->
+    <tr><td><label ></td><td><input type="submit" value="&radic; Simpan" class="simpan"/></td></tr> 
+</table>
+</form>
+{% endblock %}
+
+
+

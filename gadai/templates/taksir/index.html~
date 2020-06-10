@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right">:: Daftar Taksiran Barang Gadai ::</h2>
+
+<form action='/taksir/cari/' method='GET'>
+<img src="/static/css/images/search.png" alt="Search"  height="27" align="center"/><input type="text" name="cari" size="30" >
+<input type = 'hidden' name = 'pilih' value = '1'>
+<input type ="submit" value="Cari">
+</form>
+<br/>
+
+<table table width="100%" border="1" align="center">
+    <tr class="{% cycle 'odd' 'even' %}"><th>No</th><th>Kode Barang</th><th>Type</th><th>Nama barang</th><th>Harga Baru</th><th>Harga Pasar</th><th>Max Pinjaman</th><th>Tanggal Update</th><th>Menu</th></tr>
+{% for a in object_list%}
+    <tr>
+    <td>{{ forloop.counter }}</td>
+    <th>{{ a.kobar}}</th>
+    <td>{{ a.type }}</td>
+    <td>{{ a.spesifikasi }}</td>
+    <td>Rp. {{ a.harga_baru|number_format:0}}</td>
+    <td>Rp. {{ a.harga_pasar|number_format:0}}</td>
+    <td>Rp. {{ a.maxpinjaman|number_format:0}}</td>
+    <td>{{ a.tglupdate|date:" d-M-Y"}}</td>
+    <td>{% ifusergroup pusat %} <a href="/taksir/{{a.id }}/edit/"><img src="/static/images/edit.png" height="27px"/>{% endifusergroup %}{% endfor %}</td>
+    
+</table>
+
+
+<p class="paginator">
+
+
+    <span class="this-page">1</span> 
+
+    <a href="?p=1" class="end">2</a> 
+
+
+190 Taksir
+&nbsp;&nbsp;<a href="?all=" class="showall">Tampilkan semua</a>
+
+</p>
+{% endblock %}

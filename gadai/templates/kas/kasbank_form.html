@@ -1,0 +1,11 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}kas{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/">Home</a> &gt; <a href="/kas/">Kas</a> &gt; <a href="/kas/rekening/">Rekening</a> &gt; Tambah</p>
+{% if perms.apps.add_kasbank %}<span class="contextual"><a href="/kas/rekening/add/">Tambah Rekening</a></span>{%endif %}
+<h2>Rekening Bank/POS</h2>
+<form class="tabular" method="POST" action=".">
+{{ form.as_p }}
+<p><label>&nbsp;</label><input type="submit" value="Simpan" /></p>
+</form>
+{% endblock %}

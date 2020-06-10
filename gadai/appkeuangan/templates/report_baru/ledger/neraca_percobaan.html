@@ -1,0 +1,115 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}leger{% endblock %}
+{% block sidebar %}{% load useringroup %}
+{% block extrahead %}
+{% include "alat/neraca.html" %}
+{% load useringroup number_format terbilang %}
+
+{% endblock %}
+{% endblock %}
+{% load number_format humanize %}
+{% block content %}
+<h2> NERACA PERCOBAAN</h2>  
+<div id="jeding">
+  <img id="loading_gambar" src="/static/images/jeding.gif" alt="Load" />
+</div>
+<form method="GET" action="/rreport/neraca_percobaan_keu/" class="tabular">{% csrf_token %}
+<table class="list" align="center">
+   <li><label for="id_cabang">Kode Cabang</label> : {{form.id_cabang}}
+   </li>
+    <!--<li><label for="id_tgl_trans">Start Date</label> : {{form.start_date}}</li>-->
+    <li><label for="id_tgl_trans">Posisi Tangal</label> : {{form.end_date}}</li>
+	<br>
+            <li>&nbsp;
+            <input type="submit" value="&radic; Non Posting" class="nonposting" name="submit_satu"/> &nbsp;
+            <input type="submit" value="&raquo; CETAK" class="cetak_nonposting" name="submit_dua"/>
+            <!--<input type="submit" value="&prop; Posting" class="posting" name="submit_tiga"/>-->
+    </li>
+</table>
+</form>
+
+<br>
+{% if akun %}
+<p style='text-align: center'><b>UNIT PJB 
+   {% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA      {%endif%} 
+   {% if id_cabang = '302' %} GERAI SUCI    {%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR   {%endif%}
+   {% if id_cabang = '304' %}GERAI BALUBUR  {%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
+   {% if id_cabang = '307' %}GERAI KOPO     {%endif%} {% if id_cabang = '308' %}GERAI CIBIRU       {%endif%}
+   {% if id_cabang = '309' %}GERAI CIPACING {%endif%} {% if id_cabang = '310' %}GERAI JATINAMGOR  {%endif%}
+   {% if id_cabang = '311' %}GERAI CIMAHI  {%endif%} {% if id_cabang = '312' %}GERAI BUAH BATU   {%endif%}
+   {% if id_cabang = '313' %}GERAI KORDON  {%endif%} {% if id_cabang = '314' %}GERAI CIHANJUANG  {%endif%}
+   {% if id_cabang = '315' %}GERAI MARANATA{%endif%} {% if id_cabang = '316' %}GERAI KIARACONDONG{%endif%}
+   {% if id_cabang = '317' %}GERAI CIREBON PERJUANGN {%endif%} {% if id_cabang = '318' %}GERAI CIREBON {%endif%}
+   {% if id_cabang = '319' %}GERAI CIUMBELEUIT {%endif%} {% if id_cabang = '113' %}GERAI UJUNG BERUNG{%endif%}
+   {% if id_cabang = '322' %}GERAI BOJONGSOANG{%endif%}{% if id_cabang = '300' %}KANTOR PUSAT{%endif%}
+
+</p>
+<p style='text-align: center'>NERACA PERCOBAAN </p>
+<p style='text-align: center'>Periode : {{start_date}} S.D {{end_date}}</p>
+</b>
+<table class="list">
+
+    <tr>
+	<th rowspan="2">Coa</th>
+	<th rowspan = "2">Account</th>		
+	<th rowspan = "2">Saldo Awal</th>
+	<th colspan ="2">Mutasi</th>
+	<th rowspan = "2">Saldo Akhir</th>
+    </tr>
+    <tr>
+     <th> Debet (Rp)</th>
+     <th> Kredit (Rp)</th>
+    </tr>
+
+{% for d in akun%} 	
+	 <tr  {% if d.header_parent.id = 1%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id %}  {% else %} class="row_nenek" {% endif%}
+	      {% if d.header_parent.id = 266%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 388%} class="row_anak" {% else %}  {% endif%}	
+              {% if d.header_parent.id = 392%} class="row_cucu" {% else %}  {% endif%}   
+              {% if d.header_parent.id = 396%} class="row_cucu" {% else %}  {% endif%}   
+              {% if d.header_parent.id = 398%} class="row_cucu" {% else %}  {% endif%}   
+              {% if d.header_parent.id = 401%} class="row_cucu" {% else %}  {% endif%}   
+              {% if d.header_parent.id = 389%} class="row_cucu" {% else %}  {% endif%}   
+               
+	      {% if d.header_parent.id = 406%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 449%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 540%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 547%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 555%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 560%} class="row_anak" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 2%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 191%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 207%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 267%} class="row_cucu" {% else %}  {% endif%}
+	      {% if d.header_parent.id = 337%} class="row_cucu" {% else %}  {% endif%} 	 
+      	      {% if d.header_parent.id = 381%} class="row_cucu" {% else %}  {% endif%}
+      	      {% if d.header_parent.id = 407%} class="row_cucu" {% else %}  {% endif%}
+      	      {% if d.header_parent.id = 450%} class="row_cucu" {% else %}  {% endif%}
+      	      {% if d.header_parent.id = 2%} class="row_cucu" {% else %}  {% endif%}>
+           {% if d.saldo_akhir > 0  %}
+                 <td style="text-align:right">{{d.id_cabang}}.{{ d.coa }}</td>		 
+                 <td>{{ d.deskripsi }}<small>({{ d.id }})</small></td>
+		 <td style="text-align:right">{{ d.saldo_awal|number_format:0}} </td>				
+		 <td style="text-align:right">{{d.debet|number_format:0}}</td>
+		 <td style="text-align:right">{{ d.kredit|number_format:0}}</td>		 
+		 <td style="text-align:right">
+		{{d.saldo_akhir|number_format:0}}</td>{%else%}
+          {% if d.saldo_akhir < 0 or d.coa = '35.00.00' or d.coa = '35.04.00' %}
+                 <td style="text-align:right">{{d.id_cabang}}.{{ d.coa }}</td>       
+                 <td>{{ d.deskripsi }}<small>({{ d.id }})</small></td>
+                 <td style="text-align:right">{{ d.saldo_awal|number_format:0}} </td>
+                 <td style="text-align:right">{{d.debet|number_format:0}}</td>
+                 <td style="text-align:right">{{ d.kredit|number_format:0}}</td>
+                 <td style="text-align:right"><span style="color:#E7270E">
+                 ({{d.saldo_akhir|minplus|number_format:0}})</span></td>
+          {% endif %}{%endif%}
+	  </tr>	
+{% endfor %}
+	  
+</table>
+{% else %}
+<p>Tidak ada data neraca</p>
+{% endif %}
+{% endblock %}
+

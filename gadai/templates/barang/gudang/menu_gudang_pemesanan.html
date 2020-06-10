@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Pemesanan</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 0px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/permintaan/input_permintaan_gudang/">Kembali</a> ]</p>
+<table width="100%">
+<tr>
+	<td width="100" align="center">
+		<h3>DAFTAR PEMESANAN GERAI</h3>
+		<h5>Tanggal : {{start_date}} s/d {{ end_date}} </h5>		
+	</td>
+</tr>
+</table>
+
+<table class="tableizer-table" width="100%" border="1" bordercolor="silver " style="background-color:#FFFFFF" cellpadding="0" cellspacing="0">
+<tr class="tableizer-firstrow">
+	<th rowspan= "2">NO</th>
+        <th rowspan= "2">GERAI</th>
+	<th rowspan= "2">NOREK</th>
+	<th rowspan= "2">NAMA NASABAH</th>
+        <th rowspan= "2">STATUS AKAD</th>
+        <th rowspan= "2">SPEC BARANG</th>
+        <th rowspan= "2" >JENIS BARANG</th>
+        <th rowspan= "2">JAM PERMINTAAN</th>
+	<th rowspan= "2">TGL PERMINTAAN</th>
+	<th rowspan="2">No Rak</th>
+	
+</tr>
+<tr >
+{% for p in kp %}	
+<tr>
+	<td align="center"><font size="1">{{ forloop.counter }}</font></td>
+	<td align="center"><font size="1">{{ p.gerai }}</font></td>
+	<td align="center"><font size="1">{{ p.norek }}</font></td>
+	<td><font size="1">{{ p.agnasabah.nama|truncatewords:2 }}</font></td>
+        <td><font size="1">{{ p.get_jns_gu_display }}</font></td>
+        <td align="left"><font size="1">{{p.barang.merk}}, {{p.barang.type}}, {{p.barang.warna}},(SN {{p.barang.sn}}). </font></td>
+        <td align="left"><font size="1">{{p.barang.get_jenis_barang_display}}</font></td>
+        <td align="center"><font size="1">{{p.klik_permintaan|date:"H:i:s"}}</font></td>
+	<td align="center"><font size="1">{{p.tanggal_permintaan|date:"d-M-Y"}}</font></td>
+	<!--<td>{{p.barang.get_ruangan_display|default_if_none:"0"}}.{{p.barang.lemari|default_if_none:"0"}}.{{p.barang.no_rak|default_if_none:"0"}}.
+        {{p.barang.row|default_if_none:"0"}}</td>-->
+        <td>{{ p.barang.kode|default_if_none:"0" }}.{{ p.get_ruang_barang_display|default_if_none:"0" }}.
+        {{ p.get_lemari_barang_display|default_if_none:"0" }}.{{ p.get_rak_barang_display|default_if_none:"0" }}.
+        {{ p.get_row_barang_display|default_if_none:"0"  }}</td>
+
+</tr>
+{% endfor %}
+</table>
+</br>
+<table width="100%">
+<tr>
+        <td width="100" align="center">
+                <h3>DAFTAR PEMESANAN GERAI BELUM DITEMUKAN</h3>
+        </td>
+</tr>
+</table>
+
+<table class="tableizer-table" width="100%" border="1" bordercolor="silver " style="background-color:#FFFFFF" cellpadding="0" cellspacing="0">
+<tr class="tableizer-firstrow">
+        <th rowspan= "2">NO</th>
+        <th rowspan= "2">NOREK</th>
+        <th rowspan= "2">GERAI</th>
+        <th rowspan= "2">NAMA NASABAH</th>
+        <th rowspan= "2">STATUS AKAD</th>
+        <th rowspan= "2">SPEC BARANG</th>
+        <th rowspan= "2" >JENIS BARANG</th>
+        <th rowspan= "2">JAM PERMINTAAN</th>
+        <th rowspan= "2">TGL PERMINTAAN</th>
+        <th rowspan="2">No Rak</th>
+
+</tr>
+<tr >
+{% for p in blm %}
+<tr>
+        <td align="center"><font size="1">{{ forloop.counter }}</font></td>
+        <td align="center"><font size="1">{{ p.gerai }}</font></td>
+        <td align="center"><font size="1">{{ p.norek }}</font></td>
+        <td><font size="1">{{ p.agnasabah.nama|truncatewords:2 }}</font></td>
+        <td><font size="1">{{ p.barang.keterangan_gadai_ulang }}</font></td>
+        <td align="left"><font size="1">{{p.barang.merk}}, {{p.barang.type}}, {{p.barang.warna}},(SN {{p.barang.sn}}). </font></td>
+        <td align="left"><font size="1">{{p.barang.get_jenis_barang_display}}</font></td>
+        <td align="center"><font size="1">{{p.klik_permintaan|date:"H:i:s"}}</font></td>
+        <td align="center"><font size="1">{{p.tanggal_permintaan|date:"d-M-Y"}}</font></td>
+        <!--<td>{{p.barang.get_ruangan_display|default_if_none:"0"}}.{{p.barang.lemari|default_if_none:"0"}}.{{p.barang.no_rak|default_if_none:"0"}}.
+        {{p.barang.row|default_if_none:"0"}}</td>-->
+        <td>{{ p.barang.kode|default_if_none:"0" }}.{{ p.get_ruang_barang_display|default_if_none:"0" }}.
+        {{ p.get_lemari_barang_display|default_if_none:"0" }}.{{ p.get_rak_barang_display|default_if_none:"0" }}.
+        {{ p.get_row_barang_display|default_if_none:"0"  }}</td>
+
+</tr>
+{% endfor %}
+</table>
+

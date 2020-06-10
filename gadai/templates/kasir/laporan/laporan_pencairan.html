@@ -1,0 +1,43 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Laporan Pencairan{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>LAPORAN TRANSAKSI HARIAN  <small>DIV PJB</small>{{cabang.kode_cabang}}
+{% if gr %}
+<h3 align="Center">UNIT PJB GERAI {{kocab.nama_cabang}}</h3>
+<h3 style='text-align: center'><b> REKAPITULASI TRANSAKSI PENCAIRAN</b></h3>
+<table class="list">
+<tr>
+	<th>Norek</th>
+	<th>Debitur</th>
+	<th>Nilai Yg Diberikan (Rp)</th>
+	<th>Selisih (Rp)</th>
+	<th>Jangka Waktu</th>
+	<th>Jatuh Tempo</th>
+</tr>
+
+	<tbody>
+		{% for a in gr%}
+		<tr>
+			<td>{{ a.norek }}</td>
+			<td>{{ a.agnasabah.nama|striptags  }}</td>
+			<td align="right">{{ a.kasirgerai.nilai_pembulatan|number_format:0}}</td>
+			<td align="right">{{ a.kasirgerai.selisih|number_format:0}}</td>
+			<td align="center">
+				{% if a.jenis_transaksi = '1'  %}{{ a.jangka_waktu|default_if_none:"" }} Hari{%else%}
+				{{ a.jangka_waktu_kendaraan|default_if_none:"" }} Bulan</td>{% endif %}
+			</td>
+			<td align="center">{{ a.jatuhtempo|date:" d-M-Y"}}</td>
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% else %}
+<h3>::: Tidak Ada Data Pencairan :::</h3>
+{% endif %}
+{% endblock %}
+

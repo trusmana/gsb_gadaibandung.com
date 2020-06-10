@@ -1,0 +1,291 @@
+<style>
+div.img {margin: 5px;padding: 5px;border: 1px solid #0000ff;height: auto;width: auto;float: left; text-align: center;
+}
+
+div.img img {display: inline;margin: 5px;border: 1px solid #ffffff;
+}
+
+div.img a:hover img {border:1px solid #0000ff;
+}
+
+div.desc {text-align: center;font-weight: normal;width: 120px;margin: 5px;
+}
+</style>
+
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 10px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+ function printpage() { window.print(); }
+</script>
+<body onload="printpage();">
+
+{% load number_format useringroup %}
+<p class="print">[ <a href="/kasirgerai/{{kocab.kode_cabang}}/all_transaksi_bank/" onclick="printpage()">Print</a> | <a href="/kasirgerai/{{kocab.kode_cabang}}/all_transaksi_bank/">Kembali</a> | <a href="/kasirgerai/{{kocab.kode_cabang}}/cetak_all_transaksi_bank/?format=pdf" >Download PDF </a>]</p>
+<h3 align="Center">UNIT PJB GERAI {{kocab.nama_cabang}}</h3>
+<h3 style='text-align: center'><b> LAPORAN TRANSAKSI NON TUNAI</b></h3>
+<h3 style='text-align: center'><b><small>Periode : {{sekarang|date:"d-M-Y"}} </small> </b></h3>
+
+<table align="right" border="1" bordercolor="silver "  cellpadding="0" cellspacing="0" border-bottom-style:outset; width="15%">
+<tr>
+  <td align="center">Mengetahui / Menyetujui<br />
+    Kepala Gerai
+<br />
+<br />
+<br />
+<br />
+<br /><br />
+<br />
+( {{user.profile.gerai.nama_kg}} )
+  </td>
+  </tr>
+  <tr>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+Kasir
+<br />
+<br />
+<br />
+<br />
+<br /><br />
+<br />
+( {{user.profile.user.first_name}} {{user.profile.user.last_name}} )
+</td></tr>
+</table>
+
+{% if tampil or saldo_awal%}
+<table  class="tableizer-table" border="1" bordercolor="silver "  cellpadding="0" cellspacing="0" border-bottom-style:outset; width="75%">
+<tr>
+	<th colspan="3">SALDO</th>
+</tr>
+	<tbody>
+                <!--
+		<tr>
+			<td>Saldo Awal</td>
+			<td align="right"> {{saldo_awal|number_format:0}},00</td>
+			<td></td>
+		</tr>
+		-->
+                <tr class="row_anak">
+			<td><b>Total Saldo Awal</b></td>
+			<td></td>
+			<td><b> {{total_saldo|number_format:0}},00</b></td>
+                 </tr>
+		 <tr>
+                        <th colspan="3">PENERIMAAN</th>
+                </tr>
+		
+		<tr>
+			<td>Setoran Antar Gerai</td>
+			<td align="right"></td>
+			<td></td>
+		</tr>
+		{% for a in setoran_kas_gerai %} {% if a.debet > 0 %}
+		<tr>
+        	<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+			<td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.debet|number_format:0}},00</td>	
+			<td></td>
+        </tr>
+		{% endif %}{% endfor %}
+		{% for a in setoran_bank_gerai %} {% if a.kredit > 0 %}
+		<tr>
+        	<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+			<td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.kredit|number_format:0}},00</td>	
+			<td></td>
+        </tr>
+		{% endif %}{% endfor %}
+
+		<tr>
+            <td>Pelunasan</td>
+			<td align="right"> </td>
+			<td></td>
+                </tr>
+
+		{% for a in total_pelunasan %} {% if a.kredit > 0 %}
+                <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+                        <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.kredit|number_format:0}},00</td>
+                        <td></td>
+        </tr>
+                {% endif %}{% endfor %}
+        
+         
+        <tr>
+            <td>Penerimaan Gadai Ulang</td>
+                        <td align="right"> </td>
+                        <td></td>
+                </tr>
+				{% for a in ak_ulang %} {% if a.kredit > 0 %}
+                <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+                        <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.kredit|number_format:0}},00</td>
+                        <td></td>
+        </tr>
+        {% endif %}{% endfor %}
+
+		<!--<tr>
+			<td>Hasil Lelang Barang Lapur</td>
+			<td align="right"></td>
+			<td></td>
+		</tr>
+
+		{% for a in penjualan %} {% if a.debet > 0%}
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+          <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.debet|number_format:0}},00</td>
+                        <td></td>
+        </tr>
+        {% endif %}{% endfor %}-->
+		
+		<tr>
+            <td>Pendapatan Operasional Lainnya</td>
+			<td align="right"></td>
+			<td></td>
+        </tr>
+        {% for a in pencairan_kasir_sisa %} {% if a.kredit > 0 %}
+		<tr>
+        	<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+			<td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.kredit|number_format:0}},00</td>	
+			<td></td>
+        </tr>
+		{% endif %}{% endfor %}
+		
+
+                <tr>
+            <td>Titipan Kelebihan Pelunasan</td>
+                        <td align="right"></td>
+                        <td></td>
+        </tr>
+        {% for a in pelunasan_kelebihan_kasir %} {% if a.kredit > 0 %}
+                <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+                        <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.kredit|number_format:0}},00</td>
+                        <td></td>
+        </tr>
+                {% endif %}{% endfor %}
+
+            <td>Titipan Kelebihan Gadai Ulang</td>
+                        <td align="right"></td>
+                        <td></td>
+        </tr>
+        {% for a in gadai_ulang_kelebihan_kasir %} {% if a.kredit > 0 %}
+                <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+                        <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.kredit|number_format:0}},00</td>
+                        <td></td>
+        </tr>
+                {% endif %}{% endfor %}
+
+        
+        <tr class="row_anak">
+            <td><b>Total Penerimaan</b></td>
+			<td></td>
+			<td align="left"><b> {{total_penerimaan|number_format:0}},00</b></td>
+        </tr>
+
+
+		<tr><th colspan="3">PENGELUARAN</th></tr>
+		<tr>
+            <td>Pengeluaran Antar Gerai </td>
+			<td align="right"> </td>
+			<td></td>
+        </tr>
+		<!--{% for a in pengembalian_bank %} {% if a.debet > 0 %}
+		<tr>
+        	<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+			<td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.debet|number_format:0}},00</td>	
+			<td></td>
+        </tr>
+		{% endif %}{% endfor %}-->
+		{% for a in pengembalian_bank %} {% if a.debet > 0 %}
+		<tr>
+        	<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+			<td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.debet|number_format:0}},00</td>	
+			<td></td>
+        </tr>
+		{% endif %}{% endfor %}
+
+		<tr>
+            <td>Pencairan</td>
+			<td align="right"></td>
+			<td></td>
+        </tr>	
+		{% for a in t_kasir %} {% if a.debet > 0 %}
+                <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} </td>
+                        <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.debet|number_format:0}},00</td>
+                        <td></td>
+        </tr>
+                {% endif %}{% endfor %}
+
+              <tr>
+            <td>Pengeluaran Gadai Ulang </td>
+                        <td align="right"></td>
+                        <td></td>
+                </tr>
+		{% for a in pengeluaran_gadai_ulang %} {% if a.debet > 0 %}
+                <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} - {{ a.id_coa.deskripsi}}</td>
+                        <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.debet|number_format:0}},00</td>
+                        <td></td>
+        </tr>
+        {% endif %}{% endfor %}
+
+       {% for a in akad_ulang_pengeluaran %} {% if a.debet > 0 %}
+                <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} - {{ a.id_coa.deskripsi}}</td>
+                        <td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.debet|number_format:0}},00</td>
+                        <td></td>
+        </tr>
+        {% endif %}{% endfor %}
+
+
+
+        <tr>
+            <td>Biaya </td>
+			<td align="right"></td>
+			<td></td>
+                </tr>
+		
+		{% for a in transaksi_jurnal %} {% if a.debet > 0 %}
+		<tr>
+        	<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} - {{ a.id_coa.deskripsi}}</td>
+			<td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.debet|number_format:0}},00</td>	
+			<td></td>
+        </tr>
+	{% endif %}{% endfor %}
+
+		<tr class="row_anak">
+            <td><b>Total Pengeluaran</b></td>
+			<td></td>
+			<td> <b> {{total_pengeluaran|number_format:0}},00</b></td>
+        </tr>
+		<tr class="row_anak">
+			<td align="center"><b>Saldo Akhir</b></td>
+			<td></td>
+			<td align="right"><b> {{saldo_akhir|number_format:0}},00</b></td>
+        </tr>
+		<tr class="row_anak">
+            <td align="center"><b>Saldo Yang Disetor ke Pusat (BANK)</b></td>
+			<td></td>
+			<td align="right"><b>{{pengembalian_bank_pusat_pjb|number_format:0}},00</b></td>
+        </tr>
+
+        <tr class="row_anak">
+            <td align="center"><b>Saldo Akhir Bank Gerai</b></td>
+			<td></td>
+			<td align="right"><b> {{saldo_keseluruhan|number_format:0}},00</b></td>
+        </tr> 
+
+	</tbody>
+</table>
+</form>
+	
+{%else%}<h2 align="center"><b> :::: POSTING TRANSAKSI HARIAN KASIR BERHASIL ::::</b></h2>
+{% endif %}
+
+

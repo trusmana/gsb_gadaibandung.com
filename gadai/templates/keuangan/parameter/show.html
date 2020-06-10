@@ -1,0 +1,33 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+
+{% endblock %}
+{% block section %}kas{% endblock %}
+{% block sidebar %}{% load number_format %}
+<div class="menu_list" id="secondpane">
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU ADD</span></a></li>
+        <li class='last'><a href='/parameterjurnal/add/'><span>ADD PARAMETER BIAYA</span></a></li>
+    </ul>
+</div>
+</div>
+{% endblock %}
+{% block content %}
+
+<h2 align="right">:: PARAMETER BIAYA ::</h2>
+
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%">
+    <tr>
+        <th>No</th><th>ITEM</th><th>COA</th><th>CABANG</th>
+    </tr>
+    {% for object in biaya%}
+    <tr>
+        <td><a href='/parameterjurnal/{{object.id}}/hapus_jurnal/' title ="Hapus Jurnal">{{object.id}}</a></td>
+        <td><a href='/parameterjurnal/{{object.id}}/edit/' title ="EDIT Jurnal">{{ object.item}}</a></td>
+        <td>{{ object.coa }}</td>
+        <td>{{ object.cabang}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

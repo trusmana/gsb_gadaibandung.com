@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block extrahead %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal").datepicker({dateFormat: 'yy-mm-dd'});
+    $("#id_tgl_lahir").datepicker({dateFormat: 'yy-mm-dd'});
+    $('input:text').setMask();
+       $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+});
+</script>
+{% endblock %}
+{% block section %}pk{% endblock %}
+{% block content %}
+{% if form.errors %}
+<p ><span style = " color : red ; " >ADA KOLOM YANG BELUM ANDA INPUTKAN </span></p>
+{% endif %}
+<h2 align="right">INPUT PENCAIRAN KREDIT GADAI</h2>
+<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %} 
+<table align="center" > 
+			
+    <td colspan="3" height="10"><h3>IDENTITAS NASABAH</td>	
+
+    <tr>
+        <td><label for="id_nama"  width="200px" height="25px">NAMA <span style = " color : red ; " >*</span>:</label></td>
+        <td>{{form.nama}}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_tgl_lahir"  width="200px" height="25px">TANGGAL LAHIR<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{ form.tgl_lahir }}( Tahun-Bulan-Tanggal )</td>
+    </tr>
+	
+    
+    <tr>
+        <td><label for="id_tempat"  width="200px" height="25px">TEMPAT LAHIR <span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.tempat}}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_no_ktp"  width="200px" height="25px">NOMOR KTP / SIM<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.no_ktp}}</td>
+    </tr>
+   
+    <tr>
+        <td><label for="id_alamat_ktp"  width="200px" height="25px">ALAMAT (KTP / SIM)<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.alamat_ktp}}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_rt_ktp"  width="200px" height="25px">RT/RW (KTP / SIM)<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.rt_ktp}} {{form.rw_ktp}}</td>
+    </tr>	
+   
+    <tr>
+        <td><label for="id_telepon_ktp"  width="200px" height="25px">TELPON (KTP / SIM)<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.telepon_ktp}}</td>
+    </tr>	
+    
+    <tr>
+       <td><label for="id_hp_ktp"  width="200px" height="25px">HP (KTP / SIM)<span style = " color : red ; " >*<span>:</label></td>
+       <td>{{form.hp_ktp}}</td>
+    </tr>
+	
+    <tr>
+        <td><label for="id_kelurahan_ktp"  width="200px" height="25px" >KELURAHAN (KTP / SIM)<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.kelurahan_ktp}}</td>
+    </tr>
+    
+    <tr>
+        <td><label for="id_kecamatan_ktp"  width="200px" height="25px" >KECAMATAN (KTP / SIM)<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.kecamatan_ktp}}</td>
+    </tr>
+    
+    <tr>
+       <td><label for="id_jenis_pekerjaan"  width="200px" height="25px" >JENIS PEKERJAAN<span style = " color : red ; " >*<span>:</label></td>
+       <td>{{form.jenis_pekerjaan}}</td>
+    </tr>
+	
+    <tr>
+       <td><label for="id_alamat_kantor"  width="200px" height="25px" >ALAMAT KANTOR:</label></td>
+       <td>{{form.alamat_kantor}}</td>
+    </tr>
+	
+    <tr>
+        <td><label for="id_telepon_kantor"  width="200px" height="25px" >TELEPON KANTOR:</label></td>
+        <td>{{form.telepon_kantor}}</td>
+    </tr>	
+	
+    <tr>
+        <td><label for="id_kode_pos"  width="200px" height="25px" >KODE POS<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.kode_pos}}</td>
+    </tr>
+	
+    <tr>
+        <td><label for="id_email"  width="200px" height="25px" >EMAIL:</label></td>
+        <td>{{form.email}}</td>
+    </tr>
+	
+    <tr>
+        <td><label for="id_jenis_kelamin"  width="200px" height="25px" >JENIS_KELAMIN<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.jenis_kelamin}}</td>
+    </tr>
+    
+    <td colspan="3" height="10"><h3>DATA JAMINAN BARANG</h3></td>
+
+    <tr>
+        <td><label for="id_jenis_barang"  width="200px" height="25px" >JENIS BARANG:</label></td>
+        <td>{{form.jenis_barang}}</td>
+    </tr>
+
+    <tr>
+        <td><label for="id_merk"  width="200px" height="25px" >MERK<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.merk}}</td>
+    </tr>
+   
+    <tr>
+        <td><label for="id_type"  width="200px" height="25px" >TYPE<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.type}}</td>
+    </tr>	
+
+    <tr>
+        <td><label for="id_sn"  width="200px" height="25px" >SN /IMAY<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.sn}}</td>
+    </tr>	
+
+    <tr>
+        <td><label for="id_warna"  width="200px" height="25px" >WARNA<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.warna}}</td>
+    </tr>
+
+   
+    <tr>
+        <td><label for="id_tahun_pembuatan"  width="200px" height="25px" >TAHUN PEMBUATAN<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.tahun_pembuatan}}</td>
+    </tr>	
+
+    <tr>
+        <td><label for="id_bukan_produksi"  width="200px" height="25px" >BULAN PRODUKSI<span style = " color : red ; " >*<span>:</label></td>
+        <td>{{form.bulan_produksi}}</td>
+    </tr>
+	
+    
+    <tr>
+	<td><label for="id_lampiran_dokumen"  width="200px" height="25px" >LAMPIRAN DOKUMEN<span style = " color : red ; " >*<span>:</label></td>
+	<td>{{form.lampiran_dokumen}}</td>
+    </tr>	
+
+    <tr>
+	<td><label for="id_accesoris_barang1"  width="200px" height="25px" >PERLENGKAPAN BARANG<span style = " color : red ; " >*<span>:</label>
+	</td><td>{{form.accesoris_barang1}}</td>
+    </tr>
+
+	<td colspan="3" height="10"><h3>PENILAIAN DAN PERSETUJUAN</h3></td>
+	
+    <tr>
+	<td><label for="id_tanggal"  width="200px" height="25px" >TANGGAL TRANSAKSI<span style = " color : red ; " >*<span>:</label></td>
+	<td>{{form.tanggal}}(Tahun - Bulan - Tanggal )</td>
+    </tr>
+		
+    <tr>
+	<td><label for="id_gerai"  width="200px" height="25px" >GERAI<span style = " color : red ; " >*<span>:</label></td>
+	<td>{{form.gerai}}</td>
+   </tr>
+
+   <tr>
+	<td><label for="id_gudang"  width="200px" height="25px" >TAKSIRAN NILAI BARANG<span style = " color : red ; " >*<span>:</label></td>
+	<td>{{form.taksir}}<a href="/taksir/" class="add-another" id="add_id_taksir" onclick="return showAddAnotherPopup(this);"> <img src="/static/icon_addlink.gif" width="10" height="10" alt="TAKSIRAN"/></a>
+	</td>
+   </tr>
+	
+    <tr>
+        <td><label for="id_nilai"  width="200px" height="25px" >NILAI PINJAMAN<span style = " color : red ; " >*<span>:</label></td>
+	<td>{{form.nilai}}</td>
+    </tr>	
+	
+    <tr>
+	<td><label for="id_JANGKA_WAKTU"  width="200px" height="25px" >JANGKA WAKTU<span style = " color : red ; " >*<span>:</label></td>
+	<td>{{form.jangka_waktu}}</td>
+    </tr>
+	
+    <tr>
+        <td><label for="id_bea_materai"  width="200px" height="25px" >MATERAI<span style = " color : red ; " >*<span>:</label></td>
+	<td>{{form.bea_materai}}</td>
+    </tr>	
+
+	<tr><td><label ></td><td><input type="submit" value="Simpan" /></td></tr>	
+</table>
+</form>
+{% endblock %}

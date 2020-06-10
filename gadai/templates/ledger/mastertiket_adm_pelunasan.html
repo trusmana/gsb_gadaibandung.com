@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>MT PELUNASAN {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 10px; font-family: "calibri", Garamond, 'Comic Sans';
+    line-height: 8px;vertical-align: top;border-bottom:
+    1px solid #eee;padding: 5px;
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+function printpage() { window.print(); }
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/">Kembali</a> ]</p>
+<h4 align="Center">UNIT PJB GERAI {{cabang.nama_cabang}}</h4>
+<h4 align="Center">MASTER  TIKET PELUNASAN ADM</h4>
+<h4 align="Center">PERIODE {% now "d-m-Y" %}</h4>
+<table align="center">
+<thead>
+    <tr align="center" style="background-color:#C0C0C0;" >
+        <td>Tanggal</td>
+        <td align="center">Nama Ledger</td>
+        <td align="center">Keterangan</td>
+        <td align="center">Debet</td>
+        <td align="center">Credit</td>
+    </tr>
+</thead>
+<tbody>
+{% regroup g by jurnal as grouped %}
+  {% for group in grouped %}
+  {% for p in group.list %}
+    <tr style="background-color: {% ifchanged group.list %}{% cycle "#CCFFFF" "white" as rowcolors %}{% else %}
+            {{ rowcolors }}{% endifchanged %}">
+        {% ifchanged %}<td rowspan="{{ group.list|length }}">{{ p.tgl_trans|date:"d-M-Y" }}</td>{% endifchanged %}
+         <td>{{p}}.{{p.id_coa}} {{ p.antar_kantor }}</td>
+        <td>{% if forloop.counter %}<i>({{ p.jurnal.diskripsi}})</i>{% endif %}</td>
+        <td align="right">{{ p.debet|number_format:0 }}</td>
+        <td align="right">{{ p.kredit|number_format:0 }}</td>
+    </tr>
+  {% endfor %}
+  {% endfor %}
+  </tbody>
+
+
+<tr align="center" style="background-color:#C0C0C0;">
+    <td colspan="3" align="center">TOTAL</td><td align="right">{{total_debet|number_format:0}}</td>
+    <td align="right">{{total_kredit|number_format:0}}</td>
+</tr>
+</table>
+<br>
+<table align ="Right" border="1" bordercolor="silver "  width="50%" cellpadding="0" cellspacing="0" border-bottom-style:outset;>
+<tr align="center" style="background-color:#C0C0C0;height: 15px;" >
+    <td>Dibuat,</td>
+    <td>Di Periksa,</td>
+</tr>
+
+    
+<tr style= "height: 70px;">
+    </br></br></br>
+    </br></br></br>
+    </br></br></br>
+    <td>{{user.first_name}}</td>
+    <td>Kepala Gerai</td>
+</tr>

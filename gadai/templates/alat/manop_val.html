@@ -1,0 +1,103 @@
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+function printpage() { window.print(); }
+$(document).ready(function(){
+   $( "#datepicker" ).datepicker();
+   $("#id_tanggal").datepicker({dateFormat: 'dd-mm-yy'});
+   $("input.uang").setMask();
+   $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+    $("input.rp_uang").keypress(function(event){
+        if (event.charCode && (event.charCode < 46 || event.charCode > 57 || event.charCode == 47))
+        { event.preventDefault(); }
+    })
+    $("input.rp_nilai").change(function() {
+        total_dibayar();        
+    });  
+});
+
+function total_dibayar(){
+    var nilai = $("#id_nilai").val()
+    var denda= $("#id_denda").val()
+    var denda_kendaraan= $("#id_denda_kendaraan").val()
+    var terlambat= $("#id_terlambat").val()
+    var terlambat_kendaraan= $("#id_terlambat_kendaraan").val()
+    var bea_jasa=$("#id_bea_jasa").val()
+    var bea_jasa_kendaraan=$("#id_bea_jasa_kendaraan").val()
+    var total=$("#id_total").val()
+    var total_kendaraan=$("#id_total_kendaraan").val()
+    var hitung
+    var hitung_jasa
+    var hitung_kendaraan
+    var hitung_jasa_kendaraan
+    var total_elektronik
+    var total_kendaraan
+    hitung = (((parseFloat(to_number(nilai)))) * 0.05/30) * ((parseFloat(to_number(terlambat))))
+    /*$("#id_denda").val(format_number(String(Math.round(hitung))))*/
+    hitung_jasa =(((parseFloat(to_number(nilai)))) * 0.02/7) * ((parseFloat(to_number(terlambat))))
+    /*$("#id_bea_jasa").val(format_number(String(Math.round(hitung_jasa))))*/
+    total_elektronik = ((parseFloat(to_number(nilai)))) + hitung + hitung_jasa
+    /*$("#id_total").val(format_number(String(Math.round(total_elektronik))))*/
+    
+    hitung_kendaraan = (((parseFloat(to_number(nilai)))) * 0.05/30) * ((parseFloat(to_number(terlambat_kendaraan))))
+    $("#id_denda_kendaraan").val(format_number(String(Math.round(hitung_kendaraan))))
+    hitung_jasa_kendaraan =(((parseFloat(to_number(nilai)))) * 0.04/30) * ((parseFloat(to_number(terlambat_kendaraan))))
+    $("#id_bea_jasa_kendaraan").val(format_number(String(Math.round(hitung_jasa_kendaraan))))   
+    total_kendaraan = ((parseFloat(to_number(nilai)))) + hitung_kendaraan + hitung_jasa_kendaraan
+    $("#id_total_kendaraan").val(format_number(String(Math.round(total_kendaraan))))  
+   
+}
+</script>
+
+<script type="text/javascript">
+   $(function(){
+   $(":radio.rad").click(function(){
+	  $(".formbarang, .formkendaraan").hide()
+		 if($(this).val() == "1"){
+			$(".formbarang").show();
+			$("#id_total_kendaraan").val('0')
+			$("#id_bea_jasa_kendaraan").val('0')
+			$("#id_denda_kendaraan").val('0')
+			$("#id_terlambat_kendaraan").val('0')
+		 }else{
+			$(".formkendaraan").show();
+			$("#id_total").val('0')
+			$("#id_bea_jasa").val('0')
+			$("#id_denda").val('0')
+			$("#id_terlambat").val('0')
+		 }
+	  });
+   });
+</script>
+<script type="text/javascript">
+   function myFunction() {
+	  var bool = true;
+	  var x = bool.toString()
+	  document.getElementById("demo").innerHTML = x;
+}
+</script>
+<style>
+#login_form {
+		background: #EFE;
+		padding: 0.1em 0.0em 0.1em;
+		margin:0 auto 150px;
+		width: auto;height:auto;
+		border: 1px solid #EFE;
+		border-top:8px;
+		-webkit-border-radius:0px;
+		-moz-border-radius:0px;
+		border-radius:3px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.2) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+</style>
+
+

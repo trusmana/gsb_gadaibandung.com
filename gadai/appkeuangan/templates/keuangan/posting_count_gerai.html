@@ -1,0 +1,45 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Jurnal_Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}{% include "alat/neraca.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2>POSTING TRANSAKSI PJB   <small>DIV PJB</small></h2>
+<div id="jeding">
+  <img id="loading_gambar" src="/static/images/jeding.gif" alt="Load" />
+</div>
+
+<h3 style='text-align: center'><b><small>&nbsp;Periode : {{sekarang|date:"d-M-Y"}}</small> </b></h3>
+<table class="list">
+<tr>
+    <th>Kode Cabang </th>
+    <th>Gerai</th>
+    <th>Status Post</th>
+</tr>
+
+{% for a in cbg%}
+	<tr>
+        <td>{{ a.kode_cabang }}<input type="checkbox"  name="id_pilih" value="{{a.kode_cabang}}"/></td>
+        <td>{{a.cabang}}  {{a.kode_cabang}} </td>
+        <td align="right">
+            {% if a.postting > 0 and  a.posting_off > 0 %}
+            <button class="cari">Posting Berhasil</button>{%else%}
+            {% if a.tes_posting >= 1 %}
+            <a href='/rkeuangan/{{a.kode_cabang}}/posting_tanggal/'  class='harian' >CABANG SUDAH POSTING</a>           
+            <a href='/kasirgerai/{{a.kode_cabang}}/all_transaksi_kas_pusat/'  class='harian' >Transaksi Kas Gerai</a>
+            <a href='/kasirgerai/{{a.kode_cabang}}/all_transaksi_bank_pusat/'  class='edit' pesan="Total yg sudah di postting {{a.sts_post}}">Transaksi Bank Gerai</a> 
+            {%else%} 
+            <button class="simpan">Cabang Blm Posting</button>
+            {% endif %}{% endif %}
+        </td>
+    </tr>
+{% endfor%}
+
+</table>
+{% endblock %}
+

@@ -1,0 +1,36 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}barang{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+
+<h2 align="center">History Barang Masuk</h2>
+
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow" >
+	<th align="center">No</th>
+	<th align="center">Kode Barang</th>
+	<th align="center">Tanggal Masuk</th>
+	<th align="center">Tanggal Keluar</th>
+	<th align="center">Ruang</th>
+	<th align="center">Lemari</th>
+	<th align="center">Kolom</th>
+	<th align="center">Row</th>
+   </tr>
+{% for p in barang %}
+    <tr >
+	<td align="center">{{forloop.counter}}</td>
+	<td align="left">{{ p.agbarang.id}}</td>
+	<td>{{p.tgl_barang_masuk|date:"d-M-Y "}}</td>
+	<td>{{p.tgl_barang_keluar|date:"d-M-Y "}}</td>
+	<td align="right">{{p.get_ruang_barang_display}}</td>
+	<td align="right">{{p.get_lemari_barang_display}}</td>	
+	<td align="right">{{p.kolom_barang|default_if_none:"-"}}</td>
+	<td align="right">{{p.rak_barang}}</td>
+    </tr>{% endfor %}
+    
+</table>
+{% endblock %}
+
+

@@ -1,0 +1,65 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Ayda{% endblock %}
+{% block extrahead %}
+{% include "alat/manop_lelang.html" %}
+{% endblock %}{% load useringroup %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right">MENU EKSEKUSI JUAL AYDA</h2>
+<br>
+<hr>
+{% ifusergroup manop|KEUANGAN1|KEUANGAN2%}
+{% for a in lapur %}
+<table width="90%">
+<tr>
+    <td>NOREK </td><td>: {{ag.norek}}</td>
+    <td>JANGKA WAKTU</td><td>: {% if ag.jenis_transaksi = 1 %}{{ag.jangka_waktu_kendaraan}}(Bulan){%else%}{{ag.jangka_waktu}}(Hari) </td>{%endif%}
+    <td>PLAFON </td><td>:<b> Rp {{ag.nilai|number_format:0}}</b></td>
+</tr>
+
+
+<tr>
+    <td>NAMA NASABAH     </td> <td>: <b>{{ag.agnasabah.nama}}</b></td>
+    <td>TANGGAL AKAD  </td><td>: {{ag.tanggal|date:" d-M-Y"}}</td>
+    <!--<td>JASA AYDA </td> <td>: <b>Rp {{ag.jasa_ayda|number_format:0}}</b></td>-->
+</tr>
+
+<tr>
+    <td>KEANGGOTAAN</td><td>: {{ ag.agnasabah.get_jenis_keanggotaan_display}}</td>
+    <td>JATUH TEMPO</td><td>: {{ag.jatuhtempo|date:" d-M-Y"}} </td>
+    <!--<td>DENDA AYDA </td> <td>: <b>Rp {{ag.denda_ayda|number_format:0}}</b></td>-->
+</tr>
+
+<tr>
+    <td>ALAMAT</td><td>: {{ag.agnasabah.alamat_ktp}} No {{ag.agnasabah.no_rumah_ktp}} RT : {{ag.agnasabah.rt_ktp}} RW : {{ag.agnasabah.rw_ktp}} </td>
+    <td>TANGGAL LUNAS</td><td> : <b>{{ag.lunas|date:" d-M-Y"}}</b> </td>   
+    <td>NILAI AYDA </td> <td>: <b>Rp {{ag.total_akad_ayda|number_format:0}}</b></td>
+</tr>
+<tr>
+    <td>NO KTP</td><td>: {{ ag.agnasabah.no_ktp }} </td>
+    <td>STATUS</td><td>: {% if ag.status_transaksi %} {{ ag.get_status_transaksi_display }} {% else %} AKTIF</td>
+</tr>
+<tr>
+   <td>NO  TELEPON     </td><td>: {{ag.agnasabah.telepon_ktp}}</td>
+    {%endif%}
+</tr>
+{% endfor %}
+</table>
+<hr>
+<h3 align="center">MENU PENJUALAN</h3>
+<table align="center">
+<form method="POST" action="/manop/{{ ag.id }}/lelang_manop/" name="frmAdd" class="tabular">{% csrf_token %}
+
+        {{form.as_table}}
+    <tr><td><input type="submit" value="&radic; Simpan" class="simpan"/></td></tr>
+   
+</form>
+ </table>
+{% endifusergroup %}
+
+{% endblock %}
+
+

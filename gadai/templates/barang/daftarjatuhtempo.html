@@ -1,0 +1,81 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}dashboard{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+<h4>::: Jatuh Tempo :::</h4>
+<hr/>
+<br/>
+Total Barang Jatuh Tempo : {{jml}}<br/>
+Total Nilai : Rp.{{nilai|number_format:0}}<br />
+Total Bea Jasa : Rp.{{bea_jasa|number_format:0}}<br />
+Total Bea Simpan: Rp.{{bea_simpan|number_format:0}}<br />
+<br/>
+<hr/>
+<h4>::: REPORT HARI :::</h4>
+<br/>
+<form method="GET" action="/barang/jatuhtempo_harian/">
+<select name="tgl">{% for d in arsip_hari %}<option value="{{d|date:'Y-m-d'}}">{{ d|date:"d M Y"}}</option>{% endfor %}</select> <input type="submit" value="Cetak" />
+</form>
+<br/>
+<hr/>
+<h4>::: REPORT BULAN :::</h4>
+<br/>
+<form method="GET" action="/barang/jatuhtempo_bulanan/">
+<select name="tgl">{% for m in arsip_bulan %}<option value="{{m|date:'Y-m-1'}}">{{ m|date:"M Y"}}</option>{% endfor %}</select> <input type="submit" value="Cetak" />
+</form> 
+<br/>
+<hr/>
+<h4>::: REPORT TAHUN :::</h4>
+<br/>
+<form method="GET" action="/barang/jatuhtempo_tahunan/">
+<select name="tgl">{% for y in arsip_tahun %}<option value="{{y|date:'Y-1-1'}}">{{ y|date:"Y"}}</option>{% endfor %}</select> <input type="submit" value="Cetak" />
+</form> 
+<br/>
+<hr/>
+{% endblock %}
+{% block content %}
+{% load number_format %}
+
+<h2>DAFTAR NASABAH JATUH TEMPO &nbsp;<small align="right"><a href="/barang/xls_jatuh_tempo" class="cari"> EXCEL</a></small>
+<small align="right"><a href="/barang/cetakdaftarjatuhtempo/" class="cari">Cetak Daftar Jatuh Tempo</a></small></h2>
+<table id="tabel">
+<thead>
+<tr>
+    <th>No</th>
+    <th>No Kwitansi</th>
+    <th>Nama</th>
+    <th>Gerai</th>
+    <th>Barang</td>
+    <th>Tlp</th>    
+    <th>Tanggal</th>
+    <th>Jatuh Tempo</th>
+    <th>Nilai (Rp)</th>
+    <th>S Teguran</th>
+</tr>
+</thead>
+<tbody>
+{% for p in ag %}	
+<tr {% if p.status_gadai %} class="row_status_gadai"{% endif %}{% if p.lewat_jw %} class="row_lewat_jw"{% endif %}>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ p.norek }}</td>
+    <td>{{ p.agnasabah.nama }}</td>
+    <td>{{ p.gerai.nama }}</td>
+    <td> {%if p.jangka_waktu_kendaraan %} {{p.barang.no_mesin}} {%else%}{{ p.barang.type }}/{{ p.barang.sn }}{%endif%}</td>
+    <td align="center" style="vertical-align: top; width: 45px; ">{{ p.agnasabah.telepon_ktp}}</td>
+    <td align="center">{{p.tanggal|date:"d M Y "}}</td>
+    <td align="center" >{{p.jatuhtempo|date:"d M Y "}}</td>
+    <td align="right">{{ p.nilai|number_format:0}}</td>
+    <td align="right" colspan= "2"><a href ="/akadgadai/{{p.id}}/teguran">XXX</a></td>
+</tr>
+</tbody>
+{% endfor %}
+  <tr><th colspan="8" class="r"><strong>Jumlah</strong></th><th align = "right">{{nilai|number_format:0}}</th>
+<th align = "right"></th>
+</tr>
+</table>
+<br/>
+<br/>
+{% endblock %}

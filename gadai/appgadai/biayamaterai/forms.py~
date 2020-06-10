@@ -1,0 +1,106 @@
+from django import forms
+from django.forms import ModelForm
+from gadai.appgadai.models import Barang,AkadGadai,KELAMIN,JENIS_BARANG,GeraiGadai,KELOMPOK_BARANG,JANGKA_WAKTU,JENIS_PEKERJAAN,JENIS_DOKUMEN,Pelunasan,Taksir,Nasabah,GeraiGadai,CHOICES_TRANSAKSI,JENIS_BARANG,JANGKA_WAKTU_PRPJ,Perpanjang,STATUS_PERPANJANG
+
+
+class AkadGadaiForm(ModelForm):
+    agnasabah = forms.ModelChoiceField(label = "NAMA NASABAH",queryset=Nasabah.objects.all())
+    tanggal = forms.DateField(label = "Tanggal Akad",widget=forms.TextInput(attrs={'size': 10}))
+    gerai = forms.ModelChoiceField(queryset=GeraiGadai.objects.all(),empty_label="--- PILIH ---")
+    jangka_waktu = forms.ChoiceField( widget = forms.Select(), choices = JANGKA_WAKTU)
+    nilai = forms.IntegerField(label="Nilai Taksir",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    taksir = forms.ModelChoiceField(queryset=Taksir.objects.all(),empty_label="--- PILIH ---")
+    denda = forms.IntegerField(widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    terlambat = forms.IntegerField(widget=forms.TextInput())
+    status_transaksi =forms.ChoiceField(widget=forms.Select(),choices=CHOICES_TRANSAKSI)
+
+    class Meta:
+        model = AkadGadai
+
+class PerpanjangForm(ModelForm):
+    agkredit = forms.ModelChoiceField(label="Nama Nasabah",queryset=AkadGadai.objects.all())
+    gerai = forms.ModelChoiceField(queryset=GeraiGadai.objects.all())
+    nilai = forms.DecimalField(widget=forms.TextInput(attrs={'readonly':'True','size': 8}))
+    tanggal = forms.DateField(widget=forms.TextInput(attrs={'readonly':'True','size':10}))
+    jw = forms.ChoiceField(widget=forms.Select(),choices=JANGKA_WAKTU_PRPJ)
+    denda = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8}))
+    terlambat = forms.IntegerField()
+    bea_simpan = forms.IntegerField(widget=forms.TextInput(attrs={'readonly':'True','alt':'integer','class':'uang'}))
+    bea_jasa = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8}))
+    status =forms.ChoiceField(widget=forms.Select(),choices=STATUS_PERPANJANG)
+    class Meta:
+        model = Perpanjang
+
+class PelunasanForm(ModelForm):
+    pelunasan = forms.ModelChoiceField(queryset=AkadGadai.objects.filter(lunas__isnull=True),widget=forms.HiddenInput())
+    tanggal = forms.DateField(widget=forms.TextInput(attrs={'readonly':'True','size': 8}))
+    nilai = forms.DecimalField(widget=forms.TextInput(attrs={'readonly':'True','size': 8}))
+    denda = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8}))
+    terlambat = forms.IntegerField(widget=forms.TextInput(attrs={'size': 2}))
+    bea_jasa = forms.DecimalField(widget=forms.TextInput(attrs={'size': 8}))
+    gerai = forms.ModelChoiceField(queryset=GeraiGadai.objects.all(),widget=forms.HiddenInput())
+    status_transaksi =forms.ChoiceField(widget=forms.Select(),choices=CHOICES_TRANSAKSI) 
+    lunas = forms.BooleanField(required=False)
+    
+    class Meta:
+        model = Pelunasan    
+
+class AkadForm(forms.Form):
+    agnasabah = forms.ModelChoiceField(label = "NAMA NASABAH",queryset=Nasabah.objects.all())
+    tanggal = forms.DateField(label = "Tanggal Akad",widget=forms.TextInput(attrs={'size': 10}))
+    gerai = forms.ModelChoiceField(queryset=GeraiGadai.objects.all(),empty_label="--- PILIH ---")
+    jangka_waktu = forms.ChoiceField( widget = forms.Select(), choices = JANGKA_WAKTU)
+    nilai = forms.IntegerField(label="Nilai Taksir",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    taksir = forms.ModelChoiceField(queryset=Taksir.objects.all(),empty_label="----PILIH----")
+    barang = forms.ModelChoiceField(label="Nama Barang",queryset=Barang.objects.all())
+    
+class AGForm(forms.Form):
+    ### nasabah ###
+    nama = forms.CharField(max_length=35)
+    tgl_lahir = forms.DateField(widget=forms.TextInput(attrs={'size': 10}))
+    tempat = forms.CharField(label="Tempat lahir",max_length=15)
+    no_ktp = forms.CharField( widget=forms.TextInput( attrs={'size': 20}))
+    alamat_ktp = forms.CharField(widget=forms.TextInput(attrs={'size': 30}))
+    rt_ktp = forms.CharField( widget=forms.TextInput( attrs={'size': 4}),required=False)
+    rw_ktp = forms.CharField( widget=forms.TextInput( attrs={'size': 4}),required=False)
+    telepon_ktp = forms.CharField( widget=forms.TextInput(attrs={'size':30}),required=False)
+    hp_ktp = forms.CharField( widget=forms.TextInput(attrs={'size':30}),required=False)
+    kelurahan_ktp = forms.CharField(widget=forms.TextInput(attrs={'size': 15}),required=False)
+    kecamatan_ktp = forms.CharField(widget=forms.TextInput(attrs={'size': 15}),required=False)
+
+    #alamat_domisili = forms.CharField(widget=forms.TextInput(attrs={'size': 30}))
+    #rt_domisili = forms.CharField( widget=forms.TextInput( attrs={'size': 4}))
+    #rw_domisili = forms.CharField( widget=forms.TextInput( attrs={'size': 4}))
+    #telepon_domisili = forms.CharField(widget=forms.TextInput(attrs={'size':30}))
+    #hp_domisili = forms.CharField( widget=forms.TextInput(attrs={'size':30}))
+    #kelurahan_domisili = forms.CharField(widget=forms.TextInput(attrs={'size': 15}))
+    #kecamatan_domisili = forms.CharField(widget=forms.TextInput(attrs={'size': 15}))
+    jenis_pekerjaan = forms.ChoiceField(widget=forms.Select(),choices=JENIS_PEKERJAAN)
+ 
+    alamat_kantor =forms.CharField(widget=forms.TextInput(attrs={'size': 30}))
+    kode_pos = forms.CharField( widget=forms.TextInput( attrs={'size': 10}))
+    telepon_kantor =forms.CharField(widget=forms.TextInput(attrs={'size':30}))
+    email = forms.CharField(widget=forms.TextInput(attrs={'size': 30}),required=False)
+    jenis_kelamin = forms.ChoiceField(widget=forms.Select(), choices=KELAMIN)
+
+    ### Barang ###
+    jenis_barang = forms.ChoiceField(widget=forms.Select(), choices=JENIS_BARANG)
+    merk = forms.CharField(max_length=30)
+    type =forms.CharField(max_length=50)
+    sn = forms.CharField(label="S/N - Imei  ", widget=forms.TextInput( attrs={'size': 30}))
+    warna = forms.CharField(max_length=30)
+    tahun_pembuatan=forms.CharField(max_length=10)
+    bulan_produksi =forms.CharField(max_length=10)
+    lampiran_dokumen = forms.ChoiceField(widget =forms.Select(), choices=JENIS_DOKUMEN)
+    
+    accesoris_barang1=forms.CharField(max_length=150)
+    
+    ### AkadGadai ###
+    tanggal = forms.DateField(label = "Tanggal Akad",widget=forms.TextInput(attrs={'size': 10}))
+    gerai = forms.ModelChoiceField(queryset=GeraiGadai.objects.all(),empty_label="--- PILIH ---")
+    #nomor_akad = forms.IntegerField(required=True)
+    jangka_waktu = forms.ChoiceField( widget = forms.Select(), choices = JANGKA_WAKTU)
+    nilai = forms.IntegerField(label="Nilai Taksir",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    taksir = forms.ModelChoiceField(queryset=Taksir.objects.all(),label="TAKSIR",empty_label="--- PILIH ---")
+    bea_materai = forms.IntegerField(label="Materai",widget=forms.TextInput(attrs={'alt': 'integer', 'class': 'uang'}))
+    

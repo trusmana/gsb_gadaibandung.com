@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block section %}jms{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block content %}
+<h2 align="center">VERIFIKASI MANOP OPS ATAS NAMA : {{ag.agnasabah.nama}}</h2>
+<form method="post" action="/akadgadai/{{ ag.id }}/verifikasi_manop/" class="tabular">
+<table border=0 align="center" >
+<tr></td><td> {{ form.manop }}</td></tr>
+<tr><td align="left">STATUS PENCAIRAN </label></td><td>: {{ form.status }}</td></tr>  
+<tr><td align="left">TANGGAL </label></td><td>: {{form.tanggal }}</td></tr>
+<tr><td align="left">KANTOR BAYAR  </td><td>: {{form.kantor_bayar }}</td></tr>
+<tr><td align="left">NOTE</td> <td><textarea name="note" cols=30 rows=2></textarea></td></tr>
+<tr><td align="center"></td><td><input type="submit" value="Simpan" /></td></tr>
+<!--{{form.as_table}}-->
+</table>
+</form>
+{% endblock %} 
+

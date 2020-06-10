@@ -1,0 +1,110 @@
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  /* $("#id_tanggal").datepicker({dateFormat: 'dd-mm-yy',changeMonth: true,changeYear: true});*/
+    $('input:text').setMask();
+       $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+	$('#select_all').click( function() {
+    $(".checkbox_delete").attr('checked', true);
+    });   
+});
+	
+</script>
+<script type="text/javascript">
+$(document).ready(function() {
+    var jdebet = 0; var jsaldo = 0; var jkredit = 0; 
+    var t_debet = 0; var t_kredit = 0; var t_saldo = 0; 
+    $('table.list').each(function() {
+        var i = 0;
+        var debet = 0; var saldo = 0; var kredit = 0; 
+        $(this).find('td.debet').each(function() {
+            debet += parseInt($(this).text().replace(/\./g, ''));
+            jdebet += debet;
+            i += 1;
+        });
+        $(this).find('td.kredit').each(function() {
+            saldo += parseInt($(this).text().replace(/\./g, ''));
+            jsaldo += saldo;
+        });
+
+        //$(this).append("<tr><td colspan=3 class=r> <strong>Total</strong></td><td class='s_debet r b'>"+ format_number(debet) +"</td><td class='s_kredit r b'>"+ format_number(kredit) +"</td><td class='s_saldo r b'>"+ format_number(saldo) +"</td></tr>");
+        //t_debet += debet;t_kredit += kredit;t_saldo += saldo;        
+    });
+    $('#t_debet').text(format_number(t_debet));
+    $('#t_kredit').text(format_number(t_kredit));
+    $('#t_saldo').text(format_number(t_saldo));
+
+});
+
+</script>
+
+<style>
+table {width:100%;border-collapse: collapse;border-color: #ccc;}
+th, td {
+   font-size: 11px;
+    line-height: 13px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+    padding: 5px;
+    font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+   }
+table#tabel tr:nth-child(odd) {
+   padding: 6px; margin: 1px; border: 1px solid #ccc;
+}
+table#tabel th	{
+    background-color: #F60;border: 1px solid #ccc;
+}
+thead th,
+tfoot td {
+    color: #666;
+    padding: 2px 5px;
+    font-size: 11px;
+    background: #e1e1e1 url(../img/nav-bg.gif) top left repeat-x;
+    border-left: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+</style>
+
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	$('table.Table2 th') .click(
+		function() {
+			$(this) .parents('table.Table2') .children('tbody') .show();
+		}
+	)
+	
+});
+</script>
+
+<script type="text/javascript">  
+        $(document).ready(function(){
+            $("#report tr:odd").addClass("odd");
+            $("#report tr:not(.odd)").hide();
+            $("#report tr:first-child").show();
+            
+            $("#report tr.odd").click(function(){
+                $(this).next("tr").toggle();
+                $(this).find(".arrow").toggleClass("up");
+            });
+        });
+    </script> 
+<style type="text/css">
+	body { font-family:Arial, Helvetica, Sans-Serif; font-size:0.8em;}
+	#report { border-collapse:collapse;}
+	#report h4 { margin:0px; padding:0px;}
+	#report img { float:right;}
+	#report ul { margin:10px 0 10px 40px; padding:0px;}
+	#report th { background:#0E0E0E left; color:#fff; padding:7px 15px; text-align:right;}
+	#report td { background:#E6E6E6 none repeat-x scroll center left; color:#000; padding:7px 15px; }
+	#report tr.odd td { background:#E10000 left; cursor:pointer;color: white; }
+	#report div.arrow { background:transparent url(/static/report/arrows.png) no-repeat scroll 0px -16px; width:16px; height:16px; display:block;}
+	#report div.up { background-position:0px 0px;}
+</style>

@@ -1,0 +1,63 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}kasirgerai{% endblock %}
+{% block section %}kasir{% endblock %}
+{% block extrahead %}
+{% include "alat/kasir_pencairan.html" %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %} 
+{% block content %}			
+<script type="text/javascript" href="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+   $('#jeding').hide();
+    $('.tabular').submit(function(){
+      $('#jeding').show(); 
+       return true;          
+    });  
+});
+</script>
+
+<script type="text/javascript">
+    $(function(){
+    $(":radio.rad").click(function(){
+    $(".formkas, .formbank").hide()
+    if($(this).val() == "1"){
+    $(".formkas").show();
+    }else{
+    $(".formbank").show();
+    }
+    });
+    });
+</script>
+<div id="jeding">
+  <img id="loading_gambar" src="/static/images/jeding.gif" alt="Load" />
+</div>
+
+<h2 align="center">INPUT VALIDASI TRANSAKSI <small><small>an : {{kasir.agnasabah.nama}}</small></small></h2>
+<form method="post" action="/kasirgerai/{{ kasir.id }}/inputkasir/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table border=0 align="center" >
+<tr><br></tr>
+<tr><td></td><td> {{ form.kasir }}</td></tr>  
+<tr><td>Nilai Pinjaman (Rp) </td><td>: {{ form.nilai }}{% if form.nilai.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr>  
+<tr><td>Nilai Terima Bersih (Rp) </td><td>: {{ form.nilai_terima_bersih }}{% if form.nilai_terima_bersih.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr>  
+<tr><td><span style = " color : red ; " >Nilai Pembayaran</span></td><td>: {{ form.nilai_pembulatan }}{% if form.nilai_pembulatan.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr>  
+<tr><td>Selisih (Rp) </td><td>: {{ form.selisih }}{% if form.nilai.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr>  
+<tr><td>Tanggal</td><td>: {{form.tanggal }}{% if form.tanggal.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr> 
+<tr><td>Jenis Transaksi </td><td id = "id_tgl"> {{ form.jenis_transaksi }}{% if form.jenis_transaksi.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr> 
+<tr class="formbank" style="display:none"><td>Rek Tabungan</td><td> : {{ form.rek_tab }}</td></tr> 
+<tr><td></td><td>{{ form.status }}</td></tr>
+<tr><td></td><td></td></tr>
+<tr><td align="left"></td>
+<!--{{form.as_table}}-->
+   <td>{% include "alat/save.html" %}</td>
+</tr>
+<tr></tr>
+<tr></tr>
+</form>
+</table>
+</div>
+</form>
+{% endblock %} 
+

@@ -1,0 +1,92 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}kasirgerai{% endblock %}
+<script type="text/javascript" href="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+    $(":radio.rad").click(function(){
+    $(".formkas, .formbank").hide()
+    if($(this).val() == "1"){
+    $(".formkas").show();
+    }else{
+    $(".formbank").show();
+    }
+    });
+    });
+</script> 
+{% block section %}kasir{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+
+{% if titip%}
+<table align="left">
+   <tr>
+	  <th>Ke</th><th>Tanggal </th><th>NILAI TITIPAN</th>
+   </tr>
+</table>
+{% endif%}
+{% for a in titip%}
+<table align="left">
+   <tr>
+	  <th>{{forloop.counter}}</th><th align="center">{{a.tanggal|date:" d-m-Y"}} </th><th>{{a.nilai|number_format:0}}</th>
+   </tr>
+</table>
+{% endfor%}
+{% endblock %} 
+
+{% block extrahead %}
+{% include "alat/kasir.html" %}
+{% include "alat/sidebar.html" %}
+<style>
+#login_form {
+		background: #EFE;
+		padding: 0.1em 0.0em 0.1em;
+		margin:0 auto 150px;
+		width: auto;height:auto;
+		border: 1px solid #EFE;
+		border-top:8px;
+		-webkit-border-radius:0px;
+		-moz-border-radius:0px;
+		border-radius:3px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.2) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+</style>
+
+<style type="text/css">
+
+.formbank { display: none }
+/*#id_nilai_pembulatan{color:red;}*/
+</style>
+{% load useringroup number_format %}
+{% endblock %}
+
+
+{% block content %}			
+<div id="login_form">
+<form method="post" action="/kasirgerai/{{ kasir.id }}/input_pengembalian/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table align="left">
+{% if ttp > 0	 %}
+{{form.as_table}}
+<td align = "center">{% include "alat/save.html" %}</td>
+{% else %}
+<h2 align="center">MAAF TIDAK ADA KELEBIHAN TITIPAN / KELEBIHAN TITIPAN TELAH DI AMBIL </h2>
+
+
+{%endif%}
+</tr>
+<tr></tr>
+<tr></tr>
+</form>
+</table>
+</div>
+
+
+{% endblock %} 
+
+
+

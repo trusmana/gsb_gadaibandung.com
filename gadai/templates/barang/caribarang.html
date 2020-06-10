@@ -1,0 +1,24 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}caribarang{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% load number_format humanize %}
+{% block content %}
+<h2 align="center">Menu Pencarian Barang</h2>   
+{% if error %}
+<p style="color: red;">Masuk Nama Yg benar.</p>
+{% endif %}
+<table align="center">
+<td>
+<form action="/barang/caribrg/" method="get" size="10" align="center" height="27" >
+<input type="text" name="q" placeholder="Masukan Nama Nasabah">
+<input type="submit" value="Cari " class="cari">
+</form></td>
+<td>
+<form action='/barang/cari_norek/' method='GET'>
+<input type="text" name="rekening" size="30"  placeholder="Cari berdasarkan KWITANSI">
+<input type ="submit"  class="cari" >
+</form></td>
+</table>
+{% endblock %}
+

@@ -1,0 +1,28 @@
+from django.conf.urls.defaults import *
+from django.views.generic import list_detail, create_update, date_based
+from gadai.appgadai.manop.views import *
+from gadai.appgadai.models import *
+
+urlpatterns = patterns('',
+    url(r'^(?P<object_id>\d+)/show/$',show),
+    url(r'^cari/$',cari),
+    url(r'^list_nsb/$',list_nsb),
+    url(r'^reset_status_hilang/$', reset_status_hilang),
+    url(r'^reset_status/$', reset_status),
+    url(r'rincian_jatuhtempo/$', rincian_jatuhtempo),
+    url(r'rincian_hilang/$', rincian_hilang),
+    url(r'rincian_piutang/$', rincian_piutang),
+    url(r'rincian_lelang/$', rincian_lelang),
+    url(r'rincian_barang_di_gerai/$', rincian_barang_di_gerai),
+    url(r'^lunas/$', lunas), 
+    url(r'^cariplns/$', cariplns),
+    url(r'^(?P<object_id>\d+)/update_status/$', update_status),
+    url(r'^$', list),
+    url(r'^list_cari/$',list_cari),
+    url(r'^(?P<object_id>\d+)/lelang_manop/$', lelang_manop),
+    url(r'pencairan_gerai/$', pencairan_gerai),
+    url(r'pelunasan_gerai/$',pelunasan_gerai),
+    url(r'perpanjangan_gerai/$',perpanjangan_gerai),
+    url(r'total_harian_filter/$', total_harian_filter),
+    url(r'data_gudang_barang_aktif/$',data_gudang_barang_aktif),
+)

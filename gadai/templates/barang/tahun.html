@@ -1,0 +1,71 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}barang{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+<h3>DATA</h3>
+<p>Harian</p>
+<ol>
+{% for d in day_list %}
+<li><a href = "/barang/arsip/?tgl={{d|date:'Y-m-d'}}">{{ d|date:"d M Y"}}</a></li>{% endfor %}
+</ol>
+
+<p>Bulanan</p>
+<ol>
+{% for m in month_list %}
+<li><a href = "/barang/arsip_month/?tgl={{m|date:'Y-m-1'}}">{{ m|date:"M Y"}}</a></li>{% endfor %}
+</ol>
+<p>Tahunan</p>
+<ol>
+{% for y in year_list %}
+<li><a href = "/barang/arsip_year/?tgl={{y|date:'Y-1-1'}}">{{ y|date:"Y"}}</li>{% endfor %}
+</ol>
+
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<p class="breadcrumb"><a ></a><a></a></p>
+
+
+<h2>Rekap Barang Gadai  Tahun {{tanggal|date:" Y "}}</h2>
+<span class="contextual"></span>
+{% for p in gerai %}
+ {% ifchanged p.gerai %}
+ <br/>
+ {% endifchanged %} 
+ {% ifchanged  p.gerai %}
+ {% if not forloop.first %}</table></form><br /><br /><br />{% else %}{% endif %}
+   <p> 
+	<b>{{p.get_barang_display|upper}}</b>
+	<a href ="/barang/{{p.gerai.id}}/dafnom_tahun/?tgl={{tanggal|date:'Y-m-d'}}">
+	 Gerai :<b> {{ p.gerai}}</b> </a> 
+	
+</p>
+
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow"><th rowspan= "2">No</th><th rowspan= "2">No Rek</th><th rowspan= "2">Nasabah</th><th rowspan= "2">JW</th>
+<th rowspan= "2">Nilai</th><th rowspan= "2">Status Trs</th><th rowspan= "2">SN</th><th rowspan= "2">Barang</th><th rowspan= "2">Transaksi</th>
+<th rowspan= "2">Jatuh Tempo</th><th colspan= "5">Gudang</th></tr>
+<tr><th>Masuk Barang</th><th>Keluar Barang</th><th>NO Rak</th></tr>
+ {% else %}
+ {% endifchanged %}
+ <tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td><a href="{{ p.get_absolute_url }}">{{ p.nonas }}</a></td>
+    <td><a href="/barang/{{p.barang.id}}/rak/">{{ p.agnasabah.nama }}</a></td>
+    <td>{{ p.jangka_waktu }}</td>
+    <td>Rp.{{ p.nilai|number_format:0 }},-</td>
+    <td class="terima uang r">{{ p.status_transaksi }}</td>
+    <td>{{ p.barang.type}}</td>
+    <td >{{ p.barang.sn }}</td>    
+    
+    <td class="terima uang r">{{ p.tanggal|date:"d M Y " }}</td>
+    <td class="terima uang r">{{ p.jatuhtempo|date:"d M Y " }}</td>
+    <td>{{ p.barang.barang_masuk|date:"d M Y " }}</td>
+    <td>{{ p.barang.barang_keluar|date:"d M Y " }}</td>
+    <td>{{ p.gerai.kode }}.{{ p.barang.ruangan }}.{{ p.barang.no_rak }}.{{ p.barang.row }}</td>
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %} 

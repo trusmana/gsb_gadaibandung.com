@@ -1,0 +1,15 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}staff{% endblock %}
+{% block content %}
+<h2 align= "center">DAFTAR PENGGUNA APLIKASI GADAI</h2>
+<table class="list" align= "center">
+<tr><th>Username</th><th>Nama Lengkap</th><th>Rekening</th><th>Grup</th><th>GERAI</th><th>MENU</th></tr>
+{% for u in object_list %}
+    <tr>
+        <td>{{ u.username }} {% if u.is_superuser %}(superuser){% endif %}</td>
+        <td>{{ u.first_name }} {{ u.last_name }}</td>
+        <td>{{ u.get_profile.rekening }}</td>
+        <td>{% for g in u.groups.all %}{{ g.name }}{% endfor %}</td><td>{{ u.get_profile.gerai }}</td>
+        <td>{% if user.is_superuser %}<a href="/setting/user/{{ u.id }}/edit/">EDIT</a> | <a href="/setting/user/add/">BARU</a>{% endif %}</td></tr>{% endfor %}
+</table>
+{% endblock %}

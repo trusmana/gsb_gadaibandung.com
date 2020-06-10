@@ -1,0 +1,50 @@
+{% extends "base_aplikasi.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<h2 align="center">DATA NASABAH RETAIL </h2>
+
+<div class="pagination" align="center">
+    <span class="step-links">
+        {% if spv.has_previous %}
+            <a href="?page={{ spv.previous_page_number }}">Back</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ spv.number }} of {{ spv.paginator.num_pages }}.
+        </span>
+
+        {% if spv.has_next %}
+            <a href="?page={{ spv.next_page_number }}">Next</a>
+        {% endif %}
+    </span>
+</div>
+
+<table class="list">
+    <tr>
+        <td>ID</td>
+        <td>NASABAH</td>
+        <td>TANGGAL</td>
+        <td>STATUS PENGAJUAN</td>
+	<td>MENU</td>
+    </TR>
+    
+{% for a in spv.object_list%}
+{% load number_format useringroup %}
+   <tr>
+        <td align="center">{{ forloop.counter }}</td>
+        <td>{{a.retail.retailnasabah.nama}} </td>
+        <td align = "center">{{a.tanggal|date:'m-D-Y'}}</td>
+        <td align = "center">{{a.status}}</td>
+        <td><a href="/spvretail/{{a.id}}/spvedit/" class="cari">EDIT</a>
+	<a href="/retail/{{a.retail.id}}/mcc/" class="cari">MCC</a>
+	</td>
+    </tr>
+    
+{% endfor %}
+</table>
+
+{% endblock %}

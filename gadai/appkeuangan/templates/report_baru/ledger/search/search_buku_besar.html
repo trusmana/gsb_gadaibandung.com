@@ -1,0 +1,134 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}BukuBesar{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2> BUKU BESAR KAS RA&nbsp;<small>DIV PJB</small></h2>  
+<form method="GET" action="/rreport/buku_besar_keu/">{%csrf_token%}
+   <table id="tabel" align="center">
+   <li><label for="id_cabang">Kode Cabang</label> :
+       {{form.id_cabang}}
+   </li>
+   <li><label for="id_coa">Kode account</label> : {{ form.id_coa }}{% if form.id_coa.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</li>
+   <li><label for="id_tgl_trans">Tanggal </label> : {{form.start_date}} 
+   <label for="id_tgl_trans">Ke Tanggal </label> : {{form.end_date}}</li>
+   <br>
+   <li>
+	<input type="submit" value="Non Posting" class="nonposting" name="submit_satu"/>&nbsp;
+	<input type="submit" value="CETAK XLS" class="posting" name="submit_dua"/>&nbsp;  
+        <input type="submit" value="Posting" class="cetak_posting" name="submit_tiga"/>&nbsp;
+   </li> 
+   </table>
+</form>
+
+<br>
+{% if ledger_search %}
+<p style='text-align: center'><b>UNIT PJB 
+   <!--
+   {% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA      {%endif%} 
+   {% if id_cabang = '302' %} GERAI SUCI    {%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR   {%endif%}
+   {% if id_cabang = '304' %}GERAI BALUBUR  {%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
+   {% if id_cabang = '307' %}GERAI KOPO/JAMIKA    {%endif%} {% if id_cabang = '308' %}GERAI CIBIRU       {%endif%}
+   {% if id_cabang = '309' %}GERAI CIPACING {%endif%} {% if id_cabang = '310' %}GERAI JATINAMGOR  {%endif%}
+   {% if id_cabang = '311' %}GERAI BUAH BATU  {%endif%} {% if id_cabang = '313' %}GERAI KORDON/CIWASTRA  {%endif%}
+   {% if id_cabang = '315' %}GERAI MARANATA{%endif%} {% if id_cabang = '320' %}GERAI UJUNG BERUNG{%endif%}
+   {% if id_cabang = '322' %}GERAI BOJONGSOANG{%endif%}{% if id_cabang = '300' %}KANTOR PUSAT{%endif%}
+   {% if id_cabang = '327' %}GERAI CIMAHI{%endif%}{% if id_cabang = '323' %}GERAI CIJERAH{%endif%}
+   {% if id_cabang = '324' %}GERAI KATAPANG/KOPO SAYATI{%endif%}{% if id_cabang = '325' %}GERAI CIMINDI{%endif%}
+   {% if id_cabang = '326' %}GERAI CEMARA{%endif%}-->
+{% if id_cabang = '500' %}GABUNGAN              {%endif%} {% if id_cabang = '300' %}KANTOR PUSAT               {%endif%}
+{% if id_cabang = '301' %}GERAI JAKARTA         {%endif%} {% if id_cabang = '302' %}GERAI SUCI                 {%endif%}
+{% if id_cabang = '303' %}GERAI DIPATIUKUR      {%endif%} {% if id_cabang = '304' %}GERAI BALUBUR              {%endif%}
+{% if id_cabang = '306' %}GERAI GERLONG HILIR   {%endif%} {% if id_cabang = '307' %}GERAI KOPO/JAMIKA          {%endif%}
+{% if id_cabang = '308' %}GERAI CIBIRU          {%endif%} {% if id_cabang = '309' %}GERAI CIPACING             {%endif%}
+{% if id_cabang = '310' %}GERAI JATINAMGOR      {%endif%} {% if id_cabang = '311' %}GERAI BUAH BATU            {%endif%}
+{% if id_cabang = '313' %}GERAI KORDON/CIWASTRA {%endif%} {% if id_cabang = '315' %}GERAI MARANATA             {%endif%} 
+{% if id_cabang = '320' %}GERAI UJUNG BERUNG    {%endif%} {% if id_cabang = '322' %}GERAI BOJONGSOANG          {%endif%}
+{% if id_cabang = '323' %}GERAI CIJERAH         {%endif%} {% if id_cabang = '324' %}GERAI KATAPANG/KOPO SAYATI {%endif%}
+{% if id_cabang = '325' %}GERAI CIMINDI         {%endif%} {% if id_cabang = '326' %}GERAI CEMARA               {%endif%}
+{% if id_cabang = '327' %}GERAI CIMAHI          {%endif%} {% if id_cabang = '332' %}GERAI TURANGGA             {%endif%}
+{% if id_cabang = '328' %}GERAI NIGHT CIBIRU    {%endif%} {% if id_cabang = '330' %}GERAI NIGHT BALUBUR        {%endif%}
+{% if id_cabang = '331' %}GERAI NIGHT JAKARTA   {%endif%} {% if id_cabang = '333' %}GERAI NIGHT DIPATIUKUR     {%endif%}
+
+</b></p>
+</h3>
+ <p style='text-align: center'><b>BUKU BESAR</b></p>
+<p style='text-align: center'><b>Periode : {{start_date}} s/d {{end_date}} </b></p>
+   <p style='text-align: center'><b>AKUN &nbsp;{{kode}}</b></p>
+<table class="list">
+   <thead>
+     <tr>
+    	<th>Tanggal</th>
+      <th>No Bukti</th>
+      <th>Keterangan</th>
+    	<th>Debet (Rp.)</th>
+    	<th>Kredit (Rp.)</th>
+    	<th>Saldo (Rp.)</th>
+     </tr>
+   </thead>
+{% for d in ledger_search %}
+   <tbody>	
+	{% if forloop.first %}
+   <tr>
+	<td></td>
+	<td></td>
+  <td>Saldo Awal</td>
+	<td style="text-align:right"></td>
+	<td style="text-align:right"></td>
+        <td style="text-align:right">{{d.saldo_awal|number_format:0}}</td>
+    </tr>
+	{%endif%}
+{% if d.nobukti != '00000' %}
+ <tr class="{% cycle 'row1' 'row2' %}">
+	<td>{{ d.tgl_trans|date:'d-M-Y' }}</td>
+ 	<td>{{ d.deskripsi }}</td>
+	<td>{{ d.diskripsi }}</td>
+	<td style="text-align:right">{{ d.debet|number_format:0 }}</td>
+	<td style="text-align:right">{{ d.kredit|number_format:0 }}</td>
+	<td style="text-align:right">{{ d.saldo_akhir|number_format:0}}</td>
+     </tr>
+     {%endif%}
+	{% endfor %}
+     </tf>
+     <tfoot>
+     <tr>
+         <th colspan="3" style="text-align: center"><b>Jumlah</b></th>
+	       <th style="text-align:right">{{total_kredit|number_format:0 }}</th>
+	       <th style="text-align:right">{{total_debet|number_format:0 }}</th>
+         <th style="text-align:right"></th>
+     </tr></tfoot>
+</table>
+{% else %}
+
+<!--gabungan-->
+{% for p in ledger %}
+{% ifchanged p.id_coa %}{% if not forloop.first %}</table>{% endif %}
+<p>Akun : {{ p.id_coa }}<small>( {{ p.id_coa.tbl_transaksi_set.all.count }} )</small></p>
+<table class="list">
+   <thead>
+     <tr>
+      <th>Tanggal</th>
+      <th>No Bukti</th>
+      <th>Keterangan</th>
+      <th>Debet (Rp.)</th>
+      <th>Kredit (Rp.)</th>
+      <th>Saldo (Rp.)</th>
+     </tr>
+   </thead>
+{% endifchanged %}
+
+<tr class="{% cycle 'row1' 'row2' %}">
+  <td>{{ d.tgl_trans|date:'d-M-Y' }}</td>
+  <td>{{ d.nobukti }}</td>
+  <td>{{ d.diskripsi }}</td>
+  <td style="text-align:right">{{ d.debet|number_format:0 }}</td>
+  <td style="text-align:right">{{ d.kredit|number_format:0 }}</td>
+  <td style="text-align:right">{{ d.saldo_akhir|number_format:0}}</td>
+     </tr>
+{% if forloop.last %}</table>{% endif %}{% endfor %}
+{% endif %}
+{% endblock %}
+

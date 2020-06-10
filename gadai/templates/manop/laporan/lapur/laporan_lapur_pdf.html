@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>AYDA</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+    
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/manop/lapur_barang/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center">
+<img src="/static/img/logoksu.png" width="110" height="80" align="left" hspace="20"/>
+
+<h3>RINCIAN BARANG AYDA
+{% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA{%endif%} 
+   {% if id_cabang = '302' %}GERAI SUCI{%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR{%endif%}
+   {% if id_cabang = '304' %}GERAI BALUBUR{%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
+   {% if id_cabang = '307' %}GERAI KOPO{%endif%} {% if id_cabang = '308' %}GERAI CIBIRU{%endif%}
+   {% if id_cabang = '309' %}GERAI CIPACING {%endif%} {% if id_cabang = '310' %}GERAI JATINANGOR{%endif%}
+   {% if id_cabang = '327' %}GERAI CIMAHI  {%endif%} {% if id_cabang = '312' %}GERAI BUAH BATU{%endif%}
+   {% if id_cabang = '313' %}GERAI KORDON  {%endif%} {% if id_cabang = '314' %}GERAI CIHANJUANG{%endif%}
+   {% if id_cabang = '315' %}GERAI MARANATA{%endif%} {% if id_cabang = '316' %}GERAI KIARACONDONG{%endif%}
+   {% if id_cabang = '317' %}GERAI CIREBON PERJUANGN {%endif%} {% if id_cabang = '318' %}GERAI CIREBON {%endif%}
+   {% if id_cabang = '319' %}GERAI CIUMBELEUIT {%endif%} {% if id_cabang = '113' %}GERAI UJUNG BERUNG{%endif%}
+   {% if id_cabang = '322' %}GERAI BOJONGSOANG{%endif%}{% if id_cabang = '300' %}KANTOR PUSAT{%endif%}
+   {% if id_cabang = '329' %}GERAI LEWIGAJAH{%endif%}{% if id_cabang = '333' %}GADAI NIGHT DU{%endif%}
+   {% if id_cabang = '331' %}GADAI NIGHT JAKARTA{%endif%}{% if id_cabang = '311' %}GARAI BUAHBATU{%endif%}
+   {% if id_cabang = '320' %}GERAI UJUNGBERUNG{%endif%}{% if id_cabang = '324' %}GERAI KATAPANG SAYATI{%endif%}
+   {% if id_cabang = '325' %}GERAI CIMINDI{%endif%}{% if id_cabang = '326' %}GERAI CEMARA{%endif%}
+   {% if id_cabang = '332' %}GERAI TURANGGA{%endif%}{% if id_cabang = '328' %}GADAI NIGHT CIBIRU{%endif%}
+   {% if id_cabang = '330' %}GADAI NIGHT BALUBUR{%endif%}
+</h3>
+
+<h4>PERIODE : {{start_date}} - {{end_date}}</h4></td></tr>
+</table>
+<p>&nbsp;</p>
+<table align="center">
+<thead>
+<tr align="center" style="background-color:#C0C0C0;" >
+    <th>No</th>
+    <th>Gerai</th>
+    <th>Eks Debitur</th>
+    <th>NoRek</th>
+    <th>NoRek Ayda</th>
+    <th>Jenis Barang</th>
+    <th>Barang</th>
+    <th>Tanggal Akad</th>
+    <th>Jangka Waktu</th>
+    <th>Plafon</th>
+    <th>Nilai Ayda</th>
+</tr>
+</thead>
+{% for p in lapur %}
+<tbody>
+<tr>
+    <td align="center">{{ forloop.counter }}</td><td>{{ p.aglapur.gerai }}</td><td>{{ p.aglapur.agnasabah.nama}}</td>
+    <td align="center">{{ p.aglapur.norek }}</td>
+    <td align="center">{{ p.norek_lapur }}</td>
+    <td>{{ p.aglapur.barang.get_jenis_barang_display}}</td>
+    <td>{{ p.aglapur.barang.merk}}</td>
+    <td>{{ p.aglapur.tanggal}}</td>
+    <td>{% if p.aglapur.jenis_transaksi = '2' %}{{p.aglapur.jangka_waktu_kendaraan}} Bulan {%else%}{{p.aglapur.jangka_waktu}} Hari {% endif %}</td>
+    <td>{{p.aglapur.nilai|number_format:0}}</td>
+    <td align = "Right">{{ p.aglapur.nilai|number_format:0}}</td>
+</tr>
+</tbody>
+{% endfor %}
+<tr style="background-color:#C0C0C0;">
+    <th colspan="9"><strong>TOTAL</strong></th>
+    <th>{{total|number_format:0}}</th><th>{{total_plafon|number_format:0}}</th>
+</tr>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<table  width="100%" class="no-break">
+<tr>
+  <td align="center">Mengetahui / Menyetujui<br />
+    
+<br />
+<br />
+<br />
+<br />
+<br />
+KEPALA GERAI
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+  KADIV GADAI
+<br />
+<br />
+<br />
+<br />
+<br />
+IQBAL ,SH
+</td></tr>
+</table>
+

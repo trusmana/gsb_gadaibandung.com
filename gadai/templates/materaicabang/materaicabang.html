@@ -1,0 +1,87 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Materai{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% include "alat/jurnal.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format %}
+<h2 align="Right">REPORT MATERAI</h2>
+
+<table class="list">
+    <tr>
+        <th align="left">SALDO AWAL </th>
+        <th align="left"></th><th></th>
+        <th align="right"></th>
+    </tr>
+    <tr>
+        <td align="left">SALDO AWAL MATERAI</td>
+        <td align="left"></td><td></td>
+        <td align="right">{{saldo_gerai|number_format:0}}</td>
+    </tr>
+    {% for a in kiriman_materai_pusat %}
+    <tr class="{% cycle 'row1' 'row2' %}">
+        <td align="center">Dropping Saldo materai</td>
+        <td></td><td></td>
+        <td align="left">{{a.debet|number_format:0}}</td>
+    </tr>
+    {% endfor %}
+     <tr>
+        <th align="left" colspan="2">TOTAL SALDO </th>
+        <th></th>
+        <th align="right"><b>{{saldo|number_format:0}}</b></th>
+    </tr>
+    <tr>
+        <td align="left"><b>&nbsp;&nbsp;&nbsp;&nbsp;</b></td>
+        <td></td><td></td>
+        <td align="right"></td>
+    </tr>
+
+
+    <tr>
+        <td align="center"></td>
+        <td align="right"></td><td></td>
+        <td align="right"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PENCAIRAN</b></td>
+    </tr>
+    <tr>
+        <th align="center">Nomor</th>
+        <th align="center">Tanggal Pemakaian</th>
+        <th align="center">Keterangan</th>
+        <th align="right">Nilai</th>
+    </tr>
+    {% for a in mat_pencairan %}
+    <tr class="{% cycle 'row1' 'row2' %}">
+        <td align="center">{{forloop.counter}}</td>
+        <td align="center">{{a.tgl_trans|date:" d-M-Y"}}</td>   
+        <td align="center">{{a.jurnal.diskripsi}} </td>
+        <td align="right">{{a.kredit|number_format:0}}</td>
+    </tr>
+    {% endfor %}
+
+    <tr>
+        <th bgcolor="silver">Total Materai Pencairan</th><th></th><th></th>
+        <th bgcolor="silver" align="right">{{mat_nilai_pencairan|number_format:0}}</th>
+    </tr>
+
+
+    <tr>
+        <td align="left"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></td>
+        <td align="right"></td>
+    </tr>
+   
+    <tr>
+        <th></th><th></th><th></th>
+        <th></th>
+    </tr>
+
+    <tr  cbgcolor="#00FF00">
+
+        <th bgcolor="silver" align ="left">SALDO AKHIR MATERAI</th><th></th><th></th>
+        <th bgcolor="silver" align="right">{{saldo_akhir|number_format:0}}</th>
+    </tr>
+
+
+
+</table>
+{% endblock %}

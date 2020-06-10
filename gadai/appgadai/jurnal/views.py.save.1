@@ -1,0 +1,785 @@
+from django.shortcuts import render_to_response, get_object_or_404
+from django.forms.formsets import formset_factory
+from django.http import HttpResponseRedirect
+from django.template import RequestContext
+from django.contrib.auth.models import User
+from django.db.models import Q
+from django.http import HttpResponseRedirect,HttpResponse
+import xlwt
+import xlsxwriter
+from datetime import datetime
+from gadai.xlsxwriter.workbook import Workbook
+import datetime
+from gadai.appgadai.jurnal.forms import *
+from gadai.appgadai.models import Tbl_Akun,Tbl_Transaksi,Jurnal
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+def add_staff(request,object_id):
+    show = Tbl_Transaksi.objects.all().filter(status_jurnal=1).filter(id_cabang=0).filter(jenis='GL_GL')
+    Tbl_TransaksiFormSet = formset_factory(Tbl_TransaksiForm, extra=1,max_num=1)
+    if request.method == 'POST':
+        formset = Tbl_TransaksiFormSet(request.POST)
+        form = MainJurnalForm(request.POST)
+        if formset.is_valid() and form.is_valid():
+            nobukti = form.cleaned_data['nobukti']
+            diskripsi = form.cleaned_data['diskripsi']
+            tgl_trans = form.cleaned_data['tgl_trans']
+            #nilai = form.cleaned_data['nilai']
+            jurnal = Jurnal.objects.create(diskripsi=diskripsi,tgl_trans=tgl_trans,nobukti=nobukti)
+            for itemform in formset.forms:
+                id_coa = itemform.cleaned_data['id_coa']
+                debet = itemform.cleaned_data['debet']
+                kredit = itemform.cleaned_data['kredit']
+                gerai = itemform.cleaned_data['gerai']
+                #is_debet = itemform.cleaned_data['is_debet']
+                #if is_debet  == None:
+                    #debet = nilai
+                    #kredit = 0
+                #else:
+                    #debet = 0
+                    #kredit = nilai
+                debet = debet
+                kredit = kredit
+                itemjurnal = Tbl_Transaksi.objects.create(id_coa= id_coa,debet=debet,kredit=kredit,tgl_trans=datetime.date.today(),
+                    jurnal = jurnal,id_product=4,status_jurnal=1,id_cabang=object_id,id_unit=300,jenis='GL_GL',antar_kantor=gerai)
+                
+            messages.add_message(request, messages.INFO,"Jurnal telah disimpan dengan sukses")
+            return HttpResponseRedirect(itemjurnal.get_absolute_url_staff())
+        else:
+            messages.add_message(request, messages.INFO,"ADA NILAI YANG BELUM ANDA MASUKAN")
+        var = {'form': form, 'formset': formset,'show':show}
+    else:
+        var = {'form': MainJurnalForm(), 'formset': Tbl_TransaksiFormSet(initial= [{"is_debet":True}, {"is_debet":False}]),'show':show}
+    variables = RequestContext(request, var)
+    return render_to_response('jurnal/add_gl_gl.html', variables)
+
+def add_staff_non_kas(request,object_id):
+    sekarang = datetime.date.today()
+    show = Tbl_Transaksi.objects.filter(status_jurnal=1).filter(id_cabang=object_id).filter(tgl_trans=sekarang).filter(jenis='GL_GL_NON_KAS')
+    Tbl_TransaksiFormSet = formset_factory(Tbl_TransaksiForm, extra=1,max_num=1)
+    if request.method == 'POST':
+        formset = Tbl_TransaksiFormSet(request.POST)
+        form = MainJurnalForm(request.POST)
+        if formset.is_valid() and form.is_valid():
+            nobukti = form.cleaned_data['nobukti']
+            diskripsi = form.cleaned_data['diskripsi']
+            tgl_trans = form.cleaned_data['tgl_trans']
+            #nilai = form.cleaned_data['nilai']
+            jurnal = Jurnal.objects.create(diskripsi=diskripsi,tgl_trans=tgl_trans,nobukti=nobukti)
+            for itemform in formset.forms:
+                id_coa = itemform.cleaned_data['id_coa']
+                debet = itemform.cleaned_data['debet']
+                kredit = itemform.cleaned_data['kredit']
+                gerai =itemform.cleaned_data['gerai']
+                debet = debet
+                kredit = kredit
+                itemjurnal = Tbl_Transaksi.objects.create(id_coa= id_coa,debet=debet,kredit=kredit,tgl_trans=datetime.date.today(),
+                    jurnal = jurnal,id_product=4,status_jurnal=1,id_cabang=object_id,id_unit=300,jenis='GL_GL_NON_KAS',antar_kantor=gerai)
+                
+            messages.add_message(request, messages.INFO,"Jurnal telah disimpan dengan sukses")
+            return HttpResponseRedirect(itemjurnal.get_absolute_url_non_staff())
+        else:
+            messages.add_message(request, messages.INFO,"ADA NILAI YANG BELUM ANDA MASUKAN")
+        var = {'form': form, 'formset': formset,'show':show}
+    else:
+        var = {'form': MainJurnalForm(), 'formset': Tbl_TransaksiFormSet(initial= [{"is_debet":True}, {"is_debet":False}]),'show':show,
+               'total_debet': sum([p.debet for p in show]),'total_kredit': sum([p.kredit for p in show])}
+    variables = RequestContext(request, var)
+    return render_to_response('jurnal/add_gl_gl_non_kas.html', variables)    
+
+
+def is_in_multiple_groups(user):
+    return user.groups.filter(name__in=['KEUANGAN','SUPERUSER','MANKEU'])
+@login_required
+@user_passes_test(is_in_multiple_groups)
+def index(request): 
+    jurnal_list = Tbl_Transaksi.objects.all()
+    trans=[]
+    form = Tbl_AkunForm()
+    start_date = None
+    end_date = None
+    id_cabang = None
+    if 'id_cabang' in request.GET and request.GET['id_cabang']:
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        id_cabang = request.GET['id_cabang']
+        ledger_search = Tbl_Transaksi.objects.filter(id_cabang=id_cabang).filter(tgl_trans__range=(start_date,end_date)).\
+            filter(status_jurnal=2)   
+        trans = []
+        for l in ledger_search:           
+            trans.append(l)
+        start_date = start_date
+        id_cabang = id_cabang
+        end_date = end_date
+    variables = RequestContext(request, {'jurnal_list': trans,
+                'total_debet': sum([p.debet for p in trans]),'total_kredit': sum([p.kredit for p in trans]),
+                'start_date':start_date,'id_cabang':id_cabang,'end_date':start_date})
+    return render_to_response('jurnal/index.html', variables)
+
+def index_all(request): 
+    jurnal_list = Tbl_Transaksi.objects.all()
+    ledger_search = Tbl_Transaksi.objects.all() 
+    all = []
+    for l in ledger_search:           
+        all.append(l)
+    variables = RequestContext(request, {'jurnal': all,'total_debet': sum([p.debet for p in all]),'total_kredit': sum([p.kredit for p in all])})
+    return render_to_response('jurnal/index.html', variables)
+
+def show(request, object_id):
+    jurnal = get_object_or_404(Jurnal, id=object_id)
+    variables = RequestContext(request, {'jurnal': jurnal})
+    return render_to_response('jurnal/show.html', variables)
+
+def mastertiket(request,object_id):
+    sekarang = datetime.date.today()
+    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=1).filter(jenis=u'Pencairan')   
+    template = 'ledger/uji_coba_mastertiket.html'
+    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    return render_to_response(template, variables)
+
+def mastertiket_uji_coba(request,object_id):
+    if dari and hingga:
+        cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
+    	dari = request.GET['dari']
+    	hingga = request.GET['hingga']
+        gr = Tbl_Transaksi.objects.filter(tgl_trans__range=(dari,hingga)).filter(id_cabang=object_id).filter(status_jurnal=1).filter(jenis=u'Pencairan')
+    else:
+        gr = Tbl_Transaksi.objects.all()
+    variables = RequestContext(request, {'cabang':cabang,'g': gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    return render_to_response('ledger/mastertiket.html', variables)
+
+def mastertiket_adm_pelunasan(request,object_id):
+    sekarang = datetime.date.today()
+    #user = request.user
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=1).filter(jenis=u'Pelunasan_adm')   
+    template = 'ledger/mastertiket_adm_pelunasan.html'
+    variables = RequestContext(request, {'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    return render_to_response(template, variables)
+
+def cetak_neraca_pjb(request):
+    ledger = Tbl_Transaksi.objects.all()
+    form = Tbl_AkunForm()
+    if 'start_date' in request.GET and request.GET['start_date']:
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        id_coa = request.GET['id_coa']
+        id_cabang = request.GET['id_cabang']
+        ledger_search = Tbl_Transaksi.objects.filter(tgl_trans__range=(start_date,end_date)).filter(id_coa=id_coa).filter(id_cabang=id_cabang).order_by('id')                
+    else:
+        template='ledger/cetakledger.html'
+        variable = RequestContext(request,{'form':form})
+        return render_to_response(template,variable)
+                    
+    response = HttpResponse(mimetype='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=bukubesar_%s_coa_%s.xls' % (id_coa, id_cabang)
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet("bukubesar_%s_coa_%s" % (id_coa, id_cabang))
+    
+    row_num = 0
+    
+    columns = [
+        (u"KODE UNIT", 6000),(u"KODE CABANG", 25000),(u"TANGGAL ", 6000),(u"COA", 6000),(u"DESKRIPSI", 6000),(u"DEBET", 6000),
+        (u"KREDIT", 6000),                          
+    ]
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    for col_num in xrange(len(columns)):
+        ws.write(row_num, col_num, columns[col_num][0], font_style)
+        # set column width
+        ws.col(col_num).width = columns[col_num][1]
+
+    font_style = xlwt.XFStyle()
+    font_style.alignment.wrap = 1
+    
+    for cetak in ledger_search:
+        row_num += 1
+        row = [
+            cetak.id_unit, cetak.id_cabang,cetak.tgl_trans,cetak.id_coa.coa,cetak.id_coa.deskripsi,cetak.debet,cetak.kredit,                                            
+        ]
+        for col_num in xrange(len(row)):
+            ws.write(row_num, col_num, row[col_num], font_style)
+            
+    wb.save(response)
+    return response
+
+#### NERACA HARIAN
+def neraca_pjb(request):
+    lb_akun = Tbl_Akun.objects.filter(view_unit__in =('0','300')).filter(jenis__in = ('a','p')).order_by('coa')
+    t_debet = 0
+    t_kredit = 0
+    t_saldo_akhir = 0
+    start_date = None
+    end_date = None
+    id_cabang = None
+    
+    akun =[]
+    
+    for c in lb_akun :
+        if  'id_cabang' in request.GET and request.GET['id_cabang']:
+            start_date = request.GET['start_date']
+            end_date = request.GET['end_date']
+            id_cabang = request.GET['id_cabang']
+
+            akun.append({'c':c,'deskripsi':c.deskripsi,
+                'kredit':c.my_kredit(id_cabang,start_date,end_date),'debet':c.my_debet(id_cabang,start_date,end_date),
+                'coa':c.coa,'id':c.id,'id_cabang':300 + (int(id_cabang)) ,'header_parent':c.header_parent,
+                'saldo_akhir': c.view_saldo_akhir(id_cabang,start_date,end_date),
+                'saldo_awal': c.saldo_pjb,})
+            t_debet += c.total_debet_nenek(id_cabang,start_date,end_date)
+            t_kredit += c.total_kredit_nenek(id_cabang,start_date,end_date)
+            start_date = start_date
+            id_cabang = id_cabang
+            end_date = end_date
+
+    template='ledger/neraca_pjb.html'
+    variable = RequestContext(request,{'akun':akun,'total_debet':t_debet,'total_kredit':t_kredit,'total_saldo_akhir':t_saldo_akhir,'start_date':start_date,'id_cabang':id_cabang,'end_date':end_date})
+    return render_to_response(template,variable)
+
+def kasir_post(request):
+    for i in request.POST.getlist('id_pilih'):
+        gl = Tbl_Transaksi.objects.get(id=(i))
+        gl.status_jurnal = 1
+        gl.jenis = 'GL_GL_PUSAT'
+        messages.add_message(request, messages.INFO,' Input GL manual Terposting.')
+        gl.save()        
+    return HttpResponseRedirect(gl.get_absolute_url())
+
+def kasir_post_non_kas(request):
+    for i in request.POST.getlist('id_pilih'):
+        gl = Tbl_Transaksi.objects.get(id=int(i))
+        gl.status_jurnal = 1
+        gl.jenis = 'GL_GL_NON_KAS'
+        messages.add_message(request, messages.INFO,' Input GL Non Kas Berhasil.')
+        gl.save()
+    return HttpResponseRedirect(gl.get_absolute_url())    
+
+####LABA RUGI HARIAN
+def laba_rugi(request):
+    lb_akun = Tbl_Akun.objects.filter(view_unit__in=('300','0')).filter(jenis="l")
+    t_debet = 0
+    t_kredit = 0
+    t_saldo_akhir = 0
+    start_date = None
+    end_date = None
+    id_cabang = None
+    akun =[]
+    for c in lb_akun :
+        if  'id_cabang' in request.GET and request.GET['id_cabang']:
+            start_date = request.GET['start_date']
+            end_date = request.GET['end_date']
+            id_cabang = request.GET['id_cabang']            
+            akun.append({'c':c,'deskripsi':c.deskripsi,'kredit':c.my_kredit(id_cabang,start_date,end_date),'debet':c.my_debet(id_cabang,start_date,end_date),#'saldo_awal':saldo_dk ,
+                'coa':c.coa,'id':c.id,'id_cabang':300 + (int(id_cabang)) ,'header_parent':c.header_parent,
+                'saldo_akhir': c.view_saldo_akhir(id_cabang,start_date,end_date),
+                'saldo_awal': c.saldo_pjb,})
+            start_date = start_date
+            id_cabang = id_cabang
+            end_date = end_date    
+
+    template='ledger/labarugi.html'
+    variable = RequestContext(request,{'akun':akun,'total_debet':t_debet,'total_kredit':t_kredit,'total_saldo_akhir':t_saldo_akhir,
+        'start_date':start_date,'id_cabang':id_cabang,'end_date':end_date})
+    return render_to_response(template,variable)
+####LABA RUGI HARIAN
+
+
+def cetak_laba_rugi(request):    
+    lb_akun = Tbl_Akun.objects.filter(jenis="l").filter(view_unit__in=('0','300'))
+    t_debet = 0
+    t_kredit = 0
+    t_saldo_akhir = 0
+    akun =[]
+   
+    if 'id_cabang' in request.GET and request.GET['id_cabang']:
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        id_cabang = request.GET['id_cabang']
+        for c in lb_akun :
+            akun.append(c)
+            print akun
+    else:        
+        template = 'ledger/cetak/cetaklabarugi.html'
+        variable = RequestContext(request,{'akun':akun})
+        return render_to_response(template,variable)
+
+    response = HttpResponse(mimetype='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=labarugi_%s_coa_%s.xls' #% (id_coa, id_cabang)
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet("bukubesar_%s_coa_%s" )#% (id_coa, id_cabang))
+    
+    row_num = 0
+
+    
+    columns = [
+        (u"DESKRIPSI", 25000),(u"COA", 5000),(u"DEBET", 2500),(u"KREDIT ", 3000),        
+    ]
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    for col_num in xrange(len(columns)):
+        ws.write(row_num, col_num, columns[col_num][0], font_style)
+        # set column width
+        ws.col(col_num).width = columns[col_num][1]
+
+    font_style.alignment.wrap = 1
+    
+    for cetak in akun:
+        row_num += 1
+        row = [
+            cetak.deskripsi,cetak.coa,cetak.get_jumlah_debet(),cetak.get_jumlah_kredit(),                                            
+        ]
+        for col_num in xrange(len(row)):
+            ws.write(row_num, col_num, row[col_num], font_style)
+            
+    wb.save(response)
+    return response
+    
+def neraca_percobaan(request):
+    lb_akun = Tbl_Akun.objects.filter(view_unit__in=("0","300")).order_by('coa')
+    t_debet = 0
+    t_kredit = 0
+    t_saldo_akhir = 0
+    start_date = None
+    end_date = None
+    id_cabang = None
+    akun=[]
+    form = Tbl_AkunForm()
+    for c in lb_akun :
+        if  'id_cabang' in request.GET and request.GET['id_cabang']:
+            start_date = request.GET['start_date']
+            end_date = request.GET['end_date']
+            id_cabang = request.GET['id_cabang']            
+            #saldo_dk = total_debet -total_kredit
+            akun.append({'c':c,'deskripsi':c.deskripsi,'kredit':c.my_kredit(id_cabang,start_date,end_date),'debet':c.my_debet(id_cabang,start_date,end_date),
+                'coa':c.coa,'id':c.id,'id_cabang':300 + (int(id_cabang)) ,'header_parent':c.header_parent,'saldo_awal': c.saldo_pjb,
+                'saldo_akhir':  c.view_saldo_akhir(id_cabang,start_date,end_date)})
+            t_debet += c.total_debet_nenek(id_cabang,start_date,end_date)
+            t_kredit += c.total_kredit_nenek(id_cabang,start_date,end_date)
+            start_date = start_date
+            end_date = end_date
+            id_cabang = id_cabang
+                
+    template='ledger/neraca_percobaan.html'
+    variable = RequestContext(request,{'akun':akun,'total_debet':t_debet,'total_kredit':t_kredit,'total_saldo_akhir':t_saldo_akhir,'start_date':start_date,'end_date':end_date,'id_cabang':id_cabang})
+    return render_to_response(template,variable)
+
+def cetak_neraca_percobaan(request):
+    sekarang =datetime.date.today()
+    ledger = Tbl_Transaksi.objects.all()
+    form = Tbl_AkunForm()
+    if 'start_date' in request.GET and request.GET['start_date']:
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        id_cabang = request.GET['id_cabang']
+        ledger_search = Tbl_Transaksi.objects.filter(tgl_trans__range=(start_date,end_date)).order_by('id')                
+    else:
+        template='ledger/cetak/cetak_neraca_percobaan.html'
+        variable = RequestContext(request,{'form':form})
+        return render_to_response(template,variable)
+                    
+    response = HttpResponse(mimetype='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=neracapercobaan_%s.xls' % (sekarang)
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet("neracapercobaab_%s" % (sekarang))
+    
+    row_num = 0
+    
+    columns = [
+        (u"KODE UNIT", 6000),(u"KODE CABANG", 25000),(u"TANGGAL ", 6000),(u"COA", 6000),(u"DESKRIPSI", 6000),(u"DEBET", 6000),
+        (u"KREDIT", 6000),                          
+    ]
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    for col_num in xrange(len(columns)):
+        ws.write(row_num, col_num, columns[col_num][0], font_style)
+        # set column width
+        ws.col(col_num).width = columns[col_num][1]
+
+    font_style = xlwt.XFStyle()
+    font_style.alignment.wrap = 1
+    
+    for cetak in ledger_search:
+        row_num += 1
+        row = [
+            cetak.id_unit, cetak.id_cabang,cetak.tgl_trans,cetak.id_coa.coa,cetak.id_coa.deskripsi,cetak.debet,cetak.kredit,                                            
+        ]
+        for col_num in xrange(len(row)):
+            ws.write(row_num, col_num, row[col_num], font_style)
+            
+    wb.save(response)
+    return response
+
+def buku_besar(request):
+    ledger = Tbl_Transaksi.objects.all()
+    saldo = 0
+    start_date = None
+    end_date = None
+    id_cabang = None
+    total_debet = 0
+    total_kredit = 0    
+    form = Tbl_AkunForm()
+    if 'start_date' in request.GET and request.GET['start_date']:
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        id_coa = request.GET['id_coa']
+        id_cabang = request.GET['id_cabang']
+        ledger_search = Tbl_Transaksi.objects.filter(tgl_trans__range=(start_date,end_date)).filter(id_cabang=id_cabang).filter(status_jurnal=1).order_by('id')
+        trans = []
+        b = Tbl_Akun.objects.get(id=int(id_coa))
+        akumulasi_debet =0
+        akumulasi_kredit = 0
+        start_date = start_date
+        end_date = end_date
+        id_cabang = id_cabang
+
+        for l in ledger_search:
+            for t in l.jurnal.tbl_transaksi_set.filter(id_coa=b):
+                akumulasi_debet += t.debet
+                akumulasi_kredit += t.kredit
+                trans.append({'t':t,'debet':t.debet,'kredit':t.kredit,'saldo_akhir': (t.id_coa.saldo_pjb + akumulasi_debet - akumulasi_kredit)  ,'deskripsi': t.id_coa.deskripsi,\
+                    'diskripsi' : t.jurnal.diskripsi,'kepala_coa': t.kepala_coa,'coa':t.id_coa.coa,'nobukti': t.jurnal.nobukti,'tgl_trans':t.tgl_trans,\
+                    'id_coa':t.id_coa})
+                start_date = start_date
+                end_date = end_date
+                id_cabang = id_cabang
+                total_debet = akumulasi_debet
+                total_kredit = akumulasi_kredit 
+                saldo = (t.id_coa.saldo_pjb + akumulasi_debet - akumulasi_kredit)
+        template='ledger/search/search_buku_besar.html'
+        variable = RequestContext(request,{'form':form,'ledger_search':trans,'kode':Tbl_Akun.objects.get(id=int(id_coa)),'saldo_akhir':saldo,
+            'total_kredit':total_debet,'total_debet': total_kredit ,'start_date':start_date,'end_date':end_date,'id_cabang':id_cabang,
+            'saldo':b.saldo_pjb})
+        return render_to_response(template,variable)
+    else:
+        template='ledger/search/search_buku_besar.html'
+        variable = RequestContext(request,{'form':form})
+        return render_to_response(template,variable)
+
+def buku_besar_all(request):
+    ledger = Tbl_Transaksi.objects.all()
+    banyak = ledger.all
+    start_date = None
+    end_date = None
+    id_cabang = None
+    transaksi =  banyak.im_class(Tbl_Transaksi)
+    fil = transaksi.filter(status_jurnal = 1)
+    jumlah_debet = sum([n.debet for n in fil])
+    jumlah_kredit = sum([n.kredit for n in fil])
+    saldo_awal = jumlah_debet - jumlah_kredit
+    a = jumlah_debet + jumlah_kredit
+    akumulasi_pokok_plafon = 0
+    form = Tbl_AkunForm()
+    all = []
+    if 'start_date' in request.GET and request.GET['end_date'] and 'submit_satu' in request.GET :
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        id_cabang = request.GET['id_cabang']
+        if id_cabang == '0':
+            for (l,k) in AKUN:
+                tb = Tbl_Transaksi.objects.filter(id_coa = l ).filter(tgl_trans__range=(start_date,end_date))
+                for t in tb:
+                    all.append(t)
+        else:
+            for (l,k) in AKUN:
+                tb = Tbl_Transaksi.objects.filter(id_coa = l ).filter(tgl_trans__range=(start_date,end_date)).filter(id_cabang=id_cabang)
+                for t in tb:
+                    all.append(t)
+        template='ledger/search/search_buku_besar_all.html'
+        variable = RequestContext(request,{'ledger':all,'saldo':saldo_awal,'form':form,'start_date':start_date,'end_date':end_date,'id_cabang':id_cabang})
+        return render_to_response(template,variable)
+    
+    if 'start_date' in request.GET and request.GET['end_date'] and 'submit_dua' in request.GET:
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        id_cabang = request.GET['id_cabang']
+        if id_cabang == '0':
+            for (l,k) in AKUN:
+                tb = Tbl_Transaksi.objects.filter(id_coa = l ).filter(tgl_trans__range=(start_date,end_date))
+                for t in tb:
+                    all.append(t)
+        else:
+            for (l,k) in AKUN:
+                tb = Tbl_Transaksi.objects.filter(id_coa = l ).filter(tgl_trans__range=(start_date,end_date)).filter(id_cabang=id_cabang)
+                for t in tb:
+                    all.append(t)
+        template1='ledger/search/cetak_buku_besar_all.html'
+        variable = RequestContext(request,{'ledger':all,'saldo':saldo_awal,'form':form,'start_date':start_date,'end_date':end_date,'id_cabang':id_cabang})
+        return render_to_response(template1,variable)
+
+    if 'start_date' in request.GET and request.GET['end_date'] and 'submit_tiga' in request.GET:
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        id_cabang = request.GET['id_cabang']
+        if id_cabang == '0':
+            for (l,k) in AKUN:
+                tb = Tbl_Transaksi.objects.filter(id_coa = l ).filter(tgl_trans__range=(start_date,end_date))
+                for t in tb:
+                    all.append(t)
+        else:
+            for (l,k) in AKUN:
+                tb = Tbl_Transaksi.objects.filter(id_coa = l ).filter(tgl_trans__range=(start_date,end_date)).filter(id_cabang=id_cabang)
+                for t in tb:
+                    all.append(t)
+                    
+        response = HttpResponse(mimetype='application/ms-excel')
+        response['Content-Disposition'] = 'attachment; filename=bukubesar.xls'
+        wb = xlwt.Workbook(encoding='utf-8')
+        ws = wb.add_sheet("bukubesar" )
+        row_num = 0
+        columns =[(u"LABA RUGI")]
+        row_num = 3    
+        columns = [(u"Tanggal", 2500),(u"No bukti", 5000),(u"Kode Coa", 5000),(u"Keterangan ", 13000),
+            (u"Debet ", 3000),(u"Kredit ", 3000),(u"Saldo ", 3000),]
+            
+        font_style = xlwt.XFStyle()
+        font_style.font.bold = True
+        font_style.font.name = 'Times New Roman'
+                
+        for col_num in xrange(len(columns)):
+            ws.write(row_num, col_num, columns[col_num][0], font_style)
+            ws.col(col_num).width = columns[col_num][1]
+        font_style.font.bold = False
+        font_style.alignment.wrap = 1
+        font_style.num_format_str = 'DD-MM-YYYY'
+                
+        for cetak in all:
+            row_num += 1
+            row = [cetak.tgl_trans,cetak.jurnal.nobukti,(cetak.gabung_kode_coa()),cetak.jurnal.diskripsi,
+                   str(cetak.debet),str(cetak.kredit),str(cetak.get_jumlah_debet())]
+            for col_num in xrange(len(row)):
+                ws.write(row_num, col_num, row[col_num], font_style)
+                        
+        wb.save(response)
+        return response    
+
+    else:
+        variables = RequestContext(request, {'form': form,'ag':ledger})
+        return render_to_response('ledger/search/search_buku_besar_all.html', variables)
+        
+def cetak_buku_besar(request):    
+    ledger = Tbl_Transaksi.objects.all()
+    banyak = ledger.all
+    transaksi =  banyak.im_class(Tbl_Transaksi)
+    fil = transaksi.filter(status_jurnal = 1)
+    jumlah_debet = sum([n.debet for n in fil])
+    jumlah_kredit = sum([n.kredit for n in fil])
+    saldo_awal = jumlah_debet - jumlah_kredit
+    form = Tbl_AkunForm()
+    if 'start_date' in request.GET and request.GET['start_date']:
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        id_coa = request.GET['id_coa']
+        id_cabang = request.GET['id_cabang']
+        ledger_search = Tbl_Transaksi.objects.filter(tgl_trans__range=(start_date,end_date)).filter(id_coa=id_coa).filter(id_cabang=id_cabang).order_by('id')
+        trans = []
+        for l in ledger_search:
+            for t in l.jurnal.tbl_transaksi_set.all():
+                trans.append(t)
+                
+               
+    else:
+        template = 'ledger/cetak/cetak_buku_besar.html'
+        variable = RequestContext(request,{'form':form})
+        return render_to_response(template,variable)
+    
+    response = HttpResponse(mimetype='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=bukubesar.xls' 
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet("sheet" ) #(id_coa, id_cabang))
+    
+    row_num = 0
+    
+    columns = [
+        (u"KODE UNIT", 6000),(u"KODE CABANG", 25000),(u"TANGGAL ", 6000),(u"COA", 6000),(u"DESKRIPSI", 6000),(u"DEBET", 6000),
+        (u"KREDIT", 6000),                          
+    ]
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    for col_num in xrange(len(columns)):
+        ws.write(row_num, col_num, columns[col_num][0], font_style)
+        # set column width
+        ws.col(col_num).width = columns[col_num][1]
+
+    #font_style = xlwt.XFStyle(num_format_str='YYYY-MM-DD')
+    font_style.alignment.wrap = 1
+    
+    for cetak in ledger_search:
+        row_num += 1
+        row = [
+            cetak.id_unit, cetak.id_cabang,cetak.tgl_trans,cetak.id_coa.coa,cetak.id_coa.deskripsi,cetak.debet,cetak.kredit,                                            
+        ]
+        for col_num in xrange(len(row)):
+            ws.write(row_num, col_num, row[col_num], font_style)
+            
+    wb.save(response)
+    return response
+    '''
+        
+    
+    output = StringIO.StringIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet('sheet')
+    
+    date_format = workbook.add_format({'num_format': 'dd/mm/yyyy'})
+    bold = workbook.add_format({'bold': True})
+    money = workbook.add_format({'num_format': '#,###0'})
+    font_style = xlwt.XFStyle()
+    font_style.alignment.wrap = 1
+    # Write some data headers.
+    worksheet.write('A1', 'Nomor', bold)
+    worksheet.write('B1', 'Tanggal', bold)
+    worksheet.write('C1', 'No Bukti', bold)
+    worksheet.write('D1', 'Kode Coa', bold)    
+    worksheet.write('E1', 'Nama Coa', bold)
+   
+    # Some data we want to write to the worksheet.
+    #date_time = datetime.date.today()
+    #expenses = (
+        #['Rent', 1000,date_time],
+        #['Gas',   100,date_time],
+        #['Food',  300,date_time],
+        #['Gym',    50,date_time],
+    #)
+    a_list = []
+
+    for g in Tbl_Transaksi.objects.all():
+        a_list.append({'obj': g})
+   
+    data = sorted(a_list)
+   
+    # Start from the first cell below the headers.
+    row_num = 1
+    col_num = 0
+   
+    # Iterate over the data and write it out row by row.
+    #for nomor, tanggal,nobukti in (data):
+    #for i in (data):
+        #print i
+        #worksheet.write(row, col,id_trans)
+        #worksheet.write(row, col + 1, tanggal, money)
+        #worksheet.write_datetime(row, col + 2,nobukti, date_format)
+        #worksheet.write(i, 0, getattr(row['obj'],'id_unit'))
+        #worksheet.write_datetime(i, col + 1, getattr(row['obj'], 'tgl_tran', date_format))
+        #row += 1
+    for cetak in ledger_search:
+        row_num += 1
+        row = [
+            cetak.id_unit, cetak.id_cabang,cetak.tgl_trans,cetak.id_coa.coa,cetak.id_coa.deskripsi,cetak.debet,cetak.kredit,                                            
+        ]
+        #for col_num in xrange(len(row)):
+            #worksheet.write(row, col_num, row[col_num], font_style)   
+    # Write a total using a formula.
+    #worksheet.write(row, 0, 'Total',       bold)
+    #worksheet.write(row, 1, '=SUM(B2:B5)', money)
+
+    workbook.close()
+    filename = 'ExcelReport.xlsx'
+    output.seek(0)
+    response = HttpResponse(output.read(), content_type="application/ms-excel")
+    response['Content-Disposition'] = 'attachment; filename=bukubesar.xlsx' 
+    return response
+    '''       
+
+
+def hapus_jurnal(request,object_id):
+    tbl = Tbl_Transaksi.objects.get(id=object_id)   
+    tbl.delete()
+    messages.add_message(request, messages.INFO, 'Penghapusan Jurnal Berhasil')
+    return HttpResponseRedirect(tbl.get_absolute_url() )
+    
+def ledger_show(request, object_id):
+    akun = get_object_or_404(Tbl_Akun, pk=object_id)
+    variables = RequestContext(request, {'akun': akun})
+    return render_to_response('ledger/show.html', variables)
+    
+def akun_list(request):
+    akun_list = Tbl_Akun.objects.all().order_by('coa')
+    variables = RequestContext(request, {'object_list': akun_list})
+    return render_to_response('akun/list.html', variables)
+
+def add(request,object_id):
+    sekarang = datetime.date.today()
+    show = Tbl_Transaksi.objects.all().filter(status_jurnal=1).filter(id_cabang=object_id).filter(tgl_trans= sekarang).filter(jenis='GL_GL')
+    Tbl_TransaksiFormSet = formset_factory(Tbl_TransaksiForm, extra=1,max_num=1)
+    if request.method == 'POST':
+        formset = Tbl_TransaksiFormSet(request.POST)
+        form = MainJurnalForm(request.POST)
+        if formset.is_valid() and form.is_valid():
+            nobukti = form.cleaned_data['nobukti']
+            diskripsi = form.cleaned_data['diskripsi']
+            tgl_trans = form.cleaned_data['tgl_trans']
+            status_jurnal = form.cleaned_data['status_jurnal']
+            #nilai = form.cleaned_data['nilai']
+            jurnal = Jurnal.objects.create(diskripsi=diskripsi,tgl_trans=tgl_trans,nobukti=nobukti,status_jurnal=status_jurnal)
+            for itemform in formset.forms:
+                id_coa = itemform.cleaned_data['id_coa']
+                debet = itemform.cleaned_data['debet']
+                kredit = itemform.cleaned_data['kredit']
+                gerai = itemform.cleaned_data['gerai']
+                #if is_debet  == None:
+                    #debet = nilai
+                    #kredit = 0
+                #else:
+                    #debet = 0
+                    #kredit = nilai
+                debet = debet
+                kredit = kredit
+                itemjurnal = Tbl_Transaksi.objects.create(id_coa= id_coa,debet=debet,kredit=kredit,tgl_trans=datetime.date.today(),
+                    jurnal = jurnal,id_product=4,status_jurnal=1,id_cabang=object_id,id_unit=300,jenis='GL_GL',antar_kantor=gerai)
+                
+            messages.add_message(request, messages.INFO,"Jurnal telah disimpan dengan sukses")
+            return HttpResponseRedirect(itemjurnal.get_absolute_url())
+        else:
+            messages.add_message(request, messages.INFO,"ADA NILAI YANG BELUM ANDA MASUKAN")
+        var = {'form': form, 'formset': formset,'show':show}
+    else:
+        var = {'form': MainJurnalForm(), 'formset': Tbl_TransaksiFormSet(initial= [{"is_debet":True}, {"is_debet":False}]),'show':show}
+    variables = RequestContext(request, var)
+    return render_to_response('jurnal/add.html', variables)
+
+def add_non_kas(request,object_id):
+    sekarang = datetime.date.today()
+    show = Tbl_Transaksi.objects.filter(status_jurnal=1).filter(id_cabang=object_id).filter(tgl_trans=sekarang).filter(jenis='GL_GL_NON_KAS')
+    Tbl_TransaksiFormSet = formset_factory(Tbl_TransaksiForm, extra=1,max_num=1)
+    if request.method == 'POST':
+        formset = Tbl_TransaksiFormSet(request.POST)
+        form = MainJurnalForm(request.POST)
+        if formset.is_valid() and form.is_valid():
+            nobukti = form.cleaned_data['nobukti']
+            diskripsi = form.cleaned_data['diskripsi']
+            tgl_trans = form.cleaned_data['tgl_trans']
+            #nilai = form.cleaned_data['nilai']
+            jurnal = Jurnal.objects.create(diskripsi=diskripsi,tgl_trans=tgl_trans,nobukti=nobukti)
+            for itemform in formset.forms:
+                id_coa = itemform.cleaned_data['id_coa']
+                debet = itemform.cleaned_data['debet']
+                kredit = itemform.cleaned_data['kredit']
+		gerai =itemform.cleaned_data['gerai']
+                debet = debet
+                kredit = kredit
+                itemjurnal = Tbl_Transaksi.objects.create(id_coa= id_coa,debet=debet,kredit=kredit,tgl_trans=datetime.date.today(),
+                    jurnal = jurnal,id_product=4,status_jurnal=1,id_cabang=object_id,id_unit=300,jenis='GL_GL_NON_KAS',antar_kantor=gerai)
+                
+            messages.add_message(request, messages.INFO,"Jurnal telah disimpan dengan sukses")
+            return HttpResponseRedirect(itemjurnal.get_absolute_url_non())
+        else:
+            messages.add_message(request, messages.INFO,"ADA NILAI YANG BELUM ANDA MASUKAN")
+        var = {'form': form, 'formset': formset,'show':show}
+    else:
+        var = {'form': MainJurnalForm(), 'formset': Tbl_TransaksiFormSet(initial= [{"is_debet":True}, {"is_debet":False}]),'show':show,
+               'total_debet': sum([p.debet for p in show]),'total_kredit': sum([p.kredit for p in show])}
+    variables = RequestContext(request, var)
+    return render_to_response('jurnal/add_non_kas.html', variables)
+
+
+
+

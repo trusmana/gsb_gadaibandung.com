@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block section %}pk{% endblock %}
+{% block content %}
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+function startCalc(){
+interval = setInterval("calc()",1);
+}
+function calc(){
+nilai = document.frmAdd.nilai.value;
+terlambat = document.frmAdd.terlambat.value;
+document.frmAdd.denda.value =  (parseInt(nilai) *  0.05/30) * document.frmAdd.terlambat.value;
+
+}
+function stopCalc(){
+clearInterval(interval);
+}
+</script>
+
+<p class="breadcrumb"></p>
+<h2 align="right">PERPANJANGAN AKAD [{{ object.norek }}]</h2>
+
+<form method="POST" action="." class="tabular" name="frmAdd">
+	<p><label for="id_agnasabah">Nama Nasabah:</label> {{object.agnasabah}}</p>
+	<p><label for="id_tanggal">Tanggal:</label> {{object.tanggal }} </p>
+	<p><label for="id_gerai">Gerai :</label> {{ form.gerai}}</p>
+	<p><label for="id_jangka_waktu">Jangka waktu :</label> {{ form.jangka_waktu }}</p>
+	<p><label for="id_nilai" name="nilai">Nilai :</label> Rp.{{form.nilai}}</p>
+	<p><label for="id_terlambat">Terlambat Hari :</label>{{form.terlambat}}</p>
+	<p><label for="id_denda">Denda :</label> Rp. <input type="text" name="denda" id="id_denda" onFocus="startCalc();" onBlur="stopCalc();"readonly /></p>
+	<p><label for="id_status_transaksi">Status transaksi :</label> {{form.status_transaksi}}</p>
+	<p><label for="id_taksir">Nama Barang :</label> {{form.taksir}}</p>
+
+<p><label></label><input type="submit" value="Simpan" /></p>
+</form>
+{% endblock %}

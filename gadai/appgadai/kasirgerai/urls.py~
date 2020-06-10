@@ -1,0 +1,46 @@
+from django.conf.urls.defaults import *
+from django.views.generic import list_detail, create_update, date_based
+from gadai.appgadai.kasirgerai.views import *
+from django.views.generic.simple import direct_to_template
+from django.forms import ModelForm
+
+urlpatterns = patterns('',
+    url(r'^(?P<object_id>\d+)/posting_akhir_hari/$', posting_akhir_hari),
+    url(r'^(?P<object_id>\d+)/verifikasi_kasir_gu/$',verifikasi_kasir_gu),
+    url(r'^(?P<object_id>\d+)/app/$',app),
+    url(r'^(?P<object_id>\d+)/app_gu/$',app_gu),
+    url(r'^(?P<object_id>\d+)/laporan_pelunasan_titipan/$', laporan_pelunasan_titipan),
+    url(r'^(?P<object_id>\d+)/laporan_pelunasan/$', laporan_pelunasan),
+    url(r'^(?P<object_id>\d+)/laporan_pencairan/$', laporan_pencairan),
+    url(r'^(?P<object_id>\d+)/mastertiket_antargerai/$', mastertiket_antargerai),
+    url(r'^(?P<object_id>\d+)/mastertiket_uangmuka/$', mastertiket_uangmuka),
+    url(r'^(?P<object_id>\d+)/jurnal_umum/$', jurnal_umum),
+    url(r'^(?P<object_id>\d+)/gl_val/$',gl_val),
+    url(r'^(?P<object_id>\d+)/cetak_all_transaksi/$',cetak_all_transaksi),
+    url(r'^(?P<object_id>\d+)/cetak_data_kredit/$',cetak_data_kredit),
+    url(r'^cariplns/$', cariplns),
+    url(r'^lunas_kasir/$', lunas_kasir),
+    url(r'^(?P<object_id>\d+)/uangmuka/$', uangmuka),
+    url(r'^(?P<object_id>\d+)/all_transaksi/$', all_transaksi),
+    url(r'^(?P<object_id>\d+)/all_transaksi_kas/$', all_transaksi_kas),
+    url(r'^(?P<object_id>\d+)/all_approve/$', all_approve),
+    url(r'^postting_all_jurnal/$', postting_all_jurnal),
+    url(r'^(?P<object_id>\d+)/all_transaksi_jurnal/$', all_transaksi_jurnal),
+    url(r'^(?P<object_id>\d+)/view_cabang/$', view_cabang),
+    url(r'^(?P<object_id>\d+)/master_tiket_kasir_pelunasan/$', master_tiket_kasir_pelunasan),
+    url(r'^(?P<object_id>\d+)/inputkasir_pelunasan/$',inputkasir_pelunasan),
+    url(r'^(?P<object_id>\d+)/mcc/$',mcc),
+    url(r'^(?P<object_id>\d+)/print_loan/$',print_loan),
+    url(r'^(?P<object_id>\d+)/mcc_image/$',mcc_image),
+    url(r'^(?P<object_id>\d+)/approve_pelunasan_kasir/$',approve_pelunasan_kasir),
+    url(r'^(?P<object_id>\d+)/kasir_pelunasan/$',kasir_pelunasan),
+    url(r'^(?P<object_id>\d+)/data_approve/$',data_approve),
+    url(r'^(?P<object_id>\d+)/lunas/$',lunas),
+    url(r'^(?P<object_id>\d+)/mastertiket_gl_gl/$', mastertiket_gl_gl),
+    url(r'^(?P<object_id>\d+)/mastertiket_pencairan_kasir/$', mastertiket_pencairan_kasir),
+    url(r'^(?P<object_id>\d+)/mastertiket_uji_coba_kasir/$',mastertiket_uji_coba_kasir),
+    #url(r'^(?P<object_id>\d+)/mastertiket_uji_coba_kasir/$',mastertiket_uji_coba_kasir),
+    url(r'^(?P<object_id>\d+)/kasir/$',kasir),###19 juni
+    url(r'^(?P<object_id>\d+)/inputkasir/$',inputkasir),###19 juni
+    url(r'^(?P<object_id>\d+)/slip_validasi/$',slip_validasi),
+)

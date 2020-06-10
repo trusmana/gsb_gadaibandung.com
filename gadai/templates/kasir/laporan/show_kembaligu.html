@@ -1,0 +1,48 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}nasabah{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<script type='text/javascript'>
+$(document).ready(function(){$(&#39;.notification&#39;).hover(function(){$(this).css(&#39;cursor&#39;,&#39;auto&#39;);});
+$(&#39;.notification span&#39;).click(function(){$(this).parent().fadeOut(800);});});
+</script>
+{% load number_format useringroup %}
+<h2 align="right">:: DATA KELEBIHAN TITIPAN GADAI ULANG  {{ ag.nasabah.nama }}::</h2>
+
+
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%" align="center">
+    <tr class="tableizer-firstrow">
+    <th>No Rek</th>
+    <th>NAMA</th>
+    <th>TANGGAL</th>
+    <th>NILAI</th>
+
+    <th colspan = '2'>MENU</th>
+    </tr>
+{% for p in titip %}
+<tr>
+    <td>{{ p.akad_norek}}</td>
+    <td>{{p.nama}}</td>
+    <td>{{p.tanggal}}</td>
+
+    <td >Rp. {{p.nilai|number_format:0}}</td>
+
+     {% if p.akad_titipan_gerai != "1" %}
+       <td><a href="/kasirgerai/{{p.norek}}/tampil_app_keu_gu/" title="Input Pengembalian" class="next"> Otorisasi Keuangan </a></td>
+     {% endif %}
+     {% if p.akad_titipan_keu == "1" %}
+        <td><a href="/kasirgerai/{{p.norek}}/tampil_pengembalian_gu/" title="Input Pengembalian" class="next"> Input Pengembalian</a></td>  
+     {% endif %}
+     {% if p.akad_titipan_gerai == "1" and p.akad_titipan_keu != "1"%}
+     <td>Tunggu Konferm Keuangan</td>
+     {% endif%}
+<!--    <td><a href="/kasirgerai/{{p.norek}}/tampil_pengembalian_gu/" title="Input Pengembalian" class="next">Input Pengembalian</a></td> -->
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}
+
+
+

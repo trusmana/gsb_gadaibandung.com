@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml2/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head class="head">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>KSURA</title>
+<meta name="Author" content="Stu Nicholls" />
+<link rel="stylesheet" type="text/css" href="/static/3/pro_dropdown_3.css" />
+<script src="/static/3/stuHover.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+
+<div id="header">
+     {% if messages %}
+     <ul id="message">
+    	{% for m in messages %}<li id="msg_{{ forloop.counter }}"><a href="#" onclick="document.getElementById('msg_{{ forloop.counter }}').style.display='none'; return false;"><small>Clear</small></a>{{ m }}</li>
+    	{% endfor %}
+    </ul>{% endif %}
+    <div id="account">
+      	<ul>
+      		{% if user.is_authenticated %}
+      		<li>{% now "d.m.Y" %}</li>
+      		<li>{{ user.username }}</li>
+      		<li><a href="/accounts/password/change/" title="Ganti Password"><small>Ganti password</small></a></li>
+      		<li><a href="/accounts/logout/">logout</a></li>
+      		{% else %}
+      		<li><a href="/accounts/login/">Login</a></li>
+      		{% endif %}
+      	</ul>
+    </div>
+{% load useringroup %}
+
+	
+
+		<div class="header" style="margin-top: 2px;">
+
+			<img src="/static/img/logoksu.png" title="" alt="" style ="float: center;"/>
+
+		</div>
+
+	
+</div>
+
+<span class="preload1"></span>
+<span class="preload2"></span>
+    <div >
+       <ul id="nav">
+	{% if user.is_kadiv %} 
+	<li class="top"><a href="/" class="top_link"><span>Beranda</span></a></li>{% endif %}
+		<li class="top"><a id="/nasabah/" class="top_link"><span >Nasabah </span></a>
+			<ul class="sub">
+				<li><a href="/nasabah/add" class="nasabah">Nasabah Baru</a></li>
+				<li><a href="/nasabah/" class="nasabah">Daftar Nasabah</a></li>
+			</ul>
+		
+		<li class="top"><a href="/akadgadai/" class="top_link"><span>Akad Gadai </span></a></li>
+			<ul class="sub">
+				<li><a href="/akadgadai/add" class="akadgadai">Akad Baru</a></li>
+				<li><a href="/akadgadai/" class ="akadgadai">Data</a></li>
+			</ul>
+		</li>
+		<li class="top"><a href="/gerai/" class="top_link"><span>Gerai</span></a></li>
+			<ul class="sub">
+				<li><a href="/gerai/" class="gerai">Gerai</a></li>
+				<li><a href="/gerai/" class="gerai">Data Gerai &#187;</a><span></span>
+					<ul class="sub">
+						<li><a href="/gerai/9/show" class="gerai">Cibiru &#187;</a>
+							<ul>
+								<li><a href="/gerai/9/rekap" class="gerai">Rekap Harian</a></li>
+								<li><a href="/gerai/9/rekapbln" class="gerai">Rekap Bulan</a></li>
+							</ul>
+						</li>
+				<li><a href="/gerai/8/show" class="gerai">Suci &#187;</a>
+					<ul>
+						<li><a href="/gerai/8/rekap" class="gerai">Rekap Harian</a></li>
+						<li><a href="/gerai/8/rekapbln" class="gerai">Rekap Bulan</a></li>
+					</ul>
+				</li>
+				<li><a href="/gerai/7/show" class="gerai">Kopo &#187;</a>
+					<ul>
+						<li><a href="/gerai/7/rekap" class="gerai">Rekap Harian</a></li>
+						<li><a href="/gerai/7/rekapbln" class="gerai">Rekap Bulanan</a></li>
+					</ul>
+				</li>
+				<li><a href="/gerai/6/show" class="gerai">Gerlong Hilir &#187;</a>
+					<ul>
+						<li><a href="/gerai/6/rekap" class="gerai">Rekap Harian</a></li>
+						<li><a href="/gerai/6/rekapbln" class="gerai">Rekap Bulanan</a></li>
+					</ul>
+				</li>
+				<li><a href="/gerai/5/show" class="gerai">Gerlonggirang &#187;</a>
+					<ul>
+						<li><a href="/gerai/5/rekap" class="gerai">Rekap Harian </a></li>
+						<li><a href="/gerai/5/rekapbln" class="gerai">Rekap Bulanan </a></li>
+					</ul>
+				</li>
+				<li><a href="/gerai/4/show" class="gerai">Dago &#187;</a>
+					<ul>
+						<li><a href="/gerai/4/rekap" class="gerai">Rekap Harian</a></li>
+						<li><a href="/gerai/4/rekapbln" class="gerai">Rekap Bulanan</a></li>
+					</ul>
+				</li>
+				<li><a href="/gerai/3/show" class="gerai">Dipatiukur &#187;</a>
+					<ul>
+						<li><a href="/gerai/3/rekap" class="gerai">Rekap Harian </a></li>
+						<li><a href="/gerai/3/rekapbln" class="gerai">Rekap Bulanan </a></li>
+					</ul>
+				</li>
+				<li><a href="/gerai/2/show" class="gerai">Jakarta &#187;</a>
+					<ul>
+						<li><a href="/gerai/2/rekap" class="gerai">Rekap Harian </a></li>
+						<li><a href="/gerai/2/rekapbln" class="gerai">Rekap Bulanan </a></li>
+					</ul>
+				</li>
+				<li><a href="/gerai/1/show" class="gerai">Bandung</a></li>
+			</ul></li>
+			<li class="top"><a href="/gerai/rekapunit" class="top_link">Rekap Gerai</a></li>
+			
+		</ul>
+	</li>	
+	<li class="top"><a href="/gerai/rekapunit" class="top_link">Taksir</a>
+		<ul class="sub">
+			<li><a href="/taksir/add" class="gudang">Add Taksir</a>			
+		</ul>
+	</li>
+     
+{% if user.is_staff %}
+	<li class="top"><a href="/admin/" class="top_link">Admin</a></li>{% endif %}
+	 <li class="top"><a href="/setting/user/" class="top_link">User</a></li> 
+	<li class="top"><a href="/kas/" class="top_link">KAS</a>
+		<ul class="sub">
+			<li><a href="/kas/add" class="kas">Pencairan</a>			
+		</ul>
+	</li>
+	<li class="top"><a href="/jurnal/" class="top_link">Jurnal</a>
+		<ul>
+			<li><a href="/jurnal/add" class="jurnal">Tambah Jurnal</a>	
+			<li><a href="/jurnal/rekening/" class="jurnal">Daftar COA &#187;</a>
+				<ul>
+					<li><a href="/jurnal/rekening/add" class="jurnal">Add Coa</a>
+				</ul>
+			</li>
+		</ul>
+	</li>
+	  </ul>
+    </div><!-- main-menu -->
+</div><!--id=header-->
+
+<div class="{% if nosidebar %}nosidebar{% endif %}" id="main">
+    <div id="sidebar">        
+    {% block sidebar %}{% endblock %}
+    </div><!--id=sidebar-->
+
+    <div id="content">
+           {% block content %}<h2 align="center">KOPERASI RIZKY ABADI</h2>
+					<p align="center">Selamat Datang Di Sistem Gadai KSU Rizkyabadi</p>
+					 <p align="center">Semoga hari anda lebih menyenangkan</p>
+					 <p align="center">Terima kasih @ Team IT KSU RA </p>{% endblock %}
+    </div><!-- content -->
+</div><!-- main -->
+
+	
+<div id="footer">
+    ©Divisi Technologi 2011 KSU Rizky Abadi
+</div>
+</div><!-- wrapper -->
+
+</body></html>

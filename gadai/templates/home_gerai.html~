@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+{% block section %}Gerai{% endblock %}
+{% block sidebar %}
+
+{% include "alat/sidebar.html" %}
+{% load useringroup %}
+{% block extrahead %}
+{% load useringroup number_format %}
+{% endblock %}
+
+<div style="margin-left:10px;">
+<br>
+
+<div class="menu_list" id="secondpane">
+{% ifusergroup KPLGERAI %}
+
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU KEPALA GERAI</span></a></li>
+        <li class='has-sub'><a href=''><span>Menu Report</span></a>
+			<ul>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/buku_besar_cabang/">Buku Besar Cabang</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/neraca_percobaan/"><span>Neraca Percobaan Gerai</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/neraca/"><span>Neraca</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/labarugi/"><span>Laba Rugi</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/list/"><span>Approve Transaksi Gl to Gl</span></a></li>
+			</ul>
+		</li>
+        <li class='has-sub'><a href=''><span>Laporan Transaksi</span></a>
+			<ul>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/pencairan_gerai/" ><span> Lcairan</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/pelunasan_gerai/"><span>Laporan Pelunasan</span></a></li>
+				<li><a href="/kplgerai/all_transaksi/"><span>Laporan Transaksi All</span></a></li>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/tutup_saldo_gerai/"><span>Posting Transaksi</span></a></li>
+			</ul>
+		</li>
+		<li class='has-sub'><a href=''><span>Menu Approve</span></a>
+			<ul>
+				<li><a href="/kplgerai/{{cabang.kode_cabang}}/data_approve_kplg/" ><span> Approve Datspan></a></li>
+				<li><a  href="/kplgerai/{{cabang.kode_cabang}}/data_kplg/"><span> TEST</span></a></li>
+			</ul>
+		</li>
+        <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+    </ul>
+                         </div>
+
+{% endifusergroup %}
+		{% ifusergroup KEUANGAN %}
+		<div id='cssmenu'>
+			<ul>
+				<li class='active'><a href=''><span>MENU KEUANGAN</span></a></li>
+					<li class='has-sub'><a href=''><span>Transaksi Pusat</span></a>
+						<ul>
+							<li><a href="/keuangan/{{cabang.kode_cabang}}/add/">Penyetoran Dan Penerimaan Gerai</span></a></li>	
+							<li><a href="/jurnal/add_baru_h/">Transaksi Tunai  </a></li>	
+						   <li><a href="/kplgerai/{{cabang.kode_cabang}}/pelunasan_gerai/"><span> Transaksi Non Tunai</span></a></li>			
+						</ul>
+				   	</li>
+		        </li>
+				<li class='has-sub'><a href=''><span>Jurnal Transaksi</span></a>
+					<ul>
+						<li class='last'><a href="/jurnal/index/"> Listing Jurnal</a></li>	
+						<li><a href="/jurnal/buku_besar_all/" ><span> Rekap Jurnal</span></a></li>					   
+					</ul> 
+				</li>
+				<li class='has-sub'><a href=''><span>Sub Ledger</span></a>
+					<ul>
+						<li><a href="/jurnal/buku_besar/" ><span> Buku Besar</span></a></li>
+					</ul> 
+				</li>
+				<li class='has-sub'><a href=''><span>Laporan Keuangan</span></a>
+					<ul>
+						<li><a href="/jurnal/neraca_percobaan/"><span> Neraca Saldo</span></a></li>
+						<li><a href="/jurnal/neraca_pjb/"> <span> Neraca Harian</span></a></li>
+						<li><a href="/mankeu/neraca_pjb_month/"><span> Neraca Bulanan</span></a></li>
+						<li><a href="/jurnal/laba_rugi/"><span> Laba Rugi Harian</span></a></li>
+						<li><a href="/mankeu/laba_rugi_month/"><span> Laba Rugi Bulanan</span></a></li>						   
+					</ul>
+				</li>
+				<li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+			</ul>
+		</div>
+
+		{% endifusergroup %}
+
+
+	  {% ifusergroup ADM_GERAI%}
+
+			<div id='cssmenu'>
+				  <ul>
+					 <li class='active'><a href=''><span>MENU ADM GERAI</span></a></li>
+					 <li class='has-sub'><a href=''><span>Menu Input</span></a>
+						<ul>
+						   <li><a href="/akadgadai/add/" title="Akad Baru" ><span>Input New Akad</span></a></li>
+						   <li><a href="/akadgadai/lunas/" title="Input Pelunasan" ><span>Input Pelunasan</span></a></li>
+						   <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/show/"  title="Permintaan"><span>Input Permintaan</span></a></li>
+						   
+						</ul>
+					 </li>
+					 <li class='has-sub'><a href=''><span>Menu Report </span></a>
+						<ul>
+						   <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket/"><span>Master Tiket Pencairan</span></a></li>
+						   <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_adm_pelunasan/"><span>Master Tiket Pelunasan</span></a></li>	  
+                                                   <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_adm_penjualan_pelelangan/"><span>Master Tiket Penjualan Pelelangan</span></a></li>
+						   <li><a href="/gerai/{{cabang.kode_cabang}}/suratjalan/" title="surat jalan"><span>Cetak Surat Jalan</span></a></li>
+						   <li><a href="/barang/{{cabang.kode_cabang}}/barangnonlunas/" title="Nasabah JT"><span>Nasabah Jatuh Tempo</span></a></li>
+						   <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/cetakminta/"><span>Cetak Permintaan</span></a></li>
+						</ul>
+					 </li>
+					 <li class='has-sub'><a href=''><span>Menu Data Gerai</span></a>
+						<ul>
+						   <li><a href="/kasirgerai/{{cabang.kode_cabang}}/lunas/"><span>Data Nasabah Lunas</span></a></li>
+						   <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/data_approve/"><span>Data Nasabah Approve</span></a></li>
+						   <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/data_approve_pencairan/"><span>Data Nasabah Non Pencairan</span></a></li>
+						</ul>
+					 </li>
+					 <li class='has-sub'><a href=''><span>Menu Approve</span></a>
+						<ul>
+							<li><a href="/kplgerai/{{cabang.kode_cabang}}/data_approve_kplg/" ><span> Approve Data Kredit</span></a></li>				
+						</ul>
+					</li>
+					 <li class='last'><a href='/gerai/simulasi/' title="simulasi hitungan"><span>Simulasi PJB</span></a></li>
+				  </ul>
+			 </div>
+			<h3>Impor Data Pencairan</h3>
+				  <form action="/akadgadai/import/" method="POST" enctype="multipart/form-data">{% csrf_token %}
+				  Format data CSV: <br />
+				  <input type="file" name="ag_file" /> <input type="submit" value="Simpan" />
+				  </form>
+
+		{% endifusergroup %}
+
+		{% ifusergroup KASIR_GERAI%}
+			<div id='cssmenu'>
+				  <ul>
+				<li class='active'><a href=''><span>MENU KASIR</span></a></li>
+				
+				<li class='has-sub'><a href=''><span>Menu Input</span></a>
+					<ul>
+                                         <li class='active'><a href="/jurnal/1/add_staff_non_kas/"><span>Input GL to GL Non Kas</span></a></li>
+				 	 <li class='last'><a  href="/biaya/{{cabang.kode_cabang}}/add/">Input Biaya</a></li>
+                                         <li class='last'><a  href="/jurnal/1/add/">Input GL to GL Kas</a></li>
+					 <li><a href="/kasirgerai/lunas_kasir/" title="Input Pelunasan" ><span>Input Pelunasan</span></a></li>
+                                         <li><a href="/kasirgerai/{{cabang.kode_cabang}}/app_gu/" title="Input Pelunasan" ><span>Transaksi Gadai Ulang</span></a></li>
+					</ul>
+				</li>
+				<!--
+				<li class='has-sub'><a href=''><span>Menu Master Tiket Kasir</span></a>
+					<ul>
+					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_pencairan_kasir/" ><span>Mastertiket Pencairan Kasir</span></a></li>
+					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/master_tiket_kasir_pelunasan/" ><span>Mastertiket Pelunasan Kasir</span></a></li>
+                                            <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_kasir_penjualan_pelelangan/"><span>Master Tiket Penjualan Pelelangan</span></a></li>
+					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_gl_gl/" ><span>Mastertiket Transaksi Kas</span></a></li>
+                                            <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_uangmuka/" ><span>Mastertiket Transaksi Uang Muka</span></a></li>
+					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_antargerai/" ><span>Mastertiket Transaksi Antar Gerai</span></a></li>
+                                            <li><a href="/jurnal/{{cabang.kode_cabang}}/master_tiket_pelunasan_gadai_ulang_kasir/" ><span>Mastertiket Transaksi Gadai Ulang</span></a></li>
+                        
+                    </ul>
+				</li>-->
+                    <li class='has-sub'><a href=''><span>Menu Laporan Kasir</span></a>
+						<ul>
+							<!--<li><a href="/kasirgerai/{{cabang.kode_cabang}}/approve_pelunasan_kasir/" ><span>Data Approve Pelunasan</span></a></li>-->
+							<!--<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/all_approve/" ><span>Data Approve Pencairan</span></a></li>-->
+							<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/all_transaksi_kas/" ><span>Rekapitulasi Transaksi Kas</span></a></li>
+							<!--<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/uangmuka/" ><span>Rekapitulasi Transaksi Uang Muka</span></a></li>
+							<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/laporan_pencairan/" ><span>Laporan Pencairan</span></a></li>
+							<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/laporan_pelunasan/" ><span>Laporan Pelunasan</span></a></li>
+							<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/laporan_pelunasan_titipan/" ><span>Laporan Titipan Pelunasan</span></a></li>-->
+						</ul>
+                    </li>
+					<li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
+				</ul>
+			 </div>
+
+	{% endifusergroup %}
+  </div>      
+
+
+
+</div>
+{% endblock %}
+{% load number_format humanize %}
+{% block content %}
+<div align="center" style="font-size:20px;font-weight:bolder;font-family: serif;"><legend>DAFTAR PENCAIRAN GERAI</legend></div>
+<br>
+{% ifusergroup ADM_GERAI|NONKAS %}
+<table align="center">
+<td>
+<form action='/akadgadai/cari/' method='GET'>
+<input type="text" name="rekening" size="30"  placeholder="Cari berdasarkan KWITANSI">
+<input type ="submit" value="Cari " class="simpan" >
+</form></td>
+<td>
+ 
+<form action='/nasabah/cari/' method='GET' >
+<input type="text" name="cari" size="20" align="center" height="27" placeholder="Cari berdasarkan KTP" >
+<input type = 'hidden' name = 'pilih' value = '2' >
+<a href="/nasabah/cari/">
+<input type ="submit" value="Cari " class="perpanjang"></a>
+</form></td>
+<td>
+
+    {% if error %}
+        <p style="color: red;">Please submit a search term.</p>
+    {% endif %}
+    <form action="/nasabah/cari_nama/" method="get" size="10" align="center" height="27" >
+        <input type="text" name="q" placeholder="Cari berdasarkan Nama">
+        <input type="submit" value="Cari " class="harian">
+    </form>
+    </td>
+</table>
+{% endifusergroup %}
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%">
+{% ifusergroup KPLGERAI%}
+<tr class="tableizer-firstrow">
+        <th>NOREK</th>
+        <th>NASABAH</th>
+        <th>PLAFON (Rp)</th>
+        <th>TANGGAL CAIR</th>
+        <th>JW</th>
+        <th>JATUH TEMPO</th>
+        <th colspan="5" align="center">MENU</th>
+</tr>
+{% endifusergroup %}
+
+{% ifusergroup ADM_GERAI|NONKAS %} 
+<tr class="tableizer-firstrow">
+	<th>No KW</th>
+	<th>Nasabah</th>
+	<th>Tlp</th>
+	<th>JW</th>
+    <th>Nilai(Rp)</th>
+	<th>Tanggal</th>
+    <th>Jatuh Tempo</th>
+	<th colspan= "6">Menu</th>
+</tr>
+{% endifusergroup %}
+{% ifusergroup KASIR_GERAI%} 
+<tr class="tableizer-firstrow">
+	<th>NOREK</th>
+	<th>NASABAH</th>
+	<th>PLAFON (Rp)</th>
+	<th>TANGGAL CAIR</th>
+	<th>JW</th>
+	<th>JATUH TEMPO</th>
+	<th colspan="5" align="center">MENU</th> 
+</tr>
+{% endifusergroup %}
+{% ifusergroup ADM_GERAI|NONKAS %}
+{% for p in akad_list.object_list %}{% if p.kepalagerai.status == '1'%}
+<tr {% if p.lunas %} class="row_lunas"{% endif %}{% if p.lewat_jw %} class="row_lewat_jw"{% endif %}>
+  <td>{{ p.norek }}</a></td>
+  <td><a href="/nasabah/{{p.agnasabah.id}}/show/" >{% csrf_token %}{{ p.agnasabah.nama|striptags  }}</a></td>
+  <td>{{ p.agnasabah.no_ktp}}</td>
+  <td>{% if p.jenis_transaksi = '1'  %}{{ p.jangka_waktu|default_if_none:"" }} Hari{%else%}
+	  {{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan</td>{% endif %}
+  <td>{{ p.nilai|number_format:0 }}</td>
+  <td><abbr title="{{ p.cdate }}">{{ p.tanggal|date:" d-M-Y"}}</abbr></td>
+  <td><abbr title="{{ p.cdate }}">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+  
+  {% if p.status_kw = '0' %}
+  <td><a href="/kasirgerai/{{ p.id }}/mcc/" ><small><button class="lihat" >MCC</button></small></a></span></td>
+  {% endif %}
+   {% if p.status_mcc = '0' and p.status_kw = '0' %}  
+  <td><a href="/akadgadai/{{p.id}}/pk/" class="simpan">PK</a></td>
+  <td>{%if p.status_taksir = '2' %}MELEBIHI NILAI TAKSIR{%else%}
+		  
+  {% if p.status_kw = '0' %}  
+  {% if p.jenis_transaksi = '1' %}<a href="/akadgadai/{{p.id}}/prints2/" class="harian" >Elektronik</a>{% else %}
+  <a href="/akadgadai/{{p.id}}/motor/" class="simpan" >Kendaraan</a>{% endif %}{% endif %}{% endif %}{% endif %}</td>
+  
+  {% if p.status_kw = '1'%} <td><a href="{{ p.get_absolute_url }}" class="back">Lihat</a></td>{% endif%}
+  </tr>{% endif %}
+  {% endfor %}
+  {% endifusergroup %}
+
+
+{% ifusergroup KASIR_GERAI%}    
+{% for p in akad_list.object_list %}{% if p.kasirgerai.val = '1' %}{%else%} {% if p.kepalagerai.status == '1'%} 
+<tr>
+  <td>{{ p.norek }}</a></td>
+  <td>{{ p.agnasabah.nama|striptags}}</td>	
+  <td>{{ p.nilai|number_format:0 }}</td>
+  <td><abbr title="{{ p.cdate }}">{{ p.tanggal|date:" d-M-Y"}}</abbr></td>
+  <td>{% if p.jenis_transaksi = '2' %}{{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+      {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+  <td><abbr title="{{ p.cdate }}">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+  <td>{%if p.cekkasirgerai%}{%else%}{%if p.jenis_transaksi%}
+	<a href="/kasirgerai/{{ p.id }}/kasir/" ><small><button class="cari" >Pencairan</button></small></a></span>{% endif %}{% endif %}
+{% if p.kasirgerai.val = '0' %}
+	<a href="/kasirgerai/{{ p.kasirgerai.id }}/slip_validasi/" ><small><button class="cari" >Cetak Validasi</button></small></a></span>
+{%endif%}
+  </td>
+  <td>{%if p.status_taksir = '2' %}MELEBIHI NILAI TAKSIR{%endif%}</td>	  
+  
+</tr>{%endif%}{%endif%}
+{% endfor %}{% endifusergroup %}
+{% ifusergroup KPLGERAI%}
+{% for p in akad_list.object_list %}
+<tr>
+  <td>{{ p.norek }}</a></td>
+  <td>{{ p.agnasabah.nama|striptags}}</td>
+  <td>{{ p.nilai|number_format:0 }}</td>
+  <td><abbr title="{{ p.cdate }}">{{ p.tanggal|date:" d-M-Y"}}</abbr></td>
+  <td>{% if p.jenis_transaksi = '2' %}{{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+      {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+  <td><abbr title="{{ p.cdate }}">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+  <td></td>
+  <td>{%if p.status_taksir = '2' %}MELEBIHI NILAI TAKSIR{%endif%}</td>
+  <td><a href="/kasirgerai/{{ p.id }}/mcc/" ><small><button class="lihat" >DATA DEBITUR</button></small></a></span></td>
+  {% if p.kepala_gerai%}{%else%}{% if p.kepala_gerai_tolak %}{%else%}{%if p.jenis_transaksi%}
+  <td><a href="/kplgerai/{{ p.id }}/approve_pencairan/" ><button class="back"> APPROVE</button> </a></td>{%endif%}{%endif%}{%endif%}
+</tr>
+{% endfor %}{% endifusergroup %}
+
+</table>
+
+<div class="pagination" align="center">
+    <span class="step-links">
+        {% if akad_list.has_previous %}
+            <a href="?page={{ akad_list.previous_page_number }}" class="next">Back</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ akad_list.number }} of {{ akad_list.paginator.num_pages }}.
+        </span>
+
+        {% if akad_list.has_next %}
+            <a href="?page={{ akad_list.next_page_number }}" class="next">Next</a>
+        {% endif %}
+    </span>
+</div>
+
+{% endblock %}
+
+
+
+
+

@@ -1,0 +1,87 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% endblock %}
+{% block section %}menu refisi jurnal{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2>MENU REFISI JURNAL HARIAN</h2>  
+<form method="GET" action="/rreport/refisi_jurnal_harian/">{%csrf_token%}
+   <table id="tabel" align="center">
+   <li><label for="id_cabang">Kode Cabang</label> :
+      {{ form.id_cabang}}
+   </li>
+   <li><label for="id_tgl_trans">Tanggal </label> :<input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m-d" %}" /> </li>
+   <br>
+   <li>
+	<input type="submit" value="CARI JURNAL" class="neraca" name="submit_satu"/>&nbsp;
+   </li> 
+   </table>
+</form>
+
+<br>
+{% if ledger_search %}
+   <h3 style='text-align: center'><b><small>REFISI JURNAL HARIAN</small> </b></h3>
+   <h3 style='text-align: center'><b><small>UNIT PJB <small><small><small>{{id_cabang}}</small>
+</small</small> </b>
+</h3>
+<h3 style='text-align: center'><b><small>Periode : {{start_date}}</small> </b></h3>
+<table class="list">
+   <thead>
+   <tr>
+      <th>ID</th>
+      <th>Tiket Jurnal</th>
+      <th>Tanggal</th>
+      <th>Nama Cabang</th>
+      <th>Keterangan</th>
+       <th>Saldo</th>
+   </tr>
+   </thead>
+{% for d in ledger_search %}
+   <tbody>	
+   <tr>   <td>{{d.id}}</td>
+      <td>{{d.no_akad}}</td>
+	  <td>{{ d.tgl_trans|date:'d-M-Y' }}</td>
+	  <td align="center">{{ id_cabang}}</td>
+	  <td>{{ d.nobukti }}</td>
+	  <td><a href="/rreport/{{d.id}}/show_refisi_jurnal/" ><button class="lihat" >Edit Jurnal</button></a></td>
+   </tr>
+
+{% endfor %}
+     </tbody>
+     
+</table>
+{% else %}
+
+<!--gabungan-->
+{% for p in ledger %}
+{% ifchanged p.id_coa %}{% if not forloop.first %}</table>{% endif %}
+<p>Akun : {{ p.id_coa }}<small>( {{ p.id_coa.tbl_transaksi_set.all.count }} )</small></p>
+<table class="list">
+   <tr>
+      <th>Tanggal</th>
+      <th>NO BUKTI</th>
+      <th>Kode COA</th>
+      <th>Nama COA</th>
+      <th>Keterangan</th>
+      <th>Debet (Rp.)</th>
+      <th>Kredit (Rp.)</th>
+      <th>Saldo (Rp.)</th>
+   </tr>
+{% endifchanged %}
+
+<tr>
+   <td>{{ p.tgl_trans|date:'d-M-Y' }}</td>
+   <td>{{p.jurnal.nobukti}}</td>
+   <td>{{p.kepala_coa}}.{{p.id_coa.coa}}</td>
+   <td>{{ p.id_coa.deskripsi }}</td>
+   <td>{{ p.jurnal.diskripsi }}</td>
+   <td class="debet uang r">{{ p.debet|number_format:0 }}</td>
+   <td class="kredit uang r">{{ p.kredit|number_format:0 }}</td>
+   <td class="saldo uang r">{{ p.get_jumlah_debet|number_format:0 }}</td>
+</tr>
+{% if forloop.last %}</table>{% endif %}{% endfor %}
+{% endif %}
+{% endblock %}
+
+

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block section %}Barang{% endblock %}
+{% block title %}Edit {{ object.nama }} - {{ block.super }}{% endblock %}
+{% block content %}
+<h2>Data Barang Gadai</h2>
+<form method="POST" action="." class="tabular">{% csrf_token %}
+{{ form.as_ul }}
+<p><label></label><input type="submit" value="Simpan" /> <a href="/barang/" class="batal">batal</a></p>
+</form>
+{% endblock %}

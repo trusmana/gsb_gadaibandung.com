@@ -1,0 +1,74 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}{{ block.super }}
+{% endblock %}
+{% block section %}Pencairan{% endblock %}
+{% block sidebar %}
+
+{% endblock %}
+{% block content %}
+{% load number_format %}
+<h2 align= "right"s> STATUS APPROVE HARIAN GERAI </h2>
+
+<table class="list" width="100%" border="1" align="center">
+<tr><th colspan= "9" style="color: black">PENCAIRAN BARU</th></tr>
+<tr>
+    <th>No</th><th>Norek</th><th>Nasabah</th><th>Plafon (Rp)</th><th>Status</th><th>Approve KG</th>
+    <th>Approve KS</th><th>Jurnal</th>
+</tr>
+{% for a in ag%}
+    <tr class="{% cycle 'row1' 'row2' %}">
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ a.norek }}</td>
+    <td align="center">{{ a.agnasabah.nama }}</td>
+    <td align="center">{{ a.nilai|number_format:0}}</td>
+    <td align="center">{{ a.get_jns_gu_display}}</td>
+    <td align="center">{% if a.kepalagerai.status = '1' %} OK {%else%}{%endif%}</td>
+    <td align="center">{% if a.kasirgerai.status = '1' %}OK [ {{a.kasirgerai.get_jenis_transaksi_display}} ]{%else%}{%endif%}</td>    
+    <td align="center">{% if a.kasirgerai.status = '1' %}Jurnal Terbentuk{%else%}{%endif%}</td>
+</tr>    
+{% endfor %}
+</table>
+<br>
+<table class="list" width="100%" border="1" align="center">
+<tr><th colspan= "9" style="color: black">Gadai Ulang</th></tr>
+<tr>
+    <th>No</th><th>Norek</th><th>Nasabah</th><th>Plafon (Rp)</th><th>Status</th><th>Approv ADM</th>
+    <th>Approve KG</th><th>Approve KS</th>
+</tr>
+{% for a in gu%}
+    <tr class="{% cycle 'row1' 'row2' %}">
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ a.norek }}</td>
+    <td align="center">{{ a.agnasabah.nama }}</td>
+    <td align="center">{{ a.nilai|number_format:0}}</td>
+    <td align="center">{{ a.get_jns_gu_display}}</td>
+    <td align="center">{% if a.jns_gu = '1' %}OK {%else%}{%endif%}</td>
+    <td align="center">{% if a.kepalagerai.status = '1' %}OK [ {{a.kepalagerai.get_status_display}} ]{%else%}
+    [ {{a.kepalagerai.get_status_display}} ]{%endif%}</td>    
+    <td align="center">{% if a.kasirgerai.status = '1' %}OK [ {{a.kasirgerai.get_jenis_transaksi_display}} ]{%else%}{%endif%}</td>
+</tr>    
+{% endfor %}
+</table>
+
+<br>
+<table class="list" width="100%" border="1" align="center">
+<tr><th colspan= "9" style="color: black">Pelunasan</th></tr>
+<tr>
+    <th>No</th><th>Norek</th><th>Nasabah</th><th>Plafon (Rp)</th><th>Status</th><th>Approve KS</th>
+    <th>Approve adm</th><th>Jurnal KS</th>
+</tr>
+{% for a in lunas%}
+    <tr class="{% cycle 'row1' 'row2' %}">
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ a.kasir_lunas.norek }}</td>
+    <td align="center">{{ a.kasir_lunas.agnasabah.nama }}</td>
+    <td align="center">{{ a.nilai_pembulatan_lunas|number_format:0}}</td>
+    <td align="center">{{ a.kasir_lunas.get_status_transaksi_display|default_if_none:''}}</td>
+    <td align="center">{% if a.status = '1' %}OK [ {{a.get_jenis_transaksi_lunas_display}} ]{%else%}{%endif%}</td>
+    <td align="center">{% if a.kasir_lunas.status_transaksi = '1' %}OK{%else%}{%endif%}</td>    
+    <td align="center">{% if a.status = '1' %}Jurnal Terbentuk{%else%}{%endif%}</td>
+</tr>    
+{% endfor %}
+</table>
+{% endblock %}
+

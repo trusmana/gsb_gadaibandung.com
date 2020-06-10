@@ -1,0 +1,53 @@
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#id_tgl_lahir").datepicker({dateFormat: 'dd-mm-yy'});
+    $('input:text').setMask();
+       $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+	$('.r_ktp').keyup(function(){
+    var val = $(this).val();
+    if(isNaN(val)){
+         val = val.replace(/[^0-9\.]/g,'');
+         if(val.split('.').length > 1) 
+             val =val.replace(/\.+$/,"");
+    }
+    $(this).val(val); 
+	});
+	$("input.r_ktp").keypress(function(event){
+        if (event.charCode && (event.charCode < 46 || event.charCode > 57 || event.charCode == 47 ))
+        { event.preventDefault(); }
+    });
+	$("input.r_nama").keypress(function(event){
+        if (event.charCode && (event.charCode < 46 || event.charCode == 47 ))
+        { event.preventDefault(); }
+    });
+});
+</script>
+<script type="text/javascript" href="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+$(function(){
+    $(":radio.rad").click(function(){
+    $(".formbarang, .formkendaraan").hide()
+    if($(this).val() == "1"){
+    $(".formbarang").show();
+    }else{
+    $(".formkendaraan").show();
+    }
+    });
+});
+$(function(){
+    $(":radio.identitas").click(function(){
+	$(".formsim, .formktp").hide()
+	    if($(this).val() == "1"){
+	    $(".formsim").show();
+	    }else{
+	    $(".formktp").show();
+	}
+    });
+});
+</script>

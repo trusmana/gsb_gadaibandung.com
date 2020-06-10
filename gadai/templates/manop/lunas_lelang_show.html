@@ -1,0 +1,203 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}{% endblock %}
+{% block extrahead %}
+{% include "alat/manop_lelang.html" %}
+{% endblock %}{% load useringroup %}
+{% block sidebar %}
+
+{% ifusergroup manop%}
+
+{% if ag.lunas %}Sudah Lunas {{ ag.lunas|date:"d-m-Y" }}{% ifusergroup admin|abh %} <a href="/akadgadai/{{ ag.id }}/batal_lunas/" onclick="if (confirm('Yakin akan membatalkan status lunas : {{ ag.norek }}?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method='POST'; f.action = this.href; f.submit(); }; return false;">{% csrf_token %}BATAL LUNAS</a>{% endifusergroup %}{% else %}
+{% endif %}
+{% endifusergroup %}
+
+{% ifusergroup manop|baranglapur%}
+{%if ag.status_transaksi == '6' or ag.status_transaksi == '1' %}{%else%}  
+<hr></hr>
+<h3>RUBAH STATUS </h3>
+<form method="post" action="/manop/{{ ag.id }}/update_status/" >{% csrf_token %}
+<table>
+<td>STATUS </td>
+<td>:
+	<select name="status_transaksi" id="id_status_transaksi">
+		<option value="None">-----</option>
+		<option value="AYDA">Ayda</option>
+		<option value="HILANG">Hilang</option>
+                <option value="LAIN-LAIN">Lain-Lain</option>
+	</select>
+</td>
+<tr>
+	<td>Tanggal</td><td>: <input type="text" name="tanggal_lelang" id="id_tanggal_lelang" size="15" value="{% now "Y-m-d" %}"/></td>
+</tr>
+</table>
+<input type="submit" value="Simpan" class="simpan"/>
+</form>
+{%endif%}
+{% endifusergroup %}
+
+{% ifusergroup KEUANGAN1%}
+
+<a href="/manop/{{ag.id}}/penjualan_ayda/" class="perpanjang">penjualan Ayda</a></p>
+
+{% endifusergroup %}
+
+{% endblock %}
+{% block content %}
+{% if perms.apps.add %}<span class="contextual"></span>{% endif %}
+{% load number_format useringroup %}
+<h2 align="center">{{ag.agnasabah.nama}} : Gerai {{ag.gerai}} | {{ag.get_jenis_transaksi_display}}</h2>
+
+<table width="90%">
+<tr>
+    <td>NOREK </td><td>: {{ag.norek}}</td>
+    <td>PLAFOND </td><td>: Rp {{ag.nilai|number_format:0}},00</td>
+</tr>
+
+
+<tr>
+    <td>NAMA NASABAH     </td> <td>: <b>{{ag.agnasabah.nama}}</b></td>
+    <td>JANGKA WAKTU</td><td>: {% if ag.jenis_transaksi = 1 %}{{ag.jangka_waktu_kendaraan}}(Bulan){%else%}{{ag.jangka_waktu}}(Hari) </td>{%endif%}
+ 
+</tr>
+
+<tr>
+    <td>KEANGGOTAAN</td><td>: {{ ag.agnasabah.get_jenis_keanggotaan_display}}</td>
+    <td>TANGGAL AKAD  </td><td>: {{ag.tanggal|date:" d-M-Y"}}</td>
+</tr>
+
+<tr>
+    <td>ALAMAT</td><td>: {{ag.agnasabah.alamat_ktp}} No {{ag.agnasabah.no_rumah_ktp}} RT : {{ag.agnasabah.rt_ktp}} RW : {{ag.agnasabah.rw_ktp}} </td>
+    <td>JATUH TEMPO</td><td>: {{ag.jatuhtempo|date:" d-M-Y"}} </td>
+</tr>
+<tr>
+    <td>NO KTP</td><td>: {{ ag.agnasabah.no_ktp }} </td>
+    {% if ag.status_transaksi != '6'%}
+    <td>TANGGAL LUNAS</td><td> : <b>{{ag.lunas|date:" d-M-Y"}}</b> </td>{%else%}
+    <td>TANGGAL LUNAS AYDA</td><td> : <b>{{ag.tanggal_lunas_ayda|date:" d-M-Y"}}</b> </td>{%endif%}
+</tr>
+<tr>
+   <td>NO  TELEPON     </td><td>: {{ag.agnasabah.telepon_ktp}}</td>
+
+    <td>STATUS</td><td>: {% if ag.status_transaksi %} {{ ag.get_status_transaksi_display }} {% else %} AKTIF</td>
+    {%endif%}
+</tr>
+
+<tr>
+    <td>NAMA PASANGAN</td><td>: {{ag.agnasabah.nama_pasangan}}</td>
+</tr>
+
+<tr>
+     <td>ALAMAT PASANGAN</td><td>: {{ag.agnasabah.alamat_pasangan}} NO {{ag.agnasabah.no_rumah_pas}} RT {{ag.agnasabah.no_rt_pas}} RW {{ag.agnasabah.no_rw_pas}}</td>
+</tr>
+
+<tr>
+    <td>JENIS KELAMIN PASANGAN</td><td>: {{ag.agnasabah.jekel_pasangan}}</td>
+</tr>
+
+<tr>
+    <td>TELEPON PASANGAN</td><td>: {{ag.agnasabah.tlp_pasangan}}</td>
+</tr>
+
+</table>
+
+<hr></hr>
+<table width="80%">
+<tr>
+    <td>SALDO PINJAMAN</td><td>:  Rp {{ag.nilai|number_format:0}},00</td>
+    {% if ag.status_transaksi == '6'%}
+    <td>JASA AYDA </td> <td>: <b>Rp {{ag.jasa_ayda|number_format:0}}</b></td>{%endif%}
+</tr>
+<tr>
+    <td>ADM</td><td>: Rp {{ag.adm_all|number_format:0}},00</td>
+    {% if ag.status_transaksi == '6'%}
+    <td>DENDA AYDA </td> <td>: <b>Rp {{ag.denda_ayda|number_format:0}}</b></td>{%endif%}
+</tr>
+
+<tr>
+    <td>JASA</td><td>: Rp {{ ag.jasa_all|number_format:0 }},00</td>
+    {% if ag.status_transaksi == '6'%}
+    <td>NILAI AYDA </td> <td>: <b>Rp {{ag.total_akad_ayda|number_format:0}}</b></td>{%endif%}
+</tr>
+</tr>
+    <td>BEA SIMPAN/ SURVEY</td><td>: Rp {{ag.beasimpan_all|number_format:0}},00</td>
+</tr>
+
+<tr>
+    <td>TERIMA BERSIH</td><td>: Rp {{ag.terima_bersih_kwitansi|number_format:0}},00 </td>
+    
+</tr>
+<tr>
+    <td>PERSEN JASA</td><td>: {{ ag.persentase_jasa_all}} %</td>
+<tr>
+
+</table>
+<hr />
+<table align="right">
+<tr>
+   <td>
+        <div class="img">
+        <a target="_blank" href="/static/{{ag.berkasgadai_set.all.0.tanda_tangan}}">
+        <img src="/static/{{ ag.berkasgadai_set.all.0.tanda_tangan }}" width="80" height="60" title="berkas Tanda-Tangan"></a>
+        <div class="desc"></div>
+        </div>
+ 
+        <div class="img">
+        <a target="_blank" href="/static/{{ag.berkasgadai_set.all.0.berkas_barang}}">
+        <img src="/static/{{ ag.berkasgadai_set.all.0.berkas_barang }}" width="80" height="60" title="Barang"></a>
+        <div class="desc"></div>
+        </div>
+ 
+        <div class="img">
+        <a target="_blank" href="/static/{{ag.berkasgadai_set.all.0.foto_nasabah}}">
+        <img src="/static/{{ ag.berkasgadai_set.all.0.foto_nasabah }}" width="80" height="60" title="Berkas Nasabah"></a>
+        <div class="desc"></div>
+        </div>
+   </td>
+</tr>
+</table>
+<table width="80%">
+	<tr><td>BARANG TAKSIR</td><td>: {{ag.taksir.type}}</td>
+        <td>NILAI TAKSIR BARANG</td><td>: {{ ag.taksir.maxpinjaman|number_format:0}}</td>
+        </tr>
+	<td>BARANG JAMINAN</td><td>: {% if ag.jangka_waktu_kendaraan %}{{ag.barang.merk_kendaraan}} | {{ag.barang.type_kendaraan}} |  {{ag.barang.no_polisi}} |  {{ag.barang.accesoris_barang1}}{%else%}
+{{ag.barang.merk}} | {{ag.barang.type}} |  {{ag.barang.sn}} |  {{ag.barang.accesoris_barang1}}</td>{%endif%}
+</table>
+<hr />
+
+<div class="splitcontentright">
+<a name="pelunasan"></a>
+<h3 align="center">PELUNASAN</h3>
+<table class="list" align="center" >
+    <tr>
+	<th>No Kwitansi</th>
+	<th>Tgl Pelunasan</th>
+	<th>Barang</th>
+	<th>Nilai</th>
+	<th>Denda</th>
+	<th>Jasa</th>
+	<th>Cetak Kwitansi</th>
+        <th>Edit</th>
+    </tr>
+{% for a in ag.pelunasan_set.all %}
+    <tr>
+	<td>{{ a.norek}}
+	<td>{{ a.tanggal}}</td>
+	<td> {{ a.pelunasan.barang }}-{{a.pelunasan.taksir.type}}</td>
+	<td>{{ a.nilai|number_format:0 }}</td>
+	<td>{% if a.pelunasan.jenis_transaksi = 1 %} {{ a.denda_kendaraan|number_format:0 }} {% else %} {{ a.denda|number_format:0 }} {% endif %}</td>
+	<td>{% if a.pelunasan.jenis_transaksi = 1 %} {{ a.bea_jasa_kendaraan|number_format:0 }} {% else %} {{ a.bea_jasa|number_format:0 }} {% endif %}</td>
+	<td align="center">{% if a.pelunasan.jenis_transaksi = 1 %}<a href="/pelunasan/{{a.id}}/kwlunas_kendaraan/" class="cetak">Kendaraan</a>{% else %}
+	<a href="/pelunasan/{{a.id}}/kwlunas/" class="cetak">Elektronik</a>{% endif %}
+        </td>
+        
+   {% ifusergroup admin|abh %}<td><a href="/pelunasan/{{a.id}}/edit/" class="edit">Edit</a>{% endifusergroup %}</td>
+   </tr>{% endfor %}
+</table>
+
+{% endblock %} 
+
+
+
+
+
+

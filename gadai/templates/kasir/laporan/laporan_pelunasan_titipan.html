@@ -1,0 +1,36 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Laporan pelunasan{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>LAPORAN TRANSAKSI HARIAN  <small>DIV PJB</small>{{cabang.kode_cabang}}
+{% if gr %}
+<h4 align="Center">UNIT PJB GERAI {{cabang.nama_cabang}}</h4>
+<h3 style='text-align: center'><b> REKAPITULASI TRANSAKSI PELUNASAN TITIPAN</b></h3>
+<table class="list">
+<tr>
+	<th>Norek</th>
+	<th>Debitur</th>
+	<th>Nilai Yg Diterima (Rp)</th>
+	<th>Selisih (Rp)</th>
+	
+</tr>
+	<tbody>
+		{% for a in gr%}
+		<tr>
+			<td>{{ a.pelunasan.norek }}</td>
+			<td>{{ a.pelunasan.agnasabah.nama|striptags  }}</td>
+			<td align="right">{{ a.nilai|number_format:0}}</td>
+			<td align="right">{{ a.kasirgerai.selisih|number_format:0}}</td>
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% else %}
+<h3>::: Tidak ada data Pelunasan Titipan :::</h3>
+{% endif %}
+{% endblock %}
+

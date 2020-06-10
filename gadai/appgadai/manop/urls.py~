@@ -1,0 +1,16 @@
+from django.conf.urls.defaults import *
+from django.views.generic import list_detail, create_update, date_based
+from gadai.appgadai.manop.views import *
+from gadai.appgadai.models import *
+
+urlpatterns = patterns('',
+    url(r'^$', list),
+    url(r'^(?P<object_id>\d+)/oto_plns_manop/$', oto_plns_manop),
+    url(r'^(?P<object_id>\d+)/menu_plns_manop/$', menu_plns_manop),
+    url(r'^(?P<object_id>\d+)/pelunasan_manop/$', pelunasan_manop),
+    url(r'^daftarpelunasan/$', daftarpelunasan),
+    url(r'^otorisasi_pelunasan/$', otorisasi_pelunasan),
+    url(r'^(?P<object_id>\d+)/update_status/$', update_status),
+    url(r'^list_cari/$',list_cari),
+    url(r'^$', list),
+)

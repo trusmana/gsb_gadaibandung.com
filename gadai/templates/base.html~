@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml2/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head class="head"><link rel="icon" type="image/ico" href="/static/images/ra.ico" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>KSURA</title>
+<meta name="Author" content="Stu Nicholls" />
+<link rel="stylesheet" type="text/css" href="/static/3/pro_dropdown_3.css?{% now "U" %}" />
+<script type="text/javascript" src="/static/js/hoverIntent.js"></script>
+<script src="/static/js/jquery-1.3.2.min.js?{% now "s" %}" type="text/javascript"></script>
+<script src="/static/js/master.js?{% now "s" %}" type="text/javascript"></script>
+<script type="text/javascript" src="/static/hide/jquery.min.js"></script>
+<script src="/static/coba/script.js"></script>
+<link rel="stylesheet" href="/static/coba/styles.css?{% now "U" %}">
+<script type="text/javascript">
+$(document).ready(function(){
+
+	
+	var objMain = $('#main');
+
+	function showSidebar(){
+		objMain.addClass('use-sidebar');
+		$.cookie('sidebar-pref2', 'use-sidebar', { expires:30 });
+	}
+
+	function hideSidebar(){
+		objMain.removeClass('use-sidebar');
+		$.cookie('sidebar-pref2', null, { expires: 30 });
+	}
+
+	var objSeparator = $('#separator');
+
+	objSeparator.click(function(e){
+		e.preventDefault();
+		if ( objMain.hasClass('use-sidebar') ){
+			hideSidebar();
+		}
+		else {
+			showSidebar();
+		}
+	}).css('height', objSeparator.parent().outerHeight() + 'px');
+
+	
+});
+$(document).ready(function()
+{
+	//slides the element with class "menu_body" when paragraph with class "menu_head" is clicked 
+	$("#firstpane p.menu_head").click(function()
+    {
+		$(this).css({backgroundImage:"url(/static/img/down.png)"}).next("div.menu_body").slideToggle(300).siblings("div.menu_body").slideUp("slow");
+       	$(this).siblings().css({backgroundImage:"url(/static/img/left.png)"});
+	});
+	//slides the element with class "menu_body" when mouse is over the paragraph
+	$("#secondpane p.menu_head").mouseover(function()
+    {
+	     $(this).css({backgroundImage:"url(/static/img/down.png)"}).next("div.menu_body").slideDown(500).siblings("div.menu_body").slideUp("slow");
+         $(this).siblings().css({backgroundImage:"url(/static/img/left.png)"});
+	});
+});
+</script>
+{% block extrahead %}{% endblock %}
+</head><body >
+
+<div id="header">
+     {% if messages %}
+     <ul id="message">
+    	{% for m in messages %}<li id="msg_{{ forloop.counter }}"><a href="#" onclick="document.getElementById('msg_{{ forloop.counter }}').style.display='none'; return false;"><small>Clear</small></a>{{ m }}</li>
+    	{% endfor %}
+    </ul>{% endif %}
+    <div id="account">
+		{% if user.is_authenticated %}
+      	<ul>      		
+      		<div id="tanggal" align="center"><small><b>{% now "d F Y" %}</br>Id : {{ user.username }}</b></small></div>  
+      	</ul>
+		<ul>
+			<div id="btn" align ="right"><a href="/" id="separator" title="Max or Min" ><img src="/static/btn.png" ></a></div>
+		</ul>
+		{% endif %}
+    </div>
+</div>
+
+
+{% load useringroup %}
+<ul id="nav">{% ifusergroup pusat%}
+	<li class="top"><a  id="products" class="top_link"><span class="down">NASABAH GERAI</span></a>
+		<ul class="sub">
+			<li><b>MENU NASABAH</b></li>
+			<li><a href="/nasabah/" class="nasabah">Data Nasabah</a></li>
+			<li><b>MENU AKAD </b></li>
+			<li><a href="/akadgadai/add" class="akadgadai">New Akad</a></li>
+			<li><a href="/akadgadai/">Data Akad + Cari</a></li>
+			<li><b>Menu Taksiran</b></li>
+			<li><a href="/taksir/">Daftar Taksiran</a></li>
+			<li><a href="/taksir/add" class="akadgadai">New Taksiran</a></li>
+		</ul>
+	</li>{% endifusergroup %}
+
+	{% ifusergroup manop%}
+	<li class="top"><a  id="products" class="top_link"><span class="down">MANOP</span></a>
+		<ul class="sub">
+			<li><a href="/manop/" class="nasabah">DATA LEBIH TAKSIR</a></li>
+                        <li><a  class="fly">MENU TRANSAKSI</a>
+			    <ul>
+                                <li><b>TRANSAKSI</b></li>
+				<li><a href="/manop/list_cari/">PERUBAHAN STATUS</a></li>
+				<li><a href="/manop/list_nsb/">PENJUALAN BARANG</a></li>
+				<li><a href="/manop/otorisasi_pelunasan/" class="nasabah">OTORISASI PELUNASAN</a></li>
+			    </ul>
+			</li>
+                        <li><a  class="fly">REKAP TRANSAKSI</a>
+                            <ul>
+                                <li><b>REKAP</b></li>
+                                    <li><a href="/manop/pencairan_gerai/">REKAP PENCAIRAN GERAI</a></li>
+                                    <li><a href="/manop/pelunasan_gerai/">REKAP PELUNASAN GERAI</a></li>
+                                    <li><a href="/manop/total_harian_filter/">REKAP ALL TRANSAKSI</a></li>
+                                    <li><a href="/manop/aktif_lapur/">REKAP BARANG LAPUR</a></li>
+                            </ul>
+                        </li>
+   				    <li><a  class="fly">REPORT TRANSAKSI</a>
+                            <ul>
+                                    <li><b>TRANSAKSI</b></li>
+                                    <li><a href="/manop/lapur_barang/">DATA BARANG LAPUR</a></li>
+                                    <li><a href="/manop/lunasterjual_barang/">DATA BARANG LUNAS TERJUAL</a></li>
+                            </ul>
+                        </li>
+                        <li><a  class="fly">LAPORAN TRANSAKSI BARANG</a>
+                            <ul>
+                                <li><b>LAPORAN BARANG</b></li>
+                                    <!--<li><a href="/manop/rincian_lelang/">LAPORAN LAPUR</a></li>-->
+                                    <li><a href="/manop/lapur_barang/">LAPORAN LAPUR</a></li>
+                                    <li><a href="/manop/rincian_hilang/">LAPORAN HILANG</a></li>
+                                    <li><a href="/manop/rincian_lainlain/">LAPORAN LAIN-LAIN</a></li>
+                                    <li><a href="/manop/rincian_jatuhtempo/">LAPORAN JTH TEMPO</a></li>
+                                    <li><a href="/manop/laporan_rekap_dan_rinci/">LAPORAN PIUTANG</a></li>
+                                    <!--<li><a href="/lelang/">DATA LAPUR SIAP JUAL</a></li>-->
+                                    <li><a href="/lelang/jual/">DATA PENJUALAN LAPUR</a></li>
+                                    <!--<li><a href="/manop/lunas/">RUBAH STATUS BARANG</a></li>-->
+                                    <li><a href="/gudang/data_gudang_barang_aktif/">DATA BARANG AKTIF</a></li>
+                                    <li><a href="/manop/rincian_barang_di_gerai/">DATA BARANG DI GERAI</a></li>
+
+                            </ul>
+                        </li>
+
+                        <!--<li><a href="/manop/lunas/">RUBAH STATUS BARANG</a></li>
+                        <li><a href="/manop/rincian_piutang/">PIUTANG</a></li>-->
+                        <li><a href="/gerai/neracagabungan/">NERACA GABUNGAN</a></li>
+		</ul>
+	</li>{% endifusergroup %}
+	
+	{% ifusergroup gudang%}
+	<li class="top"><a href="" id="shop" class="top_link"><span class="down"> Menu Gudang</span></a>
+		<ul class="sub">	
+			<li><b>Data Barang</b></li>
+			<li><a href="/barang/barang_gerai">Barang Gerai</a></li>
+			<li><a href="/barang/caribarang">Cari Barang</a></li>
+            <li><a href="/barang/">Data Barang</a></li>
+			<li><a href="/lelang/">Barang Lelang</a></li>
+			<li><a href="/lelang/jual/">Jual Lelang</a></li>
+            <li><a href="/permintaan/">Permintaan Barang </a></li>
+			<li><b>Report Barang</b></li>
+            <li><a href="/report/agingharian">R. Aging Hari </a></li>
+
+	<li><a  class="fly">Report Barang</a>
+		<ul>
+			<li><b>Report Barang</b></li>
+			<li><a href="/report/1/" >BANDUNG</a></li>
+			<li><a href="/report/2/" >JAKARTA</a></li>
+			<li><a href="/report/3/" >SUCI</a></li>
+			<li><a href="/report/4/" >DIPATIUKUR</a></li>
+			<li><a href="/report/5/" >BALUBUR</a></li>
+			<li><a href="/report/6/" >GERLONG GIRANG</a></li>
+			<li><a href="/report/7/" >GERLONG HILIR</a></li>
+			<li><a href="/report/8/" >KOPO</a></li>
+			<li><a href="/report/9/" >CIBIRU</a></li>
+			<li><a href="/report/10/" >CIPACING</a></li>
+			<li><a href="/report/11/" >JATINANGOR</a></li>
+			<li><a href="/report/12/" >CIMAHI</a></li>
+			<li><a href="/report/13/" >BUAH BATU</a></li>
+			<li><a href="/report/14/" >KORDON</a></li>
+			<li><a href="/report/15/" >CIHANJUANG</a></li>
+			<li><a href="/report/16/" >MARANATHA</a></li>			
+			<li><a href="/report/16/" >KIARACONDONG</a></li>
+		</ul>
+	</li>
+
+		</ul>
+	</li>{% endifusergroup %}
+
+        {% ifusergroup keuangan|abh %}
+	<li class="top"><a href="/gerai/" id="shop" class="top_link"><span class="down">Data Pencairan GERAI</span></a>
+		<ul class="sub">
+			<li><b>PENCAIRAN</b></li>
+				<li><a  class="fly">Akad Gadai</a>
+				<ul>
+					<li><b>Akad Gadai</b></li>
+					<li>{% for b in month_list %}
+					<a href="/akadgadai/terbit_akad/{{ b|date:'Y/m' }}/csv">{{ b|date:"M Y" }}</a>{% endfor %}</li>
+					<li></li><li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+				</ul>
+			</li>
+				<li><a  class="fly">Perpanjang</a>
+				<ul>
+					<li><b>Perpanjangan</b></li>
+					<li>{% for b in month_list %}
+					<a href="/akadgadai/terbit_prpj/{{ b|date:'Y/m' }}/csv">{{ b|date:"M Y" }}</a>{% endfor %}</li>
+					<li></li><li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+				</ul>
+			</li>
+			<li><a  class="fly">Pelunasan</a>
+				<ul>
+					<li><b>Pelunasan</b></li>
+					<li>{% for b in month_list %}
+					<a href="/akadgadai/terbit_pelunasan/{{ b|date:'Y/m' }}/csv">{{ b|date:"M Y" }}</a> {% endfor %}</li>
+					<li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+				</ul>
+			</li>
+			<li><a  class="fly">Rekap Harian</a>
+				<ul>
+					<li><b>Rekap Harian</b></li>
+					<li><a href="/gerai/rekap_allgerai_harian" >Akad Gadai</a></li>
+					<li><a href="/gerai/prpj_allgerai_harian" >Perpanjangan</a></li>
+					<li><a href="/gerai/pelunasan_allgerai_harian" >Pelunasan</a></li>
+                    <li><a href="/gerai/total_harian" >Total</a></li>
+                    <li><a href="/gerai/report_harian" >Harian</a></li>
+				</ul>
+			</li>
+
+            <li><a  class="fly">Rekap Bulan</a>
+				<ul>
+				    <li><b>Rekap Bulanan</a></li>
+                    <li><a href="/gerai/pencairan_bulanan_allgerai" >Akad Gadai</a></li>
+                    <li><a href="/gerai/prpj_bulanan_allgerai" >Perpanjangan</a></li>
+                    <li><a href="/gerai/plns_bulanan_allgerai" >Pelunasan</a></li>
+                    <li><a href="/gerai/rekapunit" >Rekap All</a></li>                                       
+				</ul>
+			</li>
+			
+			<li><b>PERPANJANGAN</b></li>
+			<li><a href="/perpanjang/">PRPJ</a></li>
+                        <li><b>PELUNASAN</b></li>
+			<li><a href="/pelunasan/">PELUNASAN</a></li>
+                        <li><b>PIUTANG</b></li>
+			<li><a href="/piutang/rekappiutang/">PIUTANG</a></li>
+		</ul>
+	</li>
+{% endifusergroup %}
+
+
+	{% if user.is_superuser %}
+	<li class="top"><a href="/admin/" id="privacy" class="top_link"><span>ADMINISTRATOR</span></a></li>
+	<li class="top"><a href="/setting/user/" id="privacy" class="top_link"><span>User</span></a></li>
+	{% endif %}
+	
+{% ifusergroup admin%}
+	<li class="top"><a href="/" id="shop" class="top_link"><span class="down"><strong>BIAYA</strong></span></a>
+		<ul class="sub">
+			<li><a href="/biaya/" >LIST BIAYA</a></li>
+			<li><a href="/biaya/add/">INPUT BIAYA</a></li>			
+		</ul>
+	</li>{%endifusergroup%}
+        <li class="top"><a href="/" id="shop" class="top_link"><span class="down">{{ user.first_name }} {{ user.last_name }}</span></a>
+	    <ul class="sub">
+		    <li>{% if user.is_authenticated %}<a href="/accounts/password/change/" title="Ganti Password"><span>PASSWORD</span></a>{% endif %}</li>			
+	    </ul>
+	</li>
+
+        <li class="top" align="right">
+			{% if user.is_authenticated %}
+			<a href="/accounts/logout/" id="privacy" class="top_link" ><span>LOGOUT</span></a>
+			{% else %}
+			<a href="/accounts/login/" id="privacy" class="top_link" align="right"><span>LOGIN</span></a>
+			{% endif %}
+	</li>
+		
+	</li>
+</ul>
+<div id="center-wrapper">
+
+	<div class="dhe-example-section" id="ex-4-1">		
+
+		<div class="dhe-example-section-content">
+
+			<div class="use-sidebar sidebar-at-right" id="main">           
+
+            <div class="{% if nosidebar %}nosidebar{% endif %}" id="main">
+
+                <div id="sidebar">        
+
+                {% block sidebar %}{% endblock %}
+
+                </div><!--id=sidebar-->   
+
+                    <div id="content">
+
+                           {% block content %}<h2 align="center">KOPERASI SERBA USAHA RIZKY ABADI</h2>
+
+					                 <p align="center">Selamat Datang, <strong>{{ user.first_name }} {{ user.last_name }}</strong> EMAIL  ANDA: <strong>{{ user.email }}</strong></p>
+
+					                 <p align="center">Di SISTEM SIMPAN PINJAM RIZKY ABADI</p>
+
+					                 <p align="center"> Apabila Anda Menemui Kesulitan Dengan System, Hubungi Team IT </p> 
+
+					                 <p align="center"><span style="font-family:arial; font-size: 14px; font-weight:bold; color:#FF9933;">(08979943020 / 02291797915 / 02292216757)</span><p>                
+
+					                 {% endblock %}</div><!-- main -->
+
+                    </div><!-- content -->
+               	   <div class="clearer" title="Min"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+            
+<div id="footer">
+    ©Divisi Technologi 2011 KSU Rizky Abadi
+</div>
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+
+</body></html>

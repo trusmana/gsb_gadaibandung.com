@@ -1,0 +1,22 @@
+{% extends "base_aplikasi.html" %}
+{% block section%}jurnal{% endblock %}
+{% load number_format %}
+{% block content %}
+<p class="breadcrumb"><a href="/">Home</a> &raquo; <a href="/ledger/jurnal/">Jurnal</a> &raquo; {{ jurnal.nobukti }}</p>
+<h2 align="center">Jurnal Divisi Gadai</h2>
+<ul class="tabular_data">
+    <li>No Bukti : <span>{{ jurnal.nobukti }}</span></li>
+    <li>Transaksi : <span>{{ jurnal.tanggal|date:"d-m-Y" }}</span></li>
+    <li>Keterangan : <span>{{ jurnal.keterangan }}</span></li>
+</ul>
+<p>&nbsp;</p>
+<table class="saham">
+    <tr><th>Rekening</th><th>Debet</th><th>Kredit</th></tr>
+{% for j in jurnal.itemjurnal_set.all %}
+    <tr><td>{{ j.rekening.nama }}</td>{% if j.is_debet %}<td class="r">{{ j.nilai|number_format:2 }}</td><td>&nbsp;</td>{% else %}<td>&nbsp;</td><td class="r">{{ j.nilai|number_format:2 }}</td>{% endif %}</tr>
+{% empty %}
+    <tr><td colspan="3"><i>Kosong</i></td></tr>
+{% endfor %}
+</table>
+{% endblock %}
+

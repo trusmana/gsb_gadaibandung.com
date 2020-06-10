@@ -1,0 +1,19 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+
+{% endblock %}
+{% block section %}kas{% endblock %}
+{% block sidebar %}{% load number_format %}
+{% for date in date_list %}
+{{ date|date:"F Y" }}<br />{% endfor %}
+{% endblock %}
+{% block content %}
+
+<h2 align="right">:: REKAP GERAI {{ kasbank }} ::</h2>
+
+<table width="75%" border="2" align="center">
+    <tr><th>No</th><th>Tanggal</th><th>Rekening</th><th>Masuk</th><th>Keluar</th><th>Keterangan</th><th>Akun</th></tr>
+{% for object in object_list %}
+    <tr><td>{{object.id}}</td><td>{{ object.tanggal|date:"d-m-Y" }}</td><td>{{ object.kasbank }}</td>{% if object.is_debet %}<td class="uang">{{ object.nilai|number_format:0 }}</td><td class="uang">0</td>{% else %}<td class="uang">0</td><td class="uang">{{ object.nilai|number_format:0 }}</td>{% endif %}<td>{{ object.keterangan }}</td><td>{{ object.akun }}</td></tr>{% endfor %}
+</table>
+{% endblock %}

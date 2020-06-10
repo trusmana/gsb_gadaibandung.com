@@ -1,0 +1,38 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}{% endblock %}
+{% block extrahead %}
+
+{% endblock %}{% load useringroup %}
+{% block content %}
+
+
+
+<table align="right">
+
+
+   <td><div align= "center">
+<h2 style='text-align: center'><b><small>SOP {{awal.judul_sop}}</small> </b></h2>
+{% if ledger_search %}
+
+{% endif %}
+{% for aa in ledger_search %}
+        <a target="_blank" href="/static/{{aa.gambar}}">
+        <p><b>Materi/Judul :{{aa.judul}} & Slide/No Urut {{aa.no_urut}}</b></p>  
+        <img  src="/static/{{ aa.gambar }}" width="80%" height="60%" title="{{ aa.deskripsi }}" alt="{{ aa.deskripsi }}"></a>
+         <br><br><br><br><br>
+        <div class="desc"></div>
+{% endfor%}
+        </div>
+</td>
+
+</tr>
+
+</table>
+
+
+{% endblock %} 
+
+
+
+
+

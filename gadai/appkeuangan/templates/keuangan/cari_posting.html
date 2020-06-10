@@ -1,0 +1,44 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}SEARCH{% endblock %}
+{% block extrahead %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal").datepicker({dateFormat: 'dd-mm-yy'});
+    });
+</script>
+{% endblock %}
+{% block sidebar %}{% endblock %}
+{% load number_format humanize %}
+{% block content %}
+<aside class="right-side">     
+            <section class="content-header">
+                <h2>
+                    MENU CARI SALDO
+                    <small>KSU RA</small>
+                </h2>
+                
+            </section>
+                    
+        <section class="content">
+            <div class="row">
+                <!-- left column -->
+                <div class="col-md-5">                   
+                    <div class="box box-primary">
+                        <div align="center">
+                        <h3 class="box-title">Cari Tanggal Transaksi</h3>
+                        </div>        
+                            <form method='GET' class="form-horizontal" action='/rkeuangan/search_gerai_post/' role="form">{% csrf_token %}
+                             <div align="center">
+                             <input type="text" id="id_tanggal" nama="tanggal"  size="20" placeholder="Cari tanggal Transaksi" class="form-control">
+                             <span class="input-group-btn"><button class="btn btn-info btn-flat" type ="submit" value="Cari ">cari</button></span>                                 </div>
+                            </form>
+                        </div>
+                        </div>
+                    </div>
+        </section>
+</aside>
+{% endblock %}
+

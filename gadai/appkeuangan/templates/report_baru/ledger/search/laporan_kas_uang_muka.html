@@ -1,0 +1,97 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}BukuBesar{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2> LAPORAN UANG MUKA PUSAT PJB &nbsp;<small>DIV PJB</small></h2>  
+<form method="GET" action="/jurnal/laporan_kas_uang_muka/">{%csrf_token%}
+   <table id="tabel" align="center">
+   <li><label for="id_tgl_trans">Tanggal </label> : {{form.start_date}} 
+   <label for="id_tgl_trans">Ke Tanggal </label> : {{form.end_date}}</li>
+   <br>
+   <li>
+	<input type="submit" value="view" class="nonposting" name="submit_satu"/>&nbsp;
+	<input type="submit" value="Cetak" class="posting" name="submit_dua"/>&nbsp;  
+        <input type="submit" value="Excel" class="cetak_posting" name="submit_tiga"/>&nbsp;
+   </li> 
+   </table>
+</form>
+
+<br>
+{% if ledger or saldo_awal%}
+   <h3 style='text-align: center'><b><small>LAPORAN KAS UANG MUKA PUSAT PJB</small></h3>
+<h3 style='text-align: center'><b><small>Periode : {{start_date}} s/d {{end_date}} </small> </b></h3>
+   <p style='text-align: center'>AKUN &nbsp;13.06.03</p>
+<table class="list">
+   <thead>
+     <tr>
+    	<th>Tanggal</th>
+        <th>Keterangan</th>
+        <th>User</th>
+    	<th>Debet (Rp.)</th>
+    	<th>Kredit (Rp.)</th>
+    	<th>Saldo (Rp.)</th>
+       
+     </tr>
+   </thead>
+      <tr>
+        <td></td>
+  <td>Saldo Awal</td>
+        <td style="text-align:right"></td>
+        <td style="text-align:right"></td>
+        <td style="text-align:right">{{saldo_awal|number_format:0}}</td>
+    </tr>
+
+{% for d in ledger %}
+   <tbody>	
+	{% if forloop.first %}{%endif%}
+   {% if d.nobukti != '00000' %}
+   <tr class="{% cycle 'row1' 'row2' %}">
+	<td>{{ d.tgl_trans|date:'d-M-Y' }}</td>
+	<td>{{d.diskripsi}} - {{ d.deskripsi }} - {{d.nobukti}}</td>
+        <td style="text-align:right">{{d.cu}}</td>
+	<td style="text-align:right">{{ d.debet|number_format:0 }}</td>
+	<td style="text-align:right">{{ d.kredit|number_format:0 }}</td>
+	<td style="text-align:right">{{ d.saldo_akhir_mutasi|number_format:0}}</td>
+        </tr>
+     {%endif%}
+	{% endfor %}
+
+     </tr>
+     <tfoot>
+     <tr>
+         <th colspan="2" style="text-align: center"><b>Saldo Akhir</b></th><th></th>
+	       <th style="text-align:right">{{total_debet|number_format:0 }}</th>
+	       <th style="text-align:right">{{total_kredit|number_format:0 }}</th>
+               <th style="text-align:right">{{saldo_akhir|number_format:0}}</th>
+     </tr>
+<!--
+     <tr>
+         <th colspan="2" style="text-align: center"><b>Saldo Akhir Petty Cash Hari ini</b></th><th></th>
+	       <th style="text-align:right">&nbsp;</th>
+	       <th style="text-align:right">&nbsp;</th>
+               <th style="text-align:right">{{saldo_petty_cash|number_format:0}}</th>
+     </tr>
+     <tr>
+         <th colspan="2" style="text-align: center"><b>Total Yang Harus Ditambahkan</b></th><th></th>
+	       <th style="text-align:right">&nbsp;</th>
+	       <th style="text-align:right">&nbsp;</th>
+               <th style="text-align:right">{{nilai_ditambahkan|number_format:0}}</th>
+     </tr>
+
+     <tr>
+         <th colspan="2" style="text-align: center"><b>Total Dana Petty Cash (Impress Fund)</b></th><th></th>
+	       <th style="text-align:right">&nbsp;</th>
+	       <th style="text-align:right">&nbsp;</th>
+               <th style="text-align:right">{{saldo_limit|number_format:0}}</th>
+     </tr>
+-->
+</tfoot>
+</table>
+{% if forloop.last %}</table>{% endif %}
+{% endif %}
+{% endblock %}
+

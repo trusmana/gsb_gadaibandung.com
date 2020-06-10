@@ -1,0 +1,44 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/biaya.html" %}
+{% endblock %}
+{% block section %}Biaya{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<table id="report">
+        <tr>
+            <th colspan="6">INPUT TRANSAKSI TELER</th>
+            
+        </tr>
+        <tr>
+            <td colspan="5" align="center"><b>INPUT BIAYA</b></td>
+            <td align="right"><div class="arrow" ></div></td>
+        </tr>
+        <tr>
+            <td>Gerai:</td><td>{{form.gerai}}</td>
+            <td>Tanggal: </td><td> {{form.tanggal}}</td>
+            <td>Saldo Awal:</td><td>{{form.saldo_awal}}</td>
+        </tr>
+		
+        <tr>
+            <td colspan="5" align="center"><b>MENU PELUNASAN</b></td>
+            <td align="right"><div class="arrow" ></div></td>
+        </tr>
+        <tr>
+            <td colspan="6">
+			<ul>
+				<li>Gerai: {{form.gerai}}&nbsp;&nbsp;Tanggal : &nbsp;&nbsp;{{form.tanggal}}&nbsp;&nbsp;Saldo Awal :&nbsp;&nbsp; {{form.saldo_awal}}</li>
+				<li align="center"><b>KAS GERAI</b></li>
+				<li>SETORAN KAS GERAI &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {{form.antar_gerai}}&nbsp;&nbsp;{{form.js_trans}}&nbsp;&nbsp; {{form.penambahan_saldo}}&nbsp;&nbsp;{{form.ket_penambahan_saldo}}</li>
+				<li>PENGELUARAN KAS GERAI &nbsp;&nbsp;{{form.antar_gerai_kembali}}&nbsp;&nbsp;{{form.js_trans_kembali}}&nbsp;&nbsp;{{form.pengembalian_saldo}}&nbsp;&nbsp;{{form.ket_pengembalian_saldo}}&nbsp;&nbsp;</li>
+				<li align="center"><b>UANG MUKA GERAI</b></li>
+				<li>PENGAMBILAN UANG MUKA  :&nbsp;&nbsp;&nbsp;&nbsp;{{form.penambahan_uk}}&nbsp;&nbsp;{{form.ket_penambahan_uk}}&nbsp;&nbsp;</li>
+				<li>PENGEMBALIAN UANG MUKA :&nbsp;&nbsp;{{form.pengembalian_uk}}&nbsp;&nbsp;{{form.ket_pengembalian_uk}}</li>
+				<li align="center"><b>BEBAN BIAYA HARIAN</b></li>
+				<li>PARKIR : &nbsp;&nbsp;&nbsp;&nbsp;{{form.jenis_transaksi_palkir}}&nbsp;&nbsp;&nbsp;&nbsp; {{form.palkir}} &nbsp;&nbsp;&nbsp;&nbsp;{{form.ket_palkir}}</li>
+				<li>BBM : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{form.jenis_transaksi_bbm}} {{form.bbm}}&nbsp;&nbsp;&nbsp;&nbsp;{{form.ket_bbm}}</li>
+			</ul>
+        </tr>
+		
+</table>
+{% endblock %}

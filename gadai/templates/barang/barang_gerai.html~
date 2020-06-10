@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Barang Gerai - {{ block.super }}{% endblock %}
+{% block section %}barang{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+
+{% block sidebar %}
+
+{% endblock %}
+{% block content %}
+{% load number_format %}
+<h2 align="center">Data Barang Gerai RA</h2>
+<table border="1" bordercolor="silver " style="background-color:#FFFFFF" width="100%" cellpadding="0" cellspacing="0">
+    <tr  class="tableizer-firstrow">
+        <th>ID</th>
+        <th>KODE</th>
+        <th>GERAI</th>
+        <th>NOA aktif</th>
+        <th>T.Plafon aktif (Rp)</th>        
+        <th>NOA Lunas</th>
+        <th>T.Plafon Lunas (Rp)</th>        
+        <th>NOA Lelang</th>
+        <th>T.Harga Jual Lelang (Rp)</th>        
+        <th>T.Laba Lelang (Rp)</th>                
+{% for w in object_list %}
+    <tr>
+	<td align="center">{{ w.id }}</td>
+	<td align="center">{{ w.kode }}</td>
+	<td align="center"><a href="{{ w.id}}">{{ w.nama }}</a></td>
+	<td align="center">{{w.aktif}}</td>
+	<td align="right">{{w.get_jumlah_nilai|number_format:0}}</td>
+	<td align="center">{{w.get_banyak_lunas}}</td>
+	<td align="right">{{w.plns_nilai_bulanan|number_format:0}}</td>	
+	<td align="center">{{w.get_banyak_lelang}}</td>
+	<td align="right">{{w.get_total_nilailelang|number_format:0}}</td>
+	<td align="right">{{w.get_total_labalelang|number_format:0}}</td>
+    </tr>{% endfor %}
+    <tr><th colspan="3" class="r"><strong>Jumlah</strong></th><th >Rp.{{object_list.get_total_nilai|number_format:0}}</th><th >Rp.{{bea_jasa|number_format:0}}</th><th >Rp.{{denda|number_format:0}}</th><th></th><th></th><th></th><th></th></tr>
+</table>
+{% endblock %}

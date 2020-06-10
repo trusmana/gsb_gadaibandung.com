@@ -1,0 +1,66 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}barang{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right">:: DATA NASABAH  <small>{{nsb.nama}} </small>::</h2>
+
+<table width="90%">
+<tr><td><STRONG>Nama</STRONG></td><td>: {{nsb.nama}}</td></tr>
+<tr><td><STRONG>Alamat      </STRONG></td><td>: {{nsb.alamat_ktp}}  </td></tr>
+<tr><td><strong>No Identitas </strong> </td><td width="50%">: {{nsb.no_ktp}}  </td></tr>
+<tr> <td><strong>RT / RW  <strong> </td><td>: {{nsb.rt_ktp}}  / {{nsb.rw_ktp}}</td></tr>
+</table>
+
+
+<h3 align="center">:: Data  Barang ::</h3>
+
+<table id="tabel">
+<thead>
+<tr><th>No</th>
+	<th>Norek</th>
+	<th>Tgl Transaksi</th>
+	<th>Barang</th>
+	<th>Alamat</th>
+	<th>Gerai</th>
+	<th>Masuk Barang (SBL)</th>
+	<th>Keluar Barang (SBL)</th>
+	<th>Pisisi Barang (SBL)</th>
+	
+	<th>Masuk Barang</th>
+	<th>Keluar Barang</th>
+	<th>Pisisi Barang</th>
+	<th>Menu</th>
+</tr>
+</thead>
+{% for p in ag %}
+<tbody>
+<tr>
+    <td>{{ forloop.counter }}</td>
+    <td>{{p.norek}}</td>
+    <td>{{p.tanggal|date:" d-M-Y"}}</td>
+    <td>{{ p.barang }}</td>
+    <td>{{ p.agnasabah.alamat_ktp }}</td>
+    <td>{{ p.gerai }}</td>
+    <td>{{ p.tgl_barang_masuk|date:"d-m-Y "|default_if_none:"0" }}</td>
+    <td>{{ p.tgl_barang_keluar|date:"d-m-Y "|default_if_none:"0" }}</td> 
+    <td>{{ p.barang.kode|default_if_none:"0" }}.{{ p.barang.get_ruangan_display|default_if_none:"0" }}.
+       {{ p.barang.get_lemari_display|default_if_none:"0" }}.{{ p.barang.no_rak|default_if_none:"0" }}.{{ p.barang.row|default_if_none:"0"  }}</td>
+    <td>{{ p.barang.barang_masuk|date:"d-m-Y "|default_if_none:"0" }}</td> 
+    <td>{{ p.barang.barang_keluar|date:"d-m-Y "|default_if_none:"0" }}</td>
+
+    <td>{{ p.barang.kode|default_if_none:"0" }}.{{ p.get_ruang_barang_display|default_if_none:"0" }}.
+	{{ p.get_lemari_barang_display|default_if_none:"0" }}.{{ p.get_rak_barang_display|default_if_none:"0" }}.
+        {{ p.get_row_barang_display|default_if_none:"0"  }}</td>
+    <td><a href="/barang/{{ p.barang.id}}/{{ p.id}}/rak_pusat/" class="cari">Input</a></td>
+</tr>
+</tbody>
+{% endfor %}
+</table>
+{% endblock %}
+

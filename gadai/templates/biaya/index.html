@@ -1,0 +1,61 @@
+{% extends "base_aplikasi.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<h2 align="right">:: BIAYA GERAI  ::</h2>
+<form action='/biaya/cari/' method='GET' class="cari" value="Cari" >
+<input type="text" name="rekening" size="30" >
+<input type ="submit" value="Cari ">
+</form>
+
+<div class="pagination" align="center">
+    <span class="step-links">
+        {% if bea.has_previous %}
+            <a href="?page={{ bea.previous_page_number }}">Back</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ bea.number }} of {{ bea.paginator.num_pages }}.
+        </span>
+
+        {% if bea.has_next %}
+            <a href="?page={{ bea.next_page_number }}">Next</a>
+        {% endif %}
+    </span>
+</div>
+
+
+<hr></hr>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow">
+        <th >ID</th>
+        <th >GERAI</th>
+        <th >TANGGAL</th>
+        <th >SALDO AWAL</th>
+	<th>TUNAI PUSAT</th>
+        <th >TOTAL PENGELUARAN</th>
+	<th >PENGELUARAN POS</th>
+        <th>TUNAI PICKUP</TH>
+	<th>MENU</th>
+    
+    
+{% for a in bea.object_list%}
+{% load number_format useringroup %}
+   <tr>
+        <td align="center">{{ forloop.counter }}</td>
+        <td>{{a.gerai.nama}} </td>
+        <td align = "center">{{a.tanggal}}</td>
+        <td align = "center">Rp.{{a.saldo_awal|number_format:0}}</td>
+        <td>Rp.{{a.tunai|number_format:0}}</td>
+	<td align = "center">Rp.{{a.gerai.totalbiaya_harian|number_format:0}}</td>
+        <td>Rp.{{a.gerai.totalpospay|number_format:0}}</td>
+        <td>Rp.{{a.tunai_pickup|number_format:0}}</td>
+	<td><a href="/biaya/{{a.id}}/edit/" class="edit">EDIT</a></td>
+    </tr>
+    
+{% endfor %}
+</table>
+{% endblock %}

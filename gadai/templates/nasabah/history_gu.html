@@ -1,0 +1,42 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}{{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right">:: HISTORY AKAD ULANG::</h2><body>
+
+</body><table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow">
+    <th>No</th>
+    <th>Nama</th>
+    <th>Norek</th>
+    <th>Nama barang</th>
+    <th>Id barang</th>
+    <th>Nilai Pinjaman</th>
+    <th>Jenis barang</th>
+    <th>Merk</th>
+    <th>Type</th>
+
+    <th>Editor</th>
+{% for hs in history%}
+    <tr>
+    <td>{{ forloop.counter }}</td>
+    <td>{{ hs.nama}}</td>
+    <td>{{ hs.norek }}</td>
+    <td>{{ hs.barang }}</td>
+    <td>{{ hs.id_barang}}</td>
+    <td>{{ hs.nilai_pinjaman|number_format:0}}</td>
+    <td>{{ hs.get_jenis_barang_display}}</td>
+    <td>{{ hs.merk}}</td>
+    <td>{{ hs.type}}</td>
+    <td>{{ hs.cu}}</td>
+
+{% endfor %}</td>
+</table>
+  
+
+{% endblock %}

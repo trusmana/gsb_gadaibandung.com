@@ -1,0 +1,280 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}barang{% endblock %}
+{% block content %}
+<script type="text/javascript">
+    $(function(){
+    $(":radio.rad").click(function(){
+    $(".formbarang, .formkendaraan").hide()
+    if($(this).val() == "1"){
+    $(".formbarang").show();
+    }else{
+    $(".formkendaraan").show();
+    }
+    });
+});
+    $(function(){
+    $(":radio.barang").click(function(){
+    $(".formhp,.formkamera,.formps,.formtv").hide()
+    if($(this).val() == "4"){
+        $(".formps").show();
+        }
+    if($(this).val() == "1" ){
+        $(".formhp").show();
+        }
+    if($(this).val() == "2" ){
+        $(".formhp").show();
+        }
+    if($(this).val() == "3"){
+        $(".formkamera").show();
+        }
+    if($(this).val() == "5"){
+        $(".formtv").show();
+        }
+    });
+});
+</script>
+<h2 align="center">Edit Barang {{ object.baranggerai }}</h2>
+<form method="POST" action="." class="tabular">{% csrf_token %} 
+<table>
+	<!--
+<tr>
+{{form.barang_masuk}} {{form.barang_keluar}} {{form.ruangan}} {{form.no_rak}}
+{{form.row}} {{form.lemari}}  {{form.kolom}}
+</tr>
+<tr>
+	<td><label for="jenis_transaksi"  width="200px" height="25px" >JENIS TRANSAKSI <span style = " color : red ; " >*<span>:&nbsp;&nbsp;&nbsp;</label></td>
+	<td>
+		<li><label for="id_jenis_transaksi_0"><input value="1" type="radio" class="rad" name="jenis_transaksi" id="id_jenis_transaksi_0" /> Elektronik</label></li>
+                <li><label for="id_jenis_transaksi_1"><input value="2" type="radio" class="rad" name="jenis_transaksi" id="id_jenis_transaksi_1" /> Motor & Motor</label></li>
+		</span></td>
+    </tr>
+<tr class = "formbarang" style= "display:none">
+  <td >JENIS BARANG </td> <td>{{form.jenis_barang}}</td>
+</tr>
+
+
+<tr class = "formhp" style= "display:none">
+  <td  class = "formbarang">CHARGE<span style = " color : red ; " >*<span></td>
+	    <td  class = "formbarang">: {{form.charger}} &nbsp KONDISI : {{form.kondisi_charger}}</td>
+</tr>
+ 
+
+<tr class = "formhp" style = "display:none">
+		<td class = "formbarang">BATRE <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.batre}} &nbsp KONDISI : {{form.kondisi_batre}} </td>
+    </tr>
+    
+<tr class = "formhp" style = "display:none">
+		<td class = "formbarang">KEYBORD / KEYPATH <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.keybord}} &nbsp KONDISI : {{form.kondisi_keybord}}
+		</td>
+    </tr>
+    
+<tr class = "formhp" style = "display:none">
+                <td class = "formbarang">PASSOWRD / KEY PASSWORD <span style = " color : red ; " >*<span></td>
+                <td class = "formbarang">: {{form.password}} &nbsp KONDISI : {{form.password_barang}} &nbsp;&nbsp;  <span style = " color : red ; " >ISI SESUAI DENGAN PASSWORD JAMINAN</span>
+                </td>
+    </tr>
+
+<tr class ="formhp" style= "display:none">
+		<td class = "formbarang">CASSING <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.cassing}} &nbsp KONDISI : {{form.kondisi_cassing}} 
+		</td>
+    </tr>
+    
+<tr class = "formhp" style= "display:none" >
+	    <td  class = "formbarang">Layar<span style = " color : red ; " >*<span></td>
+	    <td  class = "formbarang">: {{form.layar}} &nbsp KONDISI : {{form.kondisi_layar}}</td>
+	</tr>
+
+<tr class ="formkamera" style= "display:none">
+		<td class = "formbarang">LENSA <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.lensa}} &nbsp KONDISI : {{form.kondisi_lensa}}
+		</td>
+    </tr>
+    
+<tr class ="formkamera" style= "display:none">
+		<td class = "formbarang">BATRE KAMERA <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.batre_kamera}} &nbsp KONDISI : {{form.kondisi_batre_kamera}}
+		</td>
+    </tr>
+
+<tr class ="formkamera" style= "display:none">
+		<td class = "formbarang">CASSING KAMERA <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.cassing_kamera}} &nbsp KONDISI : {{form.kondisi_cassing_kamera}}
+		</td>
+    </tr>
+    
+<tr class ="formps" style= "display:none">
+		<td class = "formbarang">OPTIK PS <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.optik_ps}} &nbsp KONDISI : {{form.kondisi_optik_ps}}
+		</td>
+    </tr>
+    
+<tr class ="formps" style= "display:none">
+		<td class = "formbarang">HARDDISK <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.harddisk}} &nbsp KONDISI : {{form.kondisi_harddisk}} 
+		</td>
+    </tr>
+    
+<tr class ="formps" style= "display:none">
+		<td class = "formbarang">STICK PS <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.stick}} &nbsp KONDISI : {{form.kondisi_stick}}
+		</td>
+    </tr>
+
+<tr class ="formps" style= "display:none">
+		<td class = "formbarang">HDMI <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.hdmi}} &nbsp KONDISI : {{form.kondisi_hdmi}}
+		</td>
+    </tr>
+
+<tr class ="formtv" style= "display:none">
+		<td class = "formbarang">LAYAR TV<span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.layar_tv}} &nbsp KONDISI : {{form.kondisi_layar_tv}} 
+		</td>
+    </tr>
+
+
+    
+<tr class ="formtv" style= "display:none">
+		<td class = "formbarang">REMOTE<span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.remote}} &nbsp KONDISI : {{form.kondisi_remote}} 
+		</td>
+    </tr>
+    
+
+<tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">Dus <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.dus}}
+		</td>
+    </tr>
+    
+<tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">Tas <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.tas}}
+		</td>
+    </tr>
+    <tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">Lampiran Dokumen <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.lampiran_dokumen}}
+		</td>
+    </tr>
+
+<tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">Merk <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.merk}}
+		</td>
+    </tr>
+    
+<tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">Type <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.type}}
+		</td>
+    </tr>
+
+<tr style= "display:none">
+  <td>accesoris_barang1</td> <td>{{form.accesoris_barang1}}</td>
+</tr>
+
+
+    <tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">Sn <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.sn}}
+		</td>
+    </tr>
+    <tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">Warna</td> <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.warna}}
+		</td>
+    </tr>
+    <tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">TAhun Pembuatan <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.tahun_pembuatan}}
+		</td>
+    </tr>
+
+    <tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">Bulan Produksi <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.bulan_produksi}}
+		</td>
+    </tr>
+    <tr class ="formbarang" style= "display:none">
+		<td class = "formbarang">Catatan <span style = " color : red ; " >*<span></td>
+		<td class = "formbarang">: {{form.accesoris_barang1}}
+		</td>
+    </tr>
+
+
+<tr class="formkendaraan" style= "display:none">
+  <td>JENIS KENDARAAN </td> <td>{{form.jenis_kendaraan}}</td>
+</tr>
+      
+<tr class="formkendaraan" style= "display:none">
+  <td>Merk Kendaraan  </td> <td>{{form.merk_kendaraan }}</td>
+</tr>
+
+            
+    <tr class="formkendaraan" style= "display:none">
+		<td>Tahun Pembuatan Kendaraan  </td> <td>{{form.tahun_pembuatan_kendaraan }}</td>
+    </tr>
+<tr class="formkendaraan" style= "display:none">
+  <td>Bpkb</td> <td>{{form.bpkb }}</td>
+</tr>    
+    
+<tr class="formkendaraan" style= "display:none">
+  <td>Stnk</td> <td>{{form.stnk }}</td>
+</tr>
+    
+<tr class="formkendaraan" style= "display:none">
+  <td>Faktur</td> <td>{{form.faktur }}</td>
+</tr>
+    
+<tr class="formkendaraan" style= "display:none">
+  <td>Gesek Nomesin  </td> <td>{{form.gesek_nomesin }}</td>
+</tr>
+    
+<tr class="formkendaraan" style= "display:none">
+  <td>Gesek No Rangka  </td> <td>{{form.gesek_norangka }}</td>
+</tr>
+
+
+    <tr class="formkendaraan" style= "display:none">
+	        <td>Type Kendaraan  </td> <td>{{form.type_kendaraan }}</td>
+    </tr>
+            
+            
+    <tr class="formkendaraan" style= "display:none">
+		<td>No Polisi  </td> <td>{{form.no_polisi }}</td>
+    </tr>
+            
+    <tr class="formkendaraan" style= "display:none">
+	        <td>No Rangka </td> <td>{{form.no_rangka }}</td>
+    </tr>
+            
+    <tr class="formkendaraan" style= "display:none">
+	        <td>No Mesin  </td> <td>{{form.no_mesin }}</td>
+    </tr>
+
+    <tr class="formkendaraan" style= "display:none">
+		<td>Warna Kendaraan  </td> <td>{{form.warna_kendaraan}}</td>
+    </tr>
+            
+    <tr class="formkendaraan" style= "display:none">
+	        <td>No Bpkb </td> <td>{{form.no_bpkb}}</td>
+    </tr>
+            
+    <tr class="formkendaraan" style= "display:none">
+	        <td>Stnk Atas Nama  </td> <td>{{form.stnk_atas_nama}}</td>
+    </tr>
+            
+    <tr class="formkendaraan" style= "display:none">
+	       <td>No Faktur  </td> <td>{{form.no_faktur }}</td>
+    </tr>
+   -->
+    
+{{form.as_table}}
+<td><label></label><input type="submit" value="Simpan" /></td>
+</table>
+</form>
+{% endblock %}

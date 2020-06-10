@@ -1,0 +1,61 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="/static/tedi/css/jquery.dataTables.css">
+<script type="text/javascript" language="javascript" src="/static/tedi/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/tedi/js/jquery.dataTables.js"></script>
+<script type="text/javascript" language="javascript" class="init">	
+$(document).ready(function() {
+    $('#example').DataTable();
+} );
+    $(document).ready(function() {
+        $('#menuinput').click(function() {
+        	$('.chosen-container-single').trigger("liszt:updated");
+        	$('.tampil').slideToggle("fast");
+
+        });
+    });
+</script>
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="center">DATA NASABAH LUNAS KW GADAI ULANG&nbsp<small><small>KSU RA</small></h2>
+
+	<table id="example" class="display" cellspacing="0" >
+		<thead>
+			<tr>
+				<th>NO</th>
+				<th>NOREK</th>
+				<th>NASABAH</th>
+				<th>PLAFON (Rp)</th>
+				<th>TANGGAL LUNAS</th>
+				<th>JW</th>
+				<th>Menu</th>
+				
+			</tr>
+		</thead>
+                <tbody>
+{% for a in akad%}
+	        <tr>
+			<td>{{ forloop.counter }}</td>
+			<td>{{ a.norek }}</td>
+			<td>{{ a.agnasabah.nama|striptags  }}</td>
+			<td>{{ a.nilai|number_format:0}}</td>
+			<td>{{ a.tanggal|date:'d-M-Y'}}</td>
+			<td>{% if a.jenis_transaksi = '1'  %}{{ a.jangka_waktu|default_if_none:"" }} Hari{%else%}
+				{{ a.jangka_waktu_kendaraan|default_if_none:"" }} Bulan</td>{% endif %}
+			<td align="center">
+				{% if a.total_plns_gu > 0%}
+				<a href="/akadgadai/{{a.id}}/kw_gu/" class="cari">KW GU</a>{% endif %}
+                                <a href="/akadgadai/{{a.id}}/kw_sbg_gu/" class="cari">SBG GU</a>
+			</td>
+		</tr>
+{% endfor %}
+</tbody>
+	</table>
+</div>
+
+{% endblock %}
+

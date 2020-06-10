@@ -1,0 +1,38 @@
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+   $("#id_start_date").datepicker({dateFormat: 'yy-mm-dd'});
+   $("#id_end_date").datepicker({dateFormat: 'yy-mm-dd'});  
+});
+
+function printpage() { window.print(); }
+</script>
+
+<style>
+table {width:100%;border-collapse: collapse;border-color: #ccc;}
+th, td {
+   font-size: 11px;
+    line-height: 13px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+    padding: 5px;
+    font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+   }
+table#tabel tr:nth-child(odd) {
+   padding: 6px; margin: 1px; border: 1px solid #ccc;
+}
+table#tabel th	{
+    background-color: #F60;border: 1px solid #ccc;
+}
+thead th,
+tfoot td {
+    color: #666;
+    padding: 2px 5px;
+    font-size: 11px;
+    background: #e1e1e1 url(../img/nav-bg.gif) top left repeat-x;
+    border-left: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+</style>

@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Cari {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style >
+table {width:100%;}
+th, td {padding: 2px;text-align: left;}
+table#tabel tr:nth-child(even) {
+    background-color: #eee;
+}
+table#tabel tr:nth-child(odd) {
+   background-color:#fff;text-align: right;
+}
+table#tabel th	{
+    background-color: #D2D7B9;
+    color: black;
+    
+}
+.cari {
+	background-color:#79bbff;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #84bbf3;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:13px;
+	font-weight:bold;
+	padding:3px 22px;
+	text-decoration:none;
+}.cari:hover {
+	background-color:#378de5;
+}.cari:active {
+	position:relative;
+	top:1px;
+}
+
+</style>
+
+</head>
+
+{% load number_format %}
+<p >[ <a href="/barang/caribarang/">Kembali</a> ]</p>
+<table width="100%">
+<p align="center">Yang Anda Cari: <strong>{{ query }}</strong></p>
+{% if nasabah %}
+    <p style="color: red;" align="center">Ditemukan {{ nasabah|length }} Nama </p>
+</table>
+
+<table id="tabel">
+<thead>
+<tr><th>No</th>
+	<th>Nonas</th>
+	<th>Norek</th>
+	<th>Nama</th>
+	<th>Barang</th>
+	<th>Alamat</th>
+	<th>Gerai</th>
+	<th>Masuk Barang</th>
+	<th>Keluar Barang</th>
+	<th>NO Rak</th>
+	<th colspan="2" align="center">Menu</th>
+</tr>
+</thead>
+{% for p in nasabah %}
+<tr>
+	<td>{{ forloop.counter }}</td>
+    <td><a href="/barang/{{p.id}}/all/">{{ p.nomor_nasabah }}</a></td>
+    <td>{{p.nomor}}</td>
+    <td><a href="/nasabah/{{p.nomor_id_nasabah}}/show/">{{ p.nama }}</td>
+    <td>{{ p.baranggerai }}</td>
+    <td>{{ p.alamat_ktp }}</td>
+    <td>{{ p.geraigadai }}</td>
+	<td>{{ p.baranggerai.barang_masuk|date:"d-m-Y "|default_if_none:"0" }}</td>
+    <td>{{ p.baranggerai.barang_keluar|date:"d-m-Y "|default_if_none:"0" }}</td>
+    <td>{{ p.baranggerai.kode|default_if_none:"0" }}.{{ p.baranggerai.get_ruangan_display|default_if_none:"0" }}.
+		{{ p.baranggerai.get_lemari_display|default_if_none:"0" }}.{{ p.baranggerai.no_rak|default_if_none:"0" }}.{{ p.baranggerai.row|default_if_none:"0"  }}</td>
+	<td><a href="/barang/{{ p.baranggerai.id}}/rak/" class="cari">Input</a></td>
+	<td><a href="/barang/{{ p.baranggerai.id}}/history/" class="cari">History</a></td>
+</tr>
+{% endfor %}
+
+</table>
+{% else %}
+    <p>Data yg anda cari tidak ditemukan</p>
+{% endif %}
+

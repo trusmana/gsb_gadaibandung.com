@@ -1,0 +1,60 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}approve_pencairan{% endblock %}
+{% block extrahead %}{% include "alat/sidebar.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>DATA APPROVE PENCAIRAN </h2>  
+<table class="list">
+{% ifusergroup KPLGERAI %}	
+    <tr  class="tableizer-firstrow">
+		<th>No</th><th>No Rek</th><th>Nama</th><th>Nilai (Rp)</th><th>JW</th><th>Transaksi</th><th>J.Tempo</th><th>Gerai</th><!--<th colspan= "5">MENU</th>-->
+	</tr>
+
+{% for a in kpl%}
+	<tr>
+		<td ALIGN="CENTER">{{ forloop.counter }}</td>
+		<td ALIGN="CENTER"><a href="/akadgadai/{{ a.kepala_gerai.id }}/show/" class="back"> {{a.kepala_gerai.norek}}</a></td>
+		<td ALIGN="LEFT">{{ a.kepala_gerai.agnasabah.nama}}</td>
+		<td ALIGN="RIGHT">{{ a.kepala_gerai.nilai|number_format:0}}</td>
+		<td ALIGN="CENTER">{{ a.kepala_gerai.jangka_waktu}}</td>
+		<td ALIGN="CENTER">{{a.tanggal|date:" d-m-Y"}}</td>
+		<td ALIGN="CENTER">{{ a.kepala_gerai.jatuhtempo|date:" d-m-Y"}}</td>
+		<td ALIGN="LEFT">{{a.kepala_gerai.gerai}}</td>
+	</tr>
+{% endfor %}
+{% endifusergroup %}
+
+{% ifusergroup ADM_GERAI %}
+    <tr  class="tableizer-firstrow">
+		<th>No</th><th>NoRek</th><th>Nama</th><th>Nilai (Rp)</th><th>Tanggal</th><th>Status</th><th>Catatan</th><th colspan= "4">MENU</th>
+	</tr>
+
+{% for a in akad%}
+	{% if a.kepala_gerai %}{%else%}{% if a.jenis_transaksi %}
+	<tr>
+		<td ALIGN="CENTER">{{ forloop.counter }}</td>
+		<td ALIGN="CENTER">
+			{% if a.kepala_gerai%}<a href="/akadgadai/{{ a.id }}/show/" class="back"> {{a.norek}}</a>{%else%}{{a.norek}}{%endif%}
+		</td>
+		<td ALIGN="LEFT">{{ a.agnasabah.nama}}</td>
+		<td ALIGN="RIGHT">{{ a.nilai|number_format:0}}</td>
+		<td ALIGN="CENTER">{{a.kepalagerai.tanggal|date:" d-m-Y"}}</td>
+		<td><abbr title="{{ a.kepalagerai.get_status_display }}">{{a.kepalagerai.get_status_display}}</abbr></td>
+		<td><abbr title="{{ a.kepalagerai.note }}">{{a.kepalagerai.note}}</abbr></td>
+	{% if a.kepalagerai.status == '2' %}
+		<td align="center"><a href="/kplgerai/{{a.kepalagerai.id}}/reset_status_tolak/" class="cari">AJUKAN KEMBALI</td>
+		<td><a href="/nasabah/{{a.agnasabah.id}}/edit/" class ="back">EDIT DATA NASABAH</a></td>
+		<td><a href="/akadgadai/{{a.id}}/edit/" class="back">EDIT DATA KREDIT</a></td>
+		<td><a href="/barang/{{a.barang.id}}/edit_barang/" class="back">EDIT BARANG</a></td>
+	{% endif %}
+  </tr>
+</tr>
+{%endif%}{%endif%}
+{% endfor %}
+{% endifusergroup %}
+</table>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}ledger{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2> LAPORAN PINJAMAN </h2>  
+<form method="GET" action="/manop/laporan_rekap_dan_rinci/">{% csrf_token %}
+   <table id="tabel" align="center">
+   
+        <tr>
+	    <td><label for ="cabang">Gerai PJB</label></td>
+	    <td>: {{form.id_cabang}}</td>
+	 </tr>
+        <tr>
+	    <td><label for ="jenis">Jenis Laporan</label></td>
+	    <td>: {{form.jenis_laporan}}</td>
+	 </tr>
+	 <tr>
+	    <td><label for ="start_date">Dari Tanggal</label></td>
+	    <td>: {{form.start_date}}
+	    <label for ="end_date" >Hingga Tanggal</label>: {{form.end_date}}</td>
+	 </tr>
+	 <tr>
+	    <td><label for ="format">Format Laporan</label></td>
+	    <td>: {{form.report}}</td>
+	 </tr>
+
+   <tr>
+	  <td><input type="submit" value="CETAK" class="cari" name="cetak"/></td>
+   </tr>
+   </table>
+</form>
+<br>
+<hr>
+<h3 style='text-align: center'><b><small>LAPORAN PINJAMAN </small> </b></h3>
+   <h3 style='text-align: center'><b><small>UNIT PJB <small><small><small>{{id_cabang}}</small>
+</small>GERAI 
+   {% if id_cabang = '500' %}(GABUNGAN){%endif%}
+   {% if id_cabang = '1' %}BANDUNG{%endif%}{% if id_cabang = '2' %}Gerai: JAKARTA{%endif%}
+   {% if id_cabang = '3' %}Gerai: SUCI{%endif%}{% if id_cabang = '4' %}Gerai: DIPATIUKUR{%endif%}
+   {% if id_cabang = '5' %}Gerai: BALUBUR{%endif%}{% if id_cabang = '6' %}Gerai: GERLONG GIRANG{%endif%}
+   {% if id_cabang = '7' %}Gerai: GEGER KALONG HILIR{%endif%}{% if id_cabang = '8' %}Gerai: KOPO{%endif%}
+   {% if id_cabang = '9' %}Gerai: CIBIRU{%endif%}{% if id_cabang = '10' %}Gerai: CIPACING{%endif%}
+   {% if id_cabang = '11' %}Gerai: JATINANGOR{%endif%}{% if id_cabang = '12' %}Gerai: CIMAHI{%endif%}
+   {% if id_cabang = '13' %}Gerai: BUAH BATU{%endif%}{% if id_cabang = '14' %}Gerai: KORDON{%endif%}
+   {% if id_cabang = '15' %}Gerai: CIHANJUANG{%endif%}{% if id_cabang = '16' %}Gerai: MARANATHA{%endif%}
+   {% if id_cabang = '17' %}Gerai: KIARA CONDONG{%endif%}{% if id_cabang = '18' %}Gerai: CIREBON PERJUANGAN{%endif%}
+   {% if id_cabang = '19' %}Gerai: CIREBON RAYAT{%endif%}{% if id_cabang = '20' %}Gerai: CIUMBULEUIT{%endif%}
+   {% if id_cabang = '21' %}Gerai: UJUNG BERUNG{%endif%}
+
+
+</small> </b>
+</h3>
+<h4 style='text-align: center'><small>Periode : {{start_date}} - {{end_date}}</small></h4>
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+    <th>No</th>
+    <th>No Rekening</th>
+    <th>Gerai</th>
+    <th>Nama</th>
+    <th>Tanggal Akad</th> 
+    <th>Tanggal Jatuh Tempo</th>    
+    <th>Jenis Barang</th>
+    <th>Barang</th>
+    <th>Status Barang</th>
+    <th>Pinjaman (Rp)</th>
+</tr>
+{% for p in lapur %}
+<tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ p.norek }}</td>
+    <td>{{ p.gerai }}</td>
+    <td>{{ p.agnasabah.nama|truncatewords:2 }}</td>
+    <td>{{ p.tanggal|date:"d-M-Y"}}</td>
+    <td>{{ p.jatuhtempo|date:"d-M-Y"}}</td>
+    <td>{{ p.jenis_barang_all}}</td>
+    <td>{{ p.barang}}</td>
+    <td>{%if p.status_transaksi == None %}Aktif{%else%}{{p.get_status_transaksi_display}} {%endif%}</td>
+    <td align="right">{{ p.nilai|number_format:0|default_if_none:"0" }}</td>
+</tr>
+{% endfor %}
+<tr>
+    <th colspan="9"><strong>SIJ * SISTEM INFORMASI JAMINAN BARANG</strong></th>
+    <th><strong>{{total_nilai|number_format:0}}</strong></th>
+
+</tr>
+</table>
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}
+

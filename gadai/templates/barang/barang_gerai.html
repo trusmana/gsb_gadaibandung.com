@@ -1,0 +1,57 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}Barang Gerai - {{ block.super }}{% endblock %}
+{% block section %}{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format %}
+<h2 align="center">DATA BARANG DIVISI PJB <small>KSU RA</small></h2>
+<table id="tabel">
+    <tr  class="tableizer-firstrow">
+        <th>KODE</th>
+        <th>GERAI</th>        
+        <th>NOA AKTIF</th>
+        <th>T.Plafon aktif (Rp)</th>  
+        <th>NOA J.TEMPO</th> 
+        <th>T.JATUH TEMPO (Rp)</th>     
+        <th>NOA Lunas</th>
+        <th>T.Plafon Lunas (Rp)</th>        
+        <th>NOA Lelang</th>
+        <th>T.Harga Jual Lelang (Rp)</th>        
+        <th>T.Laba Lelang (Rp)</th>
+        <!--<th>TOTAL NOA</th>-->
+        <th>History Pencairan</th>               
+{% for w in kp %}
+    <tr>
+	    <td align="center">{{ w.kode_cabang }}</td>
+	    <td align="center"><a href="/barang/{{ w.id}}/">{{ w.nama_cabang }}</a></td>	
+	    <td align="center">{{w.aktif}}</td>
+	    <td align="right">{{w.get_jumlah_nilai|number_format:0}}</td>	
+	    <td align="center"><a href="/barang/{{ w.id}}/barangnonlunas/">{{w.total_jatuhtempo}}</a></td>
+	    <td align="right">{{w.get_jumlah_jatuhtempo|number_format:0}}</td>
+	    <td align="center">{{w.get_banyak_lunas}}</td>
+	    <td align="right">{{w.plns_nilai_bulanan|number_format:0}}</td>	
+	    <td align="center">{{w.get_banyak_lelang}}</td>
+	    <td align="right">{{w.get_total_nilailelang|number_format:0}}</td>
+	    <!--<td align="right">{{w.get_total_labalelang|number_format:0}}</td>-->
+	    <td align="center">{{w.total_barang}}</td>
+	    <td align="center"><a href="/barang/{{w.id}}/lebih/">XXX</a></td>
+        </tr>{% endfor %}
+   <tr>
+        <th colspan="2" class="r"><strong>Jumlah</strong></th>
+        <th>{{total}}</th>
+        <th>Rp. {{tot_nilai|number_format:0}}</th>
+        <th>{{tot_jatuh}}</th>
+        <th>Rp. {{tot_jt_nilai|number_format:0}}</th>
+        <th>{{tot_lunas}}</th>
+        <th>Rp. {{tot_nilai_lunas|number_format:0}}</th>
+        <th><a href="/lelang/">{{tot_lelang}}</a></th>
+        <th>Rp. {{tot_nilai_lelang|number_format:0}}</th>
+        <!--<th>Rp. {{tot_laba_lelang|number_format:0}}</th>-->
+        <th>{{tot_all_barang}}</th><th></th>
+   </tr>
+</table>
+{% endblock %}

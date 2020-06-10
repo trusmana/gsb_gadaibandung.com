@@ -1,0 +1,99 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}lunas{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2>LAPORAN PENJUALAN AYDA</h2>  
+<form method="GET" action="/manop/lunasterjual_barang/">{% csrf_token %}
+   <table id="tabel" align="center">
+    <li><label for="id_cabang">Kode Cabang</label> :
+      <select id="id_id_cabang" data-placeholder="None" class="chosen-select" name="id_cabang">
+            <option value="" selected="selected">---------</option><option value="500">(GABUNGAN)</option>
+            <option value="300">PUSAT-pjb</option><option value="301">JAKARTA</option><option value="302">SUCI</option><option value="303">DIPATIUKUR</option>
+            <option value="304">BALUBUR</option><option value="306">GERLONG HILIR</option><option value="307">KOPO</option><option value="308">CIBIRU</option>
+            <option value="309">CIPACING</option><option value="310">JATINANGOR</option><option value="311">CIMAHI</option><option value="312">BUAH BATU</option>
+            <option value="313">KORDON</option><option value="314">CIHANJUANG</option><option value="315">MARANATHA</option><option value="316">KIARACONDONG</option>
+            <option value="317">CIREBON PERJUANGAN</option><option value="319">CIUMBELEUIT</option><option value="320">UJUNGBERUNG</option><option value="321">CIWASTRA</option>
+            <option value="322">BOJONGSOANG</option><option value="323">CIJERAH</option><option value="324">KATAPANG</option><option value="325">CIMINDI</option>
+            <option value="326">CEMARA</option><option value="327">LEUWI GAJAH</option>
+      </select>      
+   </li>
+   <br>
+   <li><label for="id_tgl_trans">Tanggal </label> :<input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> 
+   <label for="id_tgl_trans">Tanggal </label> :<input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
+   <br>
+   <li><input type="submit" value="CETAK XLS" class="perpanjang" name="submit_tiga" />&nbsp; 
+	  <input type="submit" value="CETAK PDF" class="cetak" name="submit_dua"/> &nbsp;
+	  <input type="submit" value="VIEW" class="next" name="submit_satu" value="Add"/>
+   </li>
+   </table>
+</form>
+<br>
+<hr>
+<h3 style='text-align: center'><b><small>LAPORAN PENJUALAN AYDA</small> </b></h3>
+   <h3 style='text-align: center'><b><small>UNIT PJB <small><small><small>{{id_cabang}}</small>
+</small>GERAI 
+   {% if id_cabang = '500' %}(GABUNGAN){%endif%}
+   {% if id_cabang = '1' %}BANDUNG{%endif%}{% if id_cabang = '2' %}Gerai: JAKARTA{%endif%}
+   {% if id_cabang = '3' %}Gerai: SUCI{%endif%}{% if id_cabang = '4' %}Gerai: DIPATIUKUR{%endif%}
+   {% if id_cabang = '5' %}Gerai: BALUBUR{%endif%}{% if id_cabang = '6' %}Gerai: GERLONG GIRANG{%endif%}
+   {% if id_cabang = '7' %}Gerai: GEGER KALONG HILIR{%endif%}{% if id_cabang = '8' %}Gerai: KOPO{%endif%}
+   {% if id_cabang = '9' %}Gerai: CIBIRU{%endif%}{% if id_cabang = '10' %}Gerai: CIPACING{%endif%}
+   {% if id_cabang = '11' %}Gerai: JATINANGOR{%endif%}{% if id_cabang = '12' %}Gerai: CIMAHI{%endif%}
+   {% if id_cabang = '13' %}Gerai: BUAH BATU{%endif%}{% if id_cabang = '14' %}Gerai: KORDON{%endif%}
+   {% if id_cabang = '15' %}Gerai: CIHANJUANG{%endif%}{% if id_cabang = '16' %}Gerai: MARANATHA{%endif%}
+   {% if id_cabang = '17' %}Gerai: KIARA CONDONG{%endif%}{% if id_cabang = '18' %}Gerai: CIREBON PERJUANGAN{%endif%}
+   {% if id_cabang = '19' %}Gerai: CIREBON RAYAT{%endif%}{% if id_cabang = '20' %}Gerai: CIUMBULEUIT{%endif%}
+   {% if id_cabang = '21' %}Gerai: UJUNG BERUNG{%endif%}
+
+
+</small> </b>
+</h3>
+<h4 style='text-align: center'><small>Periode : {{start_date}} - {{end_date}}</small></h4>
+<table class="list">
+<tr class="list">
+    <th>No</th>
+    <th>No Rekening</th>
+    <th>No Ayda</th>
+    <th>Jenis Barang</th>
+    <th>Barang</th>
+    <th>Eks Debitur</th>
+    <th>Nama Pemebeli</th>
+    <th>Nilai</th>
+    <th>Nilai AYDA</th>
+    <th>Terjual</th>
+    <th>Laba</th>
+    <th>Rugi</th>       
+</tr>
+{% for p in lunas %}
+<tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ p.aglunas.norek }}</td>
+    <td align="center">{{ p.aglunas.norek_jual_lunas_ayda }}</td>
+    <td align="center">{% if p.aglunas.jenis_transaksi == '2' %}
+     {{ p.aglunas.barang.get_jenis_kendaraan_display }}{%else%}{{p.aglunas.barang.get_jenis_barang_display}}{%endif%}</td>
+    <td align="center">{{ p.aglunas.barang.merk }}</td>
+    <td>{{ p.aglunas.agnasabah.nama|truncatewords:2 }}</td>
+    <td>{{ p.aglunas.namalelang|truncatewords:2 }}</td>
+    <td align="right">{{ p.aglunas.nilai|number_format:0|default_if_none:"0" }}</td>
+    <td align="right">{{p.aglunas.total_akad_ayda|number_format:0}}</td>
+    <td>{{ p.aglunas.hargalelang|number_format:0|default_if_none:"0"}}</td>
+    <td align="right">
+    {{ p.aglunas.untung_lelang_ayda|number_format:0|default_if_none:"0" }}</td>
+    <td align="right">
+    ({{ p.aglunas.rugi_lelang_ayda|number_format:0|default_if_none:"0" }})</td>
+</tr>
+{% endfor %}
+<tr>
+    <th colspan="7"><strong>TOTAL</strong></th>
+    <th>{{tot_kred|number_format:0}}</th><th>{{total_ayda|number_format:0}}</th>
+    <th>{{nilai_lelang_tot|number_format:0}}</th><th>{{total_untung|number_format:0}}</th>
+    <th>({{total_rugi|number_format:0}})</th>
+   
+</tr>
+</table>
+{% endblock %}
+

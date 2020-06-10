@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Rekap {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+
+<style>
+table,th,td
+{
+border:1px solid black;
+border-collapse:collapse;
+}
+img
+{
+position:absolute;
+left:400px;
+top:10px;
+}
+</style>
+
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/barang/barang_gerai">Kembali</a> ]</p>
+
+<tr><td width="100" align="center">
+<img src="/static/images/logoksu.png" width="135" height="90" align="left" hspace="10" />
+<h3 align="center">REPORT AGING DEBITUR</h3>
+<h2 align="center">GERAI {{ object.nama }}</h2>
+
+<table align="center" border="1" bordercolor="silver " style="background-color:#FFFFFF" width="45%" cellpadding="0" cellspacing="0">
+    <tr  cbgcolor="#00FF00">
+
+        <th bgcolor="silver">Jenis Barang</th>
+        <th bgcolor="silver">Nominatif</th>
+        <th bgcolor="silver">Nilai Pinjaman (Rp)</th>
+    </tr>
+
+
+<tr>
+        <th align="center">HP</th>
+        <th align="right">	{{p}}	</th>
+        <th align="right">{{nilai|number_format:0}}</th>
+   
+    </tr>
+ <tr>
+        <th align="center">LAPTOP</th>
+        <th align="right">	{{p1}}	</th>
+        <th align="right">{{nilai1|number_format:0}}</th>
+   
+    </tr>
+    <tr>
+        <th align="center">KAMERA</th>
+        <th align="right">	{{p2}}	</th>
+        <th align="right">{{nilai2|number_format:0}}</th>
+   
+    </tr>
+    <tr>
+        <th align="center">PS</th>
+        <th align="right">	{{p3}}	</th>
+        <th align="right">{{nilai3|number_format:0}}</th>
+    </tr>
+        <tr>
+        <th align="center">TV/LCD</th>
+        <th align="right">	{{p4}}	</th>
+        <th align="right">{{nilai4|number_format:0}}</th>
+    </tr>
+    </tr>
+        <tr>
+        <th align="center" colspan ="2">Jumlah</th>
+        <th align="right">{{total|number_format:0}}</th>
+    </tr>
+
+</table>
+<h3 align="center">REPORT LELANG</h3>
+<table align="center" border="1" bordercolor="silver " style="background-color:#FFFFFF" width="45%" cellpadding="0" cellspacing="0">
+    <tr  cbgcolor="#00FF00">
+
+        <th bgcolor="silver">Jenis Barang</th>
+        <th bgcolor="silver">Nominatif</th>
+        <th bgcolor="silver">Nilai Pinjaman (Rp)</th>
+    </tr>
+
+
+<tr>
+        <th align="center">HP</th>
+        <th align="right">	{{c}}	</th>
+        <th align="right">{{nilailelang|number_format:0}}</th>
+   
+    </tr>
+ <tr>
+        <th align="center">LAPTOP</th>
+        <th align="right">	{{c1}}	</th>
+        <th align="right">{{nilailelang1|number_format:0}}</th>
+   
+    </tr>
+    <tr>
+        <th align="center">KAMERA</th>
+        <th align="right">	{{c2}}	</th>
+        <th align="right">{{nilailelang2|number_format:0}}</th>
+   
+    </tr>
+    <tr>
+        <th align="center">PS</th>
+        <th align="right">	{{c3}}	</th>
+        <th align="right">{{nilailelang3|number_format:0}}</th>
+    </tr>
+        <tr>
+        <th align="center">TV/LCD</th>
+        <th align="right">	{{c4}}	</th>
+        <th align="right">{{nilailelang4|number_format:0}}</th>
+    </tr>
+    </tr>
+        <tr>
+        <th align="center" colspan ="2">Jumlah</th>
+        <th align="right">{{totallelang|number_format:0}}</th>
+    </tr>
+
+</table>
+<h3 align="center">REPORT PELUNASAN</h3>
+<table align="center" border="1" bordercolor="silver " style="background-color:#FFFFFF" width="45%" cellpadding="0" cellspacing="0">
+    <tr  cbgcolor="#00FF00">
+
+        <th bgcolor="silver">Jenis Barang</th>
+        <th bgcolor="silver">Nominatif</th>
+        <th bgcolor="silver">Nilai Pinjaman (Rp)</th>
+    </tr>
+
+
+<tr>
+        <th align="center">HP</th>
+        <th align="right">	{{aa}}	</th>
+        <th align="right">{{nilailunas|number_format:0}}</th>
+   
+    </tr>
+ <tr>
+        <th align="center">LAPTOP</th>
+        <th align="right">	{{aa1}}	</th>
+        <th align="right">{{nilailunas1|number_format:0}}</th>
+   
+    </tr>
+    <tr>
+        <th align="center">KAMERA</th>
+        <th align="right">	{{aa2}}	</th>
+        <th align="right">{{nilailunas2|number_format:0}}</th>
+   
+    </tr>
+    <tr>
+        <th align="center">PS</th>
+        <th align="right">	{{aa3}}	</th>
+        <th align="right">{{nilailunas3|number_format:0}}</th>
+    </tr>
+        <tr>
+        <th align="center">TV/LCD</th>
+        <th align="right">	{{aa4}}	</th>
+        <th align="right">{{nilailunas4|number_format:0}}</th>
+    </tr>
+    </tr>
+        <tr>
+        <th align="center" colspan ="2">Jumlah</th>
+        <th align="right">{{totallunas|number_format:0}}</th>
+    </tr>
+
+</table>
+
+
+<br/>
+<table  width="45%" class="no-break" align="center" border="0">
+<tr>
+<td align="center">KA. GUDANG<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+[MUHTAR LATIEP]
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+Kanit PJB
+<br />
+<br />
+<br />
+<br />
+<br />
+[GUNTUR WIRYAGURNITA]
+</td></tr>
+</table>

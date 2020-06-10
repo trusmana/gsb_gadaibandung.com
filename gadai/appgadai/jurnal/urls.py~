@@ -1,0 +1,49 @@
+from django.conf.urls.defaults import *
+from django.views.generic import create_update
+import urllib
+from gadai.appgadai.models import Tbl_Akun
+from gadai.appgadai.jurnal.views import *
+
+urlpatterns = patterns('',
+    url(r'^(?P<object_id>\d+)/hapus_jurnal_h/$', hapus_jurnal_h),
+    url(r'^jurnal_post/add/$', jurnal_post),
+    url(r'^add_baru_h/$', add_baru_h,{'form_class': Tbl_Transaksi_HistoryForm}),
+    #url(r'^add_baru/$', add_baru,{'form_class': Tbl_TransaksiForm}),
+    url(r'^(?P<object_id>\d+)/add_staff/$', add_staff),
+    #url(r'^add_staff/$', add_staff),
+    url(r'^(?P<object_id>\d+)/add_staff_non_kas/$', add_staff_non_kas),
+    url(r'^cetak_buku_besar/$', cetak_buku_besar),
+    url(r'^(?P<object_id>\d+)/mastertiket_adm_pelunasan/$', mastertiket_adm_pelunasan),
+    url(r'^(?P<object_id>\d+)/mastertiket/$', mastertiket),
+    url(r'^(?P<object_id>\d+)/mastertiket_pencairan/$',mastertiket_pencairan),
+    url(r'^(?P<object_id>\d+)/mastertiket_kasir_penjualan_pelelangan/$', mastertiket_kasir_penjualan_pelelangan),
+    url(r'^(?P<object_id>\d+)/mastertiket_adm_penjualan_pelelangan/$', mastertiket_adm_penjualan_pelelangan),    
+    url(r'^(?P<object_id>\d+)/master_tiket_pelunasan_gadai_ulang_kasir/$',master_tiket_Pelunasan_Gadai_Ulang_kasir),
+
+    url(r'^(?P<object_id>\d+)/add/$', add),
+    url(r'^(?P<object_id>\d+)/add_non_kas/$', add_non_kas),
+    url(r'^index/$', index),
+    url(r'^index_all/$', index_all),
+    url(r'^(?P<object_id>\d+)/$', show),
+    url(r'^(?P<tahun>\d+)/(?P<bulan>\d+)/$', index),
+    url(r'^rekening/$', akun_list),
+    url(r'^rekening/add/$', create_update.create_object, 
+        {'model': Tbl_Akun, 'post_save_redirect': '/jurnal/rekening/',
+        'template_name': 'akun/form.html'}),
+    url(r'^rekening/(?P<object_id>\d+)/edit/', create_update.update_object, 
+        {'model': Tbl_Akun, 'post_save_redirect': '/jurnal/rekening/',
+        'template_name': 'akun/form.html'}),
+    url(r'^ledger/(?P<object_id>\d+)/$', ledger_show),
+    url(r'^buku_besar/$', buku_besar),
+    url(r'^buku_besar_all/$', buku_besar_all),
+    url(r'^laba_rugi/$', laba_rugi),
+    url(r'^cetak_laba_rugi/$', cetak_laba_rugi),
+    url(r'^neraca_percobaan/$', neraca_percobaan),
+    url(r'^neraca_pjb/$', neraca_pjb),
+    url(r'^cetak_neraca_pjb/$', cetak_neraca_pjb),
+    url(r'^cetak_neraca_percobaan/$', cetak_neraca_percobaan),    
+    
+    url(r'^(?P<object_id>\d+)/hapus_jurnal/$', hapus_jurnal),
+    url(r'^kasir_post/add/$', kasir_post),
+    url(r'^kasir_post/add_non_kas/$', kasir_post_non_kas),
+)

@@ -1,0 +1,40 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}nasabah{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<script type='text/javascript'>
+$(document).ready(function(){$(&#39;.notification&#39;).hover(function(){$(this).css(&#39;cursor&#39;,&#39;auto&#39;);});
+$(&#39;.notification span&#39;).click(function(){$(this).parent().fadeOut(800);});});
+</script>
+{% load number_format useringroup %}
+<h2 align="right">:: DATA KELEBIHAN TITIPAN GADAI ULANG  {{ ag.nasabah.nama }}::</h2>
+
+
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%" align="center">
+    <tr class="tableizer-firstrow">
+    <th>No Rek</th>
+    <th>NAMA</th>
+    <th>TANGGAL</th>
+    <th>NILAI</th>
+
+    <th>MENU</th>
+    </tr>
+{% for p in kasir %}
+<tr>
+    <td>{{ p.titip_gu.norek}}</td>
+    <td>{{p.titip_gu.agnasabah.nama}}</td>
+    <td>{{p.tanggal_oto_gerai}}</td>
+
+    <td >Rp. {{p.nilai|number_format:0}}</td>
+
+    <td><a href="/kasirgerai/{{p.id}}/oto_app_keu_gu/" title="Input Pengembalian" class="next">App Otorisasi</a></td>
+ 
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}
+
+
+

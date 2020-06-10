@@ -1,0 +1,124 @@
+<style>
+div.img {margin: 5px;padding: 5px;border: 1px solid #0000ff;height: auto;width: auto;float: left; text-align: center;
+}
+
+div.img img {display: inline;margin: 5px;border: 1px solid #ffffff;
+}
+
+div.img a:hover img {border:1px solid #0000ff;
+}
+
+div.desc {text-align: center;font-weight: normal;width: 120px;margin: 5px;
+}
+</style>
+
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 10px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+ function printpage() { window.print(); }
+</script>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/akadgadai/{{ag.id}}/show/">Kembali</a> ]</p>
+<td colspan="3" height="10"><h3 align="center">
+</br>
+</br>
+</h3>
+<tr>
+ 
+
+ <table border=0 align="center">
+
+    <h2 align="center">{{ag.agnasabah.nama}} : Gerai {{ag.gerai}} | {{ag.get_jenis_transaksi_display}}</h2>
+<tr>
+    <td>NOREK </td><td>: {{ag.norek}}</td>
+    <td>PLAFOND </td><td>: Rp {{ag.nilai|number_format:0}},00</td>
+</tr>
+
+
+<tr>
+    <td>NAMA NASABAH     </td> <td>: <b>{{ag.agnasabah.nama}}</b></td>
+    <td>JANGKA WAKTU</td><td>: {% if ag.jenis_transaksi = 1 %}{{ag.jangka_waktu_kendaraan}}(Bulan){%else%}{{ag.jangka_waktu}}(Hari) </td>{%endif%}
+ 
+</tr>
+<tr>
+    <td>KEANGGOTAAN </td><td>: {{ag.agnasabah.get_jenis_keanggotaan_display}}</td>
+    <td>TANGGAL AKAD  </td><td>: {{ag.tanggal|date:" d-M-Y"}}</td>
+</tr>
+<tr>
+    <td>ALAMAT      </td><td>: {{ag.agnasabah.alamat_ktp}} No {{ag.agnasabah.no_rumah_ktp}} RT : {{ag.agnasabah.rt_ktp}} RW : {{ag.agnasabah.rw_ktp}} </td>
+    <td>JATUH TEMPO</td><td>: {{ag.jatuhtempo|date:" d-M-Y"}} </td>
+</tr>
+<tr>
+    <td>NO KTP</td><td>: {{ ag.agnasabah.no_ktp }} </td>
+    <td>TANGGAL LUNAS</td><td> : <b>{{ag.lunas|date:" d-M-Y"}}</b> </td>
+</tr>
+
+<tr>
+    <td>NO  TELEPON     </td><td>: {{ag.agnasabah.telepon_ktp}}</td>
+    <td>STATUS</td><td>: {% if ag.status_transaksi %} {{ ag.get_status_transaksi_display }} {% else %} AKTIF</td>
+    {%endif%}
+
+</tr>
+
+<tr>
+    <td>NAMA PASANGAN</td><td>: {{ag.agnasabah.nama_pasangan}}</td>
+</tr>
+
+<tr>
+     <td>ALAMAT PASANGAN</td><td>: {{ag.agnasabah.alamat_pasangan}} NO {{ag.agnasabah.no_rumah_pas}} RT {{ag.agnasabah.no_rt_pas}} RW {{ag.agnasa$
+</tr>
+
+<tr>
+    <td>JENIS KELAMIN PASANGAN</td><td>: {{ag.agnasabah.jekel_pasangan}}</td>
+</tr>
+
+<tr>
+    <td>TELEPON PASANGAN</td><td>: {{ag.agnasabah.tlp_pasangan}}</td>
+</tr>
+
+<tr>
+
+</tr>
+<tr>
+    <td colspan="4"></td>
+</tr>
+<tr>
+    <td colspan="4"></td>
+</tr>
+
+<tr>
+    <td colspan="4"></td>
+</tr>
+<tr>
+    <td colspan="4"></td>
+</tr>
+<tr>
+    <td>SALDO PINJAMAN</td><td>:  Rp {{ag.nilai|number_format:0}},00</td>
+</tr>
+<tr>
+    <td>ADM</td><td>: Rp {{ag.adm_all|number_format:0}},00</td>
+</tr>
+
+<tr>
+    <td>JASA</td><td>: Rp {{ ag.jasa_all|number_format:0 }},00</td>
+</tr>
+</tr>
+    <td>BEA SIMPAN/ SURVEY</td><td>: Rp {{ag.beasimpan_all|number_format:0}},00</td>
+</tr>
+
+<tr>
+    <td>TERIMA BERSIH</td><td>: Rp {{ag.terima_bersih_kwitansi|number_format:0}},00 </td>
+    
+</tr>
+<tr>
+    <td>PERSEN JASA</td><td>: {{ ag.persentase_jasa_all}} %</td>
+</tr>
+</table>
+

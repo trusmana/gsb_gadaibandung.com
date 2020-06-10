@@ -1,0 +1,37 @@
+{% extends "base_aplikasi.html" %}
+
+{% block title %}Edit Status{% endblock %}
+{% block section %}kasir{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+
+{% endblock %} 
+
+{% block extrahead %}
+{% load useringroup number_format %}
+{% endblock %}
+
+
+{% block content %}			
+
+{% include "alat/akad.html" %}
+<h2 align="center">Revisi Posting<br>
+<small>MOHON UNTUK DIYAKINI BAHWA GERAI DAN TANGGAL TRANSAKSI YANG AKAN DIREVISI ADALAH YANG TRANSAKSI HARI INI
+<br>
+DAN SEMENTARA HANYA DAPAT DI EKSEKUSI UNTUK GERAI SAJA </h2>
+<form method="post" action="/rkeuangan/eksekusi_revisiposting/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table align="center">   
+<tr><td>Gerai </td><td>: {{form.gerai}}</td></tr>
+<tr><td>Tanggal Transaksi Yang Di Revisi</td><td>: {{form.tgl_trans}}</td></tr>
+
+
+<tr></tr>
+<tr><td>{% include "alat/save.html" %}</td></tr>   
+</tr>
+<tr></tr>
+<tr></tr>
+</form>
+</table>
+</div>
+{% endblock %} 

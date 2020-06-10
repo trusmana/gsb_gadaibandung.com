@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block section %}{% endblock %}
+{% block extrahead %}
+{% include "alat/manop_lelang.html" %}
+{% endblock %}{% load useringroup %}
+{% block sidebar %}
+
+{% ifusergroup manop%}
+
+{% if ag.lunas %}Sudah Lunas {{ ag.lunas|date:"d-m-Y" }}{% ifusergroup admin|abh %} <a href="/akadgadai/{{ ag.id }}/batal_lunas/" onclick="if (confirm('Yakin akan membatalkan status lunas : {{ ag.norek }}?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method='POST'; f.action = this.href; f.submit(); }; return false;">{% csrf_token %}BATAL LUNAS</a>{% endifusergroup %}{% else %}
+
+<h3 align="center">Menu Rubah Status </h3>
+<form method="post" action="/manop/{{ ag.id }}/update_status/" >{% csrf_token %}
+<table>
+<td>STATUS </td>
+<td>:
+	<select name="status_transaksi" id="id_status_transaksi">
+		<option value="None">-----</option>
+		<option value="LAPUR">Lapur</option>
+		<option value="HILANG">Hilang</option>
+	</select>
+</td>
+<tr>
+	<td>Tanggal</td><td>: <input type="text" name="tanggal_lelang" id="id_tanggal_lelang" size="15" value="{% now "Y-m-d" %}"/></td>
+</tr>
+</table>
+<input type="submit" value="Simpan" class="simpan"/>
+</form>
+
+{% endif %}
+{% endifusergroup %}
+{% endblock %}
+{% block content %}
+{% if perms.apps.add %}<span class="contextual"></span>{% endif %}
+{% load number_format useringroup %}
+
+<h2 align="right">:: DATA TRANSAKSI NASABAH  {{ ag.norek}} ::</h2>
+<p>Menu Untuk Perpanjangan :<a href="/akadgadai/{{ag.id}}/perpanjang/" class="perpanjang">Perpanjang</a> 
+<td ALIGN="CENTER">{% ifusergroup admin|abh %}<a href="/akadgadai/{{ag.id}}/edit/" class="edit">Edit</a>{% endifusergroup %}
+<td ALIGN="CENTER">{% ifusergroup admin|abh %}<a href="/nasabah/{{ag.agnasabah.id}}/edit/" class="cetak">EDIT NASABAH</a>{% endifusergroup %}
+<table width="90%">
+
+<h2 align="center">{{ag.agnasabah.nama}} : Gerai {{ag.gerai}} | {{ag.get_jenis_transaksi_display}}</h2>
+
+<tr><td>NASABAH     </td><td>: {{ag.agnasabah.nama}}</td><td>Norek </td><td>: {{ag.norek}} </td></tr>
+<tr><td>No Telpon     </td><td>: {{ag.agnasabah.telepon_ktp}}</td><td>Nonas</td><td>: {{ag.nonas}}</td></tr>
+<tr><td colspan="4"></td></tr>
+<tr><td>Nilai </td><td>: Rp. {{ag.nilai|number_format:0}}</td></tr>
+<tr><td>Alamat      </td><td>: {{ag.agnasabah.alamat_ktp}}  </td></tr>
+<tr><td>No KTP</td><td>: {{ ag.agnasabah.no_ktp }} </td><td>Status</td><td>: 
+{%if ag.status_transaksi == None %}Aktif{%else%}{{ag.get_status_transaksi_display}} {%endif%} </td></tr>
+<tr><td>Tanggal Transaksi  </td><td>: {{ag.tanggal|date:" d-M-Y"}}</td>
+<td>Jatuh Tempo/JW</td><td>:{{ag.jatuhtempo|date:" d-M-Y"}}
+/{% if ag.jangka_waktu_kendaraan %}{{ag.jangka_waktu_kendaraan}}(Bulan){%else%}{{ag.jangka_waktu}}(Hari) </td>{%endif%}</tr>
+<tr><td colspan="4"></td></tr>
+<tr><td colspan="4"></td></tr>
+<tr><td>ADM</td><td>: Rp {{ ag.adm_all|number_format:0}}</td>
+<td>TERIMA BERSIH</td><td>: Rp {{ag.terima_bersih_kwitansi|number_format:0}},00 </td></tr>
+
+<tr><td>JASA</td><td>: Rp {{ ag.jasa_all|number_format:0 }},00</td>
+<td>BEA SIMPAN/ SURVEY</td><td>: {% if ag.jangka_waktu_kendaraan %}Rp.{{ag.beasimpan_kendaraan|number_format:0}}{%else%}
+Rp. {{ag.biayasimpan|number_format:0}}</td>{%endif%}</tr>
+
+<tr>
+    <td>MATERAI    </td><td>: Rp.{{ag.bea_materai|number_format:0}} </td>
+    <td>TANGGAL LELANG    </td><td>: {{ag.tanggal_lelang|date:" d-M-Y"}} </td>
+</tr>
+
+</table>
+<hr />
+<table width="80%">
+	<tr><td>BARANG TAKSIR</td><td>: {{ag.taksir.type}}</td>
+        <td>NILAI TAKSIR BARANG</td><td>: {{ ag.taksir.maxpinjaman|number_format:0}}</td>
+        </tr>
+	<td>BARANG JAMINAN</td><td>: {% if ag.jangka_waktu_kendaraan %}{{ag.barang.merk_kendaraan}} | {{ag.barang.type_kendaraan}} |  {{ag.barang.no_polisi}} |  {{ag.barang.accesoris_barang1}}{%else%}
+{{ag.barang.merk}} | {{ag.barang.type}} |  {{ag.barang.sn}} |  {{ag.barang.accesoris_barang1}}</td>{%endif%}
+</table>
+<hr />
+<div class="splitcontentleft">
+<a name="perpanjangan"></a>
+<h3 align="center">PERPANJANGAN</h3>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow">
+	<th>No Kwitansi</th>
+	<th>Tanggal Perpanjang</th>
+	<th>JW PRPJ</th>
+	<th>JT PRPJ</th>
+	<th>Status</th>
+	<th>Denda</th>
+	<th>Jasa Terlambat</th>
+	<th>Bea Simpan</th>
+    <th>Bea Jasa</th>
+	<th>Cetak Kwitansi</th>
+    <th>Edit</th>
+
+</tr>
+{% for k in ag.perpanjang_set.all %}
+    <tr>
+	<td align="center">{{k.norek}}</td>
+	<td align="center">{{ k.tanggal|date:"Y-m-d" }}</td>
+
+	<td align="center">{% if k.jw_kendaraan %}{{ k.jw_kendaraan }} (Bulan){%else%}{{k.jw}} (Hari)</td>{% endif %}
+    <td align="center">{% if k.jw_kendaraan %}{{k.jt_kendaraan|date:"Y-m-d"}}{%else%}{{k.jatuhtempo_perpanjang|date:"Y-m-d"}}</td>{% endif %}
+	<td align="center">{{ k.status}}</td>
+	<td align="center">{% if k.jw_kendaraan %}Rp.{{ k.denda_kendaraan|number_format:0}}{%else%}Rp.{{ k.denda|number_format:0}}</td>{% endif %}
+	<td>{% if k.jw_kendaraan %}Rp.{{ k.bea_jasa_terlambat_kendaraan|number_format:0}}{% else %}
+    Rp.{{ k.bea_jasa_terlambat|number_format:0}}</td>{% endif %}
+	<td>{% if k.jw_kendaraan %}Rp.{{ k.beasimpan_kendaraan|number_format:0}}{%else%}Rp.{{ k.bea_simpan|number_format:0}}</td>{% endif %}
+	<td>{% if k.jw_kendaraan %}Rp.{{k.bea_jasa_kendaraan|number_format:0}}{%else%}Rp.{{k.bea_jasa|number_format:0}}</td>{% endif %}
+	<td>{% if k.jw_kendaraan %}<a href="/perpanjang/{{ k.id}}/cetak_kendaraan/" class="cetak">Kendaraan</a>{%else%}
+    <a href="/perpanjang/{{ k.id}}/cetak/" class="cetak">Elektronik</a></td>{% endif %}
+    {% ifusergroup admin|abh %}<td><a href="/perpanjang/{{k.id}}/edit/" class="edit">Edit</a>{% endifusergroup %}</td>
+	
+   </tr>
+{% endfor %}
+</table>
+</div>
+
+<div class="splitcontentright">
+<a name="pelunasan"></a>
+<h3 align="center">PELUNASAN</h3>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow">
+	<th>No Kwitansi</th>
+	<th>Tgl Pelunasan</th>
+	<th>Barang</th>
+	<th>Nilai</th>
+	<th>Denda</th>
+	<th>Jasa</th>
+	<th>Cetak Kwitansi</th>
+        <th>Edit</th>
+    </tr>
+{% for a in ag.pelunasan_set.all %}
+    <tr>
+	<td>{{ a.norek}}
+	<td>{{ a.tanggal}}</td>
+	<td>{{ a.pelunasan.barang }}</td>
+	<td>{{ a.nilai }}</td>
+	<td>{% if a.pelunasan.jangka_waktu_kendaraan %} {{ a.denda_kendaraan }} {% else %} {{ a.denda }} {% endif %}</td>
+	<td>{% if a.pelunasan.jangka_waktu_kendaraan %} {{ a.bea_jasa_kendaraan }} {% else %} {{ a.bea_jasa }} {% endif %}</td>
+	<td align="center">{% if a.pelunasan.jangka_waktu_kendaraan %}<a href="/pelunasan/{{a.id}}/kwlunas_kendaraan/" class="cetak">Kendaraan</a>{% else %}
+	<a href="/pelunasan/{{a.id}}/kwlunas/" class="cetak">Elektronik</a>{% endif %}
+        </td>
+        
+   {% ifusergroup admin|abh %}<td><a href="/pelunasan/{{a.id}}/edit/" class="edit">Edit</a>{% endifusergroup %}</td>
+   </tr>{% endfor %}
+</table>
+<hr>
+{% ifusergroup manop%}
+{% if ag.status_transaksi == 'LUNAS TERJUAL'  or ag.status_transaksi == 'LUNAS' %}<h5 align="center">SUDAH LUNAS</h5>{%else%}
+<h3 align="center">MENU JUAL LUNAS</h3>
+<form method="POST" action="/manop/{{ ag.id }}/lelang_manop/" name="frmAdd" class="tabular">{% csrf_token %}
+<table align="center">
+        {{form.as_table}}
+	<tr><td><input type="submit" value="Simpan" class="simpan"/></td></tr>
+	</table>
+</form>
+{% endif %}
+</div>
+{% endifusergroup %}
+{% endblock %} 
+
+
+
+
+
+

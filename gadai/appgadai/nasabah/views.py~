@@ -1,0 +1,100 @@
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.template import RequestContext
+from django.shortcuts import render_to_response
+from django import forms
+from gadai.appgadai.models import *
+from gadai.appgadai.nasabah.form import NasabahForm
+from gadai.appgadai.akadgadai.forms import AkadForm
+from gadai.appgadai.templatetags.number_format import number_format
+
+def show(request,object_id):
+    nsb=Nasabah.objects.get(id=object_id)
+    ag=nsb.akadgadai_set.all()
+    p=ag.order_by('-tanggal')
+    template='nasabah/show.html'
+    variable = RequestContext(request,{'nsb': nsb, 'ag':p})
+    return render_to_response(template,variable)
+
+def addnasabah(request,object_id):
+    nsb=Nasabah.objects.get(id=object_id)
+    form = AkadForm(initial={'agnasabah': nsb.id})
+    template='nasabah/addnasabah.html'
+    variable = RequestContext(request, {'form': form, 'object': nsb })
+    return render_to_response(template, variable)
+
+def add(request):
+    if request.method == 'POST':
+        form = NasabahForm(request.POST)
+
+        if form.is_valid():
+            nama = form.cleaned_data['nama']
+            tgl_lahir = form.cleaned_data['tgl_lahir']
+            tempat = form.cleaned_data['tempat']
+            no_ktp = form.cleaned_data['no_ktp']
+            alamat_ktp = form.cleaned_data['alamat_ktp']
+            rt_ktp= form.cleaned_data['rt_ktp']
+            rw_ktp= form.cleaned_data['rw_ktp']
+            telepon_ktp = form.cleaned_data['telepon_ktp']
+            hp_ktp =form.cleaned_data['hp_ktp']
+            kelurahan_ktp = form.cleaned_data['kelurahan_ktp']
+            kecamatan_ktp = form.cleaned_data['kecamatan_ktp']
+
+            '''alamat_domisili = form.cleaned_data['alamat_domisili']
+            rt_domisili =form.cleaned_data['rt_domisili']
+            rw_domisili = form.cleaned_data['rw_domisili']
+            telepon_domisili = form.cleaned_data['telepon_domisili']
+            hp_domisili = form.cleaned_data['hp_domisili']
+            kelurahan_domisili = form.cleaned_data['kelurahan_domisili']
+            kecamatan_domisili = form.cleaned_data['kecamatan_domisili']'''
+            jenis_pekerjaan = form.cleaned_data['jenis_pekerjaan']
+            alamat_kantor = form.cleaned_data['alamat_kantor']
+            kode_pos = form.cleaned_data['kode_pos']
+            telepon_kantor =form.cleaned_data['telepon_kantor']
+            email= form.cleaned_data['email']
+            jenis_kelamin= form.cleaned_data['jenis_kelamin']
+
+            nsb= Nasabah (nama = nama, tgl_lahir = tgl_lahir,tempat=tempat, no_ktp =no_ktp,alamat_ktp=alamat_ktp,rt_ktp=rt_ktp,rw_ktp=rw_ktp,telepon_ktp=telepon_ktp,
+                hp_ktp=hp_ktp,kelurahan_ktp=kelurahan_ktp,kecamatan_ktp=kecamatan_ktp,'''alamat_domisili=alamat_domisili,rt_domisili=rt_domisili,rw_domisili=rw_domisili,kelurahan_domisili=kelurahan_domisili,kecamatan_domisili=kecamatan_domisili,'''
+                jenis_pekerjaan=jenis_pekerjaan,alamat_kantor=alamat_kantor,kode_pos=kode_pos,telepon_kantor=telepon_kantor,email=email,jenis_kelamin=jenis_kelamin)
+            nsb.save()
+            return HttpResponseRedirect('/nasabah/')
+    else :
+        form = NasabahForm()
+
+    variables = RequestContext(request, {'form': form})
+    return render_to_response('nasabah/add.html', variables)
+
+	
+def edit(request,object_id):
+    n=Nasabah.objects.get(id=object_id)
+    template='nasabah/edit.html'
+    variable = RequestContext(request,{'n': n})
+    return render_to_response(template,variable)
+
+
+
+def cari(request):
+    cari = request.GET['cari']
+    pilih = request.GET['pilih']
+    if not pilih == '1'  :
+        try :
+            br = Nasabah.objects.filter(no_ktp__icontains = cari ).order_by('no_ktp')
+            if not br   :
+                br = Nasabah.objects.filter(no_ktp_istartswith = str(cari)).order_by('nama')
+        except :
+            pass
+    else :
+        try :
+            br = AkadGadai.objects.filter(no_ktp = cari).order_by("id")[0]
+            return HttpResponseRedirect("/nasabah/%s/add/" % br.id )
+        except :
+            return  HttpResponseRedirect("/nasabah/add/?norek=%s" % cari )
+
+    if br.count() == 1 :
+        return HttpResponseRedirect("/nasabah/%s/show/" % br[0].id)
+
+    template ='nasabah/index.html'
+    variable = RequestContext(request,{'object_list': br})
+    return render_to_response(template,variable)
+
+	

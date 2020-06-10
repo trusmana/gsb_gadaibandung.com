@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>pencairan</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/lelang/jual/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center">
+<img src="/static/img/logoksu.png" width="105" height="110" align="left" hspace="20"/>
+<h3>REKAP PENJUALAN BARANG</h3>
+<small>
+   {% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA{%endif%} 
+   {% if id_cabang = '302' %}GERAI SUCI{%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR{%endif%}
+   {% if id_cabang = '304' %}GERAI BALUBUR{%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
+   {% if id_cabang = '307' %}GERAI KOPO{%endif%} {% if id_cabang = '308' %}GERAI CIBIRU{%endif%}
+   {% if id_cabang = '309' %}GERAI CIPACING {%endif%} {% if id_cabang = '310' %}GERAI JATINANGOR{%endif%}
+   {% if id_cabang = '327' %}GERAI CIMAHI  {%endif%} {% if id_cabang = '312' %}GERAI BUAH BATU{%endif%}
+   {% if id_cabang = '313' %}GERAI KORDON  {%endif%} {% if id_cabang = '314' %}GERAI CIHANJUANG{%endif%}
+   {% if id_cabang = '315' %}GERAI MARANATA{%endif%} {% if id_cabang = '316' %}GERAI KIARACONDONG{%endif%}
+   {% if id_cabang = '317' %}GERAI CIREBON PERJUANGN {%endif%} {% if id_cabang = '318' %}GERAI CIREBON {%endif%}
+   {% if id_cabang = '319' %}GERAI CIUMBELEUIT {%endif%} {% if id_cabang = '113' %}GERAI UJUNG BERUNG{%endif%}
+   {% if id_cabang = '322' %}GERAI BOJONGSOANG{%endif%}{% if id_cabang = '300' %}KANTOR PUSAT{%endif%}
+   {% if id_cabang = '329' %}GERAI LEWIGAJAH{%endif%}{% if id_cabang = '333' %}GADAI NIGHT DU{%endif%}
+   {% if id_cabang = '331' %}GADAI NIGHT JAKARTA{%endif%}{% if id_cabang = '311' %}GARAI BUAHBATU{%endif%}
+   {% if id_cabang = '320' %}GERAI UJUNGBERUNG{%endif%}{% if id_cabang = '324' %}GERAI KATAPANG SAYATI{%endif%}
+   {% if id_cabang = '325' %}GERAI CIMINDI{%endif%}{% if id_cabang = '326' %}GERAI CEMARA{%endif%}
+   {% if id_cabang = '332' %}GERAI TURANGGA{%endif%}{% if id_cabang = '328' %}GADAI NIGHT CIBIRU{%endif%}
+   {% if id_cabang = '330' %}GADAI NIGHT BALUBUR{%endif%}
+</small> </b>
+<h4>Periode : {{start_date}} s.d {{end_date}}</h4></td></tr>
+</table>
+<p>&nbsp;</p>
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+    <tr>
+        <th>No</th>
+        <th>Norek</th>
+        <th>Nasabah</th>
+        <th>Barang</th>
+        <th>JT</th>
+        <th>Gerai</th><th>Pembeli</th>
+        <TH>Tgl Lelang</TH><th>Plafon </th>
+        <th>Harga Jual</th>        
+        <th>Selisih</th>
+        <th>Rugi</th>
+        
+    </tr>        
+</tr>
+{% for a in tes %}	
+<tr>
+    <tr class="{% cycle 'row1' 'row2' %}">
+        <td ALIGN="CENTER">{{ forloop.counter }}</td>
+        <td ALIGN="CENTER"><a href="/akadgadai/{{ a.aglelang.norek }}/show/" >{{ a.aglelang.norek }}</a></td>
+        <td ALIGN="LEFT">{{ a.aglelang.agnasabah.nama}}</td>        
+        <td ALIGN="CENTER">{{a.aglelang.barang.type}}</td>
+        <td ALIGN="CENTER">{{ a.aglelang.jatuhtempo|date:" d-m-Y"}}</td>
+        <td ALIGN="LEFT">{{a.aglelang.gerai.nama_cabang}}</td><td ALIGN="LEFT">{{a.aglelang.namalelang|default_if_none:""}}</td>
+        <td ALIGN="LEFT">{{a.aglelang.tgllelang|date:" d-m-Y"}}</td>
+        <td ALIGN="left">{{ a.aglelang.nilai|number_format:0}}</td>
+        <td ALIGN="right">{{a.aglelang.hargalelang|number_format:0|default_if_none:"0"}}</td>        
+        <td ALIGN="right">{{a.aglelang.nilai_lelang|number_format:0|default_if_none:""}}</td>
+        <td ALIGN="right">{{a.aglelang.rugi_lelang|number_format:0|default_if_none:""}}</td>
+        
+    </tr>
+</tr>
+{% endfor %}
+<tr>
+    <th colspan="8" class="r"><strong align="center"><b>Jumlah</b></strong></th>       
+        <th ALIGN="right"><b>{{tot_nilai|number_format:0}}</b></th>        
+        <th ALIGN="right"><b>{{tot_lelang|number_format:0}}</b></th>
+        <th ALIGN="right"><b>{{tot_nilai_lelang|number_format:0}}</b></th>
+        <th ALIGN="right"><b>{{tot_rugi|number_format:0}}</b></th>
+          
+</tr>
+</table>
+<br/>
+<br/>
+<table  width="100%" class="no-break">
+<tr>
+  <td align="center">GUDANG LAPUR<br/>
+<br />
+<br />
+<br />
+<br />
+<br />
+( KARSITI )
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+KANIT PJB
+<br />
+<br />
+<br />
+<br />
+<br />
+( IQBAL YUSMANSYAH )
+</td></tr>
+</table>
+

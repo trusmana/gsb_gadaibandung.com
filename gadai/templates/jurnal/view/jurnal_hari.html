@@ -1,0 +1,82 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}ledger{% endblock %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+   $("#id_start_date").datepicker({dateFormat: 'yy-mm-dd'});
+   $("#id_end_date").datepicker({dateFormat: 'yy-mm-dd'});  
+});
+</script>
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="center">BUKU BESAR <small><small>&nbsp;{{kode}}</small></small></h2>
+
+<table id="tabel">
+	<thead>
+    <tr>
+		<th>No</th>
+		<th>Tanggal</th>
+		<th>NO BUKTI</th>
+        <th>Kode COA</th>
+        <th>Nama COA</th>
+		<th>Keterangan</th>
+		<th>Debet (Rp.)</th>
+		<th>Kredit (Rp.)</th>
+		<th>Saldo (Rp.)</th>
+	</tr>
+	</thead>
+
+	<tbody>{% for d in ledger_search %}
+	   
+	{% if forloop.first %}
+	<tr>		
+		<td></td>
+		<td></td>
+		<td></td>
+        <td></td>
+		<td></td>
+		<td>Saldo Awal</td>
+		<td style="text-align:right">{{saldo}}</td>
+		<td style="text-align:right">{{saldo}}</td>
+        <td style="text-align:right">0</td>
+    </tr>
+	{%endif%}
+
+	<tr>
+		<td>{{forloop.counter}}</td>
+        <td>{{ d.tgl_trans|date:'d-M-Y' }}</td>
+		<td>{{d.nobukti}}</td>
+		<td>{{d.kepala_coa}}.{{d.coa}}</td>
+		<td>{{ d.deskripsi }}</td>
+        <td>{{ d.diskripsi }}</td>	
+		<td style="text-align:right">{{ d.kredit|number_format:0 }}</td>
+		<td style="text-align:right">{{ d.debet|number_format:0 }}</td>
+		<td style="text-align:right">{{d.saldo_awal}}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+	<tfoot>
+		<tr>
+		     <th colspan="6">Jumlah</th>
+		     <th style="text-align:right">Rp.{{total_debet|number_format:0 }}</th>
+		     <th style="text-align:right">Rp.{{total_kredit|number_format:0 }}</th>
+		     <th style="text-align:right">{{saldo_akhir|number_format:0}}</th>
+		</tr>
+	</tfoot>
+
+</table>
+
+
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}

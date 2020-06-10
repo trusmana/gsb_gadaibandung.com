@@ -1,0 +1,12 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}akad{% endblock %}
+{% block content %}
+
+<h2 align="center">Edit Akad Gadai {{ object.norek }}</h2>
+<form method="POST" action="." class="tabular">{% csrf_token %}
+<table>
+{{ form.as_table }}
+<td><label></label><input type="submit" value="Simpan" /></td>
+</table>
+</form>
+{% endblock %}

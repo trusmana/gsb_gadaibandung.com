@@ -1,0 +1,30 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}{{ block.super }}
+{% endblock %}
+{% block section %}STATUS BARANG{% endblock %}
+{% block sidebar %}
+<h3>Total Barang Yg Ada di Gerai</h3>
+<p>Jumlah : {{total}} Barang</p>
+{% endblock %}
+{% block content %}
+{% load number_format %}
+<h2 align= "right"s>:: STATUS BARANG YANG ADA DI GERAI ::</h2>
+<table class="tableizer-table"width="100%" border="1" align="center" cellpadding="0" cellspacing="0">
+    <tr  class="tableizer-firstrow"><th>No</th><th>Norek</th><th>Nama</th><th>Barang</th><th>SN</th><th>Tanggal</th><th>Tanggal Permintaan</th>
+    <th>Tanggal Pengiriman</th><th>Status Barang</th></tr>
+{% for a in gerai%}
+    <tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td>{{ a.norek }}</td>
+    <td align="center"><a href="/akadgadai/{{a.id}}/show/">{{ a.agnasabah.nama }}</a></td>
+    <td>{{ a.kode_barang_all }}</td>
+    <td>{{ a.barang.sn}}</td>
+    <td align="center">{{ a.tanggal|date:"d-M-Y"}}</td>
+    <td align="center">{{ a.tanggal_permintaan|date:"d-M-Y"}}</td>
+    <td align="center">{% if a.tanggal_pengiriman_gudang == 2 %}{{ a.tanggal_pengiriman|date:"d-M-Y"}} {% endif %}</td>
+    <td align="center">{% if a.tanggal_pengiriman_gudang == 2 %}{% if a.tanggal_pengiriman = None%}Barang di Gudang{%else%} {% if a.tanggal_pengiriman  and a.sts_tdr = None %}Ada Di Gerai{%endif%}{%endif%} {% endif %}</td>    
+    {% endfor %}   
+   </tr>   
+
+</table>
+{% endblock %}

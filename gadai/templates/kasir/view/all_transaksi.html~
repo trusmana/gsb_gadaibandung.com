@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block section %}Jurnal_Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>REKAPITULASI TRANSAKSI TRANSAKSI  <small>DIV PJB</small>{{kocab}} 
+<a href="/kasirgerai/{{kocab.id}}/cetak_all_transaksi/"><img src="/static/printer.png"  height="22" width="22" ></a></h2>
+<h3 style='text-align: center'><b> REKAPITULASI TRANSAKSI</b></h3>
+<h3 style='text-align: center'><b><small>Periode : {{sekarang|date:"d-M-Y"}} </small> </b></h3>
+<table class="list">
+<tr>
+	<th colspan="3">SALDO</th>
+</tr>
+	<tbody>
+		<tr>
+			<td>Saldo Awal</td>
+			<td>Rp. 0{{saldo_awal}}</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>Penambahan Saldo Awal Hari</td>
+			<td>Rp. {{saldo_awal_hari}}</td>
+			<td></td>
+                </tr>
+                <tr class="row_anak">
+			<td><b>Total Saldo</b></td>
+			<td></td>
+			<td><b>Rp. {{total_saldo}}</b></td>
+                 </tr>
+		 <tr>
+                        <th colspan="3">PENERIMAAN</th>
+                </tr>
+
+		 <tr>
+                        <td>Pelunasan</td>
+			<td>Rp. {{total_pelunasan|number_format:0}}</td>
+			<td></td>
+                </tr>
+
+		 <tr>
+                        <td>Pendapatan Oprasional Lainnya</td>
+			<td>Rp. {{total_pendapatan_lainnya|number_format:0}}</td>
+			<td></td>
+                </tr>
+
+		 <tr class="row_anak">
+                        <td><b>Total Penerimaan</b></td>
+			<td></td>
+			<td><b>Rp. {{total_penerimaan}}</b></td>
+                </tr>
+
+
+		 <tr>
+                        <th colspan="3">PENGELUARAN</th>
+                </tr>
+
+		 <tr>
+                        <td>Pencairan</td>
+			<td>Rp. {{total_pencairan|number_format:0}}</td>
+			<td></td>
+                </tr>
+		<tr>
+			<td>Total Transaksi Gl To GL</td>
+			<td>Rp. {{total_transaksi_jurnal}}</td>
+			<td></td>
+		</tr>
+		{% for a in transaksi_jurnal %} {% if a.debet > 0 %}
+		 <tr>
+                        <!--<td>Beban Listrik</td><td>Rp. {{beban_listrik|number_format:0}}</td><td></td>-->
+			
+			
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} - {{ a.id_coa.deskripsi}}</td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rp. {{ a.debet}}</td>	
+			<td></td>
+                </tr>
+	{% endif %}{% endfor %}
+		
+		 <tr class="row_anak">
+                        <td><b>Total Pengeluaran</b></td>
+			<td></td>
+			<td> <b>Rp. {{total_pengeluaran|number_format:0}}</b></td>
+                </tr>
+
+
+                <tr>
+                        <th>Total Saldo Keseluruhan</th>
+			<th></th>
+			<th>Rp. {{saldo_keseluruhan}}</th>
+                </tr>
+                <tr>
+                        <th>Saldo Yang Dikirimkan</th>
+			<th></th>
+			<th>Rp. {{saldo_yang_di_kirim}}</th>
+                </tr>
+
+		 <tr>
+                        <th>Saldo Akhir</th>
+			<th></th>
+			<th>Rp. {{saldo_akhir}}</th>
+                </tr>
+
+	</tbody>
+</table>
+<table widht='50%'>
+<h3 style='text-align: center'><b> REDONOMINASI RUPIAH</b></h3>
+<font size="15">
+<tr>
+	<th>Keterangan</th>
+	<th>Nominal</th>
+	<th>Jumlah</th>
+</tr>
+<tr>
+	<th>Uang Kertas</th>
+	<th>Rp 100.0000,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Kertas</th>
+	<th>Rp 50.0000,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Kertas</th>
+	<th>Rp 20.0000,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Kertas</th>
+	<th>Rp 10.000,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Kertas</th>
+	<th>Rp 5.000,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Kertas</th>
+	<th>Rp 2.000,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Kertas</th>
+	<th>Rp 1000,00</th>
+	<th>.......... Lembar</th>
+</tr>
+
+<tr>
+	<th>Uang Logam</th>
+	<th>Rp 1.000,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Logam</th>
+	<th>Rp 500,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Logam</th>
+	<th>Rp 200,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Logam</th>
+	<th>Rp 100,00</th>
+	<th>.......... Lembar</th>
+</tr>
+<tr>
+	<th>Uang Logam</th>
+	<th>Rp 50,00</th>
+	<th>.......... Lembar</th>
+</tr>
+</font>
+</table>
+
+
+{% endblock %}
+

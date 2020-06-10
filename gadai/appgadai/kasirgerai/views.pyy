@@ -1,0 +1,1157 @@
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.template import RequestContext    
+from django.shortcuts import render_to_response, get_object_or_404
+from django import forms
+import datetime
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User,Group
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.contrib.auth.decorators import login_required, user_passes_test
+from gadai.appgadai.kasirgerai.forms import *
+from django.contrib import messages
+from gadai.appgadai.models import *
+
+def all_transaksi(request,object_id):
+    saldo_awal = 0
+    jurnal_list = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'Pencairan_kasir').filter(id_cabang=object_id).filter(status_jurnal=1).filter(id_coa= 7L)
+    pndptn_lainnya = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'Pencairan_kasir').filter(id_cabang=object_id).filter(status_jurnal=1).filter(id_coa= 448L)
+    tbl = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'Pelunasan_kasir').filter(id_cabang=object_id).filter(status_jurnal=1)
+    tbl_beban =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').filter(id_cabang=1).filter(status_jurnal=1).filter(id_coa= 516L)
+    rakp =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').filter(id_cabang=1).filter(status_jurnal=1).filter(id_coa= 378L)
+
+    variables = RequestContext(request,{'a':jurnal_list,'total_pencairan':sum ([a.kredit for a in jurnal_list]),\
+        'total_pelunasan':sum ([a.debet for a in tbl]),\
+        'total_pendapatan_lainnya':sum ([a.kredit for a in pndptn_lainnya]),'sekarang':datetime.date.today(),\
+        'total_penerimaan':(sum ([a.debet for a in tbl]) + sum ([a.kredit for a in pndptn_lainnya])),\
+        'total_pengeluaran':(sum ([a.kredit for a in jurnal_list])+ sum ([a.debet for a in tbl_beban])),'beban_listrik':(sum ([a.debet for a in tbl_beban])),\
+        'total_rakp':sum ([a.kredit for a in rakp]),\
+        'saldo_akhir':((sum ([a.kredit for a in rakp]) +(sum ([a.debet for a in tbl]) + sum ([a.kredit for a in pndptn_lainnya]))) - (sum ([a.kredit for a in jurnal_list])+ sum ([a.debet for a in tbl_beban]))  )
+
+    })
+    template='kasir/view/all_transaksi.html'
+    return render_to_response(template,variables)
+
+def slip_validasi(request, object_id):
+    gr = KasirGerai.objects.get(id = object_id)
+    template = 'akadgadai/kw_val.html'
+    variable = RequestContext(request, {'gr':gr,})
+    return render_to_response(template,variable)
+
+def all_approve(request,object_id):
+    ka = KasirGerai.objects.all()    
+    kasir = ka.filter()
+    template='kasir/view/data_approve_kasir.html'
+    variable = RequestContext(request,{'ka': ka,'kasir':kasir})
+    return render_to_response(template,variable)
+    
+
+def all_transaksi_jurnal(request,object_id):
+    form = KasirGeraiForm()
+    if 'start_date' in request.GET and request.GET['start_date']:
+        start_date = request.GET['start_date']
+        jurnal_list = Tbl_Transaksi.objects.filter(tgl_trans= start_date).filter(id_cabang=object_id).filter(status_jurnal=1)
+        b = Tbl_Akun.objects.all()
+        trans =[]
+        for l in jurnal_list:
+            trans.append(l)
+        variables = RequestContext(request, {'cabang':Tbl_Cabang.objects.get(kode_cabang=object_id),'jurnal_list': trans,'kode':b,'sekarang':start_date,
+            'total_debet':sum([p.debet for p in jurnal_list]),'total_kredit':sum([p.kredit for p in jurnal_list])})
+        return render_to_response('kasir/view/all_transaksi_jurnal.html', variables)
+    else:
+        template='kasir/view/all_transaksi_jurnal.html'
+        variable = RequestContext(request,{'cabang':Tbl_Cabang.objects.get(kode_cabang=object_id),'form':form})
+        return render_to_response(template,variable)
+
+def postting_all_jurnal(request):
+    for i in request.POST.getlist('id_pilih'):
+        gl = Tbl_Transaksi.objects.get(id=int(i))
+        gl.status_jurnal = 2
+        gl.save()
+    messages.add_message(request, messages.INFO,' POSTING TRANSAKSI JUNAL SUKSES.')
+    return HttpResponseRedirect("/")
+
+def view_cabang(request,object_id):
+    sekarang = datetime.date.today()
+    akumulasi_kredit =0
+    akumulasi_debet =0    
+    jurnal_list = Tbl_Transaksi.objects.filter(id_coa__id=7).filter(tgl_trans= sekarang).filter(id_cabang=object_id)
+    b = Tbl_Akun.objects.get(id=7)
+    trans =[]
+    for l in jurnal_list:
+        for t in l.jurnal.tbl_transaksi_set.filter():
+            akumulasi_kredit += t.kredit
+            akumulasi_debet += t.debet
+            trans.append({'debet':t.debet,'kredit':t.kredit,'saldo_awal':  (t.id_coa.saldo_pjb + akumulasi_debet) - akumulasi_kredit ,'deskripsi': t.id_coa.deskripsi,\
+                'diskripsi' : t.jurnal.diskripsi,'kepala_coa': t.kepala_coa,'coa':t.id_coa.coa,'nobukti': t.jurnal.nobukti,'tgl_trans':t.tgl_trans,
+                'id':t.id_coa.id})
+            #saldo = saldo_awal
+    variables = RequestContext(request, {'jurnal_list': trans,'kode':b,'saldo_kas':(b.saldo_pjb + sum([p.debet for p in jurnal_list])) - sum([p.kredit for p in jurnal_list]),
+        'total_debet':sum([p.debet for p in jurnal_list]),'total_kredit':sum([p.kredit for p in jurnal_list])})
+    return render_to_response('kasir/view/viewcabang.html', variables)
+
+def master_tiket_kasir_pelunasan(request,object_id):
+    sekarang = datetime.date.today()
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=1).filter(jenis=u'Pelunasan_kasir')  
+    template = 'kasir/tiket/mastertiket_pelunasan_kasir.html'
+    variables = RequestContext(request, {'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    return render_to_response(template, variables)
+
+def is_in_multiple_groups(user):
+    return user.groups.filter(name__in=['ADM_GERAI','SUPERUSER','KASIR_GERAI'])
+@login_required
+@user_passes_test(is_in_multiple_groups)
+def mcc(request, object_id):
+    gadai = AkadGadai.objects.get(id=object_id)    
+    template = 'kasir/view/showmcc.html'
+    variable = RequestContext(request, {'gadai': gadai})
+    return render_to_response(template,variable)
+
+def approve_pelunasan_kasir(request,object_id):
+    a = Pelunasan.objects.all()
+    kasir = a.filter(gerai=object_id).filter(kasirgerai__kasir_lunas=None)
+    template='kasir/view/data_pelunasan_kasir.html'
+    variable = RequestContext(request,{'a': a,'kasir':kasir})
+    return render_to_response(template,variable)
+
+def kasir_pelunasan(request, object_id):
+    sekarang = datetime.date.today
+    kasir = Pelunasan.objects.get(id=object_id)
+    form = KasirGeraiForm(initial={'status': 1,'kasir_lunas': kasir.id,'no_pinjaman':kasir.norek(),'tanggal':sekarang,'nilai':int(kasir.nilai)})
+    form.fields['kasir'].widget = forms.HiddenInput()
+    form.fields['kasir_lunas'].widget = forms.HiddenInput()
+    form.fields['status'].widget = forms.HiddenInput()
+    template = 'kasir/kasir_pelunasan.html'
+    variable = RequestContext(request, {'kasir': kasir,'form':form})
+    return render_to_response(template,variable)    
+
+def inputkasir_pelunasan(request, object_id):
+    ksa = Pelunasan.objects.get(id=object_id)
+    if request.method == 'POST':
+        f =  KasirGeraiForm(request.POST)
+        if f.is_valid():
+            tanggal = f.cleaned_data['tanggal']
+            status = f.cleaned_data['status']
+            no_pinjaman = f.cleaned_data['no_pinjaman']
+            jenis_transaksi = f.cleaned_data['jenis_transaksi']
+            nilai = f.cleaned_data['nilai']            
+            
+            ks = KasirGerai(tanggal=tanggal,kasir_lunas_id= ksa.id,jenis_transaksi=jenis_transaksi,status=status)
+            ks.save()
+            
+            if ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 2:
+                jurnal_bank_jkt_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 3:
+                jurnal_bank_suci_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 4:
+                jurnal_bank_du_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 5:
+                jurnal_bank_balubur_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 7:
+                jurnal_bank_gh(ks, request.user)            
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 8:
+                jurnal_bank_kopo(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 9:
+                jurnal_bank_cbr(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 10:
+                jurnal_bank_cipacing(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 11:
+                jurnal_bank_jatinangor(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 12:
+                jurnal_bank_cimahi_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 13:
+                jurnal_bank_bubat_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 14:
+                jurnal_bank_kordon_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 15:
+                jurnal_bank_cihanjuang_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 16:
+                jurnal_bank_maranata_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 17:
+                jurnal_bank_kircon_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 18:
+                jurnal_bank_crbp_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 19:
+                jurnal_bank_crbr_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 20:
+                jurnal_bank_cimuleuit_plns(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir_lunas.gerai_id == 113:
+                jurnal_bank_uber_plns(ks, request.user)
+            else:
+                jurnal_kas_plns(ks, request.user)
+
+            messages.add_message(request, messages.INFO,'### DATA KASIR TERPOSTING ###.')
+            return HttpResponseRedirect('/')
+        else:
+            variables = RequestContext(request, {'object': ks, 'form': f})
+            return render_to_response('kasir/kasir_pelunasan.html', variables)
+        
+def jurnal_kas_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_kas = get_object_or_404(Tbl_Akun, id=7L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_kas,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='1',tgl_trans = ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)  
+    
+
+def jurnal_bank_jkt_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=133L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300) 
+
+    
+def jurnal_bank_suci_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=134L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_du_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=136L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_balubur_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=141L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_gh_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=137L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_kopo_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=138L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_cbr_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=135L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_cipacing_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=139L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_jatinangor_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=140L)
+    
+    jjurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_cimahi_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=142L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_bubat_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=148L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_kordon_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=145L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_cihanjuan_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=143L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_maranata_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=144L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_kircon_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=146L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_crbp_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=147L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_crbr_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=147L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+        
+def jurnal_bank_cimuleuit_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=150L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+        
+def jurnal_bank_uber_plns(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=151L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Plns: NoRek: %s an: %s  ' % (ks.kasir_lunas.norek(), ks.kasir_lunas.pelunasan.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir_lunas.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_bank,
+        kredit = 0,debet = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pencairan,
+        debet = 0,kredit = ks.kasir_lunas.total_terima_bersih_plns(),id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir_lunas.gerai.kode_cabang,id_unit= 300)
+
+##################batas akhir jurnal kasir pelunasan        
+
+
+def data_approve(request,object_id):
+    approve=AkadGadai.objects.all()
+    view = approve.filter(gerai=object_id)
+    template = 'kasir/view/data_approve.html'
+    variables = RequestContext(request,{'page_numbers': page_numbers,'approve':approve,'view':view})
+    return render_to_response(template,variables)
+
+def lunas(request,object_id):    
+    a = Pelunasan.objects.all()
+    akad = a.filter(gerai=object_id).filter(kasirgerai__kasir_lunas=None)
+    template='kasir/view/data_lunas.html'
+    variable = RequestContext(request,{'akad': akad})
+    return render_to_response(template,variable)
+
+def mastertiket_gl_gl(request,object_id):
+    sekarang = datetime.date.today()  
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=u'1').filter(jenis=u'GL_GL_PUSAT')  
+    template = 'kasir/tiket/mastertiketgl_gl.html'
+    variables = RequestContext(request, {'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    return render_to_response(template, variables)
+'''
+def mastertiket_pencairan_kasir(request,object_id):
+    sekarang = datetime.date.today()  
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=u'1').filter(jenis=u'Pencairan_kasir')  
+    template = 'kasir/tiket/mastertiket_pencairan.html'
+    variables = RequestContext(request, {'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    return render_to_response(template, variables)
+'''
+def mastertiket_pencairan_kasir(request,object_id):
+    sekarang = datetime.date.today()
+    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=u'1').filter(jenis=u'Pencairan_kasir')  
+    template = 'kasir/tiket/mastertiket_pencairan_uji_coba.html'
+    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    return render_to_response(template, variables)
+
+def mastertiket_uji_coba_kasir(request,object_id):
+    dari = request.GET['dari']
+    hingga = request.GET['hingga']
+    if dari and hingga:
+        gr = Tbl_Transaksi.objects.filter(tgl_trans__range=(dari,hingga)).filter(id_cabang=object_id).filter(status_jurnal= '1').filter(jenis=u'Pencairan_kasir')  
+    else:
+        gr = Tbl_Transaksi.objects.all()
+    variables = RequestContext(request, {'g': gr,'cabang':Tbl_Cabang.objects.get(kode_cabang=object_id),'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    return render_to_response('kasir/tiket/mastertiket_pencairan.html', variables)
+
+def kasir(request, object_id):
+    sekarang = datetime.date.today
+    kasir = AkadGadai.objects.get(id=object_id)
+    form = KasirGeraiForm(initial={'status': 1,'kasir': kasir.id,'no_pinjaman':kasir.norek,'tanggal':sekarang,'nilai':int(kasir.nilai),
+        'nilai_terima_bersih':int(kasir.terima_bersih_all())})
+    form.fields['kasir'].widget = forms.HiddenInput()
+    form.fields['kasir_lunas'].widget = forms.HiddenInput()
+    form.fields['status'].widget = forms.HiddenInput()
+    template = 'kasir/kasir.html'
+    variable = RequestContext(request, {'kasir': kasir,'form': form})
+    return render_to_response(template,variable) 
+    
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def inputkasir(request, object_id):
+    kasir = AkadGadai.objects.get(id=object_id)
+    if request.method == 'POST':
+        f =  KasirGeraiForm(request.POST)
+        if f.is_valid():
+            tanggal = f.cleaned_data['tanggal']
+            status = f.cleaned_data['status']
+            no_pinjaman = f.cleaned_data['no_pinjaman']
+            jenis_transaksi = f.cleaned_data['jenis_transaksi']
+            nilai = f.cleaned_data['nilai']
+            nilai_pembulatan = f.cleaned_data['nilai_pembulatan']
+            selisih = f.cleaned_data['selisih']
+            messages.add_message(request, messages.INFO,'### DATA KASIR TERPOSTING ###.')
+            ks = KasirGerai(tanggal=tanggal,kasir=kasir,jenis_transaksi=jenis_transaksi,status=status,nilai_pembulatan=nilai_pembulatan,\
+                 selisih=selisih)
+            ks.save()
+            
+            if ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 2 and ks.selisih > 0:
+                jurnal_bank_jkt(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 3 and ks.selisih > 0:
+                jurnal_bank_suci(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 4 and ks.selisih > 0:
+                jurnal_bank_du(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 5 and ks.selisih > 0:
+                jurnal_bank_balubur(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 7 and ks.selisih > 0:
+                jurnal_bank_gh(ks, request.user)            
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 8 and ks.selisih > 0:
+                jurnal_bank_kopo(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 9 and ks.selisih > 0:
+                jurnal_bank_cbr(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 10 and ks.selisih > 0:
+                jurnal_bank_cipacing(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 11 and ks.selisih > 0:
+                jurnal_bank_jatinangor(ks , request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 12  and ks.selisih > 0:
+                jurnal_bank_cimahi(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 13  and ks.selisih > 0:
+                jurnal_bank_bubat(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 14  and ks.selisih > 0:
+                jurnal_bank_kordon(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 15  and ks.selisih > 0:
+                jurnal_bank_cihanjuang(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 16  and ks.selisih > 0:
+                jurnal_bank_maranata(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 17  and ks.selisih > 0:
+                jurnal_bank_kircon(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 18  and ks.selisih > 0:
+                jurnal_bank_crbp(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 19  and ks.selisih > 0:
+                jurnal_bank_crbr(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 20  and ks.selisih > 0:
+                jurnal_bank_cimuleuit(ks, request.user)
+            elif ks.jenis_transaksi == u'2' and ks.kasir.gerai_id == 113 and ks.selisih > 0:
+                jurnal_bank_uber(ks, request.user)
+            elif ks.jenis_transaksi == u'1' and ks.selisih < 0:
+                jurnal_pncr_kurang(ks, request.user)
+            else:
+                jurnal_pncr(ks, request.user)
+            
+            return HttpResponseRedirect('/')
+        else:
+            variables = RequestContext(request, {'object': kasir, 'form': f})
+            return render_to_response('kasir/kasir.html', variables)
+
+def jurnal_pncr_kurang(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_pdp_ops_lain = get_object_or_404(Tbl_Akun, id =539L)
+    a_kas = get_object_or_404(Tbl_Akun, id=7L)
+
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(round(ks.kasir.jasa_all())) - D(ks.kasir.beasimpan_all()),
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_pdp_ops_lain,
+        debet = 0 - (ks.selisih),kredit = 0,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_kas,
+        debet = 0,kredit = D(ks.kasir.nilai) - D(ks.kasir.adm_all()) - D(round(ks.kasir.jasa_all())) - D(ks.kasir.beasimpan_all()) - ks.selisih,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+
+
+def jurnal_pncr(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_pdp_ops_lain = get_object_or_404(Tbl_Akun, id =448L)
+    a_kas = get_object_or_404(Tbl_Akun, id=7L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(round(ks.kasir.jasa_all())) - D(ks.kasir.beasimpan_all()),
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_pdp_ops_lain,
+        kredit = ks.selisih,debet = 0,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_kas,
+        debet = 0,kredit = D(ks.kasir.nilai) - D(ks.kasir.adm_all()) - D(round(ks.kasir.jasa_all())) - D(ks.kasir.beasimpan_all()) - ks.selisih,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+####refisi tanggal 8.12.2014
+def jurnal_bank_jkt(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=133L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all()) - D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+####refisi tanggal 8.12.2014
+
+def jurnal_bank_suci(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=134L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) -  D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) -D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_du(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=136L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all()) - D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_balubur(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=141L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all()) - D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_gh(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=137L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_kopo(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=138L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all()) - D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all()) - D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_cbr(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=135L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) -D(ks.kasir.beasimpan_all()) - D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all()) - D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_cipacing(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=139L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all()) - D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_jatinangor(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=140L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='0',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_cimahi(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=142L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_bubat(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=148L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_kordon(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=145L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    
+def jurnal_bank_cihanjuang(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=143L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_maranata(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=144L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_kircon(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=146L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_crbp(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=147L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_crbr(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=147L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_cimuleuit(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=150L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+def jurnal_bank_uber(ks, user):
+    D = decimal.Decimal
+    a_titipan_pencairan = get_object_or_404(Tbl_Akun, id=298L)
+    a_bank = get_object_or_404(Tbl_Akun, id=151L)
+    
+    jurnal = Jurnal.objects.create(
+        diskripsi= 'Penc: NoRek: %s an: %s  ' % (ks.kasir.norek(), ks.kasir.agnasabah.nama),
+        tgl_trans =ks.tanggal,cu = user, mu = user,nobukti=ks.kasir.norek())
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_titipan_pencairan,
+        kredit = 0,debet = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
+    
+    jurnal.tbl_transaksi_set.create(
+        jenis = '%s' % ("Pencairan_kasir"), id_coa = a_bank,
+        debet = 0,kredit = D(ks.kasir.nilai) -D(ks.kasir.adm_all()) - D(ks.kasir.beasimpan_all())- D(ks.kasir.asumsi_pendapatan_jasa()),#D(ks.kasir.jasa_all()),,
+        id_product = '4',status_jurnal ='1',tgl_trans =ks.tanggal,
+        id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)

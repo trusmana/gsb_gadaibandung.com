@@ -1,0 +1,215 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}akadgadai{% endblock %}
+{% block extrahead %}
+{% include "alat/pelunasan.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block sidebar %}
+{% if titip%}
+<table align="left">
+   <tr>
+          <th>Ke</th><th>Tanggal </th><th>NILAI TITIPAN</th>
+   </tr>
+</table>
+{% endif%}
+{% for a in titip%}
+<table align="left">
+   <tr>
+          <th>{{forloop.counter}}</th><th align="center">{{a.tanggal|date:" d-m-Y"}} </th><th>{{a.nilai|number_format:0}}</th>
+   </tr>
+</table>
+{% endfor%}
+{% endblock %}
+{% block content %}
+<div id="jeding">
+  <img id="loading_gambar" src="/static/images/jeding.gif" alt="Load" />
+</div>
+<h2 align="center">MENU INPUT PELUNASAN<small><small>An: {{akad.agnasabah.nama}}</small></small></h2>
+{% if akad.lunas %}<h3 align="center">Nasabah ini Sudah Lunas </h3>{% elif akad.status_oto_plns == '2' %} <h3 align="center">Menunggu persetujuan dari manop </h3>
+{% elif akad.status_permintaan == '2' %} <H3 align="center">Status barang kreditur retur</h3>
+{% elif akad.status_oto_plns == '' or akad.status_oto_plns == None %}
+
+<form method="post" action="/akadgadai/{{akad.id}}/pelunasan/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table align="center">
+<!--{{ form.as_table}}-->
+    <tr><td> {{form.pelunasan}}</td></tr>
+    <tr><td>NOMOR REKENING NON</td><td>: {{form.norek}}</td></tr>
+    <tr><td>KANTOR BAYAR</td><td>: {{form.gerai}}</td></tr>
+    <tr>
+        <td>TANGGAL AKAD</td>
+        <td>: {{form.tgl_akad}}</td>
+        <td>TANGGAL JATUH TEMPO </td><td>: {{form.jatuhtempo }}</td>
+    </tr>    
+    <tr>
+        <td>TANGGAL PELUNASAN</td>
+        <td>: {{form.tanggal}}{% if form.tanggal.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>   
+
+    <tr>
+        <td></td>
+    </tr>
+    <tr>
+        <td>BARANG JAMINAN</td>
+        <td>
+            <b>: {% if akad.jenis_transaksi = 1 %}{{akad.barang.merk_kendaraan}} | {{akad.barang.type_kendaraan}} |  {{akad.barang.no_polisi}} |  {{akad.barang.accesoris_barang1}}{%else%}
+{{akad.barang.merk}} | {{akad.barang.type}} |  {{akad.barang.sn}} |  {{akad.barang.accesoris_barang1}} {%endif%} 
+            </b>
+        </td>
+    </tr> 
+ 
+    <tr>
+        <td>JENIS TRANSAKSI</td>
+        <td>{{form.jenis_barang}}<span style = " color : red ; " > Tekan TAB Setelah Memilih JENIS TRANSAKSI<span>{% if form.jenis_barang.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    <tr>
+        <td>NILAI PELUNASAN (Rp)</td>
+        <td>: {{form.nilai}}{% if form.nilai.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class ="formbarang" style= "display:none">
+        <td>TERLAMBAT HARI</td>
+        <td>: {{form.terlambat}}</td>
+    </tr>
+    
+    <tr class ="formbarang" style= "display:none">
+        <td>NILAI DENDA (Rp)</td>
+        <td>: {{form.denda}}{% if form.denda.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    <tr class ="formbarang" style= "display:none">
+        <td>NILAI JASA (Rp)</td>
+        <td>: {{form.bea_jasa}}</td>
+    </tr>
+    
+    <tr class="formkendaraan" style="display:none">
+        <td >TERLAMBAT HARI KENDARAAN</td>
+        <td>: {{form.terlambat_kendaraan}}</td>
+    </tr>
+    
+    <tr class="formkendaraan" style="display:none">
+        <td>DENDA KENDARAAN (Rp)</td>
+        <td> : {{form.denda_kendaraan}}</td>
+    </tr>   
+    
+    <tr class="formkendaraan" style="display:none">
+        <td>JASA KENDARAAN (Rp)</td>
+        <td>: {{form.bea_jasa_kendaraan}}</td>
+    </tr>
+    
+    <tr class="formkendaraan" style="display:none">
+        <td>TOTAL PELUNASAN KENDARAAN (Rp)</td><td></label>: {{ form.total_kendaraan}}</td>
+    </tr>
+    <tr class="formbarang" style="display:none">
+        <td>TOTAL PELUNASAN (Rp)</td><td></label>: {{ form.total}}</td>
+    </tr>
+	<tr>
+        <td>STATUS OTORISASI</td>
+        <td>: {{form.status}}</td>
+    </tr>
+	<tr>
+        <td>CATATAN OTORISASI</td>
+        <td>: {{form.comment}}</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>{{form.status_transaksi}}</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>{{form.lunas}}</td>
+    </tr>
+    <tr><td></td>
+        <td>{% if akad.status_kwlunas == '0' %} {% include "alat/save_no_back.html" %} {%else%} {%endif%}
+	    &nbsp;<a href="/" type="submit" value="Cancel" class="batal" />#Cancel</a>
+		<a href="#" onclick="printpage()" class="print">PRINT</a>
+	{% if akad.selisih_lunas > -999 or akad.selisih_lunas < 0 %}	{% include "alat/otorisasi.html" %}</td>{%endif%}
+    </tr>
+</table>
+</div>
+
+</form>
+{% endif %}
+<hr>
+
+
+{% if akad.status_oto_plns == '3' %}
+<form method="post" action="/akadgadai/{{akad.id}}/diskon_pelunasan/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table align="center">
+    <tr><td> {{form_diskon.pelunasan}}</td></tr>
+    <tr><td>NOMOR REKENING</td><td>: {{form_diskon.norek}}</td></tr>
+    <tr><td>KANTOR BAYAR</td><td>: {{form_diskon.gerai}}</td></tr>
+    <tr>
+        <td>TANGGAL AKAD</td>
+        <td>: {{form_diskon.tgl_akad}}</td>
+        <td>TANGGAL JATUH TEMPO </td><td>: {{form_diskon.jatuhtempo }}</td>
+    </tr>
+    <tr>
+        <td>TANGGAL PELUNASAN</td>
+        <td>: {{form_diskon.tanggal}}{% if form_diskon.tanggal.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td>JENIS TRANSAKSI</td>
+        <td> {{form_diskon.jenis_barang}} {% if form_diskon.jenis_barang.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr>
+        <td>NILAI PELUNASAN (Rp)</td>
+        <td>: {{form_diskon.nilai}}{% if form_diskon.nilai.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class ="formbarang" style= "display:none">
+        <td >TERLAMBAT HARI</td>
+        <td>: {{form_diskon.terlambat}}</td>
+    </tr>
+    
+    <tr class ="formbarang" style= "display:none">
+        <td>NILAI DENDA DISKON (Rp)</td>
+        <td>: {{form_diskon.denda}}{% if form_diskon.denda.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    <tr class ="formbarang" style= "display:none">
+        <td >NILAI JASA DISKON(Rp)</td>
+        <td>: {{form_diskon.bea_jasa}}</td>
+    </tr>
+    <tr class="formkendaraan" style="display:none">
+        <td >TERLAMBAT HARI KENDARAAN</td>
+        <td>: {{form_diskon.terlambat_kendaraan}}</td>
+    </tr>
+    <tr class="formkendaraan" style="display:none">
+        <td>DENDA KENDARAAN (Rp)</td>
+        <td> : {{form_diskon.denda_kendaraan}}</td>
+    </tr>
+    <tr class="formkendaraan" style="display:none">
+        <td >JASA KENDARAAN (Rp)</td>
+        <td>: {{form_diskon.bea_jasa_kendaraan}}</td>
+    </tr>
+    <tr class="formkendaraan" style="display:none">
+        <td>TOTAL PELUNASAN (Rp)</td><td></label>: {{ form_diskon.total_kendaraan}}</td>
+    </tr>
+    <tr class="formbarang" style="display:none">
+        <td>TOTAL PELUNASAN (Rp)</td><td></label>: {{ form_diskon.total}}</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>{{form_diskon.status_transaksi}}</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>{{form_diskon.lunas}}</td>
+    </tr>
+    <!--{{form_diskon.as_table}}-->
+    <tr><td></td>
+        <td>{% if akad.status_kwlunas == '0' %} {% include "alat/save_no_back.html" %}  {% else %} {%endif%}
+	    &nbsp <a href="/" type="submit" value="Cancel" class="batal" />Cancel</a>
+		<a href="#" onclick="printpage()" class="print">PRINT</a>
+		{%if akad.status_oto_plns == '' %}{% include "alat/otorisasi.html" %}{%endif%}</td>
+    </tr>
+</table>
+</div>
+
+</form>{% endif %}
+{% endblock %} 
+
+
+

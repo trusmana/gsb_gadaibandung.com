@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Rekap {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/kplgerai/{{kocab}}/pencairan_gerai/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center">
+<img src="/static/img/logoksu.png" width="105" height="110" align="left" hspace="20"/>
+<h3>DAFTAR TRANSAKSI PINJAMAN HARIAN</h3>
+<h4>GERAI {{nacab}} </h4>
+<h4>Periode : {{start_date}} s.d {{end_date}}</h4></td></tr>
+</table>
+<p>&nbsp;</p>
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+    <th rowspan= "2">No</th>
+    <th rowspan= "2">No Rekening</th>
+    <th rowspan= "2">No Nasabah</th>
+    <th rowspan= "2">Nama</th>
+    <th rowspan= "2">JW (hari)</th>
+    <th rowspan= "2">Jatuh Tempo</th>
+    <th rowspan= "2">Status</th>
+    <th rowspan= "2">Pinjaman (Rp)</th>
+    <th colspan = "4" >Pendapatan (Rp)</th>
+</tr>
+<tr>
+    <th>Jasa</th>
+    <th>Adm</th>
+    <th>Bea Simpan</th>
+    <th>Total</th>
+<tr>
+{% for p in tes %}	
+<tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ p.norek }}</td>
+    <td align="center">{{ p.nonas }}</td>
+    <td>{{ p.agnasabah.nama|truncatewords:2 }}</td>
+    <td align="center">{% if p.jenis_transaksi = 1 %}{{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}{{ p.jangka_waktu|default_if_none:"" }}</td>{% endif %}
+    <td align="center">{% if p.jenis_transaksi = 1  %}{{ p.jatuh_tempo_kendaraan|date:" d-M-Y"}}{% else %}{{ p.jatuhtempo|date:" d-m-Y"}}</abbr></td>{% endif %}
+    <td align="center">{{p.status_transaksi|default_if_none:"0"}}</td>
+    <td align="right">{{ p.nilai|number_format:0|default_if_none:"0" }}</td>
+    <td align = "right">{% if p.jenis_transaksi = 1 %}{{p.jasa_kendaraan|number_format:0}}{%else%}{{p.jasa|number_format:0}}</td>{%endif%}
+    <td align = "right">{% if p.jenis_transaksi = 1 %}{{p.adm_kendaraan|number_format:0|default_if_none:"0"}}{%else%}{{p.adm|number_format:0|default_if_none:"0"}}</td>{%endif%}
+    <td align = "right">{% if p.jenis_transaksi = 1 %}{{p.beasimpan_kendaraan|number_format:0}}{%else%}{{p.biayasimpan|number_format:0}}</td>{%endif%}
+    <td align = "right">{{p.jumlah_biaya|number_format:0|default_if_none:"0"}}</td>
+</tr>
+{% endfor %}
+<tr>
+    <th colspan="7" class="r"><strong>Jumlah</strong></th>
+    <th align="right" >{{nilai|number_format:0}}</th>
+    <th align="right" >{{jasa|number_format:0}}</th>
+    <th align="right" >{{adm|number_format:0}}</th>
+    <th align="right" >{{simpan|number_format:0}}</th>
+    <th align="right" >{{bersih|number_format:0}}</th>
+</tr>
+</table>
+<br/>
+<br/>
+<table  width="100%" class="no-break">
+<tr>
+  <td align="center">KEPALA GERAI<br/>
+<br />
+<br />
+<br />
+<br />
+<br />
+AYU
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+KANIT PJB
+<br />
+<br />
+<br />
+<br />
+<br />
+IQBAL YUSMANSYAH
+</td></tr>
+</table>

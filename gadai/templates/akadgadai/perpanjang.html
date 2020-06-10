@@ -1,0 +1,121 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}pk{% endblock %}
+{% block content %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript" href="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal").datepicker({dateFormat: 'yy-mm-dd'});
+    $("#id_tgl_lahir").datepicker({dateFormat: 'yy-mm-dd'});
+    $('input:text').setMask();
+       $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+});
+</script>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+	function startCalc(){
+	interval = setInterval("calc()",1);
+}
+function calc(){
+nilai = document.frmAdd.nilai.value;
+terlambat = document.frmAdd.terlambat.value;
+jw = document.frmAdd.jw.value;
+jw_kendaraan = document.frmAdd.jw_kendaraan.value;
+terlambat_kendaraan = document.frmAdd.terlambat_kendaraan.value;
+document.frmAdd.jw_kendaraan.value =jw_kendaraan
+
+document.frmAdd.jw.value =jw
+document.frmAdd.java_denda.value =  (parseInt(nilai) *  0.05/30) * document.frmAdd.terlambat.value;
+document.frmAdd.bea_jasa.value = (parseInt(nilai) *  0.02/7)*document.frmAdd.jw.value ;
+document.frmAdd.bea_jasa_terlambat.value =  (parseInt(nilai) *  0.02/7) * document.frmAdd.terlambat.value;
+/*kendaraan*/
+
+document.frmAdd.denda_kendaraan.value =  (parseInt(nilai) *  0.05/30) * document.frmAdd.terlambat_kendaraan.value;
+document.frmAdd.bea_jasa_kendaraan.value = (parseInt(nilai) *  0.04/30)*document.frmAdd.jw_kendaraan.value * 30;
+document.frmAdd.bea_jasa_terlambat_kendaraan.value =  (parseInt(nilai) *  0.04/30) * document.frmAdd.terlambat_kendaraan.value;
+}
+function stopCalc(){
+clearInterval(interval);
+}
+</script>
+<script type="text/javascript" href="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+    $(":radio.rad").click(function(){
+    $(".formbarang, .formkendaraan").hide()
+    if($(this).val() == "1"){
+    $(".formbarang").show();
+    }else{
+    $(".formkendaraan").show();
+    }
+    });
+    });
+</script>
+
+<h2 align="center">PERPANJANGAN AKAD GADAI [{{object.norek}}]</h2>
+<table border=0>
+<form  action="." method="POST" class="tabular" name="frmAdd">{% csrf_token %}
+
+<i>Untuk pindah kolom gunakan fungsi <b>TAB</b> </i>
+<h3 align="center">NO Rekening :</label>{{object.norek}}</h3>
+
+{{ form.non_field_errors }}
+    {{ form.nama.errors }}
+	<tr><td></td><td>{{form.agkredit}}</td></tr>
+	<tr><td> Tanggal :</td><td>{{form.tanggal}}</td></tr>
+    <tr><td> Nilai :</td><td>{{form.nilai}}</td></tr>
+    <tr>
+	<td><label for="jenis_barang"  width="200px" height="25px" >JENIS BARANG<span style = " color : red ; " >*<span>:</label></td>
+	<td>{{form.jenis_barang}}</td>
+    </tr>
+    <tr><td> Bunga Denda:</td><td>{{form.bunga_denda}}</td></tr>
+    <tr><td> Bunga Jasa:</td><td>{{form.bunga_jasa}}<i>Untuk kendaraan pilih 4 %</i></td></tr>
+
+	<tr class="formbarang" style="display:none" ><td> Jangka Waktu :</td><td>{{form.jw}}</td></tr>
+<tr class="formbarang" style="display:none" ><td> Hitung Hari :</td><td>{{form.hitung_hari}}<i>U/ PRPJ Sebelum jatuhtempo[masukan selisih hari,(jatuhtempo - tanggalsekarang),contoh 3],isi 0 apabila lewat jatuhtempo </i></td></tr>			
+	<tr class="formbarang" style="display:none" ><td> Terlambat Hari:</td><td>{{form.terlambat}}</td></tr>
+	<tr class="formbarang" style="display:none" ><td>Denda :</td><td> Rp. <input type="text" name="java_denda" id="java_denda" onFocus="startCalc();" onBlur="stopCalc();"readonly value="0" /></td>
+	<tr class="formbarang" style="display:none" ><td>Bea Jasa Terlambat :</td><td> Rp. <input type="text" name="bea_jasa_terlambat" id="bea_jasa_terlambat" onFocus="startCalc();" onBlur="stopCalc();"readonly value="0"/></td>
+	<tr class="formbarang" style="display:none" ><td> Bea Simpan :</td><td>{{form.bea_simpan}}</td></tr>
+    <tr class="formbarang" style="display:none" ><td>Bea Jasa :</td><td> Rp. <input type="text" name="bea_jasa" id="bea_jasa" onFocus="startCalc();" onBlur="stopCalc();"readonly value="0"/></td>
+
+    <tr class="formkendaraan" style="display:none" ><td> Jenis Kendaraan:</td><td>{{form.jenis_kendaraan}}</td></tr>	
+    <tr class="formkendaraan" style="display:none" ><td> Jangka Waktu :</td><td>{{form.jw_kendaraan}}</td></tr>
+    <tr class="formkendaraan" style="display:none" ><td> Hitung Hari :</td><td>{{form.hitung_hari_kendaraan}}<i>U/ Kendaraan PRPJ Sebelum jatuhtempo[masukan selisih hari,(jatuhtempo - tanggalsekarang),contoh 3],isi 0 apabila lewat jatuhtempo </i></td></tr>		
+	<tr class="formkendaraan" style="display:none" ><td> Terlambat Hari:</td><td>{{form.terlambat_kendaraan}}</td></tr>
+	<tr class="formkendaraan" style="display:none" ><td>Denda Kendaraan :</td><td> Rp. <input type="text" name="denda_kendaraan" id="denda_kendaraan" onFocus="startCalc();" onBlur="stopCalc();"readonly /></td>
+	<tr class="formkendaraan" style="display:none" ><td>Bea Jasa Terlambat Kendaraan:</td><td> Rp. <input type="text" name="bea_jasa_terlambat_kendaraan" id="bea_jasa_terlambat_kendaraan" onFocus="startCalc();" onBlur="stopCalc();"readonly /></td>
+	<tr class="formkendaraan" style="display:none" ><td> Bea Simpan Kendaraan:</td><td>{{form.beasimpan_kendaraan}}</td></tr>
+    <tr class="formkendaraan" style="display:none" ><td>Bea Jasa Kendaraan :</td><td> Rp. <input type="text" name="bea_jasa_kendaraan" id="bea_jasa_kendaraan" onFocus="startCalc();" onBlur="stopCalc();"readonly /></td>
+	   
+    <tr><td> Gerai :</td><td>{{form.gerai}}</td></tr>
+	<tr><td> Status Transaksi :</td><td>{{form.status}}</td></tr>
+
+    <tr><td><label></td><td><input type="submit" value="Simpan" /></td></tr>
+
+        
+</form>
+</table>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

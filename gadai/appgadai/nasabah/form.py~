@@ -1,0 +1,31 @@
+from django import forms
+from django.forms.widgets import RadioSelect, CheckboxSelectMultiple
+from gadai.appgadai.models import Nasabah,KELAMIN,JENIS_PEKERJAAN
+
+class NasabahForm(forms.Form):
+    nama = forms.CharField(max_length=35)
+    tgl_lahir = forms.DateField(widget=forms.TextInput(attrs={'size': 10}))
+    tempat = forms.CharField(label="Tempat lahir",max_length=15)
+    no_ktp = forms.CharField( widget=forms.TextInput( attrs={'size': 20}))
+    alamat_ktp = forms.CharField(widget=forms.TextInput(attrs={'size': 30}))
+    rt_ktp = forms.CharField( widget=forms.TextInput( attrs={'size': 4}))
+    rw_ktp = forms.CharField( widget=forms.TextInput( attrs={'size': 4}))
+    telepon_ktp = forms.CharField( widget=forms.TextInput(attrs={'size':30}))
+    hp_ktp = forms.CharField( widget=forms.TextInput(attrs={'size':30}))
+    kelurahan_ktp = forms.CharField(widget=forms.TextInput(attrs={'size': 15}))
+    kecamatan_ktp = forms.CharField(widget=forms.TextInput(attrs={'size': 15}))
+
+    #alamat_domisili = forms.CharField(widget=forms.TextInput(attrs={'size': 30}))
+    #rt_domisili = forms.CharField( widget=forms.TextInput( attrs={'size': 4}))
+    #rw_domisili = forms.CharField( widget=forms.TextInput( attrs={'size': 4}))
+    #telepon_domisili = forms.CharField(widget=forms.TextInput(attrs={'size':30}))
+    #hp_domisili = forms.CharField( widget=forms.TextInput(attrs={'size':30}))
+    #kelurahan_domisili = forms.CharField(widget=forms.TextInput(attrs={'size': 15}))
+    #kecamatan_domisili = forms.CharField(widget=forms.TextInput(attrs={'size': 15}))
+    jenis_pekerjaan = forms.ChoiceField(widget=forms.Select(),choices=JENIS_PEKERJAAN)
+ 
+    alamat_kantor =forms.CharField(widget=forms.TextInput(attrs={'size': 30}))
+    kode_pos = forms.CharField( widget=forms.TextInput( attrs={'size': 10}))
+    telepon_kantor =forms.CharField(widget=forms.TextInput(attrs={'size':30}))
+    email = forms.CharField(widget=forms.TextInput(attrs={'size': 30}))
+    jenis_kelamin = forms.ChoiceField(widget=forms.Select(), choices=KELAMIN)

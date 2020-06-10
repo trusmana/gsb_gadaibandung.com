@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Rekap {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 10px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 0px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;}
+.tableizer-table td {padding: 0px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;border: 1px solid #CCC;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/">Kembali</a> ]</p>
+<table width="100%">
+<tr>
+	<td width="100" align="center">
+		<img src="/static/img/logoksu.png" width="60" height="60" align="left" hspace="10"/>
+                <h3 align="Center">UNIT PJB GERAI {{gr.nama_cabang}}</h3>
+		<h3>FORMULIR PENGIRIMAN BARANG DARI GERAI KE GUDANG</h3>
+		<h5>Bulan {{tanggal|date:"F Y"}}</h5>
+		
+	</td>
+</tr>
+</table>
+<table width="100%">
+</td>
+<td width="230" >
+<p><h5>Kepada :	<br/>
+Kepala Gudang Gadai<br/>										
+Jl. Jakarta No. 71 Bandung<br/>
+Tanggal Kirim :  {% now "d F Y" %}
+<h5></p></td>
+<td width="100" >
+<p><h5>No. Formulir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :<br/>
+Dikirim Dengan&nbsp;:<br/>
+No. Kendaraan&nbsp;&nbsp;:[ D 1234 RA ] / [ D 1432 RA ]<br/>
+Nama Driver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:[ IMAM ] / [ SANDI ] / [WAWAN] / [FADIL]
+</h5></p></td></table>
+<table border="1" bordercolor="silver " style="background-color:#FFFFFF" width="100%" cellpadding="0" cellspacing="0">
+<tr class="tableizer-firstrow">
+	<th rowspan= "2">NO</th>
+	<th rowspan= "2">NO KWITANSI</th>
+	<th rowspan= "2">NAMA NASABAH</th>
+	<th rowspan= "2">JW</th>
+	<th rowspan= "2">Jatuh Tempo</th>
+	<th rowspan= "2" >SPESIFIKASI BARANG</th>
+	<th colspan = "8" >JENIS DAN JUMLAH BARANG</th>
+</tr>
+<tr >
+	<th>JENIS BARANG</th>
+	<th>HP</th>
+	<th>CM</th>
+	<th>LT</th>
+	<th>TV</th>
+	<th>PS</th>
+	<th>SM</th>
+	<th>MB</th>
+
+{% for p in gerai %}	
+
+<tr>
+	<td align="center"><font size="1">{{ forloop.counter }}</font></td>
+	<td align="center"><font size="1">{{ p.norek }}</font></td>
+	<td><font size="1">{{ p.agnasabah.nama|truncatewords:2 }}</font></td>
+	<td align="center"><font size="1">{{ p.jangka_waktu }}</font></td>
+	<td align="center"><font size="1">{{p.jatuhtempo}}</font></td>
+	<td align="left"><font size="1">{{p.barang.merk}}, {{p.barang.type}}, {{p.barang.warna}},(SN {{p.barang.sn}}). </font></td>
+	<td align="left"><font size="1">{{p.barang.get_jenis_barang_display}}</font></td>
+	<td align = "center"><font size="1">&nbsp;</font></td>
+	<td align = "center"><font size="1">&nbsp;</font></td>
+	<td align = "center"><font size="1">&nbsp;</font></td>
+	<td align = "center"><font size="1">&nbsp;</font></td>
+	<td align = "center"><font size="1">&nbsp;</font></td>
+	<td align = "center"><font size="1">&nbsp;</font></td>
+	<td align = "center"><font size="1">&nbsp;</font></td>
+</tr>
+{% endfor %}
+<tr>
+	<td colspan="7" class="r" align="center"><strong>Jumlah </strong></td>{% for j in rekap_jenis %}
+	<td><font size="1">{{ j.1 }}</font></td>
+	{% endfor %}
+</tr>
+
+<tr>
+	<td colspan="7" class="r" align="center"><strong>Jumlah Dikirim</strong></td>{% for j in rekap_jenis %}
+	<td ><font size="1">{{ j.1 }}</font></td>
+	{% endfor %}
+</tr>
+<tr><td rowspan="2" colspan= "14" align="center">Bersama ini kami kirim dan serahkan 1 (satu) Cash Box dari Gerai {{gr.nama}} Ke Gudang</td><tr>
+</table>
+<br/>
+
+
+<p align="center"><b>RETUR PERMINTAAN BARANG</b></p>
+
+<table border="1" bordercolor="silver " style="background-color:#FFFFFF" width="100%" cellpadding="0" cellspacing="0">
+<tr class="tableizer-firstrow">
+	<th rowspan= "2">NO</th>
+	<th rowspan= "2">NO KWITANSI</th>
+	<th rowspan= "2">NAMA NASABAH</th>
+    	<th rowspan= "2">SPEC BARANG</th>
+    	<th rowspan= "2" >JENIS BARANG</th>
+	<th rowspan= "2">TGL JATUH TEMPO</th>
+	<th rowspan= "2">KETERANGAN</th>
+</tr>
+<tr >
+{% for k in brg_retur %}	
+
+<tr>
+	<td align="center"><font size="1">{{ forloop.counter }}</font></td>
+	<td align="center"><font size="1">{{k.norek }}</font></td>
+	<td><font size="1">{{ k.agnasabah.nama|truncatewords:2 }}</font></td>
+    	<td align="left"><font size="1">{{k.barang.merk}}, {{k.barang.type}}, {{p.barang.warna}},(SN {{p.barang.sn}}). </font></td>
+    	<td align="left"><font size="1">{{k.barang.get_jenis_barang_display}}</font></td>
+	<td align="center"><font size="1">{{k.jatuhtempo}}</font></td>	
+	<td align="left"><font size="1">{{k.barang.get_jenis_barang_display}}</font></td>
+</tr>
+
+{% endfor %}
+
+</table >
+<table  width="100%" >
+<tr>
+  <td width="300" align="center">Bandung, {% now "d F Y" %}<br/>DIKIRIM OLEH<br/> KA. GERAI
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+[ {{gr.adm_gadai}} ]
+  </td>
+<td width="500" align="center">PETUGAS PICK UP<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+[ IMAM / SANDI / WAWAN / FADIL]
+</td>
+<td align="center">DITERIMA OLEH<br/>
+  KA. GUDANG
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+[ M. SOFYAN ]
+ </td></tr>
+</table>

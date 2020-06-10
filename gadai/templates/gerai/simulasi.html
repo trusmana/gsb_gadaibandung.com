@@ -1,0 +1,434 @@
+<html>
+<head class="head"><link rel="icon" type="image/ico" href="static/images/ra.ico" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>KSURA</title>
+<script type="text/javascript" src="static/js/hoverIntent.js"></script>
+<script src="/static/js/jquery-1.3.2.min.js?49" type="text/javascript"></script>
+<script src="/static/js/master.js?49" type="text/javascript"></script>
+<link href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" type="text/css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<style>
+body {  background-color: #FF6600; font-family: Times New roman; width:auto;height:auto;}
+#login_form {
+		background: green;
+		padding: 0.5em 1.5em 0.1em;
+		margin:0 auto 150px;
+		width: auto;height:auto;
+		border: 1px solid green;
+		border-top:8px;
+		-webkit-border-radius:3px;
+		-moz-border-radius:3px;
+		border-radius:10px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.5) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+.pencairan {
+	-moz-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	box-shadow:inset 0px 1px 0px 0px #f29c93;
+	background-color:#fe1900;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #d83526;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:12px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #b23e35;
+}.classname:active {
+	position:relative;
+	top:1px;
+}
+
+.perpanjangan {
+	-moz-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	box-shadow:inset 0px 1px 0px 0px #f29c93;
+	background-color:#b83a2c;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #d83526;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:12px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #b23e35;
+}.classname:active {
+	position:relative;
+	top:1px;
+}
+
+.pelunasan {
+	-moz-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	box-shadow:inset 0px 1px 0px 0px #f29c93;
+	background-color:orange;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #d83526;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:12px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #b23e35;
+}.classname:active {
+	position:relative;
+	top:1px;
+}
+
+.reset {
+	-moz-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	box-shadow:inset 0px 1px 0px 0px #f29c93;
+	background-color:#78332b;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #d83526;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:12px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #b23e35;
+}.classname:active {
+	position:relative;
+	top:1px;
+}
+	
+.kembali {
+	-moz-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #f29c93;
+	box-shadow:inset 0px 1px 0px 0px #f29c93;
+	background-color:green;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #d83526;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:12px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #b23e35;
+}.classname:active {
+	position:relative;
+	top:1px;
+}
+	
+
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $("input.uang").setMask();
+    $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+    $('#hasilna').fadeIn('slow');
+});
+
+function hitungJasa() {
+    var jasa = 0;
+    var jw = $('#jw').val();
+    if (jw == '14'){
+        $("input.rp_plafon").each(function() {
+            /*jasa = parseFloat(to_number(this.value)) * 0.02/7 * (eval($("#jw").val()));*/
+            jasa = parseFloat(to_number(this.value)) * 4.3/100 ;
+    });
+
+        $("#jasa").val(format_number(String(jasa)));   
+    }
+
+    if (jw == '31'){
+        $("input.rp_plafon").each(function() {
+            /*jasa = parseFloat(to_number(this.value)) * 0.02/7 * (eval($("#jw").val()));*/
+            jasa = parseFloat(to_number(this.value)) * 7.8/100 ;
+    });
+
+        $("#jasa").val(format_number(String(jasa)));   
+    }
+
+    if (jw == '30')
+    {
+        $("input.rp_plafon").each(function() {
+            /*jasa = parseFloat(to_number(this.value)) * 0.02/7 * (eval($("#jw").val()));*/
+            jasa = parseFloat(to_number(this.value)) * 4/100 ;
+    });
+
+        $("#jasa").val(format_number(String(jasa))); 
+    }
+}
+
+function hitungDenda() {
+    var jasa_terlambat = 0;
+    var denda = 0;
+    var terlambat;
+    $("input.rp_plafon").each(function() {
+        denda = parseFloat(to_number(this.value)) * 0.05/30 * (eval($("#terlambat").val()));
+    });
+    $("#denda").val(format_number(String(denda))); 
+    $("input.rp_plafon").each(function() {
+        jasa_terlambat = parseFloat(to_number(this.value)) * 0.02/7 * (eval($("#terlambat").val()));
+    });
+    $("#jasa_terlambat").val(format_number(String(jasa_terlambat)))  
+}
+
+function totalCair(){
+    $("input.rp_plafon").each(function(){
+        totalpencairan = parseFloat(to_number(this.value)) - parseFloat(to_number($("#jasa").val())) - parseFloat(to_number($("#beasimpan").val())) - parseFloat(to_number($("#adm").val())) ;
+    });
+    $("#total").val(format_number(String(totalpencairan)));
+    alert("Nilai Pencairan  Rp: " + totalpencairan );
+}
+
+function totalPerpanjang(){
+    $("input.rp_plafon").each(function(){
+totalperpanjang =parseFloat(to_number($("#jasa").val())) + parseFloat(to_number($("#denda").val()))+parseFloat(to_number($("#jasa_terlambat").val())) + parseFloat(to_number($("#beasimpan").val()));
+    });
+    $("#totalprpj").val(format_number(String(totalperpanjang)));
+    alert("Nilai Perpanjang  Rp: " + totalperpanjang );
+}
+
+function totalPelunasan(){
+    $("input.rp_plafon").each(function(){
+totalpelunasan =parseFloat(to_number(this.value))+parseFloat(to_number($("#denda").val()))+parseFloat(to_number($("#jasa_terlambat").val()));
+    });
+    $("#totalpelunasan").val(format_number(String(totalpelunasan)));
+    alert("Nilai Pelunasan  Rp: " + totalpelunasan );
+}
+
+
+function batal()
+{
+        $('#id_plafon').val('0');
+        $('#total').val('0');
+        $('#beasimpan').val('0');
+        $('#adm').val('0');
+        $('#jasa').val('0');
+        $('#bersih').val('0');
+        $('#jw').val('');
+        $('#jenis').val('');
+        $('#denda').val('0');
+        $('#jasa_terlambat').val('0');
+        $('#totalprpj').val('0');
+        $('#terlambat').val('0');
+        $('#totalpelunasan').val('0');    
+}
+
+function jenisbarang(){
+    var jenis= $('#jenis').val();
+    var jw = $('#jw').val();
+
+    if (jenis == "HP" && jw == '14')
+        {
+            $('#beasimpan').val(format_number(String('15000')))
+            $('#adm').val(format_number(String('15000')))
+        }
+    else if (jenis == "HP" && jw == '31')
+        {
+            $('#beasimpan').val(format_number(String('30000')))
+            $('#adm').val(format_number(String('15000')))
+        }
+
+    else if (jenis =="LAPTOP/NB" && jw == '14')
+        {
+            $('#beasimpan').val(format_number(String('15000')))
+            $('#adm').val(format_number(String('15000')))
+        }
+
+    else if (jenis =="LAPTOP/NB" && jw == '31')
+        {
+            $('#beasimpan').val(format_number(String('30000')))
+            $('#adm').val(format_number(String('15000')))
+        }
+
+    else if (jenis=="KAMERA" && jw == '14')
+        {
+            $('#beasimpan').val(format_number(String('15000')))
+            $('#adm').val(format_number(String('15000')))
+        }
+    else if (jenis=="KAMERA" && jw == '31')
+        {
+            $('#beasimpan').val(format_number(String('30000')))
+            $('#adm').val(format_number(String('15000')))
+        }
+
+    else if (jenis =="PS" && jw == '14')
+        {
+            $('#beasimpan').val(format_number(String('15000')))
+            $('#adm').val(format_number(String('15000')))
+        }
+    else if (jenis =="PS" && jw == '31')
+        {
+            $('#beasimpan').val(format_number(String('30000')))
+            $('#adm').val(format_number(String('15000')))
+        }
+
+    else if (jenis == "TV_LCD" && jw == '14')
+        {
+            $('#beasimpan').val(format_number(String('15000')))
+            $('#adm').val(format_number(String('150000')))
+        }
+    else if (jenis == "TV_LCD" && jw == '31')
+        {
+            $('#beasimpan').val(format_number(String('30000')))
+            $('#adm').val(format_number(String('150000')))
+        }
+
+    else if (jenis == "MOBIL")
+        {
+            $('#beasimpan').val(format_number(String('450000')))
+            $('#adm').val(format_number(String('150000')))
+        }
+    else if (jenis == "MOTOR")
+        {
+            $('#beasimpan').val(format_number(String('75000')))
+            $('#adm').val(format_number(String('50000')))
+        }
+}
+
+</script>
+</head>
+
+<body>
+<a href="/" class="kembali">Back</a>
+
+<center>
+		<div class="header" style="margin-top: 2px;">
+		<img src="/static/img/logoksu.png" title="" alt="" style ="float: center;"/>
+		<h4> SIMULASI HITUNGAN DIV GADAI </h4>
+		
+	</div>
+	</center>
+
+<div id="login_form">
+<table style="width: 50%;" cellpadding="1" cellspacing="1" align="center">
+
+    <tr>
+		<td><label for="id_plafon"  width="200px" height="25px">Nilai Pinjaman </label></td>
+		<td>: Rp. <input name="plafon" id="id_plafon" alt="integer" type="text" class="rp_plafon uang" value="0" onchange="hitungJasa()"/></td>
+
+	</tr>
+
+    <tr>
+		<td><label for="id_terlambat"  width="200px" height="25px">Terlambat PRPJ </label></td>
+		<td>: <input name="terlambat" id="terlambat" type="text" class="uang" value="0" onchange="hitungDenda()"/></td>
+
+	</tr>
+
+    <tr>
+		<td><label for="id_jw"  width="200px" height="25px">Jangka Waktu</label></td>
+			<td>: <select name="jw" id="jw" onchange="hitungJasa()">
+					<option value="0">-- PILIH --</option>
+					<!--<option value="7">7</option>
+			                <option value="14">14</option>
+			                <option value="21">21</option>
+			                <option value="28">28</option>
+			                <option value="30">30</option>-->
+                                        <option value="14">14</option>
+			                <option value="31">31</option>
+		    			<option value="30">1 Bulan</option>
+                                        <!--
+			                <option value="60">2 Bulan</option>                    
+			                <option value="90">3 Bulan</option>
+			                <option value="120">4 Bulan</option> 
+                                        -->
+                   </select></td>
+	</tr>
+
+
+    <tr>
+		<td><label for="id_jenis"  width="200px" height="25px">Jenis Barang</label></td>
+			<td>: <select name="jenis" id="jenis" onchange="jenisbarang()">
+				<option value="">-- PILIH --</option>
+				<option value="HP">HP</option>
+  	        	        <option value="LAPTOP/NB">LAPTOP/NB</option>
+		                <option value="KAMERA">KAMERA</option>
+                	        <option value="PS">PS</option>
+		                <option value="TV_LCD">TV LCD</option>
+				<option value="MOBIL">MOBIL</option>
+		                <option value="MOTOR">MOTOR</option> 
+                   </select></td>
+	</tr>
+    
+    <tr>
+        <td>Jasa</td>
+        <td>: Rp. <input readonly="true" name="jasa" type="text" id="jasa" class="uang" value="0"/></td>
+    </tr>
+
+    <tr>
+        <td>Adm</td>
+        <td>: Rp. <input readonly="true" name="adm"   type="text" class="uang" value="0" id="adm" /></td>
+    </tr>
+    
+    <tr>
+        <td>Bea Simpan</td>
+        <td>: Rp. <input readonly="true" name="beasimpan"type="text" class="uang" value="0" id="beasimpan" /></td>
+    </tr>
+ 
+    <tr>
+        <td>Denda prpj</td>
+        <td>: Rp. <input readonly="true" name="denda" type="text" class="uang" value="0" id="denda" /></td>
+    </tr>
+
+    <tr>
+        <td>Jasa Terlambat prpj</td>
+        <td>: Rp. <input readonly="true" name="jasa_terlambat" type="text" class="uang" value="0" id="jasa_terlambat" /></td>
+    </tr>
+
+    <tr>
+		<td colspan="2" align="center">
+            <button type="button" class="pencairan" onclick="totalCair()">Pencairan</button>
+            <button type="button" class="perpanjangan" onclick="totalPerpanjang()">Perpanjang</button>
+            <button type="button" class="pelunasan" onclick="totalPelunasan()">Pelunasan</button>
+            <button type="button" class="reset" onclick="batal()">Reset</button>
+        </td>		
+	</tr>
+    
+    <tr>
+        <td><b>Total Pencairan</b></td>
+        <td>: Rp. <input readonly="true" name="total"  type="text" class="uang" value="0" id="total" /></td>
+        
+    </tr> 
+
+    <tr>
+        <td><b>Total Perpanjangan</b></td>
+        <td>: Rp. <input readonly="true" name="totalprpj"  type="text" class="uang" value="0" id="totalprpj" /></td>
+    </tr> 
+
+    <tr>
+        <td><b>Total Pelunasan</b></td>
+        <td>: Rp. <input readonly="true" name="totalpelunasan"  type="text" class="uang" value="0" id="totalpelunasan" /></td>
+    </tr>
+
+</div>
+</table>
+ 
+
+
+
+</body>
+</html>

@@ -1,0 +1,304 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/akadpencairan.html" %}
+{% endblock %}
+{% block content %}
+<h2 align="center">AKAD BARU BARANG BERBEDA ATAS NAMA : {{object.nama}}</h2>
+<form class ="tabular" method='POST' action="/gerai/baru_beda_barang/" enctype="multipart/form-data" >{% csrf_token %}
+<table align="left" >
+	
+    <tr><td></td><td>{{form.agnasabah}}</td></tr>
+    <tr>
+        <td>GERAI </td><td>: {{form.gerai}}</td>
+    </tr>
+    <tr>
+        <td>TANGGAL </td><td>: {{form.tanggal}}</td>
+    </tr>
+	 <tr>
+        <td>JENIS TRANSAKSI </td><td> {{form.jenis_transaksi}}</td>
+    </tr>
+    <tr class="formkendaraan" style="display:none">
+        <td> <!--PILIH JASA :--> </td><td> {{form.pilih_jasa}}</td>
+    </tr>
+	<tr>
+	<td><label for="id_lampiran_dokumen"  width="200px" height="25px" >LAMPIRAN DOKUMEN<span style = " color : red ; " >*<span></label></td>
+	<td>: {{form.lampiran_dokumen}} {% if form.lampiran_dokumen.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+    <tr>
+        <td>NILAI TAKSIRAN</td><td>: {{form.taksir}}</td>
+    </tr>
+	<tr class ="formbarang" style= "display:none">
+		<td><label for="id_jenis_barang_0">JENIS BARANG</label></td>
+		<td>:
+		<label for="id_jenis_barang_1"><input name="jenis_barang" type="radio" class="barang" value="1" id="id_jenis_barang_1" /> HP</label>
+		<label for="id_jenis_barang_2"><input name="jenis_barang" type="radio" class="barang" value="2" id="id_jenis_barang_2" /> LAPTOP/NB</label>
+		<label for="id_jenis_barang_3"><input name="jenis_barang" type="radio" class="barang" value="3" id="id_jenis_barang_3" /> KAMERA</label>
+		<label for="id_jenis_barang_4"><input name="jenis_barang" type="radio" class="barang" value="4" id="id_jenis_barang_4" /> PS</label>
+		<label for="id_jenis_barang_5"><input name="jenis_barang" type="radio" class="barang" value="5" id="id_jenis_barang_5" /> TV LCD</label>
+		</td>
+	</tr>
+	
+	<tr class ="formbarang" style= "display:none">
+        <td><label for="id_sn"  width="200px" height="25px" >SN /IMAY<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.sn}} {% if form.sn.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>	
+
+    <tr class ="formbarang" style= "display:none">
+        <td><label for="id_warna"  width="200px" height="25px" >WARNA<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.warna}} {% if form.warna.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+   
+    <tr class ="formbarang" style= "display:none">
+        <td><label for="id_tahun_pembuatan"  width="200px" height="25px" >TAHUN PEMBUATAN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.tahun_pembuatan}} {% if form.tahun_pembuatan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>	
+
+    <tr class ="formbarang" style= "display:none">
+        <td><label for="id_bukan_produksi"  width="200px" height="25px" >BULAN PRODUKSI<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.bulan_produksi}} {% if form.bulan_produksi.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+    <tr class ="formhp " style= "display:none">
+		<td>CHARGE<span style = " color : red ; " >*<span></td>
+		<td>: {{form.charger}} &nbsp KONDISI : {{form.kondisi_charger}} {% if form.charger.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{%else%}{% if form.kondisi_charger.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{%endif%}</td>
+	</tr>
+	
+	
+	
+	<tr class ="formhp" style= "display:none">
+		<td>BATRE <span style = " color : red ; " >*<span></td>
+		<td>: {{form.batre}} &nbsp KONDISI : {{form.kondisi_batre}} {% if form.kondisi_batre.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.batre.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formhp" style= "display:none">
+		<td>KEYBOARD / KEYPATH <span style = " color : red ; " >*<span></td>
+		<td>: {{form.keybord}} &nbsp KONDISI : {{form.kondisi_keybord}} {% if form.kondisi_keybord.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.keybord.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+    <tr class ="formhp" style= "display:none">
+		<td>PASSWORD <span style = " color : red ; " >*<span></td>
+		<td>: {{form.password}} &nbsp KEY PASSWORD : {{form.password_barang}}{% if form.password_barang.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.keybord.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		&nbsp;&nbsp;  <span style = " color : red ; " >ISI SESUAI DENGAN PASS JAMINAN</span>
+		</td>
+    </tr>
+	<tr class ="formhp" style= "display:none">
+		<td>CASSING <span style = " color : red ; " >*<span></td>
+		<td>: {{form.cassing}} &nbsp KONDISI : {{form.kondisi_cassing}} {% if form.kondisi_cassing.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.cassing.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formhp" style= "display:none">
+		<td>LAYAR <span style = " color : red ; " >*<span></td>
+		<td>: {{form.layar}} &nbsp KONDISI : {{form.kondisi_layar}} {% if form.kondisi_layar.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.layar.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formtv" style= "display:none">
+		<td>LAYAR TV<span style = " color : red ; " >*<span></td>
+		<td>: {{form.layar_tv}} &nbsp KONDISI : {{form.kondisi_layar_tv}} {% if form.kondisi_layar_tv.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.layar.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formtv" style= "display:none">
+		<td>REMOTE<span style = " color : red ; " >*<span></td>
+		<td>: {{form.remote}} &nbsp KONDISI : {{form.kondisi_remote}} {% if form.kondisi_remote.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.remote.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formkamera" style= "display:none">
+		<td>LENSA <span style = " color : red ; " >*<span></td>
+		<td>: {{form.lensa}} &nbsp KONDISI : {{form.kondisi_lensa}} {% if form.kondisi_lensa.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.lensa.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formkamera" style= "display:none">
+		<td>BATRE KAMERA <span style = " color : red ; " >*<span></td>
+		<td>: {{form.batre_kamera}} &nbsp KONDISI : {{form.kondisi_batre_kamera}} {% if form.kondisi_batre_kamera.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.batre_kamera.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formkamera" style= "display:none">
+		<td>CASSING KAMERA <span style = " color : red ; " >*<span></td>
+		<td>: {{form.cassing_kamera}} &nbsp KONDISI : {{form.kondisi_cassing_kamera}} {% if form.kondisi_cassing_kamera.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.cassing_kamera.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+		
+	<tr class ="formps" style= "display:none">
+		<td>OPTIK PS <span style = " color : red ; " >*<span></td>
+		<td>: {{form.optik_ps}} &nbsp KONDISI : {{form.kondisi_optik_ps}} {% if form.kondisi_optik_ps.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.optik_ps.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formps" style= "display:none">
+		<td>STICK PS <span style = " color : red ; " >*<span></td>
+		<td>: {{form.stick}} &nbsp KONDISI : {{form.kondisi_stick}} {% if form.kondisi_stick.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.stick.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formps" style= "display:none">
+		<td>HDMI <span style = " color : red ; " >*<span></td>
+		<td>: {{form.hdmi}} &nbsp KONDISI : {{form.kondisi_hdmi}} {% if form.kondisi_hdmi.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.hdmi.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formps" style= "display:none">
+		<td>HARDDISK <span style = " color : red ; " >*<span></td>
+		<td>: {{form.harddisk}} &nbsp KONDISI : {{form.kondisi_harddisk}} {% if form.kondisi_harddisk.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% else %}{% if form.harddisk.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}{% endif %}
+		</td>
+    </tr>
+
+	<tr class ="formbarang" style= "display:none">
+		<td>DUS <span style = " color : red ; " >*<span></td>
+		<td>: {{form.dus}} {% if form.dus.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}
+		</td>
+    </tr>
+	
+	<tr class ="formbarang" style= "display:none">
+		<td>TAS<span style = " color : red ; " >*<span></td>
+		<td>: {{form.tas}} {% if form.tas.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}
+		</td>
+    </tr>
+	
+	
+	
+	
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_merk_kendaraan"  width="200px" height="25px" >MERK KENDARAAN </label></td>
+        <td>: {{form.merk_kendaraan}} {% if form.merk_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_jenis_kendaraan"  width="200px" height="25px" >JENIS KENDARAAN</label></td>
+        <td>: {{form.jenis_kendaraan}} {% if form.jenis_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_type_kendaraan" width="200px" height="25px">TYPE KENDARAAN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.type_kendaraan}} {% if form.type_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_tahun_pembuatan_kendaraan"  width="200px" height="25px" >TAHUN PEMBUATAN KENDARAAN:</label></td>
+        <td>: {{form.tahun_pembuatan_kendaraan}} {% if form.tahun_pembuatan_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_no_polisi"  width="200px" height="25px">NOMOR POLISI<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.no_polisi}} {% if form.no_polisi.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_no_rangka"  width="200px" height="25px" >NOMOR RANGKA<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.no_rangka}} {% if form.no_rangka.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_no_mesin" width="200px" height="25px">NOMOR MESIN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.no_mesin}} {% if form.no_mesin.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_warna_kendaraan"  width="200px" height="25px" >WARNA KENDARAAN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.warna_kendaraan}} {% if form.warna_kendaraan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_no_bpkb"  width="200px" height="25px" >NOMOR BPKB<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.no_bpkb}} {% if form.no_bpkb.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan" style="display:none">
+       <td><label for="id_no_faktur"  width="200px" height="25px" >NOMOR FAKTUR<span style = " color : red ; " >*<span></label></td>
+       <td>: {{form.no_faktur}} {% if form.no_faktur.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr class="formkendaraan" style="display:none">
+        <td><label for="id_stn_atas_nama"  width="200px" height="25px" >STNK ATAS NAMA<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.stnk_atas_nama}} {% if form.stnk_atas_nama.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_bpkb"  width="200px" height="25px" >BPKB<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.bpkb}} {% if form.bpkb.errors %}<span style = " color : red ; " >BPKB BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_stnk"  width="200px" height="25px" >STNK<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.stnk}} {% if form.stnk.errors %}<span style = " color : red ; " >STNK BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_faktur"  width="200px" height="25px" >FAKTUR<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.faktur}} {% if form.faktur.errors %}<span style = " color : red ; " >FAKTUR BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_gesek_nomesin"  width="200px" height="25px" >GESEKAN NOMOR MESIN<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.gesek_nomesin}} {% if form.gesek_nomesin.errors %}<span style = " color : red ; " >GESEKAN NOMESIN BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+	<tr class="formkendaraan" style="display:none">
+        <td><label for="id_gesek_nomesin"  width="200px" height="25px" >GESEKAN NOMOR RANGKA<span style = " color : red ; " >*<span></label></td>
+        <td>: {{form.gesek_norangka}} {% if form.gesek_norangka.errors %}<span style = " color : red ; " >GESEKAN NO RANGKA BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    
+	<tr>
+	<td><label for="id_accesoris_barang1"  width="200px" height="25px" >CATATAN KONDISI BARANG<span style = " color : red ; " >*<span></label></td>
+        <td>&nbsp; {{form.accesoris_barang1}} {% if form.accesoris_barang1.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+
+    <tr>
+        <td><label width="200px" height="25px" >TANDA TANGAN<span style = " color : red ; " >*<span></label></td>
+        <td>&nbsp; {{form.tanda_tangan}} {% if form.tanda_tangan.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    <tr>
+        <td><label width="200px" height="25px" >FOTO NASABAH<span style = " color : red ; " >*<span></label></td>
+        <td>&nbsp; {{form.foto_nasabah}} {% if form.foto_nasabah.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+    <tr>
+        <td><label width="200px" height="25px" >Berkas Barang<span style = " color : red ; " >*<span></label></td>
+        <td>&nbsp; {{form.berkas_barang}} {% if form.berkas_barang.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr> 
+
+    <tr><td colspan="3" height="10"><h3>PENILAIAN DAN PERSETUJUAN</h3></td></tr>
+    
+	<tr class="formbarang" style="display:none">
+		<td><label for="id_JANGKA_WAKTU"  width="200px" height="25px" >JANGKA WAKTU<span style = " color : red ; " >*<span></label></td>
+		<td>: {{form.jangka_waktu}} (HARIAN) {% if form.jangka_waktu.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr> 
+
+    <tr class="formkendaraan" style="display:none">
+        <td>
+          <label for="id_jangka_waktu_kendaraan"  width="200px" height="25px" >JANGKA WAKTU KENDARAAN<span style = " color : red ; " >*<span></label>
+        </td>
+        <td>: {{form.jangka_waktu_kendaraan}} (BULAN) {% if form.jangka_waktu_kendaraan.errors %}<span style = " color : red ; " >
+            KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+    <tr>
+        <td><label for="id_nilai"  width="200px" height="25px" >NILAI PINJAMAN<span style = " color : red ; " >*<span></label></td>
+	<td>: {{form.nilai}} {% if form.nilai.errors %}<span style = " color : red ; " >KOLOM INI BELUM ANDA INPUT </span>{% endif %}</td>
+    </tr>
+	
+    <tr><td>JASA<span style = " color : red ; " >*<span></td><td>: {{form.jasa_baru}}</td> </tr>
+    <tr><td>BEA SIMPAN<span style = " color : red ; " >*<span></td><td>: {{form.beasimpan_baru}}</td> </tr>
+    <tr><td>ADM<span style = " color : red ; " >*<span></td><td>: {{form.adm_baru}}</td> </tr>
+    <tr><td> MATERAI</td><td>: {{form.bea_materai}}</td></tr>
+    <tr><td> <b>TOTAL PEMBAYARAN</b> </td><td type="A" style="font-weight: bold;">: {{form.total_all}}</td></tr>
+    <!--{{form.as_table}}-->
+
+    <tr><td><label></td><td><input type="submit" value="&radic;Simpan" class="simpan" /></td></tr>
+
+</table>
+</form>
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}
+

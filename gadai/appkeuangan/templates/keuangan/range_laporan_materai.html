@@ -1,0 +1,77 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}{{ block.super }}{% endblock %}
+{% block section %}Materai{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_end_date").datepicker({dateFormat: 'dd-mm-yy'});
+    $("#id_start_date").datepicker({dateFormat: 'dd-mm-yy'});
+  });
+});
+</script>
+<form method="GET" action="/rkeuangan/range_laporan_materai/">{%csrf_token%}
+   <table id="tabel" align="center">
+   <li><label for="id_tgl_trans">Tanggal </label> : {{form.start_date}} 
+   <label for="id_tgl_trans">Ke Tanggal </label> : {{form.end_date}}</li>
+   <br>
+   <li>
+	<input type="submit" value="view" class="nonposting" name="submit_satu"/>&nbsp;
+	<input type="submit" value="Cetak" class="posting" name="submit_dua"/>&nbsp;  
+   </li> 
+   </table>
+</form>
+
+
+<br/>
+<h2 align="right" ><b>TRANSAKSI PERSEDIAAN MATERAI</b></h2>
+<br/><br/>
+<table class="list">
+    <tr >
+        <th>No</th>
+        <th>Gerai</th>
+        <th>Pembelian</th>
+        <th>Saldo Awal</th>
+        <th>Penjualan</th>
+        <th>Pengiriman Materai</th>
+        <th>Pemakaian Materai</th>
+        <th>Persediaan Materai</th>
+        <th>Pcs</th>
+    </tr>
+    {% for d in akun%}
+    </tr>    
+    <tr class="{% cycle 'row1' 'row2' %}">
+        <td align="center">{{ forloop.counter }}</td>
+        <td align="left" >{{d.nama_cabang}}</td>
+        <td align="right">{{d.range_pembelian_materai_pusat|number_format:0}}</td>
+        <td align="right">{{d.range_saldo_materai|number_format:0}}</td>
+        <td align="right">{{d.range_penjualan_materai_pusat|number_format:0}}</td>
+        <td align="right">{{d.range_permintaan_materai|number_format:0}}</td>
+        <td align="right">{{d.range_pemakaian_materai|number_format:0}}</td>
+        <td align="right">{{d.range_saldo_akhir_materai|number_format:0}}</td>
+        <td align="right">{{d.pcs_materai|number_format:0}}</td>
+    </tr>
+ {% endfor%}
+    <tr> 
+        <th align="center">Total</th>
+        <th align="right"><b></b></th>
+        <th align="right"><b></b></th>
+        <th align="right"><b></b></th>
+        <th align="right"><b></b></th>
+        <th align="right"><b></b></th>
+        <th align="left">&nbsp;</th><th align="left">&nbsp;</th>
+	<th align="center"><b>{{total_permintaan|number_format:0}}</b></th>
+    </tr>
+</table>
+</br></br>
+{% endblock %}
+
+

@@ -1,0 +1,499 @@
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.template import RequestContext
+from django.shortcuts import render_to_response
+from gadai.appgadai.gerai.views import*
+from gadai.appgadai.models import *
+import datetime
+from gadai.appgadai.templatetags.number_format import number_format
+from gadai.appgadai.models import GeraiGadai,AkadGadai
+from django import forms
+from gadai.appgadai.templatetags.terbilang import terbilang
+
+def show(request,object_id):
+    gr=GeraiGadai.objects.get(id=object_id)
+    month_list = AkadGadai.objects.dates('tanggal', 'month', order='DESC')
+    
+    variables = RequestContext(request, {'object':gr})
+    return render_to_response('gerai/detail.html', variables)
+###cetak Rekap Harian###
+def cetak_rekap(request, object_id):
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.get(id = object_id)
+    ag = gr.akadgadai_set.filter(tanggal=now) 
+    prpj = gr.perpanjang_set.filter(tanggal=now)
+    lunas= gr.pelunasan_set.filter(tanggal=now)
+        
+    template = 'gerai/pendapatan.html'
+    variable = RequestContext(request, {
+        'gr':gr,
+        'ag':ag,
+        'prpj':prpj,
+        'lunas':lunas,
+        'nilai_pencairan': sum([b.nilai for b in ag ]),
+        'jasa': sum([b.jasa for b in ag ]),
+        'adm': sum([b.adm for b in ag ]),
+        'simpan': sum([b.biayasimpan for b in ag ]),
+        'jumlah_biaya' : sum([b.jumlah_biaya for b in ag ]),
+        'simpanprpj': sum([b.bea_simpan for b in prpj ]),
+        'jasaprpj': sum([b.bea_jasa for b in prpj ]),
+        'dendaprpj': sum([b.denda for b in prpj ]), 
+        'terlambat_prpj': sum ([b.bea_jasa_terlambat for b in prpj]),
+        'jumlahbiayaprpj': sum([b.jumlahperpanjang for b in prpj ]),  
+        'terlambat': sum([b.terlambat for b in lunas ]),  
+        'denda': sum([b.denda for b in lunas ]),  
+        'jumlah_lunas': sum ([b.jasa_denda for b in lunas]),
+        'jasalunas': sum([b.bea_jasa for b in lunas]), 
+        'nilai': sum ([b.nilai for b in lunas]),     
+    })
+    return render_to_response(template,variable)
+###cetak Rekap bulanan###
+def rekap_bulan(request, object_id):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    #tanggal = forms.DateField()
+    gr = GeraiGadai.objects.get(id = object_id)
+    gerai = gr.akadgadai_set.filter(tanggal__month = tanggal.month).filter(tanggal__year=tanggal.year).order_by('gerai')
+        
+    template = 'gerai/bulan.html'
+    variables = RequestContext(request, {
+        'gr':gr,
+        'gerai':gerai,
+        'tanggal':tanggal,
+        'nilai': sum([b.terima_bersih for b in gerai ]),
+        'jasa': sum([b.jasa for b in gerai ]),
+        'adm': sum([b.adm for b in gerai ]),
+        'simpan': sum([b.biayasimpan for b in gerai ]),
+    })
+    return render_to_response(template,variables)
+
+###cetak Rekap bulanan###
+def piutang_bulan(request, object_id):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    #tanggal = forms.DateField()
+    gr =GeraiGadai.objects.get(id = object_id)
+    gerai = gr.akadgadai_set.filter(tanggal__month = tanggal.month).filter(tanggal__year=tanggal.year).order_by('gerai')
+        
+    template = 'gerai/piutang.html'
+    variables = RequestContext(request, {
+        'gr':gr,
+        'gerai':gerai,
+        'tanggal':tanggal,
+        'nilai': sum([b.terima_bersih for b in gerai ]),
+        'jasa': sum([b.jasa for b in gerai ]),
+        'adm': sum([b.adm for b in gerai ]),
+        'simpan': sum([b.biayasimpan for b in gerai ]),
+        'bersih': sum([b.terima_bersih for b in gerai ]),
+        #'simpanprpj': sum([b.bea_simpanprpj for b in gerai]),
+    })
+    return render_to_response(template,variables)
+
+
+###cetak Rekap Unit###
+def rekapunit(request):
+    rekap = GeraiGadai.objects.all()
+    kp = []
+    for k in rekap:
+        if k.akadgadai_set.filter(lunas__isnull= True).count() > 0:
+            kp.append(k)
+    
+    total_aktif = total_pk=total_jasa=total_adm=total_beasimpan=total_materai=total_nilai=total_terimabersih=  0
+    
+    for k in kp :
+        
+        total_aktif += k.aktif()
+        total_pk += k.aktif()
+        total_jasa += k.get_jumlah_jasa()
+        total_adm += k.get_jumlah_adm()
+        total_beasimpan += k.get_jumlah_beasimpan()
+        total_materai += k.get_jumlah_materai()
+        total_nilai += k.get_jumlah_nilai()
+        total_terimabersih += k.get_jumlah_terimabersih()
+
+    template = 'gerai/rekap.html'
+    variables = RequestContext(request, {
+    'kp': kp ,
+    'nkp' : len(kp),
+    'npk' : total_pk,
+    'aktif' : total_aktif,
+    'jasa' : total_jasa,
+    'adm':total_adm,
+    'simpan':total_beasimpan,
+    'materai':total_materai,
+    'nilai':total_nilai,
+    'terima_bersih':total_terimabersih,
+    })
+    return render_to_response(template, variables)
+
+def neracaunit(request, object_id):
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.get(id = object_id)
+    ag = gr.akadgadai_set.filter(tanggal=now) 
+    prpj = gr.perpanjang_set.filter(tanggal=now)
+    lunas= gr.pelunasan_set.filter(tanggal=now)    
+    bea = gr.biaya_set.filter(tanggal=now)    
+
+    template = 'gerai/rekapneraca.html'
+    variable = RequestContext(request, {
+        'gr':gr,
+        'ag':ag,
+        'prpj':prpj,
+        'lunas':lunas,
+        'nilai': sum([b.nilai for b in ag ]),
+        'jasa': sum([b.jasa for b in ag ]),
+        'adm': sum([b.adm for b in ag ]),
+        'simpan': sum([b.biayasimpan for b in ag ]),
+        'jumlah_biaya' : sum([b.jumlah_biaya for b in ag ]),
+        'simpanprpj': sum([b.bea_simpan for b in prpj ]),
+        'jasaprpj': sum([b.bea_jasa_total for b in prpj ]),
+        'dendaprpj': sum([b.denda for b in prpj ]), 
+        'jumlahbiaya': sum([b.jumlahperpanjang for b in prpj ]),  
+        'terlambat': sum([b.terlambat for b in lunas ]),  
+        'denda': sum([b.denda for b in lunas ]),  
+        'jumlah_lunas': sum ([b.jumlah_pelunasan for b in lunas]), 
+        'nilai': sum ([b.nilai for b in lunas]),
+        'bea_jasa': sum ([b.bea_jasa for b in lunas]),
+        'jumlahjasa_lunas': sum ([b.jasa_denda for b in lunas]),
+        'tunai_pusat' : sum ([b.tunai for b in bea]),
+        'bank' : sum ([b.bank for b in bea]), 
+        'dari_gerai':sum([b.dari_gerai for b in bea]),
+        'jml_pospay':sum([b.jml_pospay for b in bea]),
+
+        'pln': sum([b.listrik for b in bea]),
+        'pdam':sum([b.pdam for b in bea]),
+        'tlp':sum([b.telpon for b in bea]),
+        'foto_copy':sum([b.foto_copy for b in bea]),
+        'majalah':sum([b.majalah for b in bea]),
+        'keamanan':sum([b.iuran_keamanan for b in bea]),
+        'kebersihan':sum([b.iuran_kebersihan for b in bea]),
+        'promosi':sum([b.promosi for b in bea]),
+        'air_minum':sum([b.air_minum for b in bea]),
+        'sewa':sum([b.sewa_gedung_gerai for b in bea]),
+        'setoran_bank':sum([b.setoran_bank for b in bea]),
+        'tunai':sum([b.tunai_pickup for b in bea]),
+        'kegerai':sum([b.ke_gerai for b in bea]),
+
+        'prangko':sum ([b.prangko for b in bea]), 
+        'surat_kilat_khusus': sum ([b.surat_kilat_khusus for b in bea]),
+        'paket_pos_standar': sum([b.paket_pos_standar for b in bea]),
+        'paket_kilat_khusus': sum([b.paket_kilat_khusus for b in bea]),
+        'pos_express':sum([b.pos_express for b in bea]),
+        'materai' : sum([b.materai for b in bea]),
+        'ems' : sum([b.ems for b in bea]),
+        'pendapatan': sum([b.pendapatan_lain for b in bea]), 
+    })
+    return render_to_response(template,variable)
+
+def sjalan(request, object_id):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    #tanggal = forms.DateField()
+    now = datetime.date.today()
+    gr = GeraiGadai.objects.get(id = object_id)
+    gerai = gr.akadgadai_set.filter(tanggal=now) .filter(tanggal__year=tanggal.year).order_by('gerai')
+    rekap_jenis = dict([[k, 0] for k,v in JENIS_BARANG])
+    for ag in gerai:
+        rekap_jenis[ag.barang.jenis_barang] += 1
+        
+    template = 'gerai/suratjalan.html'
+    variables = RequestContext(request, {
+        'gr':gr,
+        'gerai':gerai,
+        'tanggal':tanggal,
+        'rekap_jenis': [(dict(JENIS_BARANG)[k], v) for k,v in rekap_jenis.iteritems()]
+    })
+    return render_to_response(template,variables)
+
+###Rekap Transaksi Harian All Gerai###  
+def rekap_allgerai_harian(request):
+    now = datetime.date.today()
+    rekap = GeraiGadai.objects.all()
+    pk = []
+    for k in rekap:
+        if k.akadgadai_set.filter(tanggal=now).filter(lunas__isnull= True).count() > 0:
+            pk.append(k)
+    
+    total_aktif = total_pk=total_jasa=total_adm=total_beasimpan=total_nilai=total_pendapatan=  0
+    
+    for k in pk :
+        
+        total_aktif += k.aktif_harian()
+        total_pk += k.aktif_harian()
+        total_jasa += k.get_jumlah_jasa_harian()
+        total_adm += k.get_jumlah_adm_harian()
+        total_beasimpan += k.get_jumlah_beasimpan_harian()
+        total_nilai += k.get_jumlah_nilai_harian()
+        total_pendapatan += k.total_pendapatan_harian()
+        
+    template = 'gerai/rekap_allgerai_harian.html'
+    variables = RequestContext(request, {
+    'pk': pk ,
+    'nkp' : len(pk),
+    'npk' : total_pk,
+    'aktif' : total_aktif,
+    'jasa' : total_jasa,
+    'adm':total_adm,
+    'simpan':total_beasimpan,
+    'nilai':total_nilai,
+    'total_pendapatan_harian':total_pendapatan,
+    })
+    return render_to_response(template, variables)
+
+def prpj_allgerai_harian(request):
+    now = datetime.date.today()
+    rekap = GeraiGadai.objects.all()
+    ppj = []
+    for k in rekap:
+        if k.perpanjang_set.filter(tanggal=now).count() > 0:
+            ppj.append(k)
+    
+    total_aktif_ppj = total_ppj=total_jasa_ppj=total_beasimpan_ppj=total_denda_ppj=total_nilai_ppj=total_pendapatan_ppj=  0
+    
+    for k in ppj :
+        
+        total_aktif_ppj += k.aktif_prpj_harian()
+        total_ppj += k.aktif_prpj_harian()
+        total_jasa_ppj += k.prpj_jasa_harian()
+        total_beasimpan_ppj += k.prpj_beasimpan_harian()
+        total_denda_ppj += k.prpj_denda_harian()
+        total_nilai_ppj += k.prpj_nilai_harian()
+        total_pendapatan_ppj += k.total_prpj_pendapatan_harian()
+        
+    template = 'gerai/prpj_allgerai_harian.html'
+    variables = RequestContext(request, {
+    'ppj': ppj ,
+    'nkp' : len(ppj),
+    'npk' : total_ppj,
+    'aktif' : total_aktif_ppj,
+    'jasa' : total_jasa_ppj,
+    'simpan':total_beasimpan_ppj,
+    'denda':total_denda_ppj,
+    'nilai':total_nilai_ppj,
+    'total_pendapatan_ppj':total_pendapatan_ppj,
+    })
+    return render_to_response(template, variables)
+    
+def pelunasan_allgerai_harian(request):
+    now = datetime.date.today()
+    rekap = GeraiGadai.objects.all()
+    plns = []
+    for k in rekap:
+        if k.pelunasan_set.filter(tanggal=now).count() > 0:
+            plns.append(k)
+    
+    total_aktif_plns = total_plns=total_jasa_plns=total_denda_plns=total_nilai_plns=total_pendapatan_plns=  0
+    
+    for k in plns :
+        
+        total_aktif_plns += k.aktif_plns_harian()
+        total_plns += k.aktif_plns_harian()
+        total_jasa_plns += k.plns_jasa_harian()
+        total_denda_plns += k.plns_denda_harian()
+        total_nilai_plns += k.plns_nilai_harian()
+        total_pendapatan_plns += k.total_plns_pendapatan_harian()
+        
+    template = 'gerai/pelunasan_allgerai_harian.html'
+    variables = RequestContext(request, {
+    'plns': plns ,
+    'nkp' : len(plns),
+    'npk' : total_plns,
+    'aktif' : total_aktif_plns,
+    'jasa' : total_jasa_plns,
+    'denda':total_denda_plns,
+    'nilai':total_nilai_plns,
+    'total_pendapatan_plns':total_pendapatan_plns,
+    })
+    return render_to_response(template, variables)
+ ###End Rekap Transaksi Harian All Gerai###     
+
+####modifikasi####
+def list(request):    
+    tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    return HttpResponseRedirect("/gerai/arsip/?tgl=%s" % tanggal.strftime('%Y-%m-%d') )
+
+
+def list_day(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    gerai = []
+    
+    
+    for (b,k) in GERAI:
+        
+        bn = AkadGadai.objects.filter(gerai = b ).filter(tanggal = tanggal).order_by('no').order_by('jangka_waktu')
+    
+        for akadgadai in bn :
+            gerai.append(akadgadai)    
+           
+        
+        
+    template = 'gerai/list_day.html'
+    variables = RequestContext(request, {
+        'tanggal' : tanggal,
+        'day_list' : AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month),
+        'month_list': AkadGadai.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'year_list' : AkadGadai.objects.dates('tanggal', 'year', order="DESC"),
+        'gerai' : gerai,
+    })    
+    return render_to_response(template, variables)
+
+def gerai_bulan(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    gerai = []
+    
+    
+    for (b,k) in GERAI:
+        
+        bn = AkadGadai.objects.filter(gerai = b ).filter(tanggal__month=tanggal.month).order_by('no').order_by('cu')
+    
+        for akadgadai in bn :
+            gerai.append(akadgadai)    
+           
+        
+        
+    template = 'gerai/list_month.html'
+    variables = RequestContext(request, {
+        'tanggal' : tanggal,
+        'day_list' : AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month),
+        'month_list': AkadGadai.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'year_list' : AkadGadai.objects.dates('tanggal', 'year', order="DESC"),
+        'gerai' : gerai,
+    })    
+    return render_to_response(template, variables)
+
+def rekaphari(request, object_id):
+    tanggal = forms.DateField().clean(request.GET.get('tgl',''))
+            
+    barang = AkadGadai.objects.filter(gerai= str(object_id)).filter(tanggal = tanggal).order_by('gerai')
+    
+    template = 'gerai/rekaphari.html'
+    variables = RequestContext(request, {
+        'barang': barang,
+        'tanggal' : tanggal,
+        'nilai': sum([b.nilai for b in barang ]),
+        'jasa': sum([b.jasa for b in barang ]),
+        'adm': sum([b.adm for b in barang ]),
+        'simpan': sum([b.biayasimpan for b in barang ]),
+        'bersih' : sum([b.terima_bersih for b in barang ]),
+    })    
+    return render_to_response(template, variables)
+
+def rekapbulan(request, object_id):    
+    tanggal = forms.DateField().clean(request.GET.get('tgl',''))
+            
+    barang = AkadGadai.objects.filter(gerai= str(object_id)).filter(tanggal__month = tanggal.month).filter(tanggal__year=tanggal.year).order_by('gerai')
+    template = 'gerai/rekapbulan.html'
+    variables = RequestContext(request, {
+        'barang': barang,
+        'tanggal' : tanggal,
+        'nilai': sum([b.nilai for b in barang ]),
+        'jasa': sum([b.jasa for b in barang ]),
+        'adm': sum([b.adm for b in barang ]),
+        'simpan': sum([b.biayasimpan for b in barang ]),
+        'bersih' : sum([b.terima_bersih for b in barang ]),
+    })    
+    return render_to_response(template, variables)
+
+def list_year(request):
+    try :
+        f = forms.DateField()
+        tanggal = f.clean(request.GET.get('tgl',''))
+    except :
+        try:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
+        except:
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
+    
+    gerai = []
+    
+    for (b,k) in GERAI:
+        
+        bn = AkadGadai.objects.filter(gerai = b ).filter(tanggal__year=tanggal.year).order_by('no').order_by('cu')
+    
+        for akadgadai in bn :
+            gerai.append(akadgadai)  
+        
+    
+    template = 'gerai/list_year.html'
+
+    variables = RequestContext(request, {
+        'tanggal' : tanggal,
+        'day_list' : AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month),
+        'month_list': AkadGadai.objects.dates('tanggal', 'month', order="DESC").filter(tanggal__year=tanggal.year),
+        'year_list' : AkadGadai.objects.dates('tanggal', 'year', order="DESC"),
+        'gerai' : gerai ,
+        })    
+    return render_to_response(template, variables)
+
+#total transaksi harian,pelunasan,perpanjangan,pencairan
+def total_harian(request):
+    now = datetime.date.today()
+    rekap = GeraiGadai.objects.all()
+    plns = []
+    for k in rekap:
+        if k.akadgadai_set.filter(tanggal=now).count() > 0:
+            plns.append(k)
+    
+    total_harian_jasa = total_harian_denda=total_harian_beasimpan=akumulasi_pendapatan_harian=aktif_nasabah_harian= 0
+    for k in plns :
+        
+        aktif_nasabah_harian += k.aktif_nasabah_harian()
+        total_harian_jasa += k.total_harian_jasa()
+        total_harian_denda += k.total_harian_denda()
+        total_harian_beasimpan += k.total_harian_beasimpan()
+        akumulasi_pendapatan_harian += k.akumulasi_pendapatan_harian()
+                
+    template = 'gerai/total_harian.html'
+    variables = RequestContext(request, {
+    'plns': plns ,
+    'total' : aktif_nasabah_harian,
+    'aktif' : aktif_nasabah_harian,
+    'jasa' : total_harian_jasa,
+    'denda':total_harian_denda,
+    'beasimpan':total_harian_beasimpan,
+    'akumulasi_pendapatan_harian':akumulasi_pendapatan_harian,
+    })
+    return render_to_response(template, variables)
+
+def simulasi(request):
+    #tb = terbilang
+    template = 'gerai/simulasi.html'
+    variables = RequestContext()
+    return render_to_response(template,variables)

@@ -1,0 +1,20 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+
+{% endblock %}
+{% block section %}kas{% endblock %}
+{% block sidebar %}{% load number_format %}
+{% for date in date_list %}
+<h3> DATA PERBULAN</h3>
+&bull; <a href="/kas/arsip/{{ date|date:"Y/m/" }}">{{ date|date:"F Y" }}</a><br />{% endfor %}
+{% endblock %}
+{% block content %}
+<h2 align="right">:: Mutasi Kas / Biaya Cabang ::</h2>
+<p><a href="/kas/rekening/pindahbuku/"><input type="submit" value="PINDAH BUKU" /></a></p>
+<div id="id_chart_cashflow" align="center"></div>
+<table  width="75%" border="1" align="center">
+    <tr class="{% cycle 'odd' 'even' %}" ><th>No</th><th>Tanggal</th><th>Rekening</th><th>Keterangan</th><th>NOMOR COA</th><th>KREDIT</th><th>DEBET</th></tr>
+{% for object in object_list %}
+    <tr><th>{{ object.id}}</th><td>{{ object.tanggal|date:"d-m-Y" }}</td><td><a href="/kas/rekening/{{ object.kasbank.id }}/">{{ object.kasbank }}</a></td><td>{{ object.keterangan }}</td><td>{{ object.akun }}</td>{% if object.is_debet %}<td class="uang">Rp. {{ object.nilai|number_format:0 }}</td><td class="uang">0</td>{% else %}<td class="uang">0</td><td class="uang">Rp. {{ object.nilai|number_format:0 }}</td>{% endif %}</tr>{% endfor %}
+</table>
+{% endblock %}

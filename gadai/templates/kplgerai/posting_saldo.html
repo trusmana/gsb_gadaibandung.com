@@ -1,0 +1,18 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Jurnal_Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>APPROVE JURNAL TRANSAKSI  <small>DIV PJB</small></h2>  
+<table id="tabel" align="center">
+<form method="GET" action="/kplgerai/{{kocab}}/tutup_saldo_gerai/">{% csrf_token %}
+
+<li>&nbsp;<input type="submit" value="POSSTING TRANSAKSI" class="cari"/>
+</form>
+</table>
+
+
+{% endblock %}

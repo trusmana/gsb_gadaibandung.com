@@ -1,0 +1,30 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>DATA ALL TRANSAKSI  <small>DIV PJB</small></h2>  
+<table id="tabel" align="center">
+<br/>
+<form method="GET" action="/barang/barangnonlunas/">{% csrf_token %}
+    <li><label for="id_tgl_trans"></label> <input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> -
+    <label for="id_tgl_trans"></label> <input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
+	<br>
+	    
+    <li>
+      <input type="submit" value="Proses" class="cari" name="submit_satu" value="Add"/>
+	</li>
+
+</form>
+</table>
+
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}
+

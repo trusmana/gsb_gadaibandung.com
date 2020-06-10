@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Cari {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p >[ <a href="/taksir/">Kembali</a> ]</p>
+<table width="100%">
+<p align="center">Yang Anda Cari: <strong>{{ query }}</strong></p>
+
+{% if taksir %}
+    <p style="color: red;" align="center">Ditemukana {{ taksir|length }} Barang taksir {{ taksir|pluralize }}</p>
+</table>
+<p>&nbsp;</p>
+
+
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow"><th>Kode Barang</th><th>Type</th><th>Nama barang</th><th>Harga Baru</th><th>Harga Pasar</th><th>Max Pinjaman</th><th>Tanggal Update</th><th colspan= "2">MENU</th></tr>
+{% for taksir in taksir %}
+    <tr class="{% cycle 'odd' 'even' %}">
+    <td>{{ taksir.kobar}}</td>
+    <th>{{ taksir.type }}</th>
+    <td>{{ taksir.spesifikasi }}</td>
+    <td>Rp. {{ taksir.harga_baru}}</td>
+    <td>Rp. {{ taksir.harga_pasar}}</td>
+    <td>Rp. {{ taksir.maxpinjaman}}</td>
+    <td>{{ taksir.tglupdate|date:" d-M-Y"}}</td>
+    <td><a href="/taksir/{{taksir.id }}/edit/"><img src="/static/images/edit.png" height="27px"/></td></tr>
+    {% endfor %}
+
+</table>
+{% else %}
+    <p>Tidak ditemukan data yg anda cari</p>
+{% endif %}

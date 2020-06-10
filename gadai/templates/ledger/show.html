@@ -1,0 +1,107 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}Buku Besar {{ object.nama }} | {{ block.super }}{% endblock %}
+{% block section %}jurnal{% endblock %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#id_dari").datepicker({dateFormat: 'yy-mm-dd'});
+	$("#id_hingga").datepicker({dateFormat: 'yy-mm-dd'});
+    
+    // hitungan jumlah debet, kredit
+    var j_debet = 0;
+    var j_kredit = 0;
+    var saldo = 0;
+    $(".debet").each(function() {
+        j_debet += parseInt(to_number($(this).text()));
+    });
+    $(".kredit").each(function() {
+        j_kredit += parseInt(to_number($(this).text()));
+    });
+    $('#j_kredit').text(j_kredit);    
+    $('#j_debet').text(j_debet);
+    $('#saldo').text(j_debet - j_kredit);
+});
+</script>
+{% endblock extrahead %}
+{% block sidebar %}<br />
+<h3>Cari Jurnal</h3>
+<form method="get" action="/jurnal/search/">
+<small><i>No Bukti atau Keterangan</i></small><br />
+<input type="text" name="q" size="20" /> <input type="submit" value="Cari" />
+</form>
+<h3>{{ tahun }}</h3>
+{% for bulan in bulans %}
+&bull; {{ bulan|date:"M" }} <a href="/jurnal/{{ bulan|date:"Y"}}/{{ bulan|date:"m"}}/">Neraca</a> | <a href="/gl/{{ bulan|date:"Y"}}/{{ bulan|date:"m" }}/">GL</a><br />
+{% endfor %}
+<h3>Lihat Jurnal</h3>
+<form method="POST" action="/jurnal/">
+ <table>
+ <tr><td colspan="2"><select name="command">
+    <option value="1">Lihat Jurnal</option>
+    <option value="2">Cetak Jurnal</option>
+    </select></td></tr>
+ <tr><td><label for="id_dari">Dari:</label></td><td><input type="text" name="dari" id="id_dari" size="10" value="{% now "Y-m" %}-01" /></td></tr>
+<tr><td><label for="id_hingga">Hingga:</label></td><td><input type="text" name="hingga" id="id_hingga" size="10" value="{% now "Y-m-d" %}" /></td></tr>
+ <tr><td colspan="2"><input type="submit" value="Tampilkan" /></td></tr>
+ </table>
+</form>
+{% endblock %}
+{% load number_format %}
+{% block content %}
+{% if ledger_search %}
+<h2 align="right">BUKU BESAR <small></small></h2>
+
+<table id="tabel">
+	<thead>
+    <tr>
+		<th>No</th>
+		<th>Kode Unit</th>
+		<th>Kode Cabang</th>
+		<th>Tanggal</th>
+		<th>Keterangan</th>
+		<th>Debet</th>
+		<th>Kredit</th>
+		<th>Saldo</th>
+	</tr>
+	</thead>
+
+	<tbody>{% for d in ledger_search %}
+	{% if forloop.first %}
+	<tr>		
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td>Saldo Awal</td>
+		<td style="text-align:right"></td>
+		<td style="text-align:right"></td>
+        <td style="text-align:right">0</td>
+    </tr>
+	{%endif%}
+	
+	<tr>
+		<td>{{forloop.counter}}</td>
+		<td>{{d.id_unit}}</td>
+		<td>{{d.id_cabang}}</td>
+		<td align="center">{{ d.tgl_trans|date:'d-M-Y' }}</td>
+		<td align="center">{{ d.id_coa.deskripsi }}</td>		
+		<td style="text-align:right">Rp. {{ d.debet|number_format:0 }}</td>
+		<td style="text-align:right">Rp. {{ d.kredit|number_format:0 }}</td>
+		<td style="text-align:right">0</td>
+	</tr>{% endfor %}
+	</tbody>
+	<tfoot>
+		<tr>
+			<th colspan="5">Jumlah</th>
+			<th style="text-align:right">Rp.{{total_debet|number_format:0 }}</th>
+			<th style="text-align:right">Rp.{{total_kredit|number_format:0 }}</th>
+			<th></th>
+		</tr>
+	</tfoot>
+
+</table>
+{% else %}
+<p>Tidak ada data Buku Besar</p>
+{% endif %}
+{% endblock %}

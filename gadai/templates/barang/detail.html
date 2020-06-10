@@ -1,0 +1,82 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}barang{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+<h3>Ringkasan</h3>
+Total Barang : {{ object.akadgadai_set.all.count }}<br />
+Barang Lunas : {{ object.get_banyak_lunas }}<br />
+
+Total Nilai : Rp.{{ object.get_jumlah_nilai|number_format:0 }}<br />
+<h3>Report Keseluruhan</h3>
+<ol>
+&bull; <a href="/barang/{{object.id}}/barang_aktif_gerai"><input type="submit" value="Barang Aktif" /></a><br />
+&bull; <a href="/barang/{{object.id}}/barang_lunas_gerai"><input type="submit" value="Barang Lunas" /></a><br />
+&bull;<a href="/barang/{{object.id}}/barangnonlunas"><input type="submit" value="Barang JatuhTempo" /></a><br />
+&bull;<a href="/barang/{{object.id}}/daftar_barang_gerai"><input type="submit" value="Barang Gerai" /></a><br />
+</ol>
+
+<h3>Report Harian</h3>
+<ol>
+&bull; <a href="/barang/{{object.id}}/barang_aktif_harian"><input type="submit" value="Barang Aktif" /></a><br />
+&bull; <a href="/barang/{{object.id}}/barang_lunas_harian"><input type="submit" value="Barang Lunas" /></a><br />
+</ol>
+
+
+<h3>Report Bulanan</h3>
+<ol>
+&bull; <a href="/barang/{{object.id}}/barang_lunas_bulanan"><input type="submit" value="Barang Lunas" /></a><br />
+</ol>
+
+<br/>
+<h3> KETERANGAN
+<h5>&bull; MERAH = DATA NASABAH LUNAS</h5>
+<h5>&bull; BIRU = NASABAH JATUH TEMPO</h5>
+<h5>&bull; KUNING = NASABAH LEWAT JATUH TEMPO</h5>
+
+{% endblock %}
+{% block content %}
+
+<h2 align="center">Gerai : {{object.nama}} :::: Jenis Barang : {{kredits.0.barang.get_jenis_barang_display}} :::: Jumlah : {{np}}</h2>
+<table align="center">
+<tr><form action="/barang/{{object.id}}/" method="POST" >{% csrf_token %} 
+    <td><select name="barang"> {% for k,l in kelompok %}<option value="{{k}}">{{k}}__{{l}} </option>{% endfor %}</select></td>
+    <td><input type="submit" value="sortir" id="filter"/></select></form></td>
+</tr>
+</table>
+{% if object.akadgadai_set %}
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow" >
+	<th align="center">No</th>
+	<th align="center">Nama</th>
+	<th align="center">Rekening</th>
+	<th align="center">Transaksi</th>
+	<th align="center">Jatuh Tempo</th>
+	<th align="center">Status</th>
+	<th align="center">Status Gadai</th>
+	<th align="center">JW</th>
+	<th align="center">Nilai</th>
+	<th align="center">Merk</th>
+	<th align="center">Type</th>
+	<th align="center">JB</th>
+	<th align="center">Gerai</th></tr>
+   </tr>
+{% for p in kredits %}
+    <tr {% if p.lunas %} class="row_lunas"{% endif %} {% if p.status_gadai %} class="row_status_gadai"{% endif %}{% if p.lewat_jw %} class="row_lewat_jw"{% endif %}>
+	<td align="center">{{forloop.counter}}</td>
+	<td align="left">{{ p.agnasabah.nama }}</td>
+	<td>{{p.norek}}</td>
+	<td>{{p.tanggal|date:"d-M-Y "}}</td>
+	<td align="right">{{p.jatuhtempo|date:"d-M-Y "}}</td>
+	<td align="right">{{p.status_transaksi|default_if_none:"0" }}</td>	
+	<td align="right">{{p.status_gadai|default_if_none:"0" }}</td>
+	<td align="right">{{p.jangka_waktu}}</td>
+	<td align="right" >{{p.nilai|number_format:0}}</td>
+	<td align="left">{{p.barang.merk}}</td>
+	<td align="left">{{p.barang.type|truncatewords:6}}</td>
+	<td align="left">{{p.barang.jenis_barang}}</td>
+	<td>{{p.gerai.nama}}</td>
+    </tr>{% endfor %}
+    
+</table>{% endif %}
+{% endblock %}
+

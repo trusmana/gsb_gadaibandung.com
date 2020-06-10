@@ -1,0 +1,31 @@
+from django.conf.urls.defaults import *
+from django.views.generic import list_detail, create_update, date_based
+
+from gadai.appgadai.models import AkadGadai
+
+from django.views.generic.simple import direct_to_template
+from django.forms import ModelForm
+from gadai.appgadai.akadgadai.views import *
+from gadai.appgadai.models import *
+from gadai.appgadai.akadgadai.forms import *
+
+urlpatterns = patterns('',
+    url(r'^$',  list),
+    url(r'^(?P<object_id>\d+)/show/$',show),
+    url(r'^add/$',add),
+    url(r'^(?P<object_id>\d+)/prints2/$',kwitansi), 
+    url(r'^(?P<object_id>\d+)/kwlunas/$',kwlunas),
+    url(r'^(?P<object_id>\d+)/prints5/$',tterima),
+    url(r'^(?P<object_id>\d+)/pelunasan/$', pelunasan),
+    url(r'^(?P<object_id>\d+)/perpanjang/$',perpanjang),
+    url(r'^baru/$', create_update.create_object, {'model': AkadGadai, 'template_name': 'akadgadai/agbaru.html'}),
+    url(r'^cari/$',cari),
+    url(r'^(?P<object_id>\d+)/batal_lunas/$', batal_lunas),
+    url(r'^terbit_akad/(?P<year>\d{4})/(?P<month>\d{2})/csv/$', akad_terbit_bulan_csv),
+    url(r'^terbit_prpj/(?P<year>\d{4})/(?P<month>\d{2})/csv/$', prpj_terbit_bulan_csv),
+    url(r'^terbit_pelunasan/(?P<year>\d{4})/(?P<month>\d{2})/csv/$', pelunasan_terbit_bulan_csv),
+    url(r'^(?P<object_id>\d+)/motor/$',kwitansi_motor),
+    url(r'^(?P<object_id>\d+)/edit/$', create_update.update_object, {'form_class': Edit_AkadForm, 'template_name': 'akadgadai/edit.html'}),
+)
+
+

@@ -1,0 +1,72 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}kupeg{% endblock %}
+{% block extrahead %}
+<style type="text/css">
+    .bs-example{
+        margin: 20px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+
+</br>
+
+
+<form method="post" action=".">{% csrf_token %}
+<table align="left" width="ancho"> 
+    <tr>
+
+    <tr class="success">
+        <td>Gerai</td>
+        <td>: {{form.id_cabang}}</td>
+    </tr>
+
+    <tr>
+        <td align="left"></td>
+        <td align="left"></td>
+    </tr>
+    <tr>
+        <td align="left"></td>
+        <td align="left"></td>
+    </tr>
+    <tr>
+        <td><button type="submit" class="btn btn-primary">Simpan</button></td>
+    </tr>
+</form>
+</table>
+
+<table class="list" border="1">
+        <tr>
+            <th>Nama Depan</th>
+            <th>Nama User</th>
+            <th>Aktif/Tidak</th>
+            <th>Gerai</th>
+
+        </tr>
+    </thead>
+{% for p in show %}
+    <tbody>
+        <tr>
+            <td>{{ p.first_name }}</td>
+            <td>{{ p.username }}</td>
+            <td>{% if p.is_active %}AKTIF{%else%}NONE AKTIF{%endif%}</td>
+            <td>{{ p.profile.gerai }}</td>
+
+            
+
+        </tr>
+    </tbody>
+{% endfor %}
+
+</table>
+                         
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}
+
+

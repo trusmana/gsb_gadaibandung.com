@@ -1,0 +1,263 @@
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal").datepicker({dateFormat: 'dd-mm-yy'});
+    $('input:text').setMask();
+       $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+    $('#jeding').hide();
+    $('.tabular').submit(function(){
+      $('#jeding').show(); 
+       return true;	     
+    });
+    $('.r_ktp').keyup(function(){
+    var val = $(this).val();
+    if(isNaN(val)){
+         val = val.replace(/[^0-9\.]/g,'');
+         if(val.split('.').length > 1) 
+             val =val.replace(/\.+$/,"");
+    }
+    $(this).val(val); 
+    });
+    $("input.r_ktp").keypress(function(event){
+        if (event.charCode && (event.charCode < 46 || event.charCode > 57 || event.charCode == 47 ))
+        { event.preventDefault(); }
+    });
+    $("input.r_nama").keypress(function(event){
+        if (event.charCode && (event.charCode == 47 ))
+        { event.preventDefault(); }
+    });
+});
+</script>
+<script type="text/javascript" href="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+    $(":radio.rad").click(function(){
+    $(".formbarang, .formkendaraan").hide()
+    if($(this).val() == "1"){
+    $(".formbarang").show();
+    }else{
+    $(".formkendaraan").show();
+    }
+    });
+    });
+$(function(){
+    $(":radio.identitas").click(function(){
+	$(".formsim, .formktp").hide()
+	    if($(this).val() == "1"){
+	    $(".formsim").show();
+	    }else{
+	    $(".formktp").show();
+	}
+    });
+});
+</script>
+<script type="text/javascript">
+    $(function(){
+    $(":radio.rad").click(function(){
+    $(".formbarang, .formkendaraan").hide()
+    if($(this).val() == "1"){
+    $(".formbarang").show();
+    }else{
+    $(".formkendaraan").show();
+    }
+    });
+});
+    $(function(){
+    $(":radio.barang").click(function(){
+    $(".formhp,.formkamera,.formps,.formtv").hide()
+    if($(this).val() == "4"){
+        $(".formps").show();
+        $('#beasimpan_baru').val(format_number(String('30000')));
+        $('#materai').val(format_number(String('6000')));
+        }
+    if($(this).val() == "1" ){
+        $(".formhp").show();
+        $('#beasimpan_baru').val(format_number(String('20000')));
+        $('#materai').val(format_number(String('6000')));
+        }
+    if($(this).val() == "2" ){
+        $(".formhp").show();
+        $('#beasimpan_baru').val(format_number(String('30000')));
+        $('#materai').val(format_number(String('6000')));
+        }        
+    if($(this).val() == "3"){
+        $(".formkamera").show();
+        $('#beasimpan_baru').val(format_number(String('30000')));
+        $('#materai').val(format_number(String('6000')));
+        }
+    if($(this).val() == "5"){
+        $(".formtv").show();
+        $('#beasimpan_baru').val(format_number(String('40000')));
+        $('#materai').val(format_number(String('6000')));
+        }
+    });
+});
+</script>
+
+<script>
+$(document).ready(function()
+{
+    $('#id_nama,#id_tempat,#id_alamat_ktp,#id_kelurahan_ktp,#id_kecamatan_ktp,#id_kotamadya_ktp,#id_kabupaten_ktp,#id_alamat_sim,#id_kelurahan_sim,#id_kecamatan_sim,#id_alamat_domisili,#id_kelurahan_domisili,#id_kecamatan_domisili,#id_kotamadya_domisili,#id_kabupaten_domisili,#id_alamat_kantor,#id_merk,#id_type,#id_sn,#id_warna,#id_accesoris_barang1,#id_type_kendaraan,#id_no_polisi,#id_no_rangka,#id_no_mesin,#id_warna_kendaraan,#id_no_bpkb,#id_no_faktur,#id_stn_atas_nama,#id_nama_pasangan,#id_alamat_pasangan,#id_tlp_pasangan').keyup(function()
+    {
+        $(this).val($(this).val().toUpperCase());
+    });
+});
+
+$(document).ready(function()
+{
+    $('#id_email').keyup(function()
+    {
+        $(this).val($(this).val().toLowerCase());
+    });
+});
+</script>
+
+<script>
+function validateForm() {
+    var x = document.forms["myForm"]["email"].value;
+    var atpos = x.indexOf("@");
+    var dotpos = x.lastIndexOf(".");
+    if (atpos<1 || dotpos<atpos+2 || dotpos+2>=x.length) {
+        alert("Email Yang Anda Masukan Tidak Valid");
+        return false;
+    }
+}
+</script>
+
+<script>
+function hitungJasa() {
+    var jasa_baru = 0;
+    var jangka_waktu;
+    var jangka_waktu_kendaraan;
+    var jw= $('#jangka_waktu').val();
+    var jwk= $('#jangka_waktu_kendaraan').val();
+    var jenis= $('#jenis_transaksi_0').val();
+    var jenis_2= $('#jenis_transaksi_1').val();
+    var jenis_3= $('#jenis_transaksi_2').val();
+    var jenis_kendaraan = $('#id_jenis_kendaraan').val();
+
+    /* Untuk Elektronik */
+    if (jw == '31' && jwk == '0'  && jenis == "1" )
+    {
+        $("input.rp_plafon").each(function() {
+            jasa = parseFloat(to_number(this.value)) * 0.02/7 * (eval($("#jangka_waktu").val()));
+        });
+        $("#jasa_baru").val(format_number(String(Math.round(jasa))));
+        /**$('#beasimpan_baru').val(format_number(String('10000')))**/
+        $('#adm_baru').val(format_number(String('15000')))
+    }
+
+    /* Untuk Motor */
+    else if (jwk == "1" && jw == "0" && jenis_2 == "2" && jenis_kendaraan == "1")
+    {
+        $("input.rp_plafon").each(function() {
+            jasa = parseFloat(to_number(this.value)) * 0.04 * (eval($("#jangka_waktu_kendaraan").val()));
+        });
+        $("#jasa_baru").val(format_number(String(Math.round(jasa))));
+        /*$('#beasimpan_baru').val(format_number(String('50000')))
+        $('#adm_baru').val(format_number(String('25000')))*/
+        $('#beasimpan_baru').val(format_number(String('75000')))
+        $('#adm_baru').val(format_number(String('50000')))
+        $('#materai').val(format_number(String('18000')));
+    }
+
+    else if (jwk == "2" && jw == "0" && jenis_2 == "2" && jenis_kendaraan == "1")
+    {
+        $("input.rp_plafon").each(function() {
+            jasa = parseFloat(to_number(this.value)) * 0.04 * (eval($("#jangka_waktu_kendaraan").val()));
+        });
+        $("#jasa_baru").val(format_number(String(Math.round(jasa))));
+        /*$('#beasimpan_baru').val(format_number(String('50000')))
+        $('#adm_baru').val(format_number(String('25000')))*/
+        $('#beasimpan_baru').val(format_number(String('75000')))
+        $('#adm_baru').val(format_number(String('50000')))
+        $('#materai').val(format_number(String('18000')));
+    }
+
+    else if (jwk == "3" && jw == "0" && jenis_2 == "2" && jenis_kendaraan == "1")
+    {
+        $("input.rp_plafon").each(function() {
+            jasa = parseFloat(to_number(this.value)) * 0.04 * (eval($("#jangka_waktu_kendaraan").val()));
+        });
+        $("#jasa_baru").val(format_number(String(Math.round(jasa))));
+        /*$('#beasimpan_baru').val(format_number(String('50000')))
+        $('#adm_baru').val(format_number(String('25000')))*/
+        $('#beasimpan_baru').val(format_number(String('75000')))
+        $('#adm_baru').val(format_number(String('50000')))
+        $('#materai').val(format_number(String('18000')));
+    }
+
+    else if (jwk == "4" && jw == "0" && jenis_2 == "2" && jenis_kendaraan == "1")
+    {
+        $("input.rp_plafon").each(function() {
+            jasa = parseFloat(to_number(this.value)) * 0.04 * (eval($("#jangka_waktu_kendaraan").val()));
+        });
+        $("#jasa_baru").val(format_number(String(Math.round(jasa))));
+        /*$('#beasimpan_baru').val(format_number(String('50000')))
+        $('#adm_baru').val(format_number(String('25000')))*/
+        $('#beasimpan_baru').val(format_number(String('75000')))
+        $('#adm_baru').val(format_number(String('50000')))
+        $('#materai').val(format_number(String('18000')));
+    }
+
+
+    /* Untuk Mobil*/
+    else if (jwk == "1" && jw == "0" && jenis_3 == "3" && jenis_kendaraan == "2")
+    {
+        $("input.rp_plafon").each(function() {
+            jasa = parseFloat(to_number(this.value)) * 0.04 * (eval($("#jangka_waktu_kendaraan").val()));
+        });
+        $("#jasa_baru").val(format_number(String(Math.round(jasa))));
+        $('#beasimpan_baru').val(format_number(String('350000')))
+        $('#adm_baru').val(format_number(String('150000')))
+        $('#materai').val(format_number(String('18000')));
+    }
+    else if (jwk == "2" && jw == "0" && jenis_3 == "3" && jenis_kendaraan == "2")
+    {
+        $("input.rp_plafon").each(function() {
+            jasa = parseFloat(to_number(this.value)) * 0.04 * (eval($("#jangka_waktu_kendaraan").val()));
+        });
+        $("#jasa_baru").val(format_number(String(Math.round(jasa))));
+        $('#beasimpan_baru').val(format_number(String('350000')))
+        $('#adm_baru').val(format_number(String('150000')))
+        $('#materai').val(format_number(String('18000')));
+    }
+    else if (jwk == "3" && jw == "0" && jenis_3 == "3" && jenis_kendaraan == "2")
+    {
+        $("input.rp_plafon").each(function() {
+            jasa = parseFloat(to_number(this.value)) * 0.04 * (eval($("#jangka_waktu_kendaraan").val()));
+        });
+        $("#jasa_baru").val(format_number(String(Math.round(jasa))));
+        $('#beasimpan_baru').val(format_number(String('350000')))
+        $('#adm_baru').val(format_number(String('150000')))
+        $('#materai').val(format_number(String('18000')));
+    }
+    else if (jwk == "4" && jw == "0" && jenis_3 == "3" && jenis_kendaraan == "2")
+    {
+        $("input.rp_plafon").each(function() {
+            jasa = parseFloat(to_number(this.value)) * 0.04 * (eval($("#jangka_waktu_kendaraan").val()));
+        });
+        $("#jasa_baru").val(format_number(String(Math.round(jasa))));
+        $('#beasimpan_baru').val(format_number(String('350000')))
+        $('#adm_baru').val(format_number(String('150000')))
+        $('#materai').val(format_number(String('18000')));
+    }
+}
+
+function akumulasi() {
+    $("input.rp_plafon").each(function(){
+    totalnilai =parseFloat(to_number(this.value))+ parseFloat(to_number($("#jasa_baru").val()))+parseFloat(to_number($("#beasimpan_baru").val())) + parseFloat(to_number($("#adm_baru").val())) + parseFloat(to_number($("#materai").val()));
+    all_nilai = (parseFloat(to_number($("#pokok").val())) - parseFloat(to_number($("#nilai").val()))) + 
+    parseFloat(to_number($("#denda").val()))+parseFloat(to_number($("#denda_keterlambatan").val()))+parseFloat(to_number($("#jasa_baru").val()))+parseFloat(to_number($("#beasimpan_baru").val())) + parseFloat(to_number($("#adm_baru").val())) + parseFloat(to_number($("#materai").val()));
+    });
+    $("#kewajiban_total_baru").val(format_number(String(totalnilai)));
+    $("#total_all").val(format_number(String(all_nilai)));
+}
+
+</script>
+

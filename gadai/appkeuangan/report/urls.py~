@@ -1,0 +1,14 @@
+from django.conf.urls.defaults import *
+from gadai.appgadai.models import *
+from gadai.appkeuangan.report.views import *
+
+urlpatterns = patterns('',
+    url(r'^index_keu/$', index_keu),
+    url(r'^buku_besar_all_keu/$', buku_besar_all),
+    url(r'^buku_besar_keu/$', buku_besar),
+    url(r'^neraca_percobaan_keu/$', neraca_percobaan),
+    url(r'^neraca_keu/$', neraca),
+    url(r'^laba_rugi_keu/$', laba_rugi),
+    #url(r'^baru_beda_barang/$', baru_beda_barang),
+    #url(r'^(?P<object_id>\d+)/barang_beda/$',barang_beda),#############nasabah lama,barang sama   
+)

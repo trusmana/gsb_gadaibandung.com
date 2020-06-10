@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 TRANSITIONAL//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<link rel="icon" type="image/ico" href="/static/images" />
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<head>
+	<title>GADAI</title>
+	<link rel="shortcut icon" href="favicon.ico" />
+	<style type="text/css">
+	body {  background-color: #FF6600; font-family: Times New roman; max-width: 1000px auto;}
+	#login_form {
+		background: #99CC99;
+		padding: 0.5em 1.5em 0.1em;
+		margin:0 auto 90px;
+		width: 25em;
+		border: 1px solid #C3D4DB;
+		border-top:10px;
+		-webkit-border-radius:2px;
+		-moz-border-radius:2px;
+		border-radius:20px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.5) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+	#login_form h1 { font-size: 1.0em; }
+	#login_form input {
+		font-size: 1em;
+		padding: 2px;
+		background:#FFFFCC ;
+		font-family: sans-serif;
+		border:6px solid #F7F9FA;
+		/***-webkit-border-radius:3px;
+		-moz-border-radius:3px;
+		border-radius:1px;
+		-moz-box-shadow:2px 3px 3px rgba(0, 0, 0, 0.06) inset, 0 0 1px #95a2a7 inset;
+		-webkit-box-shadow:2px 3px 3px rgba(0, 0, 0, 0.06) inset, 0 0 1px #95a2a7 inset;
+		box-shadow:2px 3px 3px rgba(0, 0, 0, 0.06) inset, 0 0 1px #95a2a7 inset;***/
+		margin:3px 0 4px;
+    		width:170px;
+		display:block;
+	}
+	#login_form input[type="password"]:focus, #login_form input[type="text"]:focus {
+		background: #ffc;
+		border: 1px solid #000;
+	}
+	#login_form input.submit {
+		border: solid medium #000;
+
+	}
+	#error {
+		background: #c00;
+		color: #fff;
+		width: 100%;
+		padding: 2px;
+		text-align: center;
+	}
+	#om {
+		font-family: Times New roman;
+		
+		color: #FF451B;
+		text-align: center;	
+	}
+
+	#om1 {
+		position:fixed;
+		padding:7px; 
+		border: 3px solid #990000;
+	
+		left:0;
+		bottom:10px;
+		text-align:center;
+		font:normal 11px/16px Arial, Helvetica, sans-serif;
+		width:100%;
+	}
+	</style>
+	
+
+	</head>
+	<body>
+	
+ 
+	<center>
+		<div class="header" style="margin-top: 2px;">
+		<img src="/static/img/logoksu.png" title="" alt="" style ="float: center;"/>
+		<h2> SISTEM INFORMASI PINJAMAN DENGAN JAMINAN BARANG </h2>
+		<div style="border:3px solid #990000;padding:7px;color:white;background-color: #FFCC00;"  ></div><br />
+	</div>
+	</center>
+	
+    <div id="login_form">
+        <CENTER>
+	<h5> LOGIN USER</h5>
+     <form action="." method="POST">{% csrf_token %}
+      <input type="hidden" name="next" value="{% if next %}{{ next|escape }}{% else %}/{% endif %}">
+    {% if form.errors %}
+      <p id="error">Ulangi kembali,Username atau password anda salah.</p>
+    {% endif %}
+    <table cellpadding="4" width="200">
+      <tr><td align="center">Username:</td><td>{{ form.username }}</td></tr>
+      <tr><td align="center">Password:</td><td>{{ form.password }}</td></tr>
+      <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td colspan="10" align="right"><button type="submit"><img src="/static/images/login.png"  title="" alt="" style ="float: center;"/></button></td></tr>
+      </form>
+    </table>
+    </fieldset>
+    </div>
+    <p align="center"> <img width="38" height="31" src="/static/images/django1.ico" > Apabila Anda Menemui Kesulitan Dengan System, Hubungi Team IT <span style="font-family:arial; font-size: 14px; font-weight:bold; color:#0000ff;">08979943020 / 02291797915 / 02292216757</span><p>
+<div id="om1">
+        <CENTER>
+	KSU RIZKY ABADI By @ DIV.TECHNOLOGI.ID
+	</CENTER></div>
+
+ 	</body>
+	</html>

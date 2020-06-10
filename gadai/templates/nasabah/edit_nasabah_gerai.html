@@ -1,0 +1,31 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<script type="text/javascript">
+$(document).ready(function()
+{
+    $('#id_nama,#id_tempat,#id_alamat_ktp,#id_kelurahan_ktp,#id_kecamatan_ktp,#id_kotamadya_ktp,#id_kabupaten_ktp,#id_alamat_sim,#id_kelurahan_sim,#id_kecamatan_sim,#id_alamat_kantor,#id_merk,#id_type,#id_sn,#id_warna,#id_accesoris_barang1,#id_type_kendaraan,#id_no_polisi,#id_no_rangka,#id_no_mesin,#id_warna_kendaraan,#id_no_bpkb,#id_no_faktur,#id_stn_atas_nama,#id_no_rumah_ktp,#id_alamat_domisili,#id_no_rumah_domisili,#id_rt_domisili,#id_rw_domisili,#id_telepon_domisili,#id_hp_domisili,#id_kelurahan_domisili,#id_kecamatan_domisili,#id_kotamadya_domisili,#id_kabupaten_domisili,#id_nama_pasangan,#id_alamat_pasangan,#id_alamat_kantor').keyup(function()
+    {
+        $(this).val($(this).val().toUpperCase());
+    });
+});
+
+$(document).ready(function()
+{
+    $('#id_email').keyup(function()
+    {
+        $(this).val($(this).val().toLowerCase());
+    });
+});
+
+</script>
+{% endblock %}
+{% block content %}
+	<h2 align="right">Menu Edit Nasabah</h2>
+	<form action="/nasabah/{{id}}/{{akad}}/edit_nasabahgerai/" method="post" enctype="multipart/form-data" class="tabular">{% csrf_token %}
+	<table>
+		{{form.as_table}}
+	</table>
+		<input type="submit" name="submit" value="@Simpan" class="neraca">
+	</form>
+{% endblock %}
+

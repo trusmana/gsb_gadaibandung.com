@@ -1,0 +1,10 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Taksir{% endblock %}{% load number_format %}
+{% block content %}
+<h2>Dana</h2>
+<h3>Menghapus data Taksir</h3>
+<p>Yakin akan menghapus data Taksir <strong>{{ object.type }}</strong> tanggal {{ object.tanggal|date:"d F Y" }} Kode Barang<strong> {{ object.kobar}}</strong>?</p>
+<form action="." method="POST">
+{% include "elements/submit_batal.html" %}
+</form>
+{% endblock %}

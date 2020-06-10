@@ -1,0 +1,46 @@
+<html>
+    <head>
+        <title>Add {{ field }}</title>
+        <script type="text/javascript" src="/static/mediacss/js/admin/RelatedObjectLookups.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/mediacss/css/base.css" />
+        <link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+        <script type="text/javascript" src="/admin/jsi18n/"></script>
+        <script type="text/javascript" src="/static/admin/js/core.js"></script>
+        <script type="text/javascript" src="/static/admin/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+        <script type="text/javascript" src="/static/admin/js/actions.js"></script>
+        <script type="text/javascript" src="/static/admin/js/collapse.js"></script>
+    </head>
+
+  <body>
+      <h1>Tambahkan {{ field }}</h1>
+      <form method="POST" action="">
+  <table>
+    <tr><td><label for="id_jenis_barang">Jenis Barang:</label></td><td>{{form.jenis_barang}}</td></tr>
+    <tr><td><label for="id_merk">Merk:</label></td><td>{{form.merk}}</td></tr>
+    <tr><td><label for="id_type">Type:</label></td><td>{{form.type}}</td></tr>
+    <tr><td><label for="id_sn">SN / IMEi:</label></td><td>{{form.sn}}</td></tr>
+    <tr><td><label for="id_warna">Warna:</label></td><td>{{form.warna}}</td></tr>
+    <tr><td><label for="id_tahun_pembuatan">Tahun Pembuatan:</label></td><td>{{form.tahun_pembuatan}}</td></tr>
+    <tr><td><label for="id_bulan_produksi">Bulan Produksi:</label></td><td>{{form.bulan_produksi}}</td></tr>
+    <tr><td><label for="id_accesoris_barang1">Accesoris Barang:</label></td><td>{{form.accesoris_barang1}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">Dokumen:</label></td><td>{{form.lampiran_dokumen}}</td></tr>
+    <tr><td><label for="id_jenis_dokumen">Jenis Kendaraan:</label></td><td>{{form.jenis_kendaraan}}</td></tr>
+    <tr><td><label for="id_merk_dokumen">Merk Kendaraan:</label></td><td>{{form.merk_kendaraan}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">Type Kendaraan:</label></td><td>{{form.type_kendaraan}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">No Polisi:</label></td><td>{{form.no_polisi}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">No Rangka:</label></td><td>{{form.no_rangka}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">No Mesin:</label></td><td>{{form.no_mesin}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">No Pembuatan:</label></td><td>{{form.tahun_pembuatan_kendaraan}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">Warna Kendaraan:</label></td><td>{{form.warna_kendaraan}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">No BPKB:</label></td><td>{{form.no_bpkb}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">STNK Atas Nama:</label></td><td>{{form.stnk_atas_nama}}</td></tr>
+    <tr><td><label for="id_lampiran_dokumen">No Faktur:</label></td><td>{{form.no_faktur}}</td></tr>
+
+          
+    <tr><td><label></td><td><input type="submit" value="simpan"/>| <a href="javascript:window.close()">Cancel </td></a></tr>
+      </table>
+      <!--<p><input type="submit"  /> | <a href="javascript:window.close()">Cancel</a></p>-->
+    </form>
+  </body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>MASTER IKET PENJUALAN {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 10px; font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+    line-height: 8px;vertical-align: top;border-bottom:
+    1px solid #eee;padding: 5px;
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+function printpage() { window.print(); }
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/">Kembali</a> ]</p>
+<tr><td width="100" align="center">
+<img src="/static/images/logoksu.png" width="70" height="50" align="left" hspace="10" />
+<h3 align="Right"><b>KSU RIZKY ABADI</b></h3>
+<h4 align="Right">Tanggal {% now "d-m-Y" %}</h4>
+<h4 align="Right">Gerai {{g.id_cabang}}</h4>
+<h4 align="Center">MASTER TIKET PENJUALAN PELELANGAN ADM</h4>
+<table align="center">
+<thead>
+    <tr align="center" style="background-color:#C0C0C0;" >
+        <td>No</td>
+        <td>No Slip Transaksi</td>
+        <td align="center">Kode Transaksi </td>
+        <td align="center">Nama Ledger</td>
+        <td align="center">No Ledger</td>
+        <td align="center">Debet</td>
+        <td align="center">Credit</td>
+        <td align="center">Keterangan</td>
+    </tr>
+</thead>
+
+<tbody>{% for p in g%}
+    <tr>
+        <td align="center">{{ forloop.counter }}</br></br></td>
+        <td align="left">{{p.jurnal.nobukti}}</td>
+        <td>{{p.no_trans}}</br></br>
+        <td>{{p.id_coa.deskripsi}}</td>
+        <td>{{p.id_coa}}</td>
+        <td align="right">{{p.debet|number_format:0}}</br></br>
+        <td align="right">{{p.kredit|number_format:0}}</td>
+        <td>{{p.jurnal.diskripsi}}</td> 
+    </tr>{% endfor %}
+</tbody>
+
+<tr>
+    <td colspan="5" align="center">TOTAL</td><td align="right">{{total_debet|number_format:0}}</td><td align="right">{{total_kredit|number_format:0}}<td align="right">{{debet|number_format:0}}</td></td>
+</tr>
+</table>
+
+</table>
+<br>
+<table align ="Right" border="1" bordercolor="silver "  width="50%" cellpadding="0" cellspacing="0" border-bottom-style:outset;>
+<tr align="center" style="background-color:#C0C0C0;height: 15px;" >
+    <td>Dibuat,</td>
+    <td>Di Periksa,</td>
+</tr>
+
+    
+<tr style= "height: 70px;">
+    </br></br></br>
+    </br></br></br>
+    </br></br></br>
+    <td>{{user.first_name}}</td>
+    <td>Kepala Gerai</td>
+</tr>
+

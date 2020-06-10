@@ -1,0 +1,13 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Retail{% endblock %}
+{% block content %}
+
+<h2 align="center">Edit MCC [ {{ object.norek }} ]
+</h2><table border=0>
+<form method="POST" action="." class="tabular">
+{{ form.as_p }}
+<p><label></label><input type="submit" value="Simpan" /></p>
+</tabel>
+</form>
+{% endblock %}
+

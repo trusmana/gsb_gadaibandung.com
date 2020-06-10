@@ -1,0 +1,8 @@
+{% extends "base_aplikasi.html" %}
+{% block content %}
+<h2 align ="right">:: {% if object %}Edit COA{{ object.kode }} &#8212; {{ object.nama }}{% else %}Tambah COA{% endif %} ::</h2>
+<form class="tabular" method="POST" action=".">
+{{ form.as_p }}
+<p><label></label><input type="submit" value="Simpan" /> <a href="/jurnal/rekening/" class="batal">Batal</a></p>
+</form>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block section %}Jurnal_Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>REKAPITULASI TRANSAKSI TRANSAKSI  <small>DIV PJB</small>{{cabang.kode_cabang}}</h2>
+<h3 style='text-align: center'><b> REKAPITULASI TRANSAKSI</b></h3>
+<h3 style='text-align: center'><b><small>Periode : {{sekarang|date:"d-M-Y"}} </small> </b></h3>
+<table class="list">
+<tr>
+	<th colspan="3" >REKAPITULASI TRANSAKSI</th>
+</tr>
+	<tbody>
+		<tr>
+			<td>SALDO AWAL</td><td>Rp 0</td>
+		</tr>
+		<tr>
+			<td>Penambahan Saldo Awal Hari</td><td>Rp 0</td>
+                </tr>
+		 <tr>
+                        <th colspan="3">PENERIMAAN</th>
+                </tr>
+
+		 <tr>
+                        <td>Pelunasan</td><td>Rp {{total_pelunasan|number_format:0}}</td>
+                </tr>
+
+		 <tr>
+                        <td>Pendapatan Lain - Lain</td><td>Rp </td>
+                </tr>
+
+		 <tr>
+                        <td>Total Penerimaan</td><td></td><td>Rp XXXXXX</td>
+                </tr>
+
+
+		 <tr>
+                        <th colspan="3">PENGELUARAN</th>
+                </tr>
+
+		 <tr>
+                        <td>Pencairan</td><td>Rp {{total_pencairan|number_format:0}}</td>
+                </tr>
+		
+		 <tr>
+                        <td>Beban</td><td>Rp XXXXXX</td>
+                </tr>
+
+		 <tr>
+                        <td>Total Pengeluaran</td><td></td><td>Rp XXXXXX</td>
+                </tr>
+
+
+		 <tr>
+                        <th>Saldo Akhir</th><th></th><th>Rp XXXXXX</th>
+                </tr>
+
+	</tbody>
+</table>
+
+{% endblock %}
+

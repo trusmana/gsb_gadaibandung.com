@@ -1,0 +1,16 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}kas{% endblock %}
+{% block sidebar %}{% load number_format %}
+{% for date in date_list %}
+&bull; <a href="/kas/arsip/{{ date|date:"Y/m/" }}">{{ date|date:"F Y" }}</a><br />{% endfor %}
+{% endblock %}
+{% block content %}
+
+<h2 align="right">:: Mutasi Kas Bulan ::</h2>
+
+<table width="75%" border="1" align="center">
+    <tr><th>Tanggal</th><th>Rekening</th><th>Masuk</th><th>Keluar</th><th>Keterangan</th><th>Akun</th></tr>
+{% for object in object_list %}
+    <tr><td>{{ object.tanggal|date:"d-m-Y" }}</td><td><a href="/kas/rekening/{{ object.kasbank.id }}/">{{ object.kasbank }}</a></td>{% if object.is_debet %}<td class="uang">{{ object.nilai|number_format:0 }}</td><td class="uang">0</td>{% else %}<td class="uang">0</td><td class="uang">{{ object.nilai|number_format:0 }}</td>{% endif %}<td>{{ object.keterangan }}</td><td>{{ object.akun }}</td></tr>{% endfor %}
+</table>
+{% endblock %}

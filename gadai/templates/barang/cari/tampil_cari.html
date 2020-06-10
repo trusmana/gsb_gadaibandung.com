@@ -1,0 +1,51 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}caribarang{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% load number_format humanize %}
+{% block content %}
+<h2 align="center">Data Yang Anda Cari <strong>Norek : {{ gr.norek }} Atas Nama : {{ gr.agnasabah.nama }}</strong></h2> 
+<table class="tableizer-table" width="100%" border="1" bordercolor="silver " style="background-color:#FFFFFF" cellpadding="0" cellspacing="0">
+
+<thead>
+<tr>
+    <th>Norek</th>
+	<th>Nama</th>
+	<th>Barang</th>
+	<th>Alamat</th>
+	<th>Gerai</th>
+	<th>Masuk Barang (SBL)</th>
+	<th>Keluar Barang (SBL)</th>
+	<th>Pisisi Barang (SBL)</th>
+	
+	<th>Masuk Barang</th>
+	<th>Keluar Barang</th>
+	<th>NO Rak</th>
+	<th>Menu</th>
+</tr>
+</thead>
+
+<tr>
+    <td>{{gr.norek}}</td>
+    <td>{{ gr.agnasabah.nama }}</td>
+    <td>{{ gr.barang }}</td>
+    <td>{{ gr.agnasabah.alamat_ktp }}</td>
+    <td>{{ gr.gerai }}</td>
+    <td>{{ gr.tgl_barang_masuk|date:"d-m-Y "|default_if_none:"0" }}</td>
+    <td>{{ gr.tgl_barang_keluar|date:"d-m-Y "|default_if_none:"0" }}</td>
+    <td></td>
+    <td>{{ gr.barang.barang_masuk|date:"d-m-Y "|default_if_none:"0" }}</td> 
+    <td>{{ gr.barang.barang_keluar|date:"d-m-Y "|default_if_none:"0" }}</td>
+
+    <td>{{ gr.barang.kode|default_if_none:"0" }}.{{ gr.get_ruang_barang_display|default_if_none:"0" }}.
+     {{ gr.get_lemari_barang_display|default_if_none:"0" }}.{{ gr.get_rak_barang_display|default_if_none:"0" }}.
+     {{ gr.get_row_barang_display|default_if_none:"0"  }}</td>
+    <td><a href="/barang/{{ gr.barang.id}}/{{ gr.id}}/rak_pusat/" class="cari">Input</a></td>
+</tr>
+
+
+</table>
+
+{% endblock %}
+
+

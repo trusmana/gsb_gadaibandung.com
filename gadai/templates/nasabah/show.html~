@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block section %}nasabah{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<script type='text/javascript'>
+$(document).ready(function(){$(&#39;.notification&#39;).hover(function(){$(this).css(&#39;cursor&#39;,&#39;auto&#39;);});
+$(&#39;.notification span&#39;).click(function(){$(this).parent().fadeOut(800);});});
+</script>
+{% load number_format useringroup %}
+<h2 align="right">:: DATA NASABAH  {{ ag.nasabah.nama }}::</h2>
+
+<table width="90%">
+<tr>
+    <td><STRONG>Nama</STRONG></td><td>: {{nsb.nama}}</td>
+    <td><a href="/gerai/{{nsb.id}}/barang_beda/" class ="harian" title="AKAD DENGAN BARANG BEDA">AKAD NEW</a></td>
+</tr>
+<tr><td><STRONG>Alamat      </STRONG></td><td>: {{nsb.alamat_ktp}}  </td></tr>
+<tr><td><strong>No Identitas     </strong> </td><td width="50%">: {{nsb.no_ktp}}  </td></tr>
+<tr> <td><strong>RT / RW  <strong> </td><td>: {{nsb.rt_ktp}}  / {{nsb.rw_ktp}}</td></tr>
+</table>
+
+
+<h3 align="center">:: Data Pinjaman Barang Sebelumnya ::</h3>
+
+
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%" align="center">
+    <tr class="tableizer-firstrow">
+    <th>No Rek</th>
+    <th>No Barang</th>
+    <th>Transaksi</th>
+    <th>NAMA</th>
+    <th>JW</th>
+    <th>Jatuh Tempo</th>
+    <th>Nilai</th>
+    <th>Barang</th>
+    <th>Status Akad</th>
+    <th>Status</th>
+    <th>MENU</th>
+    </tr>
+{% for p in ag %}
+<tr>
+    <td><a href="{{p.get_absolute_url}}" class="lihat" title="Lihat Data Akad" >{{ p.norek}}</a></td>
+    <td>{{p.barang.id}}</td>
+    <td>{{p.tanggal|date:"d M Y "}}</td>
+    <td>{{p.agnasabah.nama}}</td>
+    <td>{% if p.jangka_waktu_kendaraan  %}{{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+    {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+    <td><abbr title="{{ p.cdate }}">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+    <td >Rp. {{p.nilai|number_format:0}}</td>
+    <td >{% if p.jangka_waktu_kendaraan  %}{{p.barang.no_polisi}}|{{p.barang.no_rangka}}{%else%}{{p.barang.merk}}|{{p.barang.type}}{%endif%}</td>
+    <td>{%if p.status_transaksi == 'HILANG' %} {%else%}{{ p.get_status_transaksi_display|default_if_none:"AKTIF"}}{%endif%}</td>
+    <td>{{ p.barang.keterangan_gadai_ulang }}</td>
+    <td><a href="/gerai/{{p.agnasabah.id}}/barang_sama/" title="AKAD DENGAN BARANG SAMA" class="next" method="post">AKAD BRG SAMA</a></td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}
+

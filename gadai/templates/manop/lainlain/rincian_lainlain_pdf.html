@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Hilang</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+    
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/manop/rincian_lainlain/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center">
+<img src="/static/img/logoksu.png" width="110" height="80" align="left" hspace="20"/>
+
+<h3>RINCIAN BARANG LAINNYA</h3>
+
+<h4>PERIODE : {{start_date}} - {{end_date}}</h4></td></tr>
+</table>
+<p>&nbsp;</p>
+<table width="100%" border="1">
+<tr class="tableizer-firstrow">
+    <th>No</th>
+    <th>No Rekening</th>
+    <th>Gerai</th>
+    <th>Nama</th>
+    <th>Barang</th>
+    <th>Status</th>
+    <th>Tgl Status </th>
+    <th>Tgl Trans </th>
+    <th>JW (hari)</th>
+    <th>Jatuh Tempo</th>
+    <th>Pinjaman (Rp)</th>
+</tr>
+
+{% for p in kp %}
+<tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ p.norek }}</td>
+    <td>{{ p.gerai }}</td>
+    <td>{{ p.agnasabah.nama|truncatewords:2 }}</td>
+    <td>{{p.barang.merk}}.{{p.barang.type}}</td>
+	<td>{{ p.status_transaksi}}</td>
+    <td>{{ p.tanggal_lelang|date:"d-M-Y"}} </td>
+    <td>{{ p.tanggal|date:"d-M-Y"}} </td>
+    <td align="center">{% if p.jangka_waktu_kendaraan  %}{{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+                       {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+    <td align="center">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+    <td align="right">{{ p.nilai|number_format:0|default_if_none:"0" }}</td>
+</tr>
+{% endfor %}
+<tr>
+    <th colspan="10"><strong>Jumlah</strong></th>
+    <th align="right" >{{nilai|number_format:0}}</th>
+</tr>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<table  width="100%" class="no-break">
+<tr>
+  <td align="center">Mengetahui / Menyetujui<br />
+    
+<br />
+<br />
+<br />
+<br />
+<br />
+Venny Risvarinny, SE
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+  KADIV GADAI
+<br />
+<br />
+<br />
+<br />
+<br />
+IQBAL ,SH
+</td></tr>
+</table>
+

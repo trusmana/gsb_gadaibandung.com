@@ -1,0 +1,338 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Rekap {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/jurnal/laporan_kas_kecil/">Kembali</a> ]</p>
+
+{% include "alat/ledger.html" %}
+{% block content %}
+{% load number_format useringroup %}
+
+<br><br><br><br>
+{% if ledger or saldo_awal%}
+   <h3 style='text-align: center'><b><small>LAPORAN KAS KECIL PUSAT PJB</small></h3>
+<h3 style='text-align: center'><b><small>Periode : {{start_date}} s/d {{end_date}} </small> </b></h3>
+   <p style='text-align: center'>AKUN &nbsp;11.05.01</p>
+<table  class="tableizer-table" border="1" bordercolor="silver "  cellpadding="0" cellspacing="0" border-bottom-style:outset; width="5%">
+   <thead>
+     <tr>
+        <th>No</th>
+        <th>Tanggal</th>
+        <th>Keterangan</th>
+        <th>User</th>
+        <th>Debet (Rp.)</th>
+        <th>Kredit (Rp.)</th>
+        <th>Saldo (Rp.)</th>
+     </tr>
+   </thead>
+      <tr>
+        <td></td>
+  <td>Saldo Awal</td>
+        <td style="text-align:right"></td>
+        <td style="text-align:right"></td>
+        <td style="text-align:right">{{saldo_awal|number_format:0}}</td>
+    </tr>
+
+{% for d in ledger %}
+   <tbody>
+        {% if forloop.first %}{%endif%}
+   {% if d.nobukti != '00000' %}
+   <tr class="{% cycle 'row1' 'row2' %}">
+        <td>{{ forloop.counter }}</td>
+        <td>{{ d.tgl_trans|date:'d-M-Y' }}</td>
+        <td>{{d.diskripsi}} - {{ d.deskripsi }} - {{d.nobukti}}</td>
+        <td>{{d.cu}}</td>
+        <td style="text-align:right">{{ d.debet|number_format:0 }}</td>
+        <td style="text-align:right">{{ d.kredit|number_format:0 }}</td>
+        <td style="text-align:right">{{ d.saldo_akhir_mutasi|number_format:0}}</td>
+     </tr>
+     {%endif%}
+        {% endfor %}
+
+     </tr>
+     <tfoot>
+     <tr>
+         <th colspan="4" style="text-align: center"><b>Saldo Akhir</b></th>
+               <th style="text-align:right">{{total_debet|number_format:0 }}</th>
+               <th style="text-align:right">{{total_kredit|number_format:0 }}</th>
+               <th style="text-align:right">{{saldo_akhir|number_format:0}}</th>
+     </tr>
+
+     <tr>
+         <th colspan="3" style="text-align: center"><b>Saldo Akhir Petty Cash Hari ini</b></th><th></th>
+               <th style="text-align:right">&nbsp;</th>
+               <th style="text-align:right">&nbsp;</th>
+               <th style="text-align:right">{{saldo_petty_cash|number_format:0}}</th>
+     </tr>
+     <tr>
+         <th colspan="3" style="text-align: center"><b>Total Yang Harus Ditambahkan</b></th><th></th>
+               <th style="text-align:right">&nbsp;</th>
+               <th style="text-align:right">&nbsp;</th>
+               <th style="text-align:right">{{nilai_ditambahkan|number_format:0}}</th>
+     </tr>
+     <tr>
+         <th colspan="3" style="text-align: center"><b>Total Dana Petty Cash (Impress Fund)</b></th><th></th>
+               <th style="text-align:right">&nbsp;</th>
+               <th style="text-align:right">&nbsp;</th>
+               <th style="text-align:right">{{saldo_limit|number_format:0}}</th>
+     </tr>
+</tfoot>
+</table>
+{% if forloop.last %}</table>{% endif %}
+{% endif %}
+{% endblock %}
+<br><br><br><br>
+<table align="right" border="1" bordercolor="silver "  cellpadding="0" cellspacing="0" border-bottom-style:outset; width="15%" id = "mytable">
+</table>
+<br><br><br><br>
+
+</body>
+
+</html>
+
+
+
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
+<script>
+
+$(document).ready(function(){
+
+	showtable()
+
+})
+
+
+
+function formatNumber(input)
+
+{
+
+	var num = input.value.replace(/\,/g,'');
+
+	if(!isNaN(num)){
+
+	if(num.indexOf('.') > -1){
+
+	num = num.split('.');
+
+	num[0] = num[0].toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g,'$1,').split('').reverse().join('').replace(/^[\,]/,'');
+
+	if(num[1].length > 2){
+
+	alert('You may only enter two decimals!');
+
+	num[1] = num[1].substring(0,num[1].length-1);
+
+	} input.value = num[0]+'.'+num[1];
+
+	} else{ input.value = num.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g,'$1,').split('').reverse().join('').replace(/^[\,]/,'') };
+
+	}
+
+	else{ alert('Anda hanya diperbolehkan memasukkan angka!');
+
+	input.value = input.value.substring(0,input.value.length-1);
+
+	}
+
+}
+
+function currencyR(uang){
+
+	if(uang==undefined)
+
+		uang = '0';
+
+	if(uang!=undefined){
+
+		uang = uang + '';
+
+		st = '';
+
+		if(uang.indexOf('.')!=-1){
+
+			//st = 'Rp '+uang;
+
+			st =uang;
+
+		}
+
+		else{
+
+			n = 0;
+
+			st = '';
+
+			for(i=(uang.length-1);i>=0;i--){
+
+				if(n<=2){
+
+					st = uang[i]+st;
+
+					n++;
+
+				}
+
+				else{
+
+					st = ','+st;
+
+					st = uang[i]+st;
+
+					n = 1;
+
+				}
+
+			}
+
+			//st = 'Rp '+st;
+
+			st =st;
+
+		}
+
+		return st;
+
+	}
+
+	else return 0;
+
+}
+
+function showtable(){
+
+	var nom = [100000,50000,20000,10000,5000,2000,1000,1000,500,200,100,50]
+
+	var jn = ["K","K","K","K","K","K","K","L","L","L","L","L"]
+
+	var len = nom.length
+
+	var tr = ""
+
+	tr += "<tr><td>Keterangan</td><td>Nominal</td><td></td><td>Lembar</td><td></td><td>Rupiah</td></tr>"
+
+	var j = 1;
+
+	var t = 0;
+
+	for(i=0;i < len ; i++){
+
+		j = j + i;
+
+		var l = jn[i]
+
+		if(l == 'K'){
+
+			var lj = "Uang Kertas"
+
+		}else{
+
+			t = t + 1;
+
+			var lj = "Uang Logam"
+
+			if(t == 1){
+
+				tr += "<tr><td>Keterangan</td><td>Nominal</td><td></td><td>Keping</td><td></td><td>Rupiah</td></tr>"
+
+			}
+
+		}
+
+		tr += "<tr><td>"+lj+"</td><td><input type='text' id='uang"+j+"' value='"+nom[i]+"' readonly=''/></td><td>*</td><td><input type='text' id='kali"+j+"' value='' onkeyup='hitung("+j+")'/></td><td>=</td><td><input type='text' id='hasil"+j+"' class='tot' readonly='' value=''/></td></tr>"
+
+	}
+
+	tr += "<tr><td colspan='5'>TOTAL</td><td><input type='text' id='total' readonly=''></td></tr>"
+
+	document.getElementById("mytable").innerHTML = tr;
+
+}
+
+
+
+function hitung(id){
+
+	var sel = $('#uang'+id).val()
+
+	var kali = $('#kali'+id).val()
+
+	var hitung = parseInt(sel) * parseInt(kali)
+
+	$('#hasil'+id).val(hitung)
+
+	var sum = 0;
+
+	$('.tot').each(function(){
+
+		var sa = $(this).val()
+
+		if(sa == '' || sa == null){
+
+			sa = 0
+
+		}
+
+		sum += parseFloat(sa);  // Or this.innerHTML, this.innerText
+
+	});
+
+	$('#total').val(sum)
+
+}
+
+</script>
+<br><br><br><br>
+<table  width="15%" class="no-break">
+<tr>
+  <td align="center">Bandung, {% now "d F Y" %}</br>
+   Dibuat<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+(..........................)
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+Disetujui
+<br />
+<br />
+<br />
+<br />
+<br />
+(..........................)
+</td>
+
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+Di Ketahui
+<br />
+<br />
+<br />
+<br />
+<br />
+(..........................)
+</td></tr>
+</table>

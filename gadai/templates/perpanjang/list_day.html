@@ -1,0 +1,85 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Perpanjang{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+<h3>DATA PERPANJANGAN</h3>
+<p>Harian</p>
+<ol>
+{% for d in day_list %}
+<li><a href = "/perpanjang/arsip/?tgl={{d|date:'Y-m-d'}}">{{ d|date:"d M Y"}}</a></li>{% endfor %}
+</ol>
+
+<p>Bulanan</p>
+<ol>
+{% for m in month_list %}
+<li><a href = "/perpanjang/arsip_bulan/?tgl={{m|date:'Y-m-1'}}">{{ m|date:"M Y"}}</a></li>{% endfor %}
+</ol>
+<p>Tahunan</p>
+<ol>
+{% for y in year_list %}
+<li><a href = "/perpanjang/rekap_tahun/?tgl={{y|date:'Y-1-1'}}">{{ y|date:"Y"}}</a></li>{% endfor %}
+</ol>
+
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<p class="breadcrumb"><a ></a><a></a></p>
+
+<h2 align="center">Data Perpanjang Gerai  {{tanggal|date:"d F Y "}}</h2>
+<span class="contextual"></span>
+{% for p in gerai %}
+ {% ifchanged p.gerai %}
+ <br/>
+ {% endifchanged %} 
+ {% ifchanged  p.gerai %}
+ {% if not forloop.first %}</table></form><br /><br /><br />{% else %}{% endif %}
+   <p align="center"> 
+    <b>{{p.get_barang_display|upper}}</b>
+    <a href ="/perpanjang/{{p.gerai.id}}/hari/?tgl={{tanggal|date:'Y-m-d'}}">
+     Gerai :<b> {{ p.gerai}}</b> </a> 
+    
+</p>
+
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+    <th>No Kwitansi</th>
+    <th >Nasabah</th>
+    <th >JW</th>
+    <th >Nilai</th>
+    <th>Status</th>
+    <th>Barang</th>
+    <th>SN</th>
+    <th >Transaksi</th>
+    <th >Jatuh Tempo</th>
+    <th >Jasa</th>
+    <th >DENDA</th>
+    <th >BEA SIMPAN</th>
+    <th >JASA TERLAMBAT</th>
+    <th >Terlambat</th>
+    
+ {% else %}
+ {% endifchanged %}
+ <tr {% if p.lunas %} class="row_lunas"{% endif %} {% if p.status_gadai %} class="row_status_gadai"{% endif %}{% if p.lewat_jw %} class="row_lewat_jw"{% endif %}>
+     
+    <td><a href="{{ p.get_absolute_url }}">{{ p.norek }}</a></td>
+    <td>{{ p.agkredit.agnasabah.nama }}</td>
+    <td>{% if p.jw_kendaraan  %}{{p.jw_kendaraan}} Bulan{%else%}{{ p.jw }} Hari</td>{% endif %}
+    <td>Rp.{{ p.nilai|number_format:0 }},-</td>
+    <td >{{ p.status|default_if_none:"0"  }}</td>
+    <td>{{ p.agkredit.barang.merk}},{{ p.barang.type}}</td>
+    <td >{{ p.agkredit.barang.sn }}</td>    
+    <td >{{ p.tanggal|date:"d-M-Y " }}</td>
+    <td>{% if p.jw_kendaraan  %}{{ p.jt_kendaraan|date:" d-M-Y"}}{% else %}
+    {{ p.jatuhtempo_perpanjang|date:" d-M-Y"}}</td>{% endif %}
+    <td class="jasa uang r">{% if p.jw_kendaraan  %}{{p.bea_jasa_kendaraan|number_format:0}}{%else%}{{ p.bea_jasa|number_format:0 }}</td>{%endif%}
+    <td class="adm uang r">{% if p.jw_kendaraan  %}{{ p.denda_kendaraan|number_format:0 }}{%else%}{{ p.denda|number_format:0 }}</td>{%endif%}
+    <td class="adm uang r">{% if p.jw_kendaraan  %}{{ p.beasimpan_kendaraan|number_format:0 }}{%else%}{{ p.bea_simpan|number_format:0 }}</td>{%endif%}
+    <td class="biayasimpan uang r">{% if p.jw_kendaraan  %}{{ p.bea_jasa_terlambat_kendaraan|number_format:0 }}{%else%}{{ p.bea_jasa_terlambat|number_format:0 }}</td>{%endif%}
+    <td>{% if p.jw_kendaraan  %}{{ p.terlambat_kendaraan|number_format:0 }}{%else%}{{ p.terlambat|number_format:0 }}</td>{%endif%}
+    
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %} 

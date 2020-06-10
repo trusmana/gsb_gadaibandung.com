@@ -1,0 +1,38 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}PELUNASAN{% endblock %}
+{% block sidebar %}{% endblock %}
+{% load number_format humanize %}
+{% block content %}
+<aside class="right-side">     
+            <section class="content-header">
+                <h2>
+                    MENU INPUT PELUNASAN KASIR DIV PJB
+                    <small>KSU RA</small>
+                </h2>
+                
+            </section>
+                    
+        <section class="content">
+            <div class="row">
+                <!-- left column -->
+                <div class="col-md-5">
+                            <!-- general form elements -->
+                    <div class="box box-primary">
+                        <div align="center">
+                                    <h3 class="box-title">INPUT PELUNASAN</h3>
+                        </div>    
+        
+                            <form method='GET' class="form-horizontal" action='/kasirgerai/cariplns/' role="form">{% csrf_token %}
+                                    <div align="center">
+                                        <input type="text" name="rekening" size="20" placeholder="Berdasarkan norek" class="form-control">
+                                            <span class="input-group-btn">
+                                            <button class="btn btn-info btn-flat" type ="submit" value="Cari ">cari</button>
+                                            </span>                            
+                                    </div>
+                            </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+</aside>
+{% endblock %}

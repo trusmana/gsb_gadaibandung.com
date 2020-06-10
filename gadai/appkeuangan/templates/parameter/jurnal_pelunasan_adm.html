@@ -1,0 +1,62 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="/static/tedi/css/jquery.dataTables.css">
+<script type="text/javascript" language="javascript" src="/static/tedi/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/tedi/js/jquery.dataTables.js"></script>
+<script type="text/javascript" language="javascript" class="init">	
+$(document).ready(function() {
+    $('#example').DataTable();
+} );
+    $(document).ready(function() {
+        $('#menuinput').click(function() {
+        	$('.chosen-container-single').trigger("liszt:updated");
+        	$('.tampil').slideToggle("fast");
+
+        });
+    });
+</script>
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+	<h2>Parameter Adm Pelunasan</h2>
+	<div id="menuinput"><button class="neraca">+TAMBAH</button></div>
+	<div class="tampil" >
+	<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %}
+		<table>
+			{{form.as_table}}
+		</table>
+		<li><input  type="submit" name="submit" value="@Simpan" class="simpan"></li>
+	</form>
+	</div>
+	<br>
+	<h3 align="center">Data Adm Pelunasan</h3>
+	<table id="example" class="display" cellspacing="0" >
+		<thead>
+		<tr>
+		    <th>No</th><th>Item</th><th>Titipan Pelunasan </th><th>Pinjaman Anggota</th>
+		    <th>Denda</th><th>Pendapatan Jasa</th><th>PPAP</th><th>Menu</th>
+		</tr>
+		</thead>
+		<tfoot>
+		<tr>
+                    <th>No</th><th>Item</th><th>Titipan Pelunasan </th><th>Pinjaman Anggota</th>
+                    <th>Denda</th><th>Pendapatan Jasa</th><th>PPAP</th><th>Menu</th>
+		</tr>
+		</tfoot>
+		<tbody>
+		{% for a in pnkb %}
+		<tr class="{% cycle 'row1' 'row2' %}">
+			<td>{{ forloop.counter }}</td>
+			<td>{{a.get_item_display}}</td>
+                        <td>{{a.coa_1 }}</td>
+			<td>{{a.coa_2}}</td>
+			<td>{{a.coa_3}}</td>
+			<td>{{a.coa_4}}</td>
+                        <td>{{a.coa_5}}</td>
+			<td><a href="/parameter/{{a.id}}/edit_jurnal_pelunasan_adm/"><button class="neraca">#Edit</button></a></td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

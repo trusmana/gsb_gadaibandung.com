@@ -1,0 +1,61 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}GUDANG{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2>PEMESANAN DAN PENGIRIMAN BARANG DIV PJB</h2>  
+<h3 style='text-align: center'><b><small>MENU EDIT DATA PESANAN BARANG GUDANG DIV PJB </small> </b></h3>
+<h3 style='text-align: center'><b><small>Tanggal Pemesanan : {{end_date}} </small> </b></h3>
+<table class="tableizer-table"width="100%" border="1">
+<form method="POST" action="/permintaan/update_permintaan_gudang/">{% csrf_token %}
+<input type="hidden"name="tgl" value="{{tanggal_permintaan|date:'Y-m-d'}}" />Tanggal : <input type="text" name="tanggal_pengiriman" id ="id_tanggal_pengiriman" size="10" />
+Status Permintaan :<select name="status_permintaan" id="id_status_permintaan"><option value="3">Kirim</option><option value="4">Belum Ketemu</option></select>
+<input type="submit" value="Simpan" class="print"/></p>
+<tr>
+	  <th>ID</th><th>Gerai</th><th>Norek</th>
+	  <th>Nasabah</th><th>JW</th>
+	  <th>Barang</th>
+	  <th>SN/No Mesin</th>
+	  <th>Transaksi</th>
+	  <th>Jatuh Tempo</th>
+	  <th>Jam Permintaan</th>
+	  <th>Tgl Pemesanan</th>
+	  <th>Tgl Pengiriman</th>
+	  <th>Status Permintaan</th>
+	  <th>No Rak</th>
+          <th>M Reset</th>
+</tr>
+
+{% for p in kp %}
+<tr {% if p.lunas %} class="row_lunas"{% endif %} {% if p.status_gadai %} class="row_status_gadai"{% endif %}{% if p.lewat_jw %} class="row_lewat_jw"{% endif %}>
+    
+    <td><input type="checkbox" name="id_minta" value="{{ p.id }}" /></td>
+    <td>{{ p.gerai }}</td>
+    <td><a href="{{ p.get_absolute_url }}">{{ p.norek }}</a></td>
+    <td>{{ p.agnasabah.nama }}</td>
+    <td>{{ p.jangka_waktu }}</td>
+    <td>{%if p.jangka_waktu_kendaraan %}{{ p.barang.type_kendaraan}}{%else%} {{p.barang.merk}} {%endif%}</td>
+    <td> {%if p.jangka_waktu_kendaraan %} {{p.barang.no_mesin}} {%else%}{{ p.barang.sn }}{%endif%}</td>
+    <td>{{ p.tanggal|date:"d M Y " }}</td>
+    <td>{%if p.jangka_waktu_kendaraan%}{{p.jatuh_tempo_kendaraan|date:"d M Y"}}{%else%}{{ p.jatuhtempo|date:"d M Y " }}{%endif%}</td>
+    <td>{{p.cdate}}</td>
+    <td>{{p.tanggal_permintaan|date:"d M Y" }}</td>
+    <td>{{p.tanggal_pengiriman|date:"d M Y" }}</td>     
+    <td>{{p.get_status_permintaan_display }} </td>
+    <td>{{p.barang.get_ruangan_display|default_if_none:"0"}}.{{p.barang.lemari|default_if_none:"0"}}.{{p.barang.no_rak|default_if_none:"0"}}.{{p.barang.row|default_if_none:"0"}}</td>   
+    <td><a href="/permintaan/{{p.id}}/reset_status_barang_gudang/" class="cari">Reset Status</a></td>
+</tr>
+{% endfor %}
+</table>
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}
+
+
+

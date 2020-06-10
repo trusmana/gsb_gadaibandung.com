@@ -1,0 +1,236 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}approve_pencairan{% endblock %}
+{% block extrahead %}
+	
+{% load useringroup number_format %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>APPROVE PENCAIRAN  An : <small>{{kpl.agnasabah.nama}}</small></h2>  
+<table border=0 align="center">
+
+    <td colspan="2" height="10"><h3>DATA NASABAH</h3></td>
+    <td  height="10" align ="left"><h3>DATA NASABAH DOMISILI</h3></td>
+   <tr>
+       <td>KEANGGOAAN </td>
+       <td>: {{kpl.agnasabah.get_jenis_keanggotaan_display}}</td>
+      
+       <td>ALAMAT DOMISILI</td>
+       <td>: {{kpl.agnasabah.alamat_domisili}} {{kpl.agnasabah.no_rumah_domisili}}</td>
+   </tr>
+
+    <tr>
+        <td>NAMA </td>
+        <td>: {{kpl.agnasabah.nama}}</td>        
+
+        <td>RT - RW DOMISILI </td>
+        <td>: {{kpl.agnasabah.rt_domisili}} / {{kpl.agnasabah.rw_domisili}}</td>
+    </tr>
+    <tr>
+        <td>TEMPAT LAHIR </td>
+        <td>: {{kpl.agnasabah.tempat}}</td>
+
+        <td>KELURAHAN DOMISILI </td>
+        <td>: {{kpl.agnasabah.kelurahan_domisili}}</td>        
+    </tr>
+  
+    <tr>
+        <td>TANGGAL LAHIR </td>
+        <td>: {{kpl.agnasabah.tgl_lahir}}</td>
+
+       <td>KECAMATAN DOMISILI </td>
+        <td>: {{kpl.agnasabah.kecamatan_domisili}}</td>
+    </tr>
+
+    <tr>
+        <td>JENIS KELAMIN </td>
+        <td>: {{kpl.agnasabah.get_jenis_kelamin_display}}</td>
+
+        <td>KOTAMADYA DOMISILI </td>
+        <td>: {{kpl.agnasabah.kotamadya_domisili}}</td>
+
+    </tr>
+
+    <tr>        
+        <td>NO KTP  </td>
+        <td>: {{kpl.agnasabah.no_ktp}}</td>        
+
+        <td>KABUPATEN DOMISILI</td>
+        <td>: {{kpl.agnasabah.kabupaten_domisili}}</td>
+    </tr>
+    
+    <tr>
+        <td>ALAMAT KTP</td>
+        <td>: {{kpl.agnasabah.alamat_ktp}} {{kpl.agnasabah.no_rumah_ktp}}</td>
+
+        <td>KODEPOS</td>
+        <td>: {{kpl.agnasabah.kode_pos}}</td>        
+
+    </tr>
+    <tr>
+        <td>RT - RW KTP </td>
+        <td>: {{kpl.agnasabah.rt_ktp}} / {{kpl.agnasabah.rw_ktp}}</td>
+   
+        <td>TELEPON DOMISILI</td>
+        <td>: {{kpl.agnasabah.telepon_domisili}}</td>
+    </tr>   
+    
+    <tr>
+        <td>KELURAHAN KTP </td>
+        <td>: {{kpl.agnasabah.kelurahan_ktp}}</td>
+        
+        <td>HP DOMISIL</td>
+        <td>: {{kpl.agnasabah.hp_domisili}}</td>
+        
+    </tr>
+    
+    <tr>
+        <td>KECAMATAN KTP </td>
+        <td>: {{kpl.agnasabah.kecamatan_ktp}}</td>        
+       
+        <td>EMAIL</td>
+        <td>: {{kpl.agnasabah.email}}</td>
+
+    </tr>
+
+    <tr>
+       <td>KOTAMADYA KTP </td>
+       <td>: {{kpl.agnasabah.kotamadya_ktp}}</td>
+       
+       <td><h3><b>DATA LOAN FILE</b><h3></td>
+       <td></td>
+
+    </tr>
+
+    <tr>
+       <td>KABUPATEN KTP</td>
+       <td>: {{kpl.agnasabah.kabupaten_ktp}}</td>
+
+      <td>TANGGAL </td>
+      <td>: {{kpl.tanggal|date:"d-M-Y"}}</td>    
+   </tr>
+    
+    <tr>
+        <td>STATUS  </td>
+        <td>: {{kpl.agnasabah.get_jenis_pekerjaan_display}}</td>
+
+        <td>NILAI PLAFON</td>
+        <td>:  Rp. {{kpl.nilai|number_format:0}}</td>
+    </tr>
+  
+    <tr>
+        <td>TELEPON KTP</td>
+        <td>: {{kpl.agnasabah.telepon_ktp}}</td>        
+
+        <td>JANGKA WAKTU </td>
+        <td>: {% if kpl.jenis_transaksi = '1'  %}{{ kpl.jangka_waktu|default_if_none:"" }} Hari{%else%}
+          {{ kpl.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{% endif %}</td>
+
+    </tr>
+
+    <tr>
+        <td>HP KTP</td>
+        <td>: {{kpl.agnasabah.hp_ktp}}</td>        
+  
+        <td>NILAI JASA</td>
+        <td>: Rp. {%if kpl.jenis_transaksi = '1' %}{{kpl.jasa|number_format:0}}{%else%} {{kpl.jasa_kendaraan|number_format:0}} {%endif%}</td>
+    </tr>
+    <tr>
+        <td>PEKERJAAN</td>
+        <td>: {{kpl.agnasabah.get_jenis_pekerjaan_display}}</td>
+
+        <td>NILAI BIAYA SIMPAN </td>
+        <td>: Rp. {%if kpl.jenis_transaksi = '1' %}{{kpl.biayasimpan|number_format:0}}{%else%} {{kpl.beasimpan_kendaraan|number_format:0}} {%endif%}</td>
+    </tr>
+
+    <tr>
+        <td>ALAMAT PEKERJAAN  </td>
+        <td>: {{kpl.agnasabah.alamat_kantor}}</td>
+
+        <td>NILAI ADM  </td>
+        <td>: Rp. {%if kpl.jenis_transaksi = '1' %}{{kpl.adm|number_format:0}}{%else%} {{kpl.adm_kendaraan|number_format:0}} {%endif%}</td>
+    </tr>
+    <tr>
+       <td>TELEPON KANTOR</td>
+       <td>: {{kpl.agnasabah.telepon_kantor}}</td>
+ 
+        <td>TERIMA BERSIH </td>
+       <td>: Rp. {{kpl.terima_bersih_all|number_format:0}}</td>
+
+    </tr>   
+
+    <tr>
+       <td></td>
+       <td></td>
+
+       <td>GERAI  </td>
+       <td>: {{kpl.gerai.nama_cabang}}</td>
+
+    </tr>
+
+
+    <td colspan="2" height="10"><h3>DATA PASANGAN NASABAH</h3></td>
+    <td  height="10" align ="left"><h3>DATA JAMINAN</h3></td>
+   <td></td>
+ 
+
+    <tr>
+        <td>NAMA PASANGAN</td>
+        <td>: {{kpl.agnasabah.nama_pasangan}} </td>    
+        <td>JENIS BARANG JAMINAN </td>
+        <td>: {% if kpl.jenis_transaksi = '1'  %}{{ kpl.barang.get_jenis_barang_display }} {%else%}
+	  {{ kpl.barang.get_jenis_kendaraan_display }} Bulan{% endif %}</td>
+    </tr>
+
+    <tr>
+        <td>ALAMAT PASANGAN</td>
+        <td>: {{kpl.agnasabah.alamat_pasangan}} </td>
+
+        <td>MERK BARANG JAMINAN </td>
+        <td>: {{kpl.barang.merk}}</td>
+    </tr>
+    <tr>
+        <td>NO RUMAH PASANGAN</td>
+        <td>: {{kpl.agnasabah.no_rumah_pas}} </td>
+
+        <td>TAHUN PEMBUATAN</td>
+        <td>: {% if kpl.jenis_transaksi = '1' %} {{kpl.barang.tahun_pembuatan}}{%else%} {{kpl.barang.tahun_pembuatan_kendaraan}}{%endif%}</td>
+        
+    </tr>
+    
+    <tr>
+        <td>RT/RW PASANGAN</td>
+       <td>: {{kpl.agnasabah.no_rt_pas}} / {{kpl.agnasabah.no_rw_pas}}</td>
+
+        <td>JATUH TEMPO</td>
+        <td>: {{kpl.jatuhtempo|date:"d-M-Y"}} </td>
+     </tr>
+     <tr>
+        <td>NO TLP PASANGAN</td>
+        <td>: {{kpl.agnasabah.tlp_pasangan}} </td>
+
+        <td>TYPE BARANG JAMINAN</td>
+        <td>: {% if kpl.jenis_transaksi = '1'  %} {{kpl.barang.type}}{%else%}{{kpl.barang.type_kendaraan|date:"d-M-Y"}}{%endif%}</td>
+    </tr>
+
+    <tr>
+        <td>JENIS KELAMIN PASANGAN</td>
+        <td>: {{kpl.agnasabah.jekel_pasangan}} </td>
+
+        <td>NILAI TAKSIR </td>
+        <td>: Rp. {{kpl.taksir.maxpinjaman|number_format:0}}</td>
+    </tr>
+</table>
+<hr>
+<form method="POST" action="/kplgerai/{{ kpl.id }}/verifikasi_kg_pencairan/" class="tabular">{% csrf_token %}
+	<table  align="center">
+		{{form.as_table}}
+	
+	<td align="center"></td><td><label></label><input type="submit" value="&radic; Simpan" class="back"/></td>
+	</table>
+</form>
+
+
+{% endblock %}

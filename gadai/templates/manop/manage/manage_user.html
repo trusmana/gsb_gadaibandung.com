@@ -1,0 +1,86 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="/static/tedi/css/jquery.dataTables.css">
+<script type="text/javascript" language="javascript" src="/static/tedi/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/tedi/js/jquery.dataTables.js"></script>
+<script type="text/javascript" language="javascript" class="init">	
+$(document).ready(function() {
+    $('#example').DataTable();
+} );
+    $(document).ready(function() {
+        $('#menuinput').click(function() {
+        	$('.chosen-container-single').trigger("liszt:updated");
+        	$('.tampil').slideToggle("fast");
+
+        });
+    });
+</script>
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+	<h2>Menu Penambahan User</h2>
+	<div id="menuinput"><button class="neraca">+TAMBAH</button></div>
+	<div class="tampil" >
+	<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %}
+		<table>
+			{{form}}
+		</table>
+		<li><input  type="submit" name="submit" value="@Simpan" class="simpan"></li>
+	</form>
+	</div>
+	<br>
+	<h3 align="center">Data Akun</h3>
+	<table id="example" class="display" cellspacing="0" >
+		<thead>
+		<tr>
+		    <th>No</th>
+		    <th>Id</th>
+		    <th>Nama Pengguna</th>
+		    <th>Nama Depan</th>
+		    <th>Nama Belakang</th>
+		    <th>Sandi</th>
+		    <th>Aktif</th>
+            <th>Status Staff</th>		    
+            <th>Status Superuser</th>
+            <th>Grup</th>
+            <th>Menu</th>            
+		</tr>
+		</thead>
+		<tfoot>
+		<tr>
+		    <th>No</th>
+		    <th>Id</th>
+		    <th>Nama Pengguna</th>
+		    <th>Nama Depan</th>
+		    <th>Nama Belakang</th>
+		    <th>Sandi</th>
+		    <th>Aktif</th>
+            <th>Status Staff</th>		    
+            <th>Status Superuser</th>
+            <th>Grup</th>
+            <th>Menu</th>            
+        </tr>
+		</tfoot>
+		<tbody>
+		{% for a in gu %}
+		<tr class="{% cycle 'row1' 'row2' %}">
+			<td>{{ forloop.counter }}</td>
+			<td>{{a.id}}</td>
+			<td>{{a.username}}</td>
+			<td>{{a.first_name}}</td>
+			<td>{{a.last_name}}</td>
+			<td>{{a.password}}</td>
+			<td>{{a.is_active}}</td>			
+			<td>{{a.is_staff}}</td>
+			<td>{{a.is_superuser}}</td>
+			<td>{{a.groups.name }}</td>					
+			<td><a href="/manop/{{a.id}}/edit_manage_user/"><button class="neraca">#Edit</button></a></td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}
+
+
+

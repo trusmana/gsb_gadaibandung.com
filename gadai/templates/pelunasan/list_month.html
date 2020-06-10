@@ -1,0 +1,82 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}pelunasan{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+<h3>DATA PENCAIRAN</h3>
+<p>Harian</p>
+<ol>
+{% for d in day_list %}
+<li><a href = "/pelunasan/arsip/?tgl={{d|date:'Y-m-d'}}">{{ d|date:"d M Y"}}</a></li>{% endfor %}
+</ol>
+
+<p>Bulanan</p>
+<ol>
+{% for m in month_list %}
+<li><a href = "/pelunasan/rekapbulan/?tgl={{m|date:'Y-m-1'}}">{{ m|date:"M Y"}}</a></li>{% endfor %}
+</ol>
+<p>Tahunan</p>
+<ol>
+{% for y in year_list %}
+<li><a href = "/pelunasan/rekap_tahun/?tgl={{y|date:'Y-1-1'}}">{{ y|date:"Y"}}</a></li>{% endfor %}
+</ol>
+<h3> KETERANGAN
+<h5>&bull; MERAH = NASABAH LUNAS</h5>
+<h5>&bull; BIRU = NASABAH JATUH TEMPO</h5>
+<h5>&bull; KUNING = NASABAH LEWAT JATUH TEMPO</h5>
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<p class="breadcrumb"><a ></a><a></a></p>
+
+
+<h2 align="center">Rekap Pelunasan Gerai  {{tanggal|date:"d F Y "}}</h2>
+<span class="contextual"></span>
+{% for p in gerai %}
+ {% ifchanged p.gerai %}
+ <br/>
+ {% endifchanged %} 
+ {% ifchanged  p.gerai %}
+ {% if not forloop.first %}</table></form><br /><br /><br />{% else %}{% endif %}
+   <p align="center"> 
+	<b>{{p.get_barang_display|upper}}</b>
+	<a href ="/pelunasan/{{p.gerai.id}}/rekapbulan/?tgl={{tanggal|date:'Y-m-d'}}">
+	 Gerai :<b> {{ p.gerai}}</b> </a> 
+	
+</p>
+
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+    <th>No Kwitansi</th>
+    <th>Nasabah</th>
+    <th>Nilai</th>
+    <th>Status Trs</th>
+    <th>Barang</th>
+    <th>SN</th>
+    <th>Transaksi</th>
+    <th>Jasa</th>
+    <th>Denda</th>
+    <th>Terlambat hari</th>
+    
+    
+ {% else %}
+ {% endifchanged %}
+ <tr {% if p.lunas %} class="row_lunas"{% endif %} {% if p.status_gadai %} class="row_status_gadai"{% endif %}{% if p.lewat_jw %} class="row_lewat_jw"{% endif %}>
+     
+    <td><a href="/akadgadai/{{p.pelunasan.id}}/show/">{{ p.pelunasan.norek }}</a></td>
+    <td>{{ p.pelunasan.agnasabah.nama|truncatewords:2 }}</td>
+    <td>Rp.{{ p.nilai|number_format:0 }},-</td>
+    <td>{{ p.pelunasan.status_transaksi|default_if_none:"0"}}</td>
+    <td>{{ p.pelunasan.barang.type}}</td>
+    <td >{{ p.pelunasan.barang.sn }}</td>    
+    <td >{{ p.tanggal|date:"d M Y " }}</td>
+    <td class="terima uang r">Rp.{{ p.bea_jasa|number_format:0 }}</td>
+    <td class="terima uang r">Rp.{{ p.denda|number_format:0 }}</td>
+    <td class="terima uang r">{{ p.terlambat|number_format:0 }}</td>
+   </tr>
+{% endfor %}
+</table>
+
+{% endblock %} 
+
+

@@ -1,0 +1,32 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}kasirgerai{% endblock %}
+{% block section %}kasir{% endblock %}
+{% block extrahead %}
+{% include "alat/kasir.html" %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %} 
+{% block content %}			
+<h2 align="center">INPUT VALIDASI TRANSAKSI <small><small> KSU RA</small></small></h2>
+<form method="post" action="/kasirgerai/{{ kasir.id }}/inputkasir/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table border=0 align="center" >
+<tr><br></tr>
+<tr><td></td><td> {{ form.kasir }}</td></tr>  
+<tr><td><b>No Pinjaman </b></td><td>: {{ form.no_pinjaman }}{% if form.no_pinjaman.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr> 
+<tr><td ><b>Nilai Pinj (Rp) </b></td><td>: {{ form.nilai }}{% if form.nilai.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr>  
+<tr><td>Tanggal</td><td>: {{form.tanggal }}{% if form.tanggal.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr> 
+<tr><td>Jenis Transaksi </td><td> {{ form.jenis_transaksi }}{% if form.jenis_transaksi.errors %}<span style = " color : red ; " >KOLOM NILAI BELUM ANDA INPUT </span>{% endif %}</td></tr> 
+<tr><td></td><td>{{ form.status }}</td></tr>
+<tr><td></td><td></td></tr>
+<tr><td align="left"></td>
+   <td>{% include "alat/save.html" %}</td>
+</tr>
+<tr></tr>
+<tr></tr>
+</form>
+</table>
+</div>
+</form>
+{% endblock %} 
+

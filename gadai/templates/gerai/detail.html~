@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block section %}{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<h2 align="right">:: PENDAPATAN GERAI  GADAI {{ object.nama }} ::</h2>
+{% if object.akadgadai_set %}
+<table width="100%" border="1">
+    <tr class="{% cycle 'odd' 'even' %}"><th>No</th><th>Nama</th><th>No Kwitansi</th><th>JW</th><th>Transaksi</th><th>Jatuh Tempo</th><th>Nilai</th><th>ADM</th><th>Jasa</th><th>T PENCAIRAN</th></tr>
+{% for p in object.akadgadai_set.all %}
+    <tr  {% if p.lunas %} class="row_lunas"{% endif %}><td class="r">{{ forloop.counter }}</td><td><a href="{{ p.nasabah.get_absolute_url }}">{{ p.agnasabah.nama|truncatewords:2 }}</a></td><td{% if p.lunas %} class="row_lunas"{% endif %}><a href="{{ p.get_absolute_url }}">{{ p.norek }}</a></td><td>{{ p.jangka_waktu }}</td><td>{{ p.tanggal|date:"d M yy" }}</td><td>{{ p.jatuhtempo|date:"d M yy" }}</td><td class="r">Rp.{{ p.nilai|number_format:0 }}</td><td class="r">Rp. {{ p.adm|number_format:0 }}</td><td>Rp. {{ p.jasa|number_format:0 }}</td><td><a href="/akadgadai/{{ p.id }}/show/#kwitansi">Rp.{{ p.terima_bersih }}</a></td></tr>{% endfor %}
+    <tr><td colspan="6" class="r" align="center"><strong>Jumlah</strong></td><td class="r">Rp.{{ object.get_jumlah_nilai|number_format:0 }}</td><td class="r" align="center">Rp.{{ object.get_jumlah_adm|number_format:0 }}</td><td colspan="1">Rp. {{ object.get_jumlah_jasa|number_format:0 }}</td><td colspan="1">Rp. {{ object.get_jumlah_terimabersih}}</td></tr>
+</table>
+{% else %}<em>Tidak ada Transaksi</em>{% endif %}
+{% endblock %}

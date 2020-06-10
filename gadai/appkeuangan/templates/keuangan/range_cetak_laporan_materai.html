@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Rekap {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/rkeuangan/range_laporan_materai/">Kembali</a> ]</p>
+<h3 align="center" ><b>TRANSAKSI PERSEDIAAN MATERAI</b></h3>
+<h3 align="center" ><b>{{start_date}} s/d {{end_date}}</b></h3>
+<table class="tableizer-table" width="100%" border="1" align ="center">
+    <tr >
+        <th>No</th>
+        <th>Gerai</th>
+        <th>Pembelian</th>
+        <th>Saldo Awal</th>
+        <th>Penjualan</th>
+        <th>Pengiriman Materai</th>
+        <th>Pemakaian Materai</th>
+        <th>Persediaan Materai</th>
+    </tr>
+    {% for d in akun%}
+    </tr>    
+    <tr class="{% cycle 'row1' 'row2' %}">
+        <td align="center">{{ forloop.counter }}</td>
+        <td align="left" >{{d.nama_cabang}}</td>
+        <td align="right">{{d.range_pembelian_materai_pusat|number_format:0}}</td>
+        <td align="right">{{d.range_saldo_materai|number_format:0}}</td>
+        <td align="right">{{d.range_penjualan_materai_pusat|number_format:0}}</td>
+        <td align="right">{{d.range_permintaan_materai|number_format:0}}</td>
+        <td align="right">{{d.range_pemakaian_materai|number_format:0}}</td>
+        <td align="right">{{d.range_saldo_akhir_materai|number_format:0}}</td>
+    </tr>
+ {% endfor%}
+    <tr> 
+        <th align="center">Total</th>
+        <th align="right"><b></b></th>
+        <th align="right"><b></b></th>
+        <th align="right"><b></b></th>
+        <th align="right"><b></b></th>
+        <th align="left">&nbsp;</th><th align="left">&nbsp;</th>
+	<th align="center"><b>{{total_permintaan|number_format:0}}</b></th>
+    </tr>
+</table>
+</br></br>
+
+
+

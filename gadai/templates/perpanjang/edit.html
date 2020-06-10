@@ -1,0 +1,14 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}akad{% endblock %}
+{% block content %}
+
+
+<h2 align="center">EDIT PERPANJANG : {{ object.id}} | {{ object.agkredit.agnasabah.nama }}</h2>
+<form method="POST" action="." class="tabular">
+<table align='center'>
+{{ form.as_table }}
+
+<td align='center'><label></label><input type="submit" value="Simpan" /></td>
+</table>
+</form>
+{% endblock %}

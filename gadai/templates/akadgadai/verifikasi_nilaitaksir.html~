@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block section %}akad{% endblock %}
+
+{% block extrahead %}
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal").datepicker({dateFormat: 'yy-mm-dd'});
+    $('input:text').setMask();
+       $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="center">VERIFIKASI NILAI TAKSIR an : {{ object.agnasabah.nama }}</h2>
+<P align="center">BARANG TAKSIR : {{ object.taksir.type }} </P>
+<P align="center">NILAI TAKSIR : {{ object.taksir.maxpinjaman|number_format:0 }} </P>
+
+<form method="POST" action="." class="tabular">
+<table align='center'>
+{{ form.as_table }}
+<td><label></label><input type="submit" value="Simpan" /></td>
+</table
+</form>
+{% endblock %}

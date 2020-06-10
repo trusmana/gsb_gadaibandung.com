@@ -1,0 +1,53 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Param{% endblock %}
+{% block title %}Edit {{ object.nasabah }} - {{ block.super }}{% endblock %}
+{% block content %}
+		
+<script type="text/javascript">
+$(document).ready(function(){
+    $( "#id_tanggal" ).datepicker({changeMonth: true,
+		changeYear: true,firstDay: 1,dateFormat: 'dd-mm-yy',
+		}) 
+    $("#id_tanggal").datepicker({dateFormat: 'dd-mm-yy'});
+    $('input:text').setMask();
+       $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+</script>
+		
+<style>
+#login_form {
+		background: #EBEBEB;
+		padding: 0.5em 1.5em 0.1em;
+		margin:0 auto 150px;
+		width: 90%;height:auto;
+		border: 1px solid #EBEBEB;
+		border-top:8px;
+		-webkit-border-radius:30px;
+		-moz-border-radius:3px;
+		border-radius:10px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 3px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.5) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+</style>
+
+<h2 align="right">EDIT PARAM</h2>
+<form method="post" action="/nasabah/add_param/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table border=0 align="center" >
+
+<tr><td>Batas Akad</td><td>{{form.jml_akad}} <td></tr>
+<tr><td>Tanggal </td><td>{{form.tanggal}}<td></tr>
+<tr><td></td><td>{{form.aktif}}<td></tr>
+<tr></tr>
+<tr><td>{% include "alat/save.html" %}</td></tr>   
+</table>
+</div>
+</form>
+{% endblock %}
+

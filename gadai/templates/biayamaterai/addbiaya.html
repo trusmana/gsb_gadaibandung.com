@@ -1,0 +1,60 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/biaya.html" %}
+{% endblock %}
+{% block section %}Biaya Materai{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right">Menu Input Biaya Materai</h2>
+<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %}
+<table align="center" width="100%" >
+
+	{{form.as_table}}
+
+<tr><td><label ></td><td></td><td><input type="submit" value="Simpan" class="simpan"></td></tr>
+</table>
+</form>
+
+<br><h2>Posting Biaya</h2><a>
+<form method="POST" action="/biaya/biaya_post/add/">{% csrf_token %}
+<input type="hidden" name="id" value="{{object.id}}" />
+<table id="list">
+    <thead>
+        <tr>
+          <th><input id="select_all" type="checkbox" align="center"></th>
+          <th>Kode Account</th>
+          <th>Keterangan</th>
+          <th>Debet(Rp)</th>
+          <th>Kredit(Rp)</th>
+          <th>Menu</th>
+
+        </tr>
+    </thead>
+    {% for p in bea%}
+
+    <tbody>
+        <tr>
+            <td><input type="checkbox"  value="{{ p.id }}" class="checkbox_delete" name='id_pilih' /></td>
+            <td>{{p}}.{{p.id_coa}} {{ p.antar_kantor }}</td>
+            <td>{{p.jurnal.diskripsi}}&nbsp;{{p.jurnal.no_akad}}</td>
+            <td align="right">{{p.debet|number_format:0}}</td>
+            <td align="right">{{p.kredit|number_format:0}}</td>
+            <td align="center"><a href="/biaya/{{p.id}}/hapus_jurnal/" class="cari">Batal</a>
+        </tr>
+    </tbody>
+    {%endfor%}
+  <tr>
+    <td align="center" colspan="3">Jumlah</td>
+    <td align="right"><b>{{total_debet|number_format:0}}</b></td>
+    <td align="right"><b>{{total_kredit|number_format:0}}</b></td>
+    <td align="right"></td><td></td>
+  </tr>
+
+</table>
+
+
+<p align="right"><input type="submit" value="Simpan" class="next" /></p>
+</form>
+
+{% endblock %}

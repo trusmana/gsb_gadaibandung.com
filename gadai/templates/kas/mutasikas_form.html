@@ -1,0 +1,24 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal").datepicker({dateFormat: 'yy-mm-dd'});
+    $('input:text').setMask();
+    $('#form_mutasikas').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+});
+</script>
+{% endblock %}
+{% block section %}kas{% endblock %}
+{% block content %}
+<h2 align="right">:: Tambah Penerimaan / Pengeluaran Kas ::</h2>
+<form id="form_mutasikas" class="tabular" method="post" action=".">
+{{ form.as_p }}
+<p><label></label><input type="submit" value="Simpan" /></p>
+</form>
+{% endblock %}

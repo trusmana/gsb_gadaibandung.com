@@ -1,0 +1,47 @@
+from django import forms
+from django.forms import ModelForm
+from gadai.appgadai.models import *
+
+class KasirGeraiForm(forms.ModelForm):
+    kasir = forms.ModelChoiceField(queryset=AkadGadai.objects.all())
+    #no_pinjaman = forms.CharField(max_length=35)
+    nilai = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10, 'value': '0','alt': 'integer','class': 'rp_nilai uang','readonly':'true'}))    
+    nilai_terima_bersih = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10,'alt': 'integer','class': 'rp_nilai uang','readonly':'true'}))
+    nilai_pembulatan = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10, 'alt': 'integer','class': 'rp_nilai uang','onkeyup':'total_dibayar()'}))
+    selisih  = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10,'alt': 'integer','class': 'rp_nilai uang'})) 
+    jenis_transaksi =forms.ChoiceField(choices=JENIS_TRANSAKSI,widget=forms.RadioSelect(attrs={'class':'rad'}))
+    tanggal = forms.DateField(initial = datetime.date.today,widget=forms.widgets.DateInput( format="%d-%m-%Y"))
+    nilai_dibayar = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10,'alt': 'integer','class': 'rp_nilai uang','readonly':'true'}))
+    #nilai_yg_bayar  = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10,'class': 'rp_nilai uang','readonly':'true'}))
+    sisa_bayar =forms.IntegerField(widget=forms.TextInput(attrs={'size': 10,'alt': 'integer','class': 'rp_nilai uang','readonly':'true'}))
+
+    class Meta:
+        model = KasirGerai
+        
+    def kasir(self):
+        try:
+            return self.kasir
+        except KasirGerai.DoesNotExist:
+            return None
+        
+class KasirGeraiCairForm(forms.ModelForm):
+    kasir = forms.ModelChoiceField(queryset=AkadGadai.objects.all())
+    #no_pinjaman = forms.CharField(max_length=35)
+    nilai = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10, 'value': '0','alt': 'integer','class': 'rp_nilai uang','readonly':'true'}))    
+    nilai_terima_bersih = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10,'alt': 'integer','class': 'rp_nilai uang','readonly':'true'}))
+    nilai_pembulatan = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10, 'alt': 'integer','class': 'rp_nilai uang','onkeyup':'total_dibayar()'}))
+    selisih  = forms.IntegerField(widget=forms.TextInput(attrs={'size': 10,'alt': 'integer','class': 'rp_nilai uang'})) 
+    jenis_transaksi =forms.ChoiceField(choices=JENIS_TRANSAKSI,widget=forms.RadioSelect(attrs={'class':'rad'}))
+    tanggal = forms.DateField(initial = datetime.date.today,widget=forms.widgets.DateInput( format="%d-%m-%Y"))
+
+
+    class Meta:
+        model = KasirGerai
+        
+    def kasir(self):
+        try:
+            return self.kasir
+        except KasirGerai.DoesNotExist:
+            return None       
+
+

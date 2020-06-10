@@ -1,0 +1,97 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}hilang{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2>DATA BARANG HILANG UNIT PJB </h2>  
+<form method="GET" action="/manop/rincian_hilang/">{% csrf_token %}
+   <table id="tabel" align="center">
+    <li><label for="id_cabang">Kode Cabang</label> :{{form.id_cabang}} </li>
+   <br>
+   <li><label for="id_tgl_trans">Tanggal </label> :{{form.start_date}} 
+   <label for="id_tgl_trans">Tanggal </label> :{{form.end_date}}</li>
+   <br>
+   <li><input type="submit" value="CETAK XLS" class="cari" name="submit_tiga"/>&nbsp; 
+	  <input type="submit" value="CETAK PDF" class="cari" name="submit_dua"/> &nbsp;
+	  <input type="submit" value="VIEW" class="cari" name="submit_satu" value="Add"/>
+   </li>
+   </table>
+</form>
+<br>
+<hr>
+   {%if kp%}
+<h3 style='text-align: center'><b><small>DATA BARANG HILANG</small></b><b><small> UNIT PJB <small><small>
+</small>
+   {% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA{%endif%} 
+   {% if id_cabang = '302' %}GERAI SUCI{%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR{%endif%}
+   {% if id_cabang = '304' %}GERAI BALUBUR{%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
+   {% if id_cabang = '307' %}GERAI KOPO{%endif%} {% if id_cabang = '308' %}GERAI CIBIRU{%endif%}
+   {% if id_cabang = '309' %}GERAI CIPACING {%endif%} {% if id_cabang = '310' %}GERAI JATINANGOR{%endif%}
+   {% if id_cabang = '327' %}GERAI CIMAHI  {%endif%} {% if id_cabang = '312' %}GERAI BUAH BATU{%endif%}
+   {% if id_cabang = '313' %}GERAI KORDON  {%endif%} {% if id_cabang = '314' %}GERAI CIHANJUANG{%endif%}
+   {% if id_cabang = '315' %}GERAI MARANATA{%endif%} {% if id_cabang = '316' %}GERAI KIARACONDONG{%endif%}
+   {% if id_cabang = '317' %}GERAI CIREBON PERJUANGN {%endif%} {% if id_cabang = '318' %}GERAI CIREBON {%endif%}
+   {% if id_cabang = '319' %}GERAI CIUMBELEUIT {%endif%} {% if id_cabang = '113' %}GERAI UJUNG BERUNG{%endif%}
+   {% if id_cabang = '322' %}GERAI BOJONGSOANG{%endif%}{% if id_cabang = '300' %}KANTOR PUSAT{%endif%}
+   {% if id_cabang = '329' %}GERAI LEWIGAJAH{%endif%}{% if id_cabang = '333' %}GADAI NIGHT DU{%endif%}
+   {% if id_cabang = '331' %}GADAI NIGHT JAKARTA{%endif%}{% if id_cabang = '311' %}GARAI BUAHBATU{%endif%}
+   {% if id_cabang = '320' %}GERAI UJUNGBERUNG{%endif%}{% if id_cabang = '324' %}GERAI KATAPANG SAYATI{%endif%}
+   {% if id_cabang = '325' %}GERAI CIMINDI{%endif%}{% if id_cabang = '326' %}GERAI CEMARA{%endif%}
+   {% if id_cabang = '332' %}GERAI TURANGGA{%endif%}{% if id_cabang = '328' %}GADAI NIGHT CIBIRU{%endif%}
+   {% if id_cabang = '330' %}GADAI NIGHT BALUBUR{%endif%}
+</small> </b>
+</h3>
+<h4 style='text-align: center'><small>Periode : {{start_date}} - {{end_date}}</small></h4>
+<form method="POST" action="/manop/reset_status_hilang/">{% csrf_token %}
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+    <th>No</th>
+    <th>No Rekening</th>
+    <th>Gerai</th>
+    <th>Nama</th>
+    <th>Barang</th>
+    <th>Status</th>
+    <th>Tgl Status </th>
+    <th>Tanggal</th>
+    <th>JW (hari)</th>
+    <th>Jatuh Tempo</th>
+    <th>Nilai</th>
+</tr>
+
+{% for p in kp %}
+<tr>
+    <td align="center"><input type="checkbox"  value="{{ p.id }}" class="checkbox_delete" name='id_pilih' />{{ forloop.counter }}</td>
+    <td align="center">{{ p.norek }}</td>
+    <td>{{ p.gerai }}</td>
+    <td>{{ p.agnasabah.nama|truncatewords:2 }}</td>
+    <td>{{p.barang.merk}}.{{p.barang.type}}</td>
+    <td>{{ p.status_transaksi}}</td>
+    <td>{{p.tanggal_lelang|date:"d-M-Y"}}
+    <td>{{ p.tanggal|date:"d-M-Y"}}</td>
+    <td align="center">{% if p.jangka_waktu_kendaraan  %}{{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+                       {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+    <td align="center">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
+    <td align="right">{{ p.nilai|number_format:0|default_if_none:"0" }}</td>
+</tr>
+{% endfor %}
+<tr>
+    <th colspan="10"><strong>Jumlah</strong></th>
+    <th align="right" >{{nilai|number_format:0}}</th>
+</tr>
+</table>
+<p align="right"><input type="submit" value="RESET STATUS" class="cari" /></p>
+</form>
+{% else %}
+<p>Tidak ada data </p>
+{% endif %}
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}
+
+

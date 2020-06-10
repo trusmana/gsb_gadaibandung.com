@@ -1,0 +1,16 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+	<h2>Edit Mapper Penjualan</h2>
+	<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %}
+		<table>
+			{{form.as_table}}
+		</table>
+		<li><input  type="submit" name="submit" value="@Simpan" class="simpan"></li>
+	</form>
+{% endblock %}
+
+

@@ -1,0 +1,28 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal").datepicker({dateFormat: 'yy-mm-dd'});
+    $("#id_tgl_lahir").datepicker({dateFormat: 'yy-mm-dd'});
+    $('input:text').setMask();
+    $('.tabular').submit(function(){
+        $('input.rupiah').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+});
+</script>
+{% endblock %}
+{% block section %}pk{% endblock %}
+{% block content %}
+
+<h2 align="center">Nasabah dan Akad baru</h2>
+<form class="tabular" method="POST" action="." enctype="multipart/form-data">{% csrf_token %} 
+<table align="center">
+{{ form}}
+</table>
+<p><label>&nbsp;</label><input type="image" src="/static/css/images/simpan.png" height="30px" width="100px" /> <!--<input type="submit" value="Simpan" />--><a href="/pk/"><img src="/static/css/images/batal.png" height="30px" width="100px" /></a> </p>
+</form>
+{% endblock %}

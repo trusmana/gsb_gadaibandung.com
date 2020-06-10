@@ -1,0 +1,35 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}{% endblock %}
+{% block extrahead %}
+{% endblock %}{% load useringroup %}
+{% block content %}
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_dari,#id_hingga").datepicker({dateFormat: 'yy-mm-dd'});
+    $('input:text').setMask();
+    $('.tabular').submit(function(){
+    $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+ });
+</script>
+
+<h2><span>Master Tiket Pencairan Kasir</span></h2>    
+   <table>
+        <form method="GET" action="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_uji_coba_kasir/">{% csrf_token %}
+            <tr>
+                <td><b><label for="id_dari">Tanggal</label></b></td>
+                <td>: <input type="text" name="dari" id="id_dari" size="8" value="{% now "Y-m-d" %}" /></td>
+				<td><b><label for="id_hingga">Tanggal</label></b></td>
+                <td>: <input type="text" name="hingga" id="id_hingga" size="8" value="{% now "Y-m-d" %}" /></td>
+				<td colspan="2"><input type="submit" value="Cetak" class="cari"/></td>
+             </tr>
+    
+       </form>
+</table>
+
+{% endblock %} 
+

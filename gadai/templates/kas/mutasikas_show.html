@@ -1,0 +1,14 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}kas{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/">Home</a> &gt; <a href="/kas/">Kas</a> &gt; {{ object.keterangan }}</p>
+<h2>Perubahan Kas</h2>
+<table>
+    <tr>
+        <td>Tanggal</td><td>{{ object.tanggal|date:"d-m-Y"}}</td>
+    </tr>
+    <tr>
+        <td>Tanggal</td><td>{{ object.tanggal|date:"d-m-Y"}}</td>
+    </tr></table>{{ object.nilai }}
+{{ object.keterangan }}
+{% endblock %}

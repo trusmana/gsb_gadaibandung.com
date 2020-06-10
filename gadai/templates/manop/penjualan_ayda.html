@@ -1,0 +1,54 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}{% endblock %}
+{% block extrahead %}
+{% include "alat/manop_lelang.html" %}
+{% endblock %}{% load useringroup %}
+{% block sidebar %}
+
+{% endblock %}
+{% block content %}
+{% if perms.apps.add %}<span class="contextual"></span>{% endif %}
+{% load number_format useringroup %}
+<h2 align="center">{{ag.agnasabah.nama}} : Gerai {{ag.gerai}} | {{ag.get_jenis_transaksi_display}}</h2>
+
+<div class="splitcontentright">
+{% ifusergroup manop|KEUANGAN1%}
+{% if ag.status_transaksi == 'LUNAS TERJUAL'  or ag.status_transaksi == 'LUNAS' %}<h5 align="center">SUDAH LUNAS</h5>{%else%}
+<h3 align="center">AYDA</h3>
+<table class="list" align="center" >
+    <tr>
+	<th>Tanggal</th>
+	<th>Nilai Ayda</th>
+	<th>Terlambat</th>
+	<th>Jasa</th>
+	<th>Denda</th>
+        <th>Total</td>
+   </tr>
+{% for a in lapur %}
+        <td align="center">{{a.tanggal|date:" d-M-Y"}}</td>
+        <td align="center">{{a.nilai|number_format:0}}</td>
+        <td align="center">{{a.terlambat|number_format:0}}</td>
+        <td align="center">{{a.jasa|number_format:0}}</td>
+        <td align="center">{{a.denda|number_format:0}}</td>       
+        <td align="center">{{a.total_ayda|number_format:0}}</td>
+{% ifusergroup admin|abh %}<td><a href="/pelunasan/{{a.id}}/edit/" class="edit">Edit</a>{% endifusergroup %}</td>
+   </tr>{% endfor %}
+</table>
+<hr>
+<h3 align="center">MENU JUAL LUNAS</h3>
+<form method="POST" action="/manop/{{ ag.id }}/lelang_manop/" name="frmAdd" class="tabular">{% csrf_token %}
+<table align="center">
+        {{form.as_table}}
+	<tr><td><input type="submit" value="Simpan" class="simpan"/></td></tr>
+	</table>
+</form>
+{% endif %}
+</div>
+{% endifusergroup %}
+{% endblock %} 
+
+
+
+
+
+

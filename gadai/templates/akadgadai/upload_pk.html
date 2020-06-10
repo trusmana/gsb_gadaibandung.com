@@ -1,0 +1,67 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}mitra{% endblock %}
+{% block title %}Edit {{ object.nasabah }} - {{ block.super }}{% endblock %}
+{% block content %}
+		
+<script type="text/javascript">
+$(document).ready(function()
+{
+    $('#id_nama,#id_tempat,#id_alamat_ktp,#id_kelurahan_ktp,#id_kecamatan_ktp,#id_kotamadya_ktp,#id_kabupaten_ktp,#id_alamat_sim,#id_kelurahan_sim,#id_kecamatan_sim,#id_alamat_kantor,#id_merk,#id_type,#id_sn,#id_warna,#id_accesoris_barang1,#id_type_kendaraan,#id_no_polisi,#id_no_rangka,#id_no_mesin,#id_warna_kendaraan,#id_no_bpkb,#id_no_faktur,#id_stn_atas_nama,#id_no_rumah_ktp,#id_alamat_domisili,#id_no_rumah_domisili,#id_rt_domisili,#id_rw_domisili,#id_telepon_domisili,#id_hp_domisili,#id_kelurahan_domisili,#id_kecamatan_domisili,#id_kotamadya_domisili,#id_kabupaten_domisili,#id_nama_pasangan,#id_alamat_pasangan,#id_alamat_kantor').keyup(function()
+    {
+        $(this).val($(this).val().toUpperCase());
+    });
+});
+
+$(document).ready(function()
+{
+    $('#id_email').keyup(function()
+    {
+        $(this).val($(this).val().toLowerCase());
+    });
+});
+
+
+</script>
+		
+<style>
+#login_form {
+		background: #EBEBEB;
+		padding: 0.5em 1.5em 0.1em;
+		margin:0 auto 150px;
+		width: 90%;height:auto;
+		border: 1px solid #EBEBEB;
+		border-top:8px;
+		-webkit-border-radius:30px;
+		-moz-border-radius:3px;
+		border-radius:10px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 3px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.5) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+</style>
+
+
+<h2 align="right">UPLOAD PK NASABAH a.n :{{n.agnasabah.nama}} {{ n.id }}</h2>
+<!--<form class ="tabular" method='POST' action="/akadgadai/{{ n.upload.id }}/input_uploadpk/" enctype="multipart/form-data" >{% csrf_token %} -->
+<!--<form method="post" action="/akadgadai/{{ n.id }}/upload_pk/" class="tabular">{% csrf_token %}-->
+<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %} 
+{{upload}}
+<div id="login_form">
+<table border=0 align="left" >
+<!--
+<tr>
+  <td style='font-weight:bold'> UPLOAD PK</td> <td style='font-weight:bold'>:  {{form.berkas_pk}}</td>
+</tr>
+-->
+{{ form.as_table }}
+<tr><td align="center"></td><td style='font-weight:bold'><input type="submit" value="Simpan" class="cari" /></td></tr>
+</table>
+</div>
+</form>
+{% endblock %}
+
+
+

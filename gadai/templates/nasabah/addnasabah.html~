@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block extrahead %}
+<script type="text/javascript" src="/static/mediacss/js/admin/RelatedObjectLookups.js"></script>
+<link type="text/css" href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_tanggal").datepicker({dateFormat: 'yy-mm-dd'});
+    $('input:text').setMask();
+       $('.tabular').submit(function(){
+        $('input.uang').each(function () { $(this).val(to_number($(this).val())); });
+        return true;
+    });
+});
+</script>
+<script type="text/javascript" href="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+    $(":radio.rad").click(function(){
+    $(".formbarang, .formkendaraan").hide()
+    if($(this).val() == "1"){
+    $(".formbarang").show();
+    }else{
+    $(".formkendaraan").show();
+    }
+    });
+    });
+</script>
+{% endblock %}
+{% block sidebar %}
+<h3>:: AKAD GADAI ::</h3>
+<ol>{% for ag in object.akadgadai_set.all %}
+<li>{{ ag.norek }} &#8212; {{ ag.tanggal|date:"d-m-y" }}</li>{% empty %}<li>Belum ada.</li>{% endfor %}{% endblock %}
+{% block content %}
+<h2 align="right">:: AKAD GADAI KSU RIZKYABADI ::</h2>
+<form class="tabular" action="/akadgadai/baru/" method="POST">{% csrf_token %}
+<table align="left" > 
+
+    <tr><td><label for="id_agnasabah">NAMA NASABAH:</label></td><td>{{form.agnasabah}}</td></tr>
+    <tr><td> TANGGAL TRANSAKSI :</td><td>{{form.tanggal}}</td></tr>
+    <tr><td>JENIS TRANSAKSI:</td><td>{{form.jenis_transaksi}}</td></tr>	
+    <tr class ="formbarang" style= "display:none"><td> JANGKA WAKTU :</td><td>{{form.jangka_waktu}}</td></tr>
+    <tr class ="formkendaraan" style= "display:none"><td> JANGKA WAKTU KENDARAAN:</td><td>{{form.jangka_waktu_kendaraan}}</td></tr>	
+    <tr>
+    <tr class="formkendaraan" style="display:none">
+    <td><label for="id_jenis_kendaraan"  width="200px" height="25px" >JENIS KENDARAAN:</label>
+    </td><td>{{form.jenis_kendaraan}}</td>
+    </tr>
+    <td><label for="id_nilai"  width="200px" height="25px" >NILAI PINJAMAN<span style = " color : red ; " >*<span>:</label></td>
+    <td>{{form.nilai}}</td>
+    </tr>	
+    <tr><td> MATERAI :</td><td>{{form.bea_materai}}</td></tr>
+    <tr><td> GERAI :</td><td>{{form.gerai}}</td></tr>
+    
+    <tr><td><label for="id_gudang"  width="200px" height="25px" >TAKSIRAN NILAI BARANG<span style = " color : red ; " >*<span>:</label></td>
+    <td>{{form.taksir}}</a></tr>
+    <TR><td></TD><TD>UNTUK BARANG YANG SAMA LIHAT NOMOR BARANG [ NO BARANG ]</td></TR>       
+    <tr><td><label for="id_barang">BARANG :</label></td><td>{{form.barang}} </td>
+    <td><a href="/barang/add/" class="add-another" id="add_id_barang" onclick="return showAddAnotherPopup(this);"> <img src="/static/mediacss/img/admin/icon_addlink.gif" width="10" height="10" alt="Add Another"/>
+</a></tr>
+
+<tr><td><label></td><td><input type="submit" value="Simpan" /></td></tr>
+
+</table>
+</form>
+
+{% endblock %}

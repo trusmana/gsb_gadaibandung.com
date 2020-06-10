@@ -1,0 +1,29 @@
+from django.conf.urls.defaults import *
+from django.views.generic import list_detail, create_update, date_based
+
+from django.views.generic.simple import direct_to_template
+from django.forms import ModelForm
+from gadai.appgadai.gerai.views import *
+from gadai.appgadai.models import *
+
+urlpatterns = patterns('',
+    #url(r'^$', list_detail.object_list, {'queryset': GeraiGadai.objects.all().order_by('-id')[:20], 'template_name': 'gerai/index.html'}),
+    url(r'^(?P<object_id>\d+)/show/$',show),
+    url(r'rekapunit/$', rekapunit),
+    url(r'^(?P<object_id>\d+)/rekap/$', cetak_rekap), 
+    url(r'^(?P<object_id>\d+)/rekapbln/$', rekap_bulan), 
+    url(r'^(?P<object_id>\d+)/rekapneraca/$', neracaunit),
+    url(r'^(?P<object_id>\d+)/piutang/$', piutang_bulan), 
+    url(r'^(?P<object_id>\d+)/suratjalan/$',sjalan),
+    ####modif
+    url(r'^$',  list),
+    url(r'^arsip/$',  list_day),
+    url(r'^rekapbulan/$',  gerai_bulan),
+    url(r'^(?P<object_id>\d+)/hari/$', rekaphari),
+    url(r'^(?P<object_id>\d+)/rekapbulan/$', rekapbulan),
+    #url(r'^(?P<object_id>\d+)/dafnom_tahun/$', dafnom_tahun), 
+    url(r'rekap_allgerai_harian/$', rekap_allgerai_harian),
+    url(r'prpj_allgerai_harian/$', prpj_allgerai_harian),
+    url(r'pelunasan_allgerai_harian/$', pelunasan_allgerai_harian),
+   
+)

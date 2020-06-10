@@ -1,0 +1,92 @@
+<link href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" type="text/css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.autocomplete.pack.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="/static/admin/admin/css/changelists.css" />
+<link rel="stylesheet" href="/static/chosen/docsupport/chosen.css">
+<script type="text/javascript">
+$(document).ready(function() {
+    updateJumlahKredit();
+    updateJumlahDebet();
+    setSubmitEnabled();
+    $("input.uang").setMask();
+    $("input.rp_kredit").keypress(function(event){
+        if (event.charCode && (event.charCode < 46 || event.charCode > 57 || event.charCode == 47))
+        { event.preventDefault(); }
+    });
+    $("input.rp_debet").keypress(function(event){
+        if (event.charCode && (event.charCode < 46 || event.charCode > 57 || event.charCode == 47))
+        { event.preventDefault(); }
+    });
+    $('#select_all').click( function() {
+    $(".checkbox_delete").attr('checked', true);
+    });
+    $("input.rp_kredit").change(function() {
+        updateJumlahDebet();
+        updateJumlahKredit();
+        if ($("#selisih_jurnal").html() != '0') { 
+            setSubmitEnabled(false);
+        } else { setSubmitEnabled(); }
+    });
+    $("input.rp_debet").change(function() {
+        updateJumlahDebet();
+        updateJumlahKredit();
+        if ($("#selisih_jurnal").html() != '0') { 
+            setSubmitEnabled(false);
+        } else { setSubmitEnabled(); }
+    });
+    $("#form_jurnal").submit(function () {
+        $("input.uang").each(function () {
+            $(this).val(to_number($(this).val()));
+        });
+        return true;
+    });
+});
+
+function setSubmitEnabled (state) {
+    if (state==null & 
+        ($("#id_tanggal").val() != "") &
+        ($("#total_kredit").html() != '0')) stat = '';
+    else stat = 'disabled';
+    $("input#id_simpan").attr("disabled",stat);
+}
+
+function updateJumlahKredit() {
+    var tot_kredit = 0;
+    $("input.rp_kredit").each(function() {
+        tot_kredit += parseFloat(to_number(this.value));
+    });
+    $("#total_kredit").text(format_number(String(tot_kredit)));
+    $("#selisih_jurnal").text(format_number(String(to_number($("#total_debet").text()) - to_number($("#total_kredit").text()))));
+}
+
+
+function updateJumlahDebet() {
+    var tot_debet = 0;
+    $("input.rp_debet").each(function() {
+        tot_debet += parseFloat(to_number(this.value));
+    });
+    $("#total_debet").text(format_number(String(tot_debet)));
+    $("#selisih_jurnal").text(format_number(String(to_number($("#total_debet").text()) - to_number($("#total_kredit").text()))));
+}
+
+
+$(document).ready(function(){
+	$("#id_tgl_trans").datepicker({dateFormat: 'dd-mm-yy'});
+    });
+
+
+function respConfirm () {
+     var response = confirm('Anda Sudah Yakin?');
+
+     if (response) alert("Your response was OK!");
+     else alert("Yg Anda pilih Cancel!");
+}
+
+</script>
+
+
+<link rel="stylesheet" href="/static/chosen/docsupport/chosen.css">
+<style type="text/css" media="all">
+    .chosen-rtl .chosen-drop { left: -9000px; }
+</style>

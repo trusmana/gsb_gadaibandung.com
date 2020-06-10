@@ -1,0 +1,10 @@
+{% extends "base_aplikasi.html" %}
+{% block content %}
+<h2 align="right">MENU INPUT PARAMETER JURNAL MATERAI</h2>
+<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %}
+<table align="center" width="100%" >
+    {{ form.as_table }}
+<tr><td></td><td><input type="submit" value="Simpan" class="simpan"></td></tr>
+</table>
+</form>
+{% endblock %}

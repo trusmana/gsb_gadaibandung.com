@@ -1,0 +1,31 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}Edit Status{% endblock %}
+{% block section %}kasir{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+
+{% endblock %} 
+
+{% block extrahead %}
+{% load useringroup number_format %}
+{% endblock %}
+
+
+{% block content %}			
+<h2 align="center">BUKA STATUS CETAK:<small>  {{akad.agnasabah.nama}} </small>&nbsp;&nbsp; NOREK : <small>{{akad.norek}}</small></h2>
+<form method="post" action="/manop/{{ akad.id }}/input_edit_sts_kw/" class="tabular">{% csrf_token %}
+<div id="login_form">
+<table align="center">   
+<tr><td>Buka Status KW </td><td>: {{form.buka_status_kw}}</td></tr>
+<tr><td>Buka Status Label </td><td>: {{form.buka_status_label}}</td></tr>
+<tr><td>Buka Kondisi Barang </td><td>: {{form.buka_kondisi_barang}}</td></tr>
+<tr><td>Buka Status Tdr </td><td>: {{form.buka_sts_tdr}}</td></tr>
+<tr></tr>
+<tr><td>{% include "alat/save.html" %}</td></tr>   
+</tr>
+<tr></tr>
+<tr></tr>
+</form>
+</table>
+</div>
+{% endblock %} 

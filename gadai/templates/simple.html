@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div align="center"> 
+  <p><a style="color: black;">Django-jChat</a></p> 
+  <p>SELAMAT DATANG DI FASILITAS CHATING KSURA</p> 
+</div> 
+
+<div id="chat"></div>
+
+<script type="text/javascript" src="/static/js/jchat.js"></script>
+<script type="text/javascript">
+$(window).ready(function(){
+	init_chat({{chat_id}}, "chat");
+})
+</script>
+<div id="explanation" align="center">
+<strong >Emoticon Reference</strong><br />
+<p align="center">
+[ >:D  :D  =D  :)  :O  :P  :(  :3  ;) (ball) ]
+</p>
+</div>
+
+{% endblock %}

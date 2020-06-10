@@ -1,0 +1,59 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}{% endblock %}
+
+{% block extrahead %}
+
+{% endblock %}{% load useringroup %}
+{% block sidebar %}
+
+
+{% endblock %}
+{% block content %}
+<style>
+#login_form {
+		background: #EBEBEB;
+		padding: 0.5em 1.5em 0.1em;
+		margin:0 auto 150px;
+		width: 450px;height:auto;
+		border: 1px solid #EBEBEB;
+		border-top:8px;
+		-webkit-border-radius:3px;
+		-moz-border-radius:3px;
+		border-radius:10px;
+		-moz-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		-webkit-box-shadow:rgba(0,0,0,0.5) 0 0 1px;
+		box-shadow:rgba(0,0,0,0.5) 0 0 10px;
+		color:black;
+		font:normal 12px/14px Arial, Helvetica, Sans-serif;    
+		overflow:hidden;
+	}
+</style>
+{% load number_format useringroup %}
+
+<h2 align="right">DATA PENYIMPANAN BARANG GUDANG AN: {{cari.agnasabah.nama}}</h2>
+<div id="login_form">
+
+<table border=0 align="center">
+
+<tr><td>JENIS_BARANG</td><td>: {{barang.get_jenis_barang_display}}</td></tr>
+<tr><td align="left">SN</td><td>: {{barang.sn}}</td></tr>
+<tr><td align="left">MERK</td><td>: {{barang.merk}}</td></tr>
+<tr><td align="left">WARNA</td><td>: {{barang.warna}}</td></tr>
+<tr><td align="left">TAHUN PEMBUATAN</td><td>: {{barang.tahun_pembuatan}}</td></tr>
+<tr><td align="left">TOTAL BAYAR</td><td>: {{barang.accesoris_barang1}}</td></tr>
+<tr><td align="left">LAMPIRAN DOKUMEN</td><td>: {{barang.get_lampiran_dokumen_display}}</td></tr>
+<tr><td><h3>DATA PENYIMPANAN</h3></td></tr>
+<tr><td align="left">TANGGAL MASUK GUDANG</td><td>: {{barang.barang_masuk}}</td></tr>
+<tr><td align="left">TANGGAL KELUAR GUDANG</td><td>: {{barang.barang_keluar}}</td></tr>
+<tr><td align="left">RUANGAN</td><td>: {{barang.get_ruangan_display}}</td></tr>
+<tr><td align="left">LEMARI</td><td>: {{barang.get_lemari_display}}</td></tr>
+<tr><td align="left">NOMOR RAK</td><td>: {{barang.get_no_rak_display}}</td></tr>
+<tr><td align="left">BARIS KE</td><td>: {{barang.get_row_display}}</td></tr>
+</table>
+</div>
+{% endblock %} 
+
+
+
+
+

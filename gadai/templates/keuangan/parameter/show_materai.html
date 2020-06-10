@@ -1,0 +1,36 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+
+{% endblock %}
+{% block section %}kas{% endblock %}
+{% block sidebar %}{% load number_format %}
+<div class="menu_list" id="secondpane">
+<div id='cssmenu'>
+    <ul>
+        <li class='active'><a href=''><span>MENU ADD</span></a></li>
+        <li class='last'><a href='/parameterjurnal/add_parameter_materai/'><span>ADD PARAMETER MATERAI</span></a></li>
+    </ul>
+</div>
+</div>
+{% endblock %}
+{% block content %}
+
+<h2 align="right">:: PARAMETER MATERAI ::</h2>
+
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%">
+    <tr>
+        <th>No</th><th>ITEM</th><th>COA1</th><th>COA2</th><th>COA3</th><th>COA4</th><th>CABANG</th>
+    </tr>
+    {% for object in materai%}
+    <tr>
+        <td><a href='/parameterjurnal/{{object.id}}/hapus_jurnal_materai/' title ="Hapus Jurnal">{{object.id}}</a></td>
+        <td><a href='/parameterjurnal/{{object.id}}/edit_materai/' title ="EDIT Jurnal">{{ object.item}}</a></td>
+        <td>{{ object.coa1 }}</td>
+        <td>{{ object.coa2 }}</td>
+        <td>{{ object.coa3 }}</td>
+        <td>{{ object.coa4 }}</td>
+        <td>{{ object.cabang}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

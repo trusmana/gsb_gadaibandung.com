@@ -1,0 +1,16 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}LUNAS TERJUAL {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="right">:: Menu Penjualan ::</h2>
+<form action="/manop/cari/" method="GET" size="10" align="center" height="27" >
+<table align="center">
+    <td>Masukan Norek : <input type="text"  name="rekening" placeholder="Cari berdasarkan Norek"><input type="submit" value="Cari " class="cari"></td>    
+</table>
+</form>
+{% endblock %}
+

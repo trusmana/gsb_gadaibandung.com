@@ -1,0 +1,59 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}dashboard{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}
+{% endblock %}
+{% load useringroup number_format %}
+{% block sidebar %}
+<h4>::: Keterangan :::</h4>
+<hr/>
+<br/>
+Total Barang Lelang : {{jml}}<br/>
+Total Nilai Lelang : Rp.{{tot_nilai|number_format:0}}<br />
+<br/>
+<hr/>
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="right">:: DATA LELANG KSU RIZKYABADI ::</h2>
+<table id="tabel">
+    <thead>
+    <tr>
+        <th>No</th>
+        <th>No Kwitansi</th>
+        <th>Nama Nasabah</th>
+        <th>Barang</th>
+        <th>Nilai (Rp)</th>
+        <th>JW</th>
+        <th>Status</th>
+        <th>J.Tempo</th>
+        <th>Gerai</th>
+    </tr>
+    </thead>
+{% for a in lapur%}
+    <tbody>
+    <tr>
+        <td ALIGN="CENTER">{{ forloop.counter }}</td>
+        <td ALIGN="CENTER"><a href = "/lelang/{{a.id}}/lapur/">{{ a.norek }}</a></td>
+        <td ALIGN="LEFT">{{ a.agnasabah.nama}}</td>
+        <td ALIGN="LEFT">{{ a.barang}}</td>
+        <td ALIGN="left">{{ a.nilai|number_format:0}}</td>
+        <td ALIGN="CENTER">{{ a.jangka_waktu}}</td>
+        <td ALIGN="CENTER">{{a.status_transaksi}}</td>
+        <td ALIGN="CENTER">{{ a.jatuhtempo|date:" d-m-Y"}}</td>
+        <td ALIGN="LEFT">{{a.gerai}}</td>
+    </tr>
+{%endfor%}
+    <tr>
+        <th colspan="4" class="r"><strong align="center">Jumlah</strong></th>        
+        <th>Rp. {{tot_nilai|number_format:0}}</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>             
+   </tr>
+ </tbody>
+</table>
+{% endblock %}
+
+

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ block.super }}
+{% endblock %}
+{% block section %}GERAI{% endblock %}
+{% block sidebar %}
+
+{% endblock %}
+{% block content %}
+{% load number_format %}
+<h2 align= "right"s>:: DIVISI GADAI KSU RIZKY ABADI ::</h2>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow"><th>No</th><th>Nama Gerai</th><th>Alamat</th><th>T NASABAH</th><th>T PENCAIRAN</th></tr>
+{% for a in object_list%}
+    <tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="center">{{ a.nama }}</a></td>
+    <td align="center">{{ a.alamat}}</td>
+    <td align="center">{{ a.aktif}}</td>
+    <td align="center">Rp. {{ a.get_jumlah_terimabersih|number_format:0}}</td>{% endfor %}
+   
+   </tr>
+    <td colspan="3" class="r" align="center"><strong>Jumlah</strong></td>
+    <td colspan="1" align ="center">{{ a.npk|number_format:0 }}</td>
+    <td colspan="1" align="center">Rp. {{ object.terima_bersih}}</td>
+    </tr>
+    
+
+</table>
+{% endblock %}

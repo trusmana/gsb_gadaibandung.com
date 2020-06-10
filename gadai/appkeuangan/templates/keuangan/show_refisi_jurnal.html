@@ -1,0 +1,48 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}Refisi Jurnal{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block content %}
+{% load useringroup number_format %}  
+
+<h3 align="center">Data Jurnal</h3>
+<table class="list">
+<thead>
+    <tr>
+      <th><input id="select_all" type="checkbox" align="center"></th>
+      
+      <th>Kode Account</th>
+      <th>Tiket Jurnal / Edit</th>
+      <th>Keterangan</th>          
+      <th>Debet(Rp)</th>
+      <th>Kredit(Rp)</th>
+      <th>Menu</th>
+    </tr>
+</thead>
+    
+    <tbody>
+    {% regroup show by jurnal as grouped %}
+    {% for group in grouped %}
+    {% for p in group.list %}
+        <tr style="background-color: {% ifchanged group.list %}{% cycle "#CCFFFF" "white" as rowcolors %}{% else %}
+            {{ rowcolors }}{% endifchanged %}">
+            {% ifchanged %}<td rowspan="{{ group.list|length }}"><input type="checkbox"  value="{{ p.jurnal.id }}" class="checkbox_delete" name='id_pilih' /></td>
+            {% endifchanged %}
+            <td>{{p.id_coa}} ({{p.id}})</td>
+            <td><a href="/rreport/{{p.id}}/edit_refisi_jurnal/" class="cari">{{p.jurnal.no_akad}}</a></td>            
+            <td><i>{{p.jurnal.diskripsi}}</i></td>
+            <td align="right">{{ p.debet|number_format:0 }}</td>
+            <td align="right">{{ p.kredit|number_format:0 }}</td>
+            {% ifchanged %} <td rowspan="{{ group.list|length }}" align="center"><a href="/rreport/{{p.jurnal.id}}/hapus_jurnal_refisi/" class="cari">Batal</a></td>{% endifchanged %}
+        </tr>
+    {% endfor %}
+    {% endfor %}
+    </tbody>
+
+</table>
+
+{% endblock %}
+
+
+
+

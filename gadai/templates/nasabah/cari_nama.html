@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>Cari {{ object.nama }}</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<style type="text/css">
+table.tableizer-table {border: 1px solid #CCC; font-family: Arial, Helvetica, sans-serif; font-size: 10px;} .tableizer-table td {padding: 3px; margin: 2px; border: 1px solid #ccc;}
+.tableizer-table th {background-color: #FF9933; color: #FFF; font-weight: bold;}
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+
+</head>
+<body onload="printpage();">
+{% load number_format %}{% load useringroup %}
+<p >[ <a href="/">Kembali</a> ]</p>
+<table width="100%">
+<p align="center">Yang Anda Cari: <strong>{{ query }}</strong></p>
+
+{% if nasabah %}
+    <p style="color: red;" align="center">Ditemukana {{ nasabah|length }} Nasabah {{ nasabah|pluralize }}</p>
+</table>
+<p align="center"><strong>Klik No Nasabah untuk melihat detail nasabah dan riwayat akad gadainya</strong></p>
+<p>&nbsp;</p>
+
+
+<table class="tableizer-table"width="100%" border="1">
+<tr class="tableizer-firstrow">
+{% ifusergroup MANOP %}<th>Status</th> <th>No Nasabah</th>{% else %}<th>No Nasabah</th>{% endifusergroup %}
+<th>Nama</th><th>No Ktp</th><th>Alamat</th><th>Gerai</th></tr>
+
+{% for nasabah in nasabah %}
+    <tr class="{% cycle 'odd' 'even' %}">
+    {% ifusergroup MANOP %}
+    <td align="center">{% if nasabah.status_nasabah == "2" %}BLACKLIST{% else %}WHITLIST{% endif %}</td>
+    <td align="center"><a href="/nasabah/{{ nasabah.id}}/show/">{{ nasabah.nomor_nasabah}}</a></td>
+    {% else %}
+    <td align="center">{% if nasabah.status_nasabah == "2" %}BLACKLIST{% else %}<a href="/nasabah/{{ nasabah.id}}/show/">{{ nasabah.nomor_nasabah}}{%endif%}</a></td>
+    {% endifusergroup %}
+    <td>{{ nasabah.nama }}</td>
+    <td>{{ nasabah.no_ktp }}</td>
+    <td>{{ nasabah.alamat_ktp }}</td>
+    <td>{{ nasabah.geraigadai }}</td>
+   </tr>
+{% endfor %}
+
+</table>
+{% else %}
+    <p>Data yg anda cari tidak ditemukan</p>
+{% endif %}

@@ -1,0 +1,27 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}nasabah{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+<table width="10%">
+<tr><td><STRONG>Nama</STRONG></td><td>: {{ids.nama}}</td></tr>
+<tr><td><STRONG>Alamat      </STRONG></td><td>: {{ids.alamat_domisili}}  </td></tr>
+<tr><td><strong>No Identitas     </strong> </td><td width="50%">: {{ids.no_ktp}}  </td></tr>
+<tr> <td><strong>RT / RW  <strong> </td><td>: {{ids.rt_domisili}}  / {{ids.rw_domisili}}</td></tr>
+</table>
+
+<h4>Data Angsuran</h4>
+<table class="list">
+    <tr><th>No</th><th>Transaksi</th><th>JW</th><th>Jatuh Tempo</th><th>Nilai </th><th>Biaya Adm</th><th>Tabungan</th><th>Asuransi</th><th>Angsuran</th><th>&nbsp;</th></tr>
+{% for p in akadgadai %}
+<tr class="{% cycle 'odd' 'even' %}"><td><a href="/ag/{{p.id}}/show/">{{ p.norek}}</a></td>
+
+<td>{{p.tanggal|date:"d M Y "}}</td>
+<td>{{p.jangka_waktu}}</td>
+<td>{{p.tanggal_lunas|date:"d M Y "}}</td>
+<td align="right">{{p.nilai}}</td>
+<td align="right">{{p.adm}}</td>
+
+{% endfor %}
+</table>
+{% endblock %}

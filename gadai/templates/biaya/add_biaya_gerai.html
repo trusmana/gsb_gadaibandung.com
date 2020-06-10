@@ -1,0 +1,120 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/biaya.html" %}
+{% endblock %}
+{% block section %}Biaya{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="right">Menu Input Biaya Pusat</h2>
+<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %}
+<table align="center" width="100%" class='list'>
+        <tr>
+                <td>TELPON </td>
+                <td> :</td>
+                <td>  {{form.jenis_transaksi_telepon}}</td>
+                <td>{{form.telpon_gerai}}</td>
+               <td> {{form.telpon}}</td><td>{{form.ket_telpon}}</td>
+        </tr>
+
+        <tr>
+                <td>BBM </td>
+                <td> :</td>
+                <td>  {{form.jenis_transaksi_bbm}}</td>
+                <td>{{form.bbm_gerai}}</td>
+               <td> {{form.bbm}}</td><td>{{form.ket_bbm}}</td>
+        </tr>
+
+        <tr>
+                <td>SUMBANGAN </td>
+                <td> :</td>
+                <td>  {{form.jenis_transaksi_sumbangan}}</td>
+                <td>{{form.sumbangan_gerai}}</td>
+               <td> {{form.sumbangan}}</td><td>{{form.ket_sumbangan}}</td>
+        </tr>
+
+        <tr>
+                <td>LISTRIK </td>
+                <td> :</td>
+                <td>  {{form.jenis_transaksi_listrik}}</td>
+                <td>{{form.listrik_gerai}}</td>
+               <td> {{form.listrik}}</td><td>{{form.ket_listrik}}</td>
+        </tr>
+        <tr>
+                <td>PDAM </td>
+                <td> :</td>
+                <td>  {{form.jenis_transaksi_pdam}}</td>
+                <td>{{form.pdam_gerai}}</td>
+               <td> {{form.pdam}}</td><td>{{form.ket_pdam}}</td>
+        </tr>
+        <tr>
+                <td>PEMELIHARAAN TRANSPORT </td>
+                <td> :</td>
+                <td>  {{form.jenis_transaksi_transport}}</td>
+                <td>{{form.transport_gerai}}</td>
+               <td> {{form.transport}}</td><td>{{form.ket_transport}}</td>
+        </tr>
+        <!--
+        <tr>
+                <td>PARKIR </td>
+                <td> :</td>
+                <td> {{form.jenis_transaksi_palkir}}</td>
+                <td>{{form.palkir_gerai}}</td>
+               <td> {{form.palkir}}</td><td>{{form.ket_palkir}}</td>
+        </tr>
+        -->
+
+<tr><td><label ></td><td></td><td><input type="submit" value="Simpan" class="simpan"></td></tr>
+</table>
+</form>
+
+<br>
+<h3 align="center"><b>Posting Biaya</b></h2>
+<form method="POST" action="/biaya/biaya_post/add_post_pusat/">{% csrf_token %}
+
+<input type="hidden" name="id" value="{{object.id}}" />
+<table class="list">
+    <tr>
+          <th><input id="select_all" type="checkbox" align="center"></th>
+          <th>Tanggal</th>
+          <th>Kode Account</th>
+          <th>Keterangan</th>
+          <th>Debet(Rp)</th>
+          <th>Kredit(Rp)</th>
+          <th>Menu</th>
+
+        </tr>
+   
+   <tbody>
+    {% regroup bea by jurnal as grouped %}
+    {% for group in grouped %}
+    {% for p in group.list %}
+        <tr style="background-color: {% ifchanged group.list %}{% cycle "#CCFFFF" "white" as rowcolors %}{% else %}
+            {{ rowcolors }}{% endifchanged %}">
+            {% ifchanged %}<td rowspan="{{ group.list|length }}"><input type="checkbox"  value="{{ p.jurnal.id }}" class="checkbox_delete" name='id_pilih' /></td>
+            {% endifchanged %}
+            {% ifchanged %}<td rowspan="{{ group.list|length }}">{{ p.tgl_trans|date:"d-M-Y" }}</td>{% endifchanged %}
+            <td>{{p}}.{{p.id_coa}}</td>       
+            <td>{% if forloop.counter %}<i>{{p.deskripsi}}</i>{% endif %}</td>
+            <td align="right">{{ p.debet|number_format:0 }}</td>
+            <td align="right">{{ p.kredit|number_format:0 }}</td>
+            {% ifchanged %} <td rowspan="{{ group.list|length }}" align="center"><a href="/biaya/{{p.jurnal.id }}/hapus_jurnal_jurnal/" class="cari">"&radic; Batal</a></td>{% endifchanged %}
+        </tr>
+    {% endfor %}
+    {% endfor %}
+    </tbody>
+  <tr>
+    <th align="center" colspan="4"><b>Jumlah</b></th>
+    <th align="right"><b>{{total_debet|number_format:0}}</b></th>
+    <th align="right"><b>{{total_kredit|number_format:0}}</b></th>
+    <th align="right"></th>
+  </tr>
+
+</table>
+
+
+<p align="right"><input type="submit" value="Simpan" class="next" /></p>
+</form>
+
+{% endblock %}
+

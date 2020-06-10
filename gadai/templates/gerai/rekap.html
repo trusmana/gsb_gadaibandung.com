@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>:: REKAP UNIT ::</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+@media screen, print {
+body, td, th { font-size: 12px; font-family: verdana; }
+}
+@media print { .print { display: none; } }
+</style>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/master.js"></script>
+<script language="javascript">
+<!--
+function printpage() { window.print(); }
+
+    
+
+//-->
+</script>
+</head>
+<body onload="printpage();">
+{% load number_format %}
+<p class="print">[ <a href="#" onclick="printpage()">Print</a> | <a href="/gerai/">Kembali</a> ]</p>
+<table width="100%">
+<tr><td width="100" align="center">
+<img src="/static/img/logoksu.png" width="110" height="80" align="left" hspace="20"/>
+</td><td align="center">
+<h3>REKAP TRANSAKSI DIVISI GADAI<br /></h3>
+<h3>KSU RIZKYABADI<br /></h3>
+<h4>Pada tanggal : {% now "d F Y" %}</h4></td></tr>
+</table>
+<p>&nbsp;</p>
+<table class="tableizer-table"width="100%" border="1" align="center">
+    <tr  class="tableizer-firstrow">
+        <th rowspan= "2">ID</th>
+        <th rowspan= "2">GERAI</th>
+        <th rowspan= "2">TOTAL NASABAH</th>
+        <th rowspan= "2">TOTAL TRANSAKSI</th>
+        <th colspan = "3" >TOTAL PENDAPATAN ADM</th>
+        <th rowspan= "2">TOTAL BERSIH</th></tr>
+    <tr>
+        <th>JASA</th>
+        <th>ADM</th>
+        <th>Bea SIMPAN</th>
+    <tr>
+{% for k in kp %}
+    <tr>
+        <td align="center">{{k.id}}</td>
+        <td>{{k.nama}} </td>
+        <td align = "center">{{k.aktif}}</td>
+        <td align = "center">Rp.{{k.get_jumlah_nilai|number_format:0}}</td>
+        <td align = "center">Rp.{{k.get_jumlah_jasa|number_format:0}}</td>
+        <td align = "center">Rp.{{k.get_jumlah_adm|number_format:0}}</td>
+        <td align = "center">Rp.{{k.get_jumlah_beasimpan|number_format:0}}</td>
+        <td align = "center">Rp.{{k.get_jumlah_terimabersih|number_format:0}}</td>
+    </tr>
+{% endfor %}
+    <tr>
+        <th >{{nkp}}</th>
+        <th>Total </th>
+        <th>{{npk}}</th>
+        <th>Rp.{{nilai|number_format:0}}</th>
+        <th>Rp.{{jasa|number_format:0}}</th>
+        <th>Rp.{{adm|number_format:0}}</th>
+        <th>Rp.{{simpan|number_format:0}}</th>
+        <th >Rp.{{terima_bersih|number_format:0}}</th>
+    </tr>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<table  width="100%" class="no-break">
+<tr>
+  <td align="center">Mengetahui / Menyetujui<br />
+    Ketua
+<br />
+<br />
+<br />
+<br />
+<br />
+Venny Risvarinny, SE
+  </td>
+  <td align="center">Bandung, {% now "d F Y" %}<br />
+KANIT GADAI
+<br />
+<br />
+<br />
+<br />
+<br />
+GUNTUR WIRYANA
+</td></tr>
+</table>

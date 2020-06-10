@@ -1,0 +1,71 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}ledger{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2> BUKU BESAR ALL ACCOUNT &nbsp;<small>DIV PJB</small></h2>  
+<form method="GET" action="/kplgerai/{{kocab}}/buku_besar_cabang/">{% csrf_token %}
+   <table id="tabel" align="center">
+   <li><label for="id_tgl_trans">Tanggal </label> :<input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> 
+   <label for="id_tgl_trans">Tanggal </label> :<input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
+   <br>
+   <li><input type="submit" value="CETAK XLS" class="cari" name="submit_tiga"/>&nbsp; 
+	  <input type="submit" value="CETAK PDF" class="cari" name="submit_dua"/> &nbsp;
+	  <input type="submit" value="VIEW" class="cari" name="submit_satu" value="Add"/>
+   </li>
+   </table>
+</form>
+<br>
+<hr>
+{% for p in ledger %}
+{% ifchanged p.id_coa and p.id_coa.saldo_pjb %}{% if not forloop.first %}</table>{% endif %}
+{% if forloop.first %}
+
+   <h3 style='text-align: center'><b><small>BUKU BESAR KSU RIZKY ABADI</small> </b></h3>
+  
+   <h3 style='text-align: center'><b><small>UNIT PJB <small><small><small>{{id_cabang}}</small>
+   </small>GERAI 
+   {% if id_cabang = '0' %}PUSAT{%endif%}{% if id_cabang = '1' %}JAKARTA{%endif%}{% if id_cabang = '2' %}SUCI{%endif%}{% if id_cabang = '3' %}DIPATIUKUR{%endif%}
+   {% if id_cabang = '4' %}BALUBUR{%endif%}{% if id_cabang = '6' %}GERLONG HILIR{%endif%}{% if id_cabang = '7' %}KOPO{%endif%}{% if id_cabang = '8' %}CIBIRU{%endif%}
+   {% if id_cabang = '9' %}CIPACING{%endif%}{% if id_cabang = '10' %}JATINAMGOR{%endif%}{% if id_cabang = '11' %}CIMAHI{%endif%}{% if id_cabang = '12' %}BUAH BATU{%endif%}
+   {% if id_cabang = '13' %}KORDON{%endif%}{% if id_cabang = '14' %}CIHANJUANG{%endif%}{% if id_cabang = '15' %}MARANATA{%endif%}{% if id_cabang = '16' %}KIARACONDONG{%endif%}{% if id_cabang = '17' %}CIREBON PERJUANGN{%endif%}
+   {% if id_cabang = '18' %}CIREBON{%endif%}{% if id_cabang = '19' %}CIUMBELEUIT{%endif%}{% if id_cabang = '113' %}UJUNG BERUNG{%endif%}
+   </small> </b>
+   </h3>
+    <h3 style='text-align: center'><b><small><small>Periode : {{start_date }} s/d {{end_date}}</small></small> </b></h3>
+{%endif%}
+<p>Akun : {{ p.id_coa }}<small>( {{ p.id_coa.tbl_transaksi_set.all.count }} )</small>saldo : {{p.id_coa.saldo_pjb}}</p>
+<table class="list">
+    <tr>
+	<th>Tanggal</th>
+	<th>NO BUKTI</th>
+    <th>Keterangan</th>
+	<th>Debet (Rp.)</th>
+	<th>Kredit (Rp.)</th>
+	<th>Saldo (Rp.)</th>
+    </tr>
+    <tr> 
+        <td></td><td></td><td>Saldo Awal</td><td></td><td></td><td>{{p.id_coa.saldo_pjb}}</td>
+</tr>
+{% endifchanged %}
+
+<tr>
+	  <td>{{ p.tgl_trans|date:'d-M-Y' }}</td>
+	  <td>{{p.nobukti}}</td>
+	  <td>{{ p.diskripsi }}</td>	
+	  <td class="kredit uang r">{{ p.debet|number_format:0 }}</td>
+	  <td class="debet uang r">{{ p.kredit|number_format:0 }}</td>
+	  <td class="saldo uang r">{{ p.saldo_akhir|number_format:0 }}</td>
+    </tr>{% if forloop.last %}</table>{% endif %}{% endfor %}
+
+
+<link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
+<script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".chosen-select").chosen()
+</script>
+{% endblock %}
+

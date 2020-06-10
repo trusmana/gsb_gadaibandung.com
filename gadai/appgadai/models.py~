@@ -1,0 +1,2496 @@
+from django.db import models
+from django.db.models import Sum
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
+from django.contrib.auth.models import User
+from datetime import datetime
+import datetime
+import calendar
+import decimal
+from dateutil.relativedelta import *
+
+STATUS = (
+    ('1','CAIR'),
+    ('2','NONE CAIR'),
+)
+
+JENIS_TRANSAKSI = (
+    ('1','KAS'),
+    ('2','BANK'),
+)
+
+class KasirGerai(models.Model):
+    kasir = models.OneToOneField('AkadGadai',null=True, blank=True)
+    kasir_lunas = models.OneToOneField('Pelunasan',null=True,blank=True)
+    status = models.CharField(max_length=1, choices=STATUS)
+    tanggal = models.DateField()
+    nilai_pembulatan = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    nilai_pembulatan_lunas = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    selisih = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    selisih_lunas = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    jenis_transaksi = models.CharField(max_length=1, choices=JENIS_TRANSAKSI)
+    coa_sisa = models.CharField(max_length=30,null =True,blank=True)
+    val = models.CharField(max_length = 3, null =True, blank=True)
+    val_lunas = models.CharField(max_length=3,null=True,blank=True)
+    cu = models.ForeignKey(User, related_name='c_kasirgerai', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_kasirgerai', editable=False, null=True, blank=True)
+    nilai = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    sisa_bayar = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+
+    nilai_lunas = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    sisa_bayar_lunas = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    tanggal_lunas = models.DateField(null=True, blank=True)
+    jenis_transaksi_lunas = models.CharField(max_length=1, choices=JENIS_TRANSAKSI, null=True, blank=True)
+
+
+    class Meta:
+        db_table = 'kasirgerai'
+        verbose_name = 'KasirGerai'
+        verbose_name_plural = verbose_name
+
+    def get_absolute_url(self):
+        return "/kasirgerai/" % self.id
+
+    def slip_validasi(self):
+        sekarang=self.tanggal
+        h=sekarang.day
+        m=sekarang.month
+        y=sekarang.year
+        return "|%s|%s|%s|%s|%s|%s" % ((self.kasir.mdate),(str(self.kasir.gerai.init_cabang)),self.nilai_pembulatan,self.kasir.nocoa_kas,self.selisih,self.coa_sisa)
+
+
+def add_months(dt,months):
+    month = dt.month - 1 + months
+    year = dt.year + month / 12
+    month = month % 12 + 1
+    day = min(dt.day,calendar.monthrange(year,month)[1])
+    return dt.replace(year=year, month=month, day=day)
+
+JANGKA_WAKTU = (
+    ('0','--- PILIH ---'),
+    ('31','31'),
+)
+
+JANGKA_WAKTU_KENDARAAN = (
+    ('0','--- PILIH ---'),
+    ('1','1'),
+    ('2','2'),
+    ('3','3'),
+    ('4','4'),
+)  
+
+MERK_KENDARAAN_CHOICES = (
+    ('0','--- PILIH ---'),
+    ('1','HONDA'),
+    ('2','SUZUKI'),
+    ('3','TOYOTA'),
+    ('4','NISAN'),
+    ('5','MITSUBISHI'),
+    ('6','DAIHATSHU'),
+    ('7','YAMAHA'),
+    ('8','CHEVROLET'),
+    ('9','HYUNDAI'),
+    ('10','KAWASAKI'),
+    ('11','MAZDA')
+) 
+
+GERAI = (
+    ('1','1'),('2','2'),
+    ('3','3'),('4','4'),
+    ('5','5'),('6','6'),
+    ('7','7'),('8','8'),
+    ('9','9'),('10','10'),
+    ('11','11'),('12','12'),    
+    ('13','13'),('14','14'),
+    ('15','15'),('16','16'),
+    ('17','17'),('18','18'),
+    ('19','19'),('20','20'),
+    ('21','21'),('22','22'),
+    ('23','23'),('24','24'),
+)
+
+AKUN = (
+    ('3','3'),('4','4'),('5','5'),('6','6'),('7','7'),('8','8'),('131','131'),('132','132'),('133','133'),('134','134'),('135','135'),('136','137'),('138','138'),('139','139'),
+    ('139','139'),('140','140'),('141','141'),('142','142'),('143','143'),('144','144'),('145','145'),('146','146'),('147','147'),('148','149'),('150','150'),('151','151'),
+    ('152','152'),('153','153'),('154','154'),('155','155'),('156','156'),('157','157'),('158','158'),('159','159'),('160','160'),('161','161'),('162','162'),
+    ('163','163'),('164','164'),('165','165'),('166','166'),('167','167'),('168','168'),('169','169'),('170','170'),('171','171'),('172','172'),('173','173'),
+    ('174','174'),('175','175'),('176','176'),('177','177'),('178','178'),('178','178'),('179','179'),('180','180'),('181','181'),('182','182'),('183','183'),
+    ('184','184'),('185','185'),('186','186'),('187','187'),('188','188'),('189','189'),('190','190'),('191','191'),('192','192'),('193','193'),('194','194'),
+    ('195','195'),('196','196'),('197','197'),('198','198'),('199','199'),('200','200'),('201','201'),('202','202'),('203','203'),('204','204'),('205','205'),
+    ('206','206'),('207','207'),('208','208'),('209','209'),('210','210'),('211','211'),('212','212'),('213','213'),('214','214'),('215','215'),('216','216'),
+    ('217','217'),('218','218'),('219','219'),('220','220'),('221','221'),('222','222'),('223','223'),('224','224'),('225','225'),('226','226'),('227','227'),
+    ('228','228'),('229','229'),('230','230'),('231','231'),('232','232'),('233','233'),('234','234'),('235','235'),('243','243'),('244','244'),('245','245'),
+    ('246','246'),('247','247'),('248','248'),('249','249'),('250','250'),('251','251'),('252','252'),('253','253'),('254','254'),('255','255'),('256','256'),
+    ('257','257'),('258','258'),('259','259'),('260','260'),('265','265'),('266','266'),('267','267'),('268','268'),('269','269'),('270','270'),('271','271'),
+    ('272','272'),('273','273'),('274','274'),('286','286'),('287','287'),('288','288'),('293','293'),('294','294'),('295','295'),('297','297'),('298','298'),
+    ('307','307'),('308','308'),('311','311'),('312','312'),('313','313'),('314','314'),('315','315'),('316','316'),('317','317'),('318','318'),('319','319'),
+    ('320','320'),('321','321'),('322','322'),('323','323'),('324','324'),('325','325'),('326','326'),('327','327'),('328','328'),('329','329'),('330','330'),
+    ('331','331'),('332','332'),('333','333'),('334','334'),('335','335'),('336','336'),('337','337'),('359','359'),('360','360'),('361','361'),('362','362'),
+    ('363','363'),('364','364'),('365','365'),('366','366'),('367','367'),('368','368'),('369','369'),('370','370'),('371','371'),('372','372'),('373','373'),
+    ('374','374'),('375','375'),('376','376'),('377','377'),('378','378'),('379','379'),('380','380'),('381','381'),('382','382'),('383','383'),('384','384'),
+    ('385','385'),('386','386'),('387','387'),('388','388'),('389','389'),('390','390'),('390','390'),('390','390'),('390','390'),('390','390'),('390','390'),
+    ('390','390'),('390','390'),('390','390'),('390','390'),('390','390'),('390','390'),('390','390'),('391','391'),('392','392'),('393','393'),('394','394'),
+    ('394','394'),('395','395'),('396','396'),('397','397'),('398','398'),('399','399'),('400','400'),('401','401'),('402','402'),('403','403'),('404','404'),
+    ('405','405'),('406','406'),('407','407'),('408','408'),('409','409'),('410','410'),('411','411'),('412','412'),('413','413'),('414','414'),('415','415'),
+    ('416','416'),('417','417'),('418','418'),('419','419'),('420','420'),('429','429'),('430','430'),('431','431'),('432','432'),('439','439'),('440','440'),
+    ('441','441'),('442','442'),('443','443'),('444','444'),('445','445'),('446','446'),('447','447'),('448','448'),('449','449'),('450','450'),('451','451'),
+    ('452','452'),('453','453'),('454','454'),('455','455'),('456','456'),('457','457'),('458','458'),('459','459'),('460','460'),('461','461'),('462','462'),
+    ('463','463'),('464','464'),('465','465'),('466','466'),('467','467'),('468','468'),('469','469'),('470','470'),('471','471'),('472','472'),('473','473'),
+    ('474','474'),('475','475'),('476','476'),('477','477'),('478','478'),('479','479'),('480','480'),('481','481'),('482','482'),('483','483'),('484','484'),
+    ('485','485'),('486','486'),('487','487'),('488','488'),('489','489'),('490','490'),('491','491'),('492','492'),('493','493'),('494','494'),('495','495'),
+    ('496','496'),('497','497'),('498','498'),('499','499'),('500','500'),('501','501'),('502','502'),('503','503'),('504','504'),('505','505'),('506','506'),
+    ('507','507'),('508','508'),('509','509'),('510','510'),('511','511'),('512','512'),('513','513'),('514','514'),('515','515'),('516','516'),('517','517'),
+    ('518','518'),('519','519'),('520','520'),('521','521'),('522','522'),('523','523'),('524','524'),('525','525'),('526','526'),('527','527'),('528','528'),
+    ('529','529'),('530','530'),('531','531'),('532','532'),('533','533'),('534','534'),('535','535'),('536','536'),('537','537'),('538','538'),('539','539'),
+    ('540','540'),('541','541'),('542','543'),('544','544'),('545','545'),('546','546'),('547','547'),('548','548'),('549','549'),('550','550'),('551','551'),
+    ('552','552'),('553','553'),('554','554'),('555','555'),('556','556'),('557','557'),('558','558'),('559','559'),('560','560'),('560','560'),('560','560'),
+    ('561','561'),('562','562'),('563','563'),('564','564'),('565','565'),('595','595'),('596','596'),('597','597'),('598','598'),('599','599'),('600','600'),
+    ('601','601'),('602','602'),('603','603'),('604','604'),('605','605'),('606','606'),('607','607'),('608','608'),('609','609'),('610','610'),
+    ('611','611'),('612','612'),('613','613'),('614','614'),('615','615'),('616','616'),('617','617'),('618','618'),('619','619'),('620','620'),
+    ('621','621'),('622','622'),('623','623'),('624','624'),('625','625'),('626','626'),('627','627'),('628','628'),('629','629'),('630','630'),('631','631'),
+)
+
+KELAMIN = (
+    ('0','---PILIH---'),
+    ('Pria','Pria'),
+    ('Wanita','Wanita'),
+)
+
+JENIS_PEKERJAAN =(
+    ('1','PEGAWAI SWASTA'),
+    ('2','PNS/TNI/POLRI'),
+    ('3','PROFESI'),
+    ('4','MAHASISWA/PELAJAR'),
+    ('5','WIRASWASTA'),
+    ('6','IBU RUMAH TANGGA'),
+)
+
+JENIS_DOKUMEN= (
+    ('1','Photo copy KTP'),
+    ('2','Faktur Pembelian'),
+    ('3','Kartu Garasi'),
+    ('4','Manual Book'),
+    ('5','STNK'),
+    ('6','BPKB'),
+    ('7','SIM'),
+)
+
+JENIS_BARANG = (
+    ('0','--- PILIH ---'),
+    ('1','HP'),
+    ('2','LAPTOP/NB'),
+    ('3','KAMERA'),
+    ('4','PS'),
+    ('5','TV LCD'),
+)
+
+JENIS_KENDARAAN = (
+    ('0','--- PILIH ---'),
+    ('1','MOTOR'),
+    ('2','MOBIL'),
+)
+
+TAHUN_KENDARAAN_CHOICES = (
+    ('0','--- PILIH ---'),
+    ('12','1996'),('10','1997'),('13','1998'),
+    ('14','1999'),('15','2000'),('11','2001'),
+    ('16','2002'),('17','2003'),('18','2004'),
+    ('1','2005'), ('2','2006'), ('3','2007'),
+    ('4','2008'), ('5','2009'), ('6','2010'),
+    ('7','2011'), ('8','2012'), ('9','2013'),
+    ('19','2014'),('20','1990'),
+)
+
+RAK_CHOICES = (
+    ('1','1'),
+    ('2','2'),
+    ('3','3'),
+    ('4','4'),
+    ('5','5'),
+    ('6','6'),
+    ('7','7'),
+)
+
+RUANGAN_CHOICES = (
+    ('1','A'),
+    ('2','B'),
+    ('3','C'),
+    ('4','D'),
+    ('5','E'),
+    ('6','1'),
+    ('7','2'),
+    ('8','3'),
+    ('9','4'),
+    ('10','K1'),
+    ('11','K2'),
+    ('12','K3'),
+    ('13','K4'),
+    ('14','K5'),
+    ('15','K6'),
+)
+LEMARI_CHOICES = (
+    ('1','L1'),
+    ('2','L2'),
+    ('3','L3'),
+    ('4','L4'),
+    ('5','L5'),
+    ('6','L6'),
+    ('7','L7'),
+    ('8','L8'),
+)
+ROW_CHOICES = (
+    ('1','1'),
+    ('2','2'),
+    ('3','3'),
+    ('4','4'),
+    ('5','5'),
+    ('6','6'),
+    ('7','7'),
+)
+
+JENIS_KEANGGOTAAN= (
+    ('2','NON ANGGOTA'),
+    ('1','ANGGOTA'),    
+)
+
+CHOICES_BARANG=(
+    ('1','ADA'),
+    ('2','TIDAK ADA')
+)
+
+CHOICES_KONDISI_BARANG=(
+    ('1','BAGUS SEKALI'),
+    ('2','BAGUS'),
+    ('3','CUKUP BAGUS'),
+    ('4','SEDANG'),
+    ('5','KURANG'),
+)
+
+
+class Barang(models.Model):
+    jenis_barang = models.CharField(max_length=4 ,choices=JENIS_BARANG, null =True, blank=True,default=0)
+    merk = models.CharField(max_length=70)   
+    type = models.CharField(max_length=70)
+    sn = models.CharField(max_length=75)
+    warna = models.CharField(max_length=30)
+    tahun_pembuatan = models.CharField(max_length=10)
+    bulan_produksi = models.CharField(max_length=10)   
+    accesoris_barang1 = models.CharField(max_length=150)
+    lampiran_dokumen = models.CharField(max_length = 2,choices =JENIS_DOKUMEN)
+    barang_masuk= models.DateField(null=True, blank=True)
+    barang_keluar= models.DateField(null=True, blank=True)
+    ruangan = models.CharField(null=True, blank=True,max_length=2,choices=RUANGAN_CHOICES)
+    no_rak =models.CharField(null=True, blank=True,max_length=2,choices=RAK_CHOICES)
+    row = models.CharField(null=True, blank=True,max_length=2,choices=ROW_CHOICES)
+    lemari = models.CharField(null=True, blank=True,max_length=2,choices=LEMARI_CHOICES)
+    kolom = models.CharField(null=True, blank = True,max_length=2)
+    ###form kendaraan
+    jenis_kendaraan = models.CharField(max_length=4 ,choices=JENIS_KENDARAAN,default=0)
+    merk_kendaraan = models.CharField(max_length=10,choices =MERK_KENDARAAN_CHOICES,null=True, blank=True,default=0)
+    type_kendaraan =  models.CharField(max_length=20,default=0)
+    no_polisi = models.CharField(max_length=15,default=0)
+    no_rangka = models.CharField(max_length=15,default=0)
+    no_mesin = models.CharField(max_length=15,default=0)
+    tahun_pembuatan_kendaraan = models.CharField(max_length=10,choices =TAHUN_KENDARAAN_CHOICES,default=0)
+    warna_kendaraan = models.CharField(max_length=10,default=0)
+    no_bpkb = models.CharField(max_length=30,default=0)
+    stnk_atas_nama = models.CharField(max_length=30,default=0)
+    no_faktur = models.CharField(max_length=20,default=0)
+    ####### update input barang 31 maret 2015
+    charger = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_charger = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    batre = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_batre = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    keybord= models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_keybord = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    cassing = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_cassing = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    layar = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_layar = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    password  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    password_barang  = models.CharField(max_length=70,null=True, blank=True)   
+ 
+    lensa  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_lensa = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    batre_kamera  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_batre_kamera = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    cassing_kamera  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_cassing_kamera = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    
+    
+    optik_ps  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_optik_ps = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    harddisk  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_harddisk = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    stick  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_stick = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    hdmi  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_hdmi = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    
+    
+    layar_tv = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_layar_tv = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    remote = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_remote = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    
+    bpkb = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    stnk = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    faktur = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    gesek_nomesin = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    gesek_norangka = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    dus = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    tas = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    
+    class Meta:
+        db_table='barang'
+        verbose_name = 'Barang'
+        verbose_name_plural = verbose_name
+
+    def __unicode__(self):
+        return "%s-%s-%s-%s" %(self.id, self.merk, self.type, self.sn)
+    
+    def get_absolute_url(self):
+        return "/barang/"
+    
+    def totallebih(self):
+        a = self.akadgadai_set.all().count()
+        return a
+
+class Nasabah(models.Model):
+    nama = models.CharField(max_length=75)
+    tgl_lahir = models.DateField(help_text="Tahun-Bulan-Tanggal", null=True)
+    tempat = models.CharField(max_length=15)
+    
+    no_ktp = models.CharField(max_length= 16, null=True)
+    alamat_ktp = models.CharField(max_length=30,null=True)
+    no_rumah_ktp = models.CharField(max_length=5,null=True)
+    rt_ktp = models.CharField(max_length=6,null=True)
+    rw_ktp=models.CharField(max_length=6,null=True)
+    telepon_ktp =models.CharField(max_length=30, null=True)
+    hp_ktp =models.CharField(max_length=30, null=True)
+    kelurahan_ktp = models.CharField(max_length=25,null=True)
+    kecamatan_ktp = models.CharField(max_length=25,null=True)
+    kotamadya_ktp = models.CharField(max_length=30,blank=True,null=True)
+    kabupaten_ktp = models.CharField(max_length=30,blank=True,null=True)
+    
+    no_sim = models. CharField(max_length= 20, null=True, blank=True)
+    alamat_sim = models.CharField(max_length=30,null=True, blank=True)
+    rt_sim = models.CharField(max_length=6,null=True, blank=True)
+    rw_sim=models.CharField(max_length=6,null=True, blank=True)
+    kelurahan_sim = models.CharField(max_length=25,null=True, blank=True)
+    kecamatan_sim = models.CharField(max_length=25,null=True, blank=True)
+    ###domisili
+    alamat_domisili = models.CharField(max_length=30,null=True)
+    no_rumah_domisili = models.CharField(max_length=5,null=True)
+    rt_domisili = models.CharField(max_length=6,null=True)
+    rw_domisili=models.CharField(max_length=6,null=True)
+    telepon_domisili =models.CharField(max_length=30, null=True)
+    hp_domisili =models.CharField(max_length=30, null=True)
+    kelurahan_domisili = models.CharField(max_length=25,null=True)
+    kecamatan_domisili = models.CharField(max_length=25,null=True)
+    kotamadya_domisili = models.CharField(max_length=30,blank=True,null=True)
+    kabupaten_domisili = models.CharField(max_length=30,blank=True,null=True)
+    
+    jenis_pekerjaan= models.CharField(max_length=20 ,choices=JENIS_PEKERJAAN)
+    alamat_kantor = models.CharField(max_length=30)
+    kode_pos = models.CharField(max_length = 10)
+    telepon_kantor =models.CharField(max_length=30)
+    email = models.CharField(max_length=30,blank=True)
+
+    jenis_kelamin= models.CharField(max_length=10 ,choices=KELAMIN)
+    cu = models.ForeignKey(User, related_name='c_nasabah', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_nasabah', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+    jenis_keanggotaan = models.CharField(max_length=20 ,choices=JENIS_KEANGGOTAAN)
+    # Data Pasangan
+    nama_pasangan = models.CharField(max_length=30,blank=True,null=True)
+    alamat_pasangan = models.CharField(max_length=50,blank=True,null=True)
+    jekel_pasangan = models.CharField(max_length=25,choices=KELAMIN)
+    tlp_pasangan = models.CharField(max_length=30,blank=True,null=True)
+    no_rumah_pas = models.CharField(max_length=5,blank=True,null=True)
+    no_rt_pas = models.CharField(max_length=6,blank=True,null=True)
+    no_rw_pas = models.CharField(max_length=6,blank=True,null=True)
+
+    class Meta:
+        db_table='nasabah'
+        verbose_name = 'Nasabah'
+        verbose_name_plural = verbose_name
+        
+    def __unicode__(self):
+        return "%s-%s" %(self.nomor(),self.nama)
+
+    def sn(self):
+        pn = 0
+        a = self.akadgadai_set.latest()
+        for p in self.akadgadai_set.all():
+            try:
+                pn = p.barang.sn
+            except:
+                pass
+            return pn
+        
+    def jenis_barang(self):
+        pn = 0
+        for p in self.akadgadai_set.all():
+            try:
+                pn = p.barang.jenis_barang
+            except:
+                pass
+            return pn
+        
+    def jenis_transaksi(self):
+        pn = 0
+        a = self.akadgadai_set.latest()
+        for p in self.akadgadai_set.filter(id = a.id):
+            try:
+                pn = p.jenis_transaksi
+            except:
+                pass
+            return pn
+        
+    def __unicode__(self):
+        return "%s-%s" %(self.nomor(),self.nama)
+### AKAD BARU
+    def ro(self):
+        return self.akadgadai_set.all().count()
+
+    def taksir(self):
+        for p in self.akadgadai_set.all():
+            return p.taksir
+    
+    def jenis_trans(self):
+        for p in self.akadgadai_set.all():
+            return p.jenis_transaksi
+        
+    def jenis_barang(self):
+        for p in self.akadgadai_set.all():
+            return p.barang
+
+    def kreditterakhir(self):
+        a = self.akadgadai_set.all()
+        b = list(a)
+        return b[-1]
+    
+    def lunasakadterakhir(self, ):
+        if self.kreditterakhir().status_transaksi == u'1':
+            return 'Lunas'
+        else:
+            return 'Belum Lunas'
+### akad bari akhir
+
+    def get_absolute_url(self):
+        return "/akadgadai/%s/show/" % self.id
+    
+    def cek_number_ktp(value):
+        if value % 2 != 0:
+            raise ValidationError(u'%s is not an even number' % value)
+    
+    def lebih(self):
+        a = self.akadgadai_set.all().count()
+        return a
+
+    def nomor(self):
+        pn = 0
+        for p in self.akadgadai_set.all():
+            try:
+                pn = p.norek()
+            except:
+                pass
+            return pn
+
+    ###17042013
+    def nomor_nasabah(self):
+        pn = 0
+        for p in self.akadgadai_set.all():
+            try:
+                pn = p.nonas()
+            except:
+                pass
+            return pn
+
+    def geraigadai(self):
+        for p in self.akadgadai_set.all():
+            return p.gerai
+
+    def baranggerai(self):
+        for p in self.akadgadai_set.all():
+            return p.barang
+
+    def jatuh_tempo(self):
+        pn = 0
+        for p in self.akadgadai_set.all():
+            try:
+                pn = p.jatuhtempo
+            except:
+                pass
+            return pn
+    
+    def status_lunas(self):
+        pn = 0
+        for p in self.akadgadai_set.all():
+            try:
+                pn = p.lunas
+            except:
+                pass
+            return pn
+
+
+CHOICES_TRANSAKSI=(
+    ('1','Lunas'),
+    ('2','Lelang'),
+    ('3','Aktif')
+)
+
+CHOICES_JENIS_TRANSAKSI=(
+    ('1','Elektronik'),
+    ('2','Motor'),
+    ('3','Mobil')
+)
+CHOICES_JENIS_IDENTITAS=(
+    ('1','Elektronik'),
+    ('2','Motor'),
+    ('3','Mobil')
+)
+
+
+STATUS_PERMINTAAN=(
+    ('1','PESAN'),
+    ('2','RETUR'),
+    ('3','KIRIM'),
+)
+
+STATUS_TAKSIR=(
+    ('1','SESUAI NILAI TAKSIR'),
+    ('2','MELEBIHI NILAI TAKSIR'),
+    
+)
+
+class AkadGadaiManager(models.Manager):
+    def jangka_waktu(self):
+        pass
+    
+    def for_user(self, user):
+        try:
+            gerai = user.get_profile().gerai
+            gg_list = [gerai.id] + [k.id for k in gerai.tbl_cabang_set.all()]
+            return self.filter(gerai__id__in=gg_list)
+        except:
+            return None
+            
+class AkadGadai(models.Model):
+    agnasabah = models.ForeignKey(Nasabah)
+    barang = models.ForeignKey(Barang)
+    tanggal = models.DateField(help_text="tahun-bl-tg", null=True)
+    gerai = models.ForeignKey('Tbl_Cabang',null=True)
+    nilai = models.FloatField()
+    jangka_waktu= models.CharField(max_length=4 ,choices=JANGKA_WAKTU, null=True)
+    jangka_waktu_kendaraan= models.CharField(max_length=4 ,choices=JANGKA_WAKTU_KENDARAAN, null=True)
+    lunas = models.DateField()
+    lelang = models.DateField(null=True, default=None, editable=False)
+
+    '''bea materai dirubah menjadi data inputan di akadgadai(editor hasan tgl 04102012)'''
+    bea_materai = models.FloatField(default=0, null=True, blank=True, help_text="(Untuk biaya materai, jika tidak ada isi 0)")
+    
+    cu = models.ForeignKey(User, related_name='c_akadgadai', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_akadgadai', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+    lunas = models.DateField(null=True, default=None, blank=True)
+    status_transaksi = models.CharField(max_length=20 ,choices=CHOICES_TRANSAKSI, null=True, blank=True)
+    taksir=models.ForeignKey('Taksir')
+    objects = AkadGadaiManager()
+    jenis_transaksi = models.CharField(max_length=20 ,choices=CHOICES_JENIS_TRANSAKSI, null=True, blank=True)
+    tanggal_permintaan =models.DateField(null=True, blank=True, editable=False)
+    tanggal_pengiriman =models.DateField(null=True, blank=True, editable=False)
+    status_permintaan= models.CharField(max_length=4 ,choices=STATUS_PERMINTAAN, null=True, blank=True, editable=False)
+    status_taksir= models.CharField(max_length=4 ,choices=STATUS_TAKSIR, null=True, blank=True)
+    jatuhtempo = models.DateField(null=True, blank=True, default=0)
+    nilai_jasa = models.DecimalField(max_digits=12, decimal_places=2,null=True,blank=True,default=0)
+    nilai_jasa_kendaraan = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    nilai_biayasimpan = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    nilai_beasimpan_kendaraan = models.DecimalField(max_digits=12,decimal_places =2,default=0,null=True,blank=True)
+    nilai_adm = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    nilai_adm_kendaraan = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
+    nocoa_titipan = models.CharField(max_length=15,blank=True,null=True)
+    nocoa_kas = models.CharField(max_length=15,blank=True,null=True)
+    os_pokok = models.DecimalField(max_digits=12, decimal_places=2,null=True,default=0)
+    asumsi_jasa = models.DecimalField(max_digits=12, decimal_places=2,null=True,blank=True)
+    nilai_asuransi = models.DecimalField(max_digits=12, decimal_places=2,null=True,default=0)    
+    nilai_provisi = models.DecimalField(max_digits=12, decimal_places=2,null=True,default=0)
+    status_kw = models.CharField(max_length=20 ,null=True, blank=True)
+    status_kwlunas = models.CharField(max_length=20 ,null=True, blank=True)
+    status_mcc = models.CharField(max_length=20 ,null=True, blank=True)
+    
+    selisih_pelunasan = models.DecimalField(max_digits=12, decimal_places=2,null=True,blank=True,default=0)
+    kewajiban_pelunasan = models.DecimalField(max_digits=12, decimal_places=2,null=True,blank=True,default=0)####nilai pelunasan sebelumnya
+    nilai_gu = models.DecimalField(max_digits=12, decimal_places=2,null=True,blank=True,default=0)####nilai pelunasan sebelumnya
+    denda_gu = models.DecimalField(max_digits=12, decimal_places=2,null=True,blank=True,default=0)####nilai pelunasan sebelumnya
+    jasa_gu = models.DecimalField(max_digits=12, decimal_places=2,null=True,blank=True,default=0)####nilai pelunasan sebelumnya  
+    jns_gu = models.CharField(max_length=20 ,null=True, blank=True)
+
+    class Meta:
+        db_table = 'akadgadai'
+        ordering = ['-tanggal']
+        verbose_name = 'AkadGadai'
+        verbose_name_plural = verbose_name
+        get_latest_by = 'tanggal'
+
+    def pelunasan_terakhir(self):
+        return self.pelunasan_set.all().latest()
+
+    def coba_jw(self):
+        if self.jenis_transaksi == u'1':
+            return self.tanggal + datetime.timedelta(int(self.jangka_waktu))
+        else:
+            return self.jatuh_tempo_kendaraan_hitung()
+        
+    def kepala_gerai(self):
+        try:
+            s = self.kepalagerai
+            ret = s.status=='1'
+        except KepalaGerai.DoesNotExist:
+            ret = False
+        return ret
+    
+    def kepala_gerai_tolak(self):
+        try:
+            s = self.kepalagerai
+            ret = s.status=='1'
+        except KepalaGerai.DoesNotExist:
+            ret = False
+        return ret
+
+    def jw_all(self):
+        if self.jenis_transaksi == 1:
+            return self.jangka_waktu_kendaran
+        else:
+            return self.jangka_waktu
+    
+    def get_absolute_url(self):
+        return "/akadgadai/%s/show/" % self.id
+
+    def get_absolute_url_manop(self):
+        return "/manop/%s/show/" % self.id
+    
+    def tanggal_akhir_bulan(self):
+        tgl= self.tanggal + relativedelta(day=31)
+        return tgl.day
+    
+    def asumsi_pendapatan_jasa(self):
+        tanggal_r = (self.tanggal_akhir_bulan() - self.tanggal.day) + 1
+        hitung_r = (tanggal_r  * self.nilai_jasa) /self.tanggal_akhir_bulan()
+        hitung_kend = (tanggal_r  * self.nilai_jasa_kendaraan) /self.tanggal_akhir_bulan()
+        if self.jenis_transaksi == '1':
+            return hitung_r
+        else:
+            return hitung_kend
+        
+    def hari_terlambat(self):
+        sekarang = datetime.date.today()
+        selisih =  sekarang - self.jatuhtempo 
+        if selisih.days < 0 :
+            return 0
+        else:
+            return selisih.days  
+    
+    def denda_all_transaksi(self):
+        if self.jenis_transaksi == '1':
+            return self.denda_elektronik()
+        else:
+            return self.denda_kendaraan()
+
+    def denda_elektronik(self):
+        if self.jenis_transaksi == u'1':
+            return int(self.nilai*0.05/31)*int(self.hari_terlambat())
+        else:
+            return 0
+    def denda_kendaraan(self):
+        if self.jenis_transaksi == u'1':
+            return 0
+        else:
+            return int(self.nilai*0.05/31)*int(self.hari_terlambat())
+
+    def hitung_jasa_pelunasan_elektronik(self):
+        if self.jenis_transaksi == u'1':
+            return int(self.nilai*0.02/7)*int(self.hari_terlambat())
+        else:
+            return 0
+
+    def hitung_jasa_pelunasan_kendaraan(self):
+        if self.jenis_transaksi == u'1':
+            return 0
+        else:
+            return int(self.nilai*0.02/7)*int(self.hari_terlambat())    
+
+    def hitung_denda_pelunasan(self):
+        return int(self.nilai*0.05/31)*int(self.hari_terlambat())
+    
+    def hitung_jasa_pelunasan(self):
+        if self.jenis_transaksi == u'1':
+            return self.hitung_jasa_pelunasan_elektronik()  
+        else:
+            return self.hitung_jasa_pelunasan_kendaraan() 
+
+    @property
+    def next_group(self):
+        ret = ''
+        if self.cekkasirgerai and (self.kasirgerai.status == '1'):
+            ret = 'KASIRGERAI'
+        else:
+            ret = 'CABANG'
+        
+
+    def cekkasirgerai(self):
+        try:
+            s = self.kasirgerai
+            ret = s.status == u'1'
+        except KasirGerai.DoesNotExist:
+            ret = False
+        return ret
+    cekkasir = property(cekkasirgerai)
+    
+    def notrans_jurnal(self):
+        self.id = 0
+        for a in self.agnasabah.akadgadai_set.all().order_by('tanggal'):
+            if a.id == self.id:
+                return self.id
+            self.id += 1
+    
+    
+    def _get_usia(self):
+        skr = datetime.date.today()
+        if not self.agnasabah.tgl_lahir:
+            self.agnasabah.tgl_lahir = skr
+        usia = skr - self.agnasabah.tgl_lahir
+        return usia.days / 365
+    usia = property(_get_usia)
+    
+    
+    def kw_validasi(self):
+        return "KT %s %s %s %s %s WIB|%s" % ((self.norek()),self.nocoa_titipan,self.nilai,self.nocoa_kas,self.mdate,(str(self.gerai.init_cabang)) )
+
+    def __unicode__(self):
+        return "%s-%s" %(self.agnasabah.nama,self.id)
+
+####NOMOR ACCOUNT####
+    def norek(self):
+        return "%s.%s.%s.%s" % (str(self.gerai.kode_cabang).zfill(1),(self.tanggal.year),str(self.jenis_transaksi).zfill(1),str(self.id).zfill(6))
+    
+    def norek_import(self):
+        return "%s.%s.%s.%s" % (str(self.gerai.kode_cabang).zfill(1),(self.tanggal),str(self.jenis_transaksi).zfill(1),str(self.id).zfill(6))
+
+    def nonas(self):
+        return "%s.%s.%s" % (str(self.gerai.kode_cabang).zfill(1),str(self.gerai.kode_cabang).zfill(2),str(self.agnasabah.id).zfill(6))
+ 
+    def norek_id(self):
+        return "%s" % (str(self.id).zfill(6))
+####NOMOR ACCOUNT####
+    
+#### HITUNGAN ADM ####    
+    def _get_jasa(self):
+        if self.barang.jenis_barang == '1':
+            return (self.nilai * (0.02/7)) * float(self.jangka_waktu)
+        if self.barang.jenis_barang == '2':
+            return (self.nilai * 0.02/7) * float(self.jangka_waktu)
+        if self.barang.jenis_barang == '3':
+            return (self.nilai * 0.02/7) * float(self.jangka_waktu)
+        if self.barang.jenis_barang == '4':
+            return (self.nilai * 0.02/7) * float(self.jangka_waktu)
+        if self.barang.jenis_barang == '5':
+            return (self.nilai * 0.02/7) * float(self.jangka_waktu)
+        if self.barang.jenis_barang == '6':
+            return (self.nilai * 0.04/30) * float(self.jangka_waktu)
+        if self.barang.jenis_barang == '7':
+            return (self.nilai * 0.04/30) / float(self.jangka_waktu)
+        else:
+            return 0
+    jasa = property(_get_jasa)
+
+    def persen_jasa(self):
+        if self.barang.jenis_barang == '1':
+            return 2
+        if self.barang.jenis_barang == '2':
+            return 2
+        if self.barang.jenis_barang == '3':
+            return 2
+        if self.barang.jenis_barang == '4':
+            return 2
+        if self.barang.jenis_barang == '5':
+            return 2
+        if self.barang.jenis_barang == '6':
+            return 4
+        if self.barang.jenis_barang == '7':
+            return 4
+        else:
+            return 0
+    persentase_jasa = property(persen_jasa)
+
+    def persen_jasa_kendaraan(self):
+        return 4
+    persentase_jasa_kendaraan = property (persen_jasa_kendaraan)
+
+    def persentase_jasa_all(self):
+        if self.jenis_transaksi == '1':
+            return self.persentase_jasa
+        else:
+            return self.persentase_jasa_kendaraan
+    
+    ###tgl 1 april revisi jasa acc manop gadai    
+    def _get_jasa_kendaraan(self):
+        if self.barang.jenis_kendaraan =='1' and self.jenis_transaksi == 2:
+            return (self.nilai * 0.04)* float(self.jangka_waktu_kendaraan)
+        if self.barang.jenis_kendaraan =='2' and self.jenis_transaksi == 2:
+            return (self.nilai * 0.04)* float(self.jangka_waktu_kendaraan)
+        else:
+            return (self.nilai * 0.04)* float(self.jangka_waktu_kendaraan)
+    jasa_kendaraan = property (_get_jasa_kendaraan)        
+
+    def jasa_kwitansi(self):
+        if self.jenis_transaksi == u'1':
+            return round(self.jasa)
+        else:
+            return round(self.jasa_kendaraan)
+
+    def _get_totjasa(self):
+        try:
+            ret= self.jasa + self.jasa_kendaraan
+            return ret
+        except:
+            return 0
+    tot_jasa_kend_elek = property(_get_totjasa)
+
+
+    def _get_adm(self):
+        if self.barang.jenis_barang =="1":
+            return 10000
+        if self.barang.jenis_barang =="2":
+            return 10000
+        if self.barang.jenis_barang =="3":
+            return 10000
+        if self.barang.jenis_barang =="4":
+            return 10000
+        if self.barang.jenis_barang =="5":
+            return 10000
+        if self.barang.jenis_barang =="6":
+            return 25000
+        if self.barang.jenis_barang =="7":
+            return 50000
+        else:
+            return 0
+    adm =property(_get_adm)
+
+    def _get_adm_kendaraan(self):
+        if self.barang.jenis_kendaraan =='1' :
+            return 25000
+        elif self.barang.jenis_kendaraan =='2':
+            return 50000
+        elif self.barang.jenis_kendaraan =='2':
+            return 150000
+        else:
+            return 0
+    adm_kendaraan = property(_get_adm_kendaraan) 
+
+    def _get_totadm(self):
+        try:
+            ret= self.adm + self.adm_kendaraan
+            return ret
+        except:
+            return 0
+    tot_adm_kend_elek = property(_get_totadm) 
+
+
+    def _get_biayasimpan(self):
+        if self.barang.jenis_barang == u'1':
+            return 5000
+        elif self.barang.jenis_barang == u'2':
+            return 10000
+        elif self.barang.jenis_barang == u'3':
+            return 10000
+        elif self.barang.jenis_barang == u'4':
+            return 10000
+        elif self.barang.jenis_barang == u'5':
+            return 15000
+        elif self.barang.jenis_barang == u'6':
+            return 50000
+        elif self.barang.jenis_barang == u'7':
+            return 100000
+        else:
+            return 0
+    biayasimpan =property(_get_biayasimpan)
+
+    def _get_beasimpan_kendaraan(self):
+        if self.barang.jenis_kendaraan == u'1' :
+            return 50000
+        elif self.barang.jenis_kendaraan == u'2':
+            return 100000
+        elif self.barang.jenis_kendaraan == u'2':
+            return 350000
+        else:
+            return 0
+    beasimpan_kendaraan = property(_get_beasimpan_kendaraan) 
+    
+    ###teddy jurnal(hitung totalberdasarkan filter jenis barang)
+    def adm_all(self):
+        if self.jenis_transaksi == '1':
+            return self.nilai_adm
+        else:
+            return self.nilai_adm_kendaraan
+    
+    def jasa_all(self):
+        if self.jenis_transaksi == '1':
+            return self.nilai_jasa
+        else:
+            return self.nilai_jasa_kendaraan 
+        
+    def beasimpan_all(self):
+        if self.jenis_transaksi == '1':
+            return self.nilai_biayasimpan
+        else:
+            return self.nilai_beasimpan_kendaraan
+
+    def terima_bersih_all(self):
+        if self.jenis_transaksi == '1':
+            return self.terima_bersih_kwitansi
+        else:
+            return self.terima_bersih_kendaraan
+        
+    def jurnal_titipan_all(self):
+        d = decimal.Decimal
+        return  d(self.nilai) - d(self.adm_all()) - d(round(self.jasa_all())) - d(self.beasimpan_all())
+    jurnal_titipan = property(jurnal_titipan_all)
+    
+    ####teddy jurnal
+
+    def _get_totbeasimpan(self):
+        try:
+            ret= self.biayasimpan + self.beasimpan_kendaraan
+            return ret
+        except:
+            return 0
+    tot_simpan_kend_elek = property(_get_totbeasimpan)
+
+    def _get_jumlahbiaya_kwitansi(self):
+        try:
+            ret= round(self.adm + self.jasa_kwitansi() + self.biayasimpan)
+            return ret
+        except:
+            return 0
+    jumlahbiaya_kwitansi = property(_get_jumlahbiaya_kwitansi)
+
+    def _get_jumlahbiaya(self):
+        try:
+            ret= self.jasa + self.adm + self.biayasimpan  
+            return ret
+        except:
+            return 0
+    jumlahbiaya = property(_get_jumlahbiaya)
+
+    def _get_jumlahbiaya_kendaraan(self):
+        try:
+            ret= self.jasa_kendaraan + self.adm_kendaraan + self.beasimpan_kendaraan 
+            return ret
+        except:
+            return 0
+
+    jumlahbiaya_kendaraan = property(_get_jumlahbiaya_kendaraan)
+    def jumlah_biaya_pk(self):
+        if self.jenis_transaksi == '1':
+            return round(self.jumlahbiaya)
+        else:    
+            return round(self.jumlahbiaya_kendaraan)
+
+    def _get_jumlah_biaya(self):
+        try:
+            ret = self.jasa +self.adm + self.biayasimpan + self.jasa_kendaraan + self.adm_kendaraan + self.beasimpan_kendaraan
+            return ret
+        except:
+            return 0
+    jumlah_biaya = property(_get_jumlah_biaya)### jumlah biaya tanpa materai
+
+    ####JUMLAH PERPANJANG 1 & 2####
+    def _get_jumlahperpanjang(self):
+        try:
+            ret = self.jasa + self.denda + self.biayasimpan
+            return ret
+        except:
+            return 0
+    jumlahperpanjang = property(_get_jumlahperpanjang)
+    ####JUMLAH PERPANJANG 1 & 2####
+    
+    def _get_terima(self):
+        try:
+            terima= self.nilai - self.jumlahbiaya
+            return terima
+        except:
+            return 0
+    terima_bersih = property(_get_terima)
+
+    def _get_terima_kwitansi(self):
+        try:
+            terima= round(self.nilai - self.jumlahbiaya_kwitansi)
+            return terima
+        except:
+            return 0
+    terima_bersih_kwitansi = property(_get_terima_kwitansi)
+
+    def _get_terima_kendaraan(self):
+        try:
+            terima= self.nilai - self.jumlahbiaya_kendaraan
+            return terima
+        except:
+            return 0
+    terima_bersih_kendaraan = property(_get_terima_kendaraan)
+    
+    def _get_terimalunas(self):
+        try:
+            terima= self.nilai + self.denda
+            return terima
+        except:
+            return 0
+    terima_bersih = property(_get_terima)
+ #### HITUNGAN ADM ####  
+
+    def jatuhtempo_hitung(self):
+        return self.tanggal + datetime.timedelta(int(self.jangka_waktu))
+
+    def jatuh_tempo_kendaraan_hitung(self):
+        return add_months(self.tanggal, (int(self.jangka_waktu_kendaraan)))
+
+    def menu_hitung_jt(self):####teddy new
+        if self.jenis_transaksi == u'1':
+            return self.tanggal + datetime.timedelta(int(self.jangka_waktu))
+        else:
+            return self.jatuh_tempo_kendaraan_hitung()
+
+    def tgl_jatuhtempo(self):
+        if self.barang.jenis_barang == '1':
+            return self.jatuhtempo + datetime.timedelta(14)
+        else:
+            return self.jatuhtempo + datetime.timedelta(21)
+
+    def terlambat_tajuhtempo(self):
+        sekarang = datetime.date.today()
+        hitung = sekarang - self.jatuhtempo
+        return hitung.days
+
+###jatuh tempo
+    def _hari_jt(self):
+        """Return banyaknya hari sejak jatuh tempo """
+        hari_ini = datetime.date.today()
+        selisih = hari_ini - self.jatuhtempo()
+        return selisih.days
+    hari_jangkawaktu = property(_hari_jt)
+
+    @property    
+    def hari_jw_kendaraan(self):
+        """Return banyaknya hari sejak jatuh tempo kendaraan """
+        hari_ini = datetime.date.today()
+        selisih = hari_ini - self.jatuh_tempo_kendaraan()
+        return selisih.days
+
+    @property    
+    def status_gadai(self):
+        if self.barang.jenis_barang == "1" and self.hari_jangkawaktu >= 0 and self.hari_jangkawaktu <= 3 :
+            return 'Jatuh Tempo elektronik'
+        if self.barang.jenis_kendaraan == "2" and self.hari_jw_kendaraan >=0 and self.hari_jw_kendaraan <=3:
+            return 'Jatuh Tempo Kendaraan'
+        return
+
+###jatuh tempo
+
+
+    def jt_status(self):
+        if self.jenis_transaksi == u'1':
+            return  self.prpj_jatuhtempo()
+        else:
+            return self.prpj_jatuhtempo_kendaraan()      
+
+    ###Pelunasan#####
+    def lunas_identitas(self):
+        tgl = 0
+        for p in self.pelunasan_set.all():
+            try:
+                tgl = p.id
+            except:
+                pass
+        return tgl
+
+    def lunas_tanggal(self):
+        tgl = 0
+        for p in self.pelunasan_set.all():
+            try:
+                tgl = p.tanggal
+            except:
+                pass
+        return tgl
+    
+    def status_manop_pelunasan(self):
+        sts = 1
+        for p in self.pelunasan_set.all():
+            try:
+                sts = p.status
+            except:
+                pass
+        return sts
+
+    def lunas_denda_all(self):
+        if self.jenis_transaksi == u'1':
+            return  self.lunas_denda()
+        else:
+            return self.lunas_denda_kendaraan()  
+
+    def lunas_jasa_all(self):
+        if self.jenis_transaksi == u'1':
+            return  self.lunas_jasa()
+        else:
+            return self.lunas_bea_jasa_kendaraan()  
+
+    def lunas_denda(self):
+        dp = 0
+        for p in self.pelunasan_set.all():
+            try:
+                dp = p.denda
+            except:
+                pass
+        return dp
+
+    def lunas_jasa(self):
+        bsp = 0
+        for p in self.pelunasan_set.all():
+            try:
+                bsp = p.bea_jasa
+            except:
+                pass
+        return bsp
+
+    def lunas_denda_kendaraan(self):
+        dp = 0
+        for p in self.pelunasan_set.all():
+            try:
+                dp = p.denda_kendaraan
+            except:
+                pass
+        return dp
+
+    def lunas_bea_jasa_kendaraan(self):
+        bsp = 0
+        for p in self.pelunasan_set.all():
+            try:
+                bsp = p.bea_jasa_kendaraan
+            except:
+                pass
+        return bsp
+        
+    def nilai_pelunasan(self):
+        bsp = 0
+        for p in self.pelunasan_set.all():
+            try:
+                bsp = p.nilai
+            except:
+                pass
+        return bsp  
+
+    #def kondisi_pelunasan(self):
+        #nsb = self.agnasabah.id
+          
+####barang lelang
+    def tgllelang(self):
+        for p in self.baranglelang_set.all():
+            try:
+                pn = p.tgl_lelang
+            except:
+                pass
+            return pn
+
+    def hargalelang(self):
+        for p in self.baranglelang_set.all():
+            try:
+                pn = p.harga_jual
+            except:
+                pass
+            return pn
+
+    def namalelang(self):
+        for p in self.baranglelang_set.all():
+            try:
+                pn = p.nama_pembeli
+            except:
+                pass
+            return pn
+
+    def nilai_lelang(self):
+        nilaix = self.hargalelang() - self.nilai
+        if nilaix > 0:
+           return nilaix
+        else:
+           return 0
+   
+    def rugi_lelang(self):
+        nilaix = self.hargalelang() - self.nilai
+        if nilaix < 0:
+           return nilaix
+        else:
+           return 0
+    ###piutang
+    def piutang(self):
+        return self.nilai
+
+KELOMPOK_BARANG = (
+    ('1','HP'),
+    ('2','LAPTOP/NB'),
+    ('3','KAMERA'),
+    ('4','PS'),
+    ('5','TV LCD'),
+    ('6','MOTOR'),
+    ('7','MOBIL'),
+)
+
+
+class BerkasGadai(models.Model):
+    upload = models.ForeignKey('AkadGadai')
+    tanda_tangan = models.FileField(upload_to="media/berkasttd/")
+    foto_nasabah = models.FileField(upload_to="media/berkasfoto/")
+    berkas_barang = models.FileField(upload_to="media/barang/")
+    
+    def filename(self):
+        return os.path.basename(self.tanda_tangan.name)
+
+    def get_absolute_url(self):
+        return "/"
+
+    class Meta:
+        db_table = "berkasgadai"
+        verbose_name = 'BerkasGadai'
+        ordering = ['-id']
+
+
+STATUS_HILANG = (
+    ('1','LAPUR'),
+)
+
+class Hilang(models.Model):
+    aghilang = models.ForeignKey(AkadGadai)
+    tanggal = models.DateField(null=True)    
+    status = models.CharField(max_length=7,choices=STATUS_HILANG)
+    cu = models.ForeignKey(User, related_name='c_hilang', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_hilang', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'hilang'
+        verbose_name = 'Hilang'
+
+STATUS_LAIN_LAIN = (
+    ('1','LAIN LAIN'),
+)
+
+class Lainlain(models.Model):
+    aglain = models.ForeignKey(AkadGadai)
+    tanggal = models.DateField(null=True)    
+    status = models.CharField(max_length=7,choices=STATUS_LAIN_LAIN)
+    cu = models.ForeignKey(User, related_name='c_lain_lain', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_lain_lain', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'lainlain'
+        verbose_name = 'Lainlain'
+        verbose_name_plural = verbose_name
+
+
+STATUS_LUNAS = (
+    ('1','LUNAS TERJUAL'),
+)
+
+class LunasTerjual(models.Model):
+    aglunas = models.ForeignKey(AkadGadai)
+    tanggal = models.DateField(null=True)    
+    status = models.CharField(max_length=7,choices=STATUS_LUNAS)
+    cu = models.ForeignKey(User, related_name='c_lunasterjual', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_lunasterjual', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'lunasterjual'
+        verbose_name = 'LunasTerjual'
+        verbose_name_plural = verbose_name
+        
+    #def __unicode__(self):
+        #return self.aglunas
+        
+STATUS_LAPUR = (
+    ('1','LAPUR'),
+)
+
+class Lapur(models.Model):
+    aglapur = models.ForeignKey(AkadGadai)
+    tanggal = models.DateField(null=True)    
+    status = models.CharField(max_length=7,choices=STATUS_LAPUR)
+    cu = models.ForeignKey(User, related_name='c_lapur', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_lapur', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'lapur'
+        verbose_name = 'Lapur'
+
+
+
+class BiayaManager(models.Manager):
+    pass
+
+    def for_user(self, user):
+        try:
+            biaya = user.get_profile().gerai
+            geraigadai_list = self.all().filter(id__exact=gerai.id) | gerai.geraigadai_set.all()
+        except:
+            geraigadai_list = None
+        return geraigadai_list
+
+
+class Biaya(models.Model):
+    gerai = models.ForeignKey('Tbl_Cabang',null=True)
+    tanggal = models.DateField(help_text="Tahun-bl-tg", null=True)
+    saldo_awal = models.FloatField(default=0)
+    saldo_akhir =  models.FloatField(default=0)
+    antar_gerai= models.CharField(max_length=20 , null=True, blank=True)
+    antar_gerai_kembali= models.CharField(max_length=20 , null=True, blank=True)
+    
+    penerimaan_saldo = models.FloatField(default=0)
+    pendapatan_lain =  models.FloatField(default=0)
+    ket_pendapatan_lain= models.CharField(max_length=50 , null=True, blank=True)
+    
+    listrik = models.FloatField(default=0)
+    ket_listrik= models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_listrik = models.CharField(max_length=2 , null=True, blank=True)
+    
+    pdam = models.FloatField(default=0)
+    ket_pdam= models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_pdam = models.CharField(max_length=2 , null=True, blank=True)
+    
+    telpon = models.FloatField(default=0)
+    ket_telpon= models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_telepon = models.CharField(max_length=2 , null=True, blank=True)
+    
+    foto_copy = models.FloatField(null=True,blank=True,default=0)
+    ket_foto_copy= models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_foto_copy = models.CharField(max_length=2 , null=True, blank=True)
+    
+    majalah = models.FloatField(default=0)
+    ket_majalah= models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_majalah = models.CharField(max_length=2 , null=True, blank=True)
+    
+    
+    palkir = models.FloatField(default=0)
+    ket_palkir= models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_palkir = models.CharField(max_length=2 , null=True, blank=True)
+    
+    bbm = models.FloatField(default=0)   
+    ket_bbm= models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_bbm = models.CharField(max_length=2 , null=True, blank=True)
+    
+    #pulsa = models.FloatField(default=0)
+    #ket_pulsa= models.CharField(max_length=50 , null=True, blank=True)
+    #jenis_transaksi_pulsa = models.CharField(max_length=2 , null=True, blank=True)
+    
+    materai = models.FloatField(default=0)
+    ket_materai= models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_materai = models.CharField(max_length=2 , null=True, blank=True)
+    
+    pemb_lingkungan = models.FloatField(default=0)
+    ket_pemb_lingkungan = models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_pemb_lingkungan = models.CharField(max_length=2 , null=True, blank=True)
+    
+    sumbangan= models.FloatField(default=0)
+    ket_sumbangan = models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_sumbangan = models.CharField(max_length=2 , null=True, blank=True)
+    
+    perlengkapan = models.FloatField(default=0)
+    ket_perlengkapan = models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_perlengkapan = models.CharField(max_length=2 , null=True, blank=True)
+    
+    konsumsi = models.FloatField(default=0)
+    ket_konsumsi = models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_konsumsi = models.CharField(max_length=2 , null=True, blank=True)
+    
+    nilai_lain_lain = models.FloatField(default=0)
+    ket_lain_lain= models.CharField(max_length=50 , null=True, blank=True)
+    jenis_transaksi_nilai_lain_lain = models.CharField(max_length=2 , null=True, blank=True)
+    
+    ket_penambahan_uk= models.CharField(max_length=50 , null=True, blank=True)
+    ket_penambahan_saldo= models.CharField(max_length=50 , null=True, blank=True)
+    lain_lain= models.CharField(max_length=50 , null=True, blank=True)
+    pengembalian_uk = models.FloatField(default=0)
+    ket_pengembalian_uk = models.CharField(max_length=50 , null=True, blank=True)
+    penambahan_uk = models.FloatField(default=0)
+    pengembalian_saldo = models.FloatField(default=0)
+    penambahan_saldo = models.FloatField(default=0)
+    ket_pengembalian_saldo= models.CharField(max_length=50 , null=True, blank=True)
+    
+    js_trans = models.CharField(max_length=20 , null=True, blank=True)
+    js_trans_kembali = models.CharField(max_length=20 , null=True, blank=True)
+    
+    class Meta:
+        db_table="biaya"
+        verbose_name="Biaya"
+        verbose_name_plural = verbose_name
+        ordering = ['-tanggal']        
+
+    def get_absolute_url(self):
+        return "/biaya/"
+
+
+    def _get_totalbiaya(self):
+        try:
+            ret= self.listrik+ self.pdam+ self.telpon+self.foto_copy+self.majalah+self.iuran_keamanan+self.iuran_kebersihan+self.promosi+self.air_minum+self.sewa_gedung_gerai
+            return ret
+        except:
+            return 0
+    jumlahbiaya = property(_get_totalbiaya)
+
+    def _get_totalpos(self):
+        try:
+            ret= self.prangko+ self.surat_kilat_khusus+ self.paket_pos_standar+self.paket_kilat_khusus+self.pos_express+self.ems+self.materai
+            return ret
+        except:
+            return 0
+    jumlahpospay = property(_get_totalpos)
+
+    def _get_totalkas_gerai(self):
+        try:
+            ret= self.tunai + self.dari_gerai + self.bank
+            return ret
+        except:
+            return 0
+    jumlahkasgerai = property(_get_totalkas_gerai)
+
+    def _get_totalkas_setoran(self):
+        try:
+            ret= self.setoran_bank + self.ke_gerai + self.tunai_pickup
+            return ret
+        except:
+            return 0
+    jumlahkassetoran = property(_get_totalkas_setoran)
+
+class Taksir(models.Model):
+    type = models.CharField(max_length=50)
+    spesifikasi = models.CharField(max_length=350, null=True, blank=True)
+    harga_baru = models.FloatField()
+    harga_pasar = models.FloatField()
+    maxpinjaman = models.FloatField()
+    tglupdate = models.DateField()
+    
+    class Meta:
+        db_table="taksir"
+        verbose_name="Taksir"
+        verbose_name_plural = verbose_name
+        ordering = ['-type']
+
+    def __unicode__(self):
+        return "%s-%s" %(self.type,self.maxpinjaman)
+
+    def get_absolute_url(self):
+        return "/taksir/%s/show/" % self.id
+
+    def kobar(self):
+        return "%s" % (str(self.id).zfill(4))
+
+
+STATUS_MANOP = (
+    ('1','CAIR'),
+    ('2','TOLAK'),
+)
+class ManopGadai(models.Model):
+    manop = models.OneToOneField('AkadGadai',null=True, blank=True)
+    pelunasan = models.OneToOneField('Pelunasan',null=True, blank=True)
+    status = models.CharField(max_length=1, choices=STATUS_MANOP)
+    tanggal = models.DateField()
+    cu = models.ForeignKey(User, related_name='c_manopgadai', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_manopgadai', editable=False, null=True, blank=True)
+    note = models.CharField(max_length=200, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'manopGadai'
+        verbose_name = 'ManopGadai'
+        verbose_name_plural = verbose_name
+
+##firman##
+class BarangLelang(models.Model):
+    aglelang =models.ForeignKey(AkadGadai)
+    tgl_lelang = models.DateField(null = True)
+    harga_jual = models.FloatField()
+    nama_pembeli = models.CharField(max_length=70, blank = True, null=True)
+    no_identitas = models. CharField( max_length= 20, null=True)
+    alamat_pembeli = models.CharField(max_length=120,null=True, blank=True)
+    no_telp = models.CharField(max_length=70, blank = True, null=True)    
+    class Meta:
+        db_table="lelang"
+        verbose_name="Lelang"
+        verbose_name_plural = verbose_name
+        
+STATUS_AKUN =(
+    ('0','Tidak Aktif'),
+    ('1','Aktif'),
+)
+
+JENIS_AKUN =(
+    ('A','AKTIFA'),
+    ('P','PASSIVA'),
+    ('L','RUGI DAN LABA')
+)
+
+VIEW_UNIT_AKUN =(
+    ('0','SEMUA'),
+    ('000','PASSIVA'),
+    ('L','RUGI DAN LABA')
+)
+
+#class Tbl_AkunManager(models.Manager):     
+
+class Tbl_Akun(models.Model):
+    no_urut = models.IntegerField(null=True, blank=True, editable=False)
+    kode_guna = models.CharField(max_length=15)
+    header_parent = models.ForeignKey('self', null=True, blank=True)
+    coa = models.CharField(max_length=15, unique=True)
+    deskripsi = models.CharField(max_length=75)
+    saldo_mf = models.DecimalField(null=True, blank=True, max_digits =11,decimal_places = 2)
+    saldo_krs = models.DecimalField(null=True, blank=True,max_digits =11,decimal_places = 2)
+    saldo_pjb = models.DecimalField(null=True, blank=True,max_digits =18,decimal_places = 2)
+
+    status = models.CharField(max_length=10, choices=STATUS_AKUN)
+    jenis = models.CharField(max_length=10, choices=JENIS_AKUN)
+    view_unit = models.CharField(max_length=10)
+    kode_cabang = models.CharField(max_length=2,null=True,blank=True)
+    view_cabang = models.CharField(max_length=10)
+    tanggal = models.DateField(null=True, blank=True)
+    saldo_akhir_pjb = models.DecimalField(null=True, blank=True,max_digits =11,decimal_places = 2)
+    #objects = Tbl_AkunManager()        
+
+    class Meta:
+        db_table = "tbl_akun"
+
+    ######GABUNGAN    
+    def my_debet_gabung(self, id_cabang, start_date, end_date):
+        ret = 0
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.debet for p in cucu.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                    for cicit in cucu.children():
+                        ret += sum([p.debet for p in cicit.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret    
+        #elif self.coa[2:] == '.00.00':
+        elif self.coa == '11.00.00' or self.coa == '12.00.00' or self.coa == '13.00.00' or self.coa == '21.00.00' or self.coa == '22.00.00' or self.coa == '23.00.00' or\
+            self.coa == '31.00.00' or self.coa == '32.00.00' or self.coa == '33.00.00' or self.coa == '34.00.00' or self.coa == '35.00.00' or  self.coa == '41.00.00' or \
+            self.coa == '51.00.00'or self.coa == '61.00.00':
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.debet for p in cucu.tbl_transaksi_set.filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+            return ret
+        #elif self.coa[5:] == '.00':
+        elif self.coa == '11.01.00' or self.coa == '11.05.00' or self.coa == '11.06.00' or self.coa == '11.07.00' or self.coa == '11.08.00' or self.coa == '11.09.00' or \
+            self.coa == '11.10.00' or self.coa == '11.11.00' or self.coa == '11.12.00' or self.coa == '11.13.00' or self.coa == '12.01.00' or self.coa == '12.02.00' or \
+            self.coa == '12.03.00' or self.coa == '13.01.00' or self.coa == '13.02.00' or self.coa == '13.03 .00' or self.coa == '13.04.00' or self.coa == '13.05.00' or \
+            self.coa == '13.06.00' or self.coa == '21.01.00' or self.coa == '21.02.00' or self.coa == '21.03.00' or self.coa == '21.04.00' or self.coa == '21.05.00' or\
+            self.coa == '21.06.00' or self.coa == '21.07.00' or self.coa == '21.08.00' or self.coa == '21.09.00' or self.coa == '21.10.00' or self.coa == '22.03.00' or \
+            self.coa == '22.04.00' or self.coa == '22.05.00' or self.coa == '22.06.00' or self.coa == '23.01.00' or self.coa == '23.02.00' or self.coa == '41.01.00' or \
+            self.coa == '41.02.00' or self.coa == '41.03.00' or self.coa == '51.01.00' or self.coa == '51.02.00' or self.coa == '51.03.00' or self.coa == '51.04.00' or \
+            self.coa == '51.05.00' or self.coa == '51.06.00' or self.coa == '51.07.00' or self.coa == '51.08.00' or self.coa == '51.09.00' or self.coa == '51.10.00' or \
+            self.coa == '51.11.00':
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret
+        else:
+            return sum([p.debet for p in self.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+
+      
+    def my_kredit_gabung(self, id_cabang, start_date, end_date):
+        ret = 0
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.kredit for p in cucu.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                    for cicit in cucu.children():
+                        ret += sum([p.kredit for p in cicit.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret    
+        #elif self.coa[2:] == '.00.00':
+        elif self.coa == '11.00.00' or self.coa == '12.00.00' or self.coa == '13.00.00' or self.coa == '21.00.00' or self.coa == '22.00.00' or self.coa == '23.00.00' or\
+            self.coa == '31.00.00' or self.coa == '32.00.00' or self.coa == '33.00.00' or self.coa == '34.00.00' or self.coa == '35.00.00' or  self.coa == '41.00.00' or \
+            self.coa == '51.00.00'or self.coa == '61.00.00':
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.kredit for p in cucu.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret
+        #elif self.coa[5:] == '.00':
+        elif self.coa == '11.01.00' or self.coa == '11.05.00' or self.coa == '11.06.00' or self.coa == '11.07.00' or self.coa == '11.08.00' or self.coa == '11.09.00' or \
+            self.coa == '11.10.00' or self.coa == '11.11.00' or self.coa == '11.12.00' or self.coa == '11.13.00' or self.coa == '12.01.00' or self.coa == '12.02.00' or \
+            self.coa == '12.03.00' or self.coa == '13.01.00' or self.coa == '13.02.00' or self.coa == '13.03 .00' or self.coa == '13.04.00' or self.coa == '13.05.00' or \
+            self.coa == '13.06.00' or self.coa == '21.01.00' or self.coa == '21.02.00' or self.coa == '21.03.00' or self.coa == '21.04.00' or self.coa == '21.05.00' or\
+            self.coa == '21.06.00' or self.coa == '21.07.00' or self.coa == '21.08.00' or self.coa == '21.09.00' or self.coa == '21.10.00' or self.coa == '22.03.00' or \
+            self.coa == '22.04.00' or self.coa == '22.05.00' or self.coa == '22.06.00' or self.coa == '23.01.00' or self.coa == '23.02.00' or self.coa == '41.01.00' or \
+            self.coa == '41.02.00' or self.coa == '41.03.00' or self.coa == '51.01.00' or self.coa == '51.02.00' or self.coa == '51.03.00' or self.coa == '51.04.00' or \
+            self.coa == '51.05.00' or self.coa == '51.06.00' or self.coa == '51.07.00' or self.coa == '51.08.00' or self.coa == '51.09.00' or self.coa == '51.10.00' or \
+            self.coa == '51.11.00':
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret        
+        else:            
+            return sum([p.kredit for p in self.tbl_transaksi_set.filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+    
+    def view_saldo_akhir_gabung(self,id_cabang, start_date, end_date):
+        if self.coa[0:2] == str(20) or self.coa[0:2] == str(21) or self.coa[0:2] == str(22) or self.coa[0:2] == str(23) or self.coa[0:2] == str(30) or \
+            self.coa[0:2] == str(31) or self.coa[0:2] == str(32) or self.coa[0:2] == str(33) or self.coa[0:2] == str(34) or self.coa[0:2] == str(35) or \
+            self.coa[0:2] == str(40) or self.coa[0:2] == str(41) or self.coa[0:2] == str(60) or self.coa[0:2] == str(61):
+            return (self.saldo_pjb + (self.my_kredit_gabung(id_cabang,start_date,end_date)) - self.my_debet_gabung(id_cabang,start_date,end_date))
+        else:
+            return (self.saldo_pjb + self.my_debet_gabung(id_cabang,start_date,end_date)) - (self.my_kredit_gabung(id_cabang,start_date,end_date))
+    
+    ######GABUNGAN  
+    
+    def __unicode__(self):
+        return "%s-%s" % (self.coa,self.deskripsi)
+    
+    def tes_coa(self):
+        tes = self.coa[-2:]
+        return tes
+    
+    def children(self):
+        return self.tbl_akun_set.all()
+    
+    def is_child(self):
+        return self.tbl_akun_set.all().count() == 0
+    
+    def is_akun(self):
+        return self.header_parent == None
+    
+    def my_debet_all(self):
+        ret = 0
+        if self.coa[5:] == '.00':
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(id_unit = 300)])
+            return ret
+        else:
+            return sum([p.debet for p in self.tbl_transaksi_set.filter(id_unit = 300)])
+        
+    def my_kredit_all(self):
+        ret = 0
+        if self.coa[5:] == '.00':
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_unit = 300)])
+            return ret        
+        else:            
+            return sum([p.kredit for p in self.tbl_transaksi_set.filter(id_unit = 300)])
+
+
+    
+    def my_debet_month(self, id_cabang, month, year):
+        ret = 0
+        if self.coa[1:] == '0.00.00':
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+                for cucu in anak.children():
+                    ret += sum([p.debet for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+                    for cicit in cucu.children():
+                        ret += sum([p.debet for p in cicit.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+            return ret    
+        elif self.coa[2:] == '.00.00':
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+                for cucu in anak.children():
+                    ret += sum([p.debet for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+            return ret
+        elif self.coa[5:] == '.00':
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+            return ret
+        else:
+            return ret
+        
+    def my_kredit_month(self, id_cabang, month, year):
+        ret = 0
+        if self.coa[1:] == '0.00.00':
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+                for cucu in anak.children():
+                    ret += sum([p.kredit for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+                    for cicit in cucu.children():
+                        ret += sum([p.kredit for p in cicit.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+            return ret    
+        elif self.coa[2:] == '.00.00':
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+                for cucu in anak.children():
+                    ret += sum([p.kredit for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+            return ret
+        elif self.coa[5:] == '.00':
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__month=month).filter(tgl_trans__year=year)])
+            return ret        
+        else:            
+            return ret
+
+    
+    def my_debet(self, id_cabang, start_date, end_date):
+        ret = 0
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.debet for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                    for cicit in cucu.children():
+                        ret += sum([p.debet for p in cicit.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret    
+        #elif self.coa[2:] == '.00.00':
+        elif self.coa == '11.00.00' or self.coa == '12.00.00' or self.coa == '13.00.00' or self.coa == '21.00.00' or self.coa == '22.00.00' or self.coa == '23.00.00' or\
+            self.coa == '31.00.00' or self.coa == '32.00.00' or self.coa == '33.00.00' or self.coa == '34.00.00' or self.coa == '35.00.00' or  self.coa == '41.00.00' or \
+            self.coa == '51.00.00'or self.coa == '61.00.00':
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.debet for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+            return ret
+        #elif self.coa[5:] == '.00':
+        elif self.coa == '11.01.00' or self.coa == '11.05.00' or self.coa == '11.06.00' or self.coa == '11.07.00' or self.coa == '11.08.00' or self.coa == '11.09.00' or \
+            self.coa == '11.10.00' or self.coa == '11.11.00' or self.coa == '11.12.00' or self.coa == '11.13.00' or self.coa == '12.01.00' or self.coa == '12.02.00' or \
+            self.coa == '12.03.00' or self.coa == '13.01.00' or self.coa == '13.02.00' or self.coa == '13.03 .00' or self.coa == '13.04.00' or self.coa == '13.05.00' or \
+            self.coa == '13.06.00' or self.coa == '21.01.00' or self.coa == '21.02.00' or self.coa == '21.03.00' or self.coa == '21.04.00' or self.coa == '21.05.00' or\
+            self.coa == '21.06.00' or self.coa == '21.07.00' or self.coa == '21.08.00' or self.coa == '21.09.00' or self.coa == '21.10.00' or self.coa == '22.03.00' or \
+            self.coa == '22.04.00' or self.coa == '22.05.00' or self.coa == '22.06.00' or self.coa == '23.01.00' or self.coa == '23.02.00' or self.coa == '41.01.00' or \
+            self.coa == '41.02.00' or self.coa == '41.03.00' or self.coa == '51.01.00' or self.coa == '51.02.00' or self.coa == '51.03.00' or self.coa == '51.04.00' or \
+            self.coa == '51.05.00' or self.coa == '51.06.00' or self.coa == '51.07.00' or self.coa == '51.08.00' or self.coa == '51.09.00' or self.coa == '51.10.00' or \
+            self.coa == '51.11.00' or self.coa == '41.04.00':
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret
+        else:
+            return sum([p.debet for p in self.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+
+      
+    def my_kredit(self, id_cabang, start_date, end_date):
+        ret = 0
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.kredit for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                    for cicit in cucu.children():
+                        ret += sum([p.kredit for p in cicit.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret    
+        #elif self.coa[2:] == '.00.00':
+        elif self.coa == '11.00.00' or self.coa == '12.00.00' or self.coa == '13.00.00' or self.coa == '21.00.00' or self.coa == '22.00.00' or self.coa == '23.00.00' or\
+            self.coa == '31.00.00' or self.coa == '32.00.00' or self.coa == '33.00.00' or self.coa == '34.00.00' or self.coa == '35.00.00' or  self.coa == '41.00.00' or \
+            self.coa == '51.00.00'or self.coa == '61.00.00':
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.kredit for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret
+        #elif self.coa[5:] == '.00':
+        elif self.coa == '11.01.00' or self.coa == '11.05.00' or self.coa == '11.06.00' or self.coa == '11.07.00' or self.coa == '11.08.00' or self.coa == '11.09.00' or \
+            self.coa == '11.10.00' or self.coa == '11.11.00' or self.coa == '11.12.00' or self.coa == '11.13.00' or self.coa == '12.01.00' or self.coa == '12.02.00' or \
+            self.coa == '12.03.00' or self.coa == '13.01.00' or self.coa == '13.02.00' or self.coa == '13.03 .00' or self.coa == '13.04.00' or self.coa == '13.05.00' or \
+            self.coa == '13.06.00' or self.coa == '21.01.00' or self.coa == '21.02.00' or self.coa == '21.03.00' or self.coa == '21.04.00' or self.coa == '21.05.00' or\
+            self.coa == '21.06.00' or self.coa == '21.07.00' or self.coa == '21.08.00' or self.coa == '21.09.00' or self.coa == '21.10.00' or self.coa == '22.03.00' or \
+            self.coa == '22.04.00' or self.coa == '22.05.00' or self.coa == '22.06.00' or self.coa == '23.01.00' or self.coa == '23.02.00' or self.coa == '41.01.00' or \
+            self.coa == '41.02.00' or self.coa == '41.03.00' or self.coa == '51.01.00' or self.coa == '51.02.00' or self.coa == '51.03.00' or self.coa == '51.04.00' or \
+            self.coa == '51.05.00' or self.coa == '51.06.00' or self.coa == '51.07.00' or self.coa == '51.08.00' or self.coa == '51.09.00' or self.coa == '51.10.00' or \
+            self.coa == '51.11.00' or self.coa == '41.04.00':
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret        
+        else:            
+            return sum([p.kredit for p in self.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+
+    def hitung_saldo_akhir_cc(self, id_cabang, start_date, end_date):
+        nilai_debet = sum([p.debet for p in self.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+        nilai_kredit = sum([p.kredit for p in self.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+        total_nilai = nilai_debet -nilai_kredit 
+        return total_nilai
+
+    def hitung_saldo_akhir(self, id_cabang, start_date, end_date):
+        ret = 0        
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                total_nilai = nilai_debet - nilai_kredit
+                ret += total_nilai
+                for cucu in anak.children():
+                    nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                    nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                    total_nilai = nilai_debet -nilai_kredit
+                    ret += total_nilai
+                    for cicit in cucu.children():
+                        ret += total_nilai
+            return ret    
+        elif self.coa[2:] == '.00.00':
+            for anak in self.children():
+                nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                total_nilai = nilai_debet -nilai_kredit
+                ret += total_nilai
+                for cucu in anak.children():
+                    nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                    nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                    total_nilai = nilai_debet -nilai_kredit
+                    ret += total_nilai
+            return ret
+        elif self.coa[5:] == '.00':
+            for anak in self.children():
+                nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                total_nilai = nilai_debet -nilai_kredit
+                ret += total_nilai
+            return ret
+        else:
+            nilai_debet = sum([p.debet for p in self.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+            nilai_kredit = sum([p.kredit for p in self.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(id_unit=300).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+            total_nilai = nilai_debet -nilai_kredit            
+            return total_nilai
+        
+    def hitung_saldo_akhir_bln(self, id_cabang, month, year):
+        ret = 0        
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                total_nilai = nilai_debet - nilai_kredit
+                ret += total_nilai
+                for cucu in anak.children():
+                    nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                    nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                    total_nilai = nilai_debet -nilai_kredit
+                    ret += total_nilai
+                    for cicit in cucu.children():
+                        ret += total_nilai
+            return ret    
+        elif self.coa[2:] == '.00.00':
+            for anak in self.children():
+                nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                total_nilai = nilai_debet -nilai_kredit
+                ret += total_nilai
+                for cucu in anak.children():
+                    nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                    nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                    total_nilai = nilai_debet -nilai_kredit
+                    ret += total_nilai
+            return ret
+        elif self.coa[5:] == '.00':
+            for anak in self.children():
+                nilai_debet = sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                nilai_kredit = sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+                total_nilai = nilai_debet -nilai_kredit
+                ret += total_nilai
+            return ret
+        else:
+            nilai_debet = sum([p.debet for p in self.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+            nilai_kredit = sum([p.kredit for p in self.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '2').filter(tgl_trans__range=(start_date,end_date))])
+            total_nilai = nilai_debet -nilai_kredit            
+            return total_nilai
+
+    def total_kredit_nenek(self, id_cabang, start_date, end_date):
+        ret = 0
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.kredit for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(tgl_trans__range=(start_date,end_date))])
+                    for cicit in cucu.children():
+                        ret += sum([p.kredit for p in cicit.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(tgl_trans__range=(start_date,end_date))])
+            return ret
+        else:            
+            return ret
+        
+    def total_debet_nenek(self, id_cabang, start_date, end_date):
+        ret = 0
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.debet for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+                    for cicit in cucu.children():
+                        ret += sum([p.debet for p in cicit.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(id_unit=300).filter(tgl_trans__range=(start_date,end_date))])
+            return ret    
+        else:            
+            return ret
+        
+    def selisih_kredit_nenek(self, id_cabang, start_date, end_date):
+        ret = 0
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                ret += sum([p.kredit for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.kredit for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(tgl_trans__range=(start_date,end_date))])
+                    for cicit in cucu.children():
+                        ret += sum([p.kredit for p in cicit.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(tgl_trans__range=(start_date,end_date))])
+            return ret
+        else:            
+            return ret
+        
+    def selisih_debet_nenek(self, id_cabang, start_date, end_date):
+        ret = 0
+        #if self.coa[1:] == '0.00.00':
+        if self.header_parent == None:
+            for anak in self.children():
+                ret += sum([p.debet for p in anak.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(tgl_trans__range=(start_date,end_date))])
+                for cucu in anak.children():
+                    ret += sum([p.debet for p in cucu.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(tgl_trans__range=(start_date,end_date))])
+                    for cicit in cucu.children():
+                        ret += sum([p.debet for p in cicit.tbl_transaksi_set.filter(id_cabang=id_cabang).filter(status_jurnal= '1').filter(tgl_trans__range=(start_date,end_date))])
+            return ret    
+        else:            
+            return ret
+        
+    #def view_saldo_akhir(self,id_cabang, start_date, end_date):
+        #return (self.saldo_pjb + self.my_debet(id_cabang,start_date,end_date)) - (self.my_kredit(id_cabang,start_date,end_date)) 
+
+    def view_saldo_akhir(self,id_cabang, start_date, end_date):
+        if self.coa[0:2] == str(20) or self.coa[0:2] == str(21) or self.coa[0:2] == str(22) or self.coa[0:2] == str(23) or self.coa[0:2] == str(30) or \
+            self.coa[0:2] == str(31) or self.coa[0:2] == str(32) or self.coa[0:2] == str(33) or self.coa[0:2] == str(34) or self.coa[0:2] == str(35) or \
+            self.coa[0:2] == str(40) or self.coa[0:2] == str(41) or self.coa[0:2] == str(60) or self.coa[0:2] == str(61):
+            return (self.saldo_pjb + (self.my_kredit(id_cabang,start_date,end_date)) - self.my_debet(id_cabang,start_date,end_date))
+        else:
+            return (self.saldo_pjb + self.my_debet(id_cabang,start_date,end_date)) - (self.my_kredit(id_cabang,start_date,end_date))
+   
+    def get_jumlah_debet(self):        
+        pk = self.tbl_transaksi_set.all()
+        return sum([ a.debet for a in pk ])
+    
+    def get_jumlah_kredit(self):
+        pk = self.tbl_transaksi_set.all() 
+        return sum([ a.kredit for a in pk ])
+    
+    
+    def kpl_coa(self):
+        for p in self.tbl_transaksi_set.all():
+            try:
+                pn = p.id_unit 
+            except:
+                pass
+            return pn
+        
+    def debet_satu(self):
+        for p in self.tbl_transaksi_set.all():
+            try:
+                pn = p.debet
+            except:
+                pass
+            return pn
+        
+    def kredit_dua(self):
+        for p in self.tbl_transaksi_set.all():
+            try:
+                pn = p.kredit
+            except:
+                pass
+            return pn   
+
+
+
+
+JENIS_JURNAL = (
+   ('1','GL-GL'),
+   ('2','SALDO AWAL'),
+   ('3','SALDO YANG DI KIRIM'),
+)
+
+class Jurnal_History(models.Model):
+    def number():
+        kode = 100000000
+        no = Jurnal_History.objects.all().count()
+        if no == None:
+            return 1
+        else:
+            return no + 1 + kode
+        
+    diskripsi = models.CharField(max_length=200, blank=True, null=True)
+    no_akad = models.IntegerField(default=number,blank=True, null=True)
+    tgl_trans = models.DateField()
+    object_id = models.IntegerField(max_length=11,blank =True,null=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+    
+    def __unicode__(self):
+        return '%s' % (self.id)
+    
+    class Meta:
+        db_table = "jurnal_history"
+        
+    def nobukti_sama(self):
+        sama = Jurnal.objects.values('nobukti').order_by()
+        return sama
+    
+        
+class Tbl_Transaksi_History(models.Model):
+    id_coa = models.ForeignKey(Tbl_Akun,null =True,blank=True,related_name='orders')
+    jurnal_h = models.ForeignKey(Jurnal_History, related_name='ordered_items')
+    no_trans = models.IntegerField(max_length=6, null=True, blank=True)
+    jenis = models.CharField(max_length=35)
+    debet = models.IntegerField(max_length=11)
+    kredit = models.IntegerField(max_length=11)
+    id_cabang = models.IntegerField(max_length=3)
+    id_unit = models.IntegerField(max_length=3)
+    id_product  = models.IntegerField(max_length=1)
+    status_jurnal = models.IntegerField(max_length=1)
+    user = models.ForeignKey(User, related_name='c_tbl_transaksi_h', editable=False, null=True, blank=True)
+    tgl_trans = models.DateField()
+    status_posting = models.IntegerField(max_length=1,blank=True,null=True)
+    
+    
+    class Meta:
+        db_table = "tbl_transaksi_history"        
+
+    def get_absolute_url(self):
+        return "/jurnal/add_baru_h/" 
+
+        
+class Jurnal(models.Model):
+    def number():
+        kode = 1000000
+        no = Jurnal.objects.all().count()
+        if no == None:
+            return 1
+        else:
+            return no + 1 + kode
+    nobukti= models.CharField(max_length=35,blank=True, null=True)
+    no_akad = models.IntegerField(default=number,blank=True, null=True) 
+    object_id = models.IntegerField(max_length=11,blank =True,null=True)        
+    diskripsi = models.CharField(max_length=200, blank=True, null=True)
+    tgl_trans = models.DateField()
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+    cu = models.ForeignKey(User, related_name='jurnal_creator', null=True)
+    mu = models.ForeignKey(User, related_name='jurnal_modifier', null=True)
+
+    def __unicode__(self):
+        return '%s' % (self.id)
+    
+    class Meta:
+        db_table = "jurnal"
+        
+    def nobukti_sama(self):
+        sama = Jurnal.objects.values('nobukti').order_by()
+        return sama
+    
+        
+class Tbl_Transaksi(models.Model):
+    id_coa = models.ForeignKey(Tbl_Akun,null =True,blank=True)
+    jurnal = models.ForeignKey(Jurnal)
+    no_trans = models.IntegerField(max_length=6, null=True, blank=True)
+    jenis = models.CharField(max_length=60)
+    debet = models.IntegerField(max_length=11)
+    kredit = models.IntegerField(max_length=11)
+    id_cabang = models.IntegerField(max_length=3)
+    id_unit = models.IntegerField(max_length=3)
+    id_product  = models.IntegerField(max_length=1)
+    status_jurnal = models.IntegerField(max_length=1)
+    user = models.ForeignKey(User, related_name='c_tbl_transaksi', editable=False, null=True, blank=True)
+    tgl_trans = models.DateField()
+    status_posting = models.IntegerField(max_length=1,blank=True,null=True)
+    deskripsi = models.CharField(max_length=200, blank=True, null=True)
+
+    
+    class Meta:
+        db_table = "tbl_transaksi"        
+    
+    def __unicode__(self):
+        return '%s-%s' % ((self.id),(self.jurnal))
+
+    def gl_validasi(self):
+        return "KGL %s %s %s %s %s %s" % ((self.jurnal.nobukti),self.id_coa.coa,self.kredit,self.id_coa.coa,self.tgl_trans,self.id_cabang)
+
+    def gabung_kode_coa(self):
+        return "%s.%s" % ((self.kepala_coa()),(self.id_coa.coa))
+
+    ### Transaksi Kasir
+    def total_pencairan_kasir_pembulatan(self, ):
+        tbl = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'Pencairan_kasir').filter(id_coa= 7L)
+        return sum ([a.debet for a in tbl])
+    
+    def total_pelunasan_kasir(self, ):
+        tbl = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'Pelunasan_kasir').filter(id_coa= 7L)
+        return sum ([a.debet for a in tbl])
+        
+    def kepala_coa(self):
+        kp_coa= self.id_unit + self.id_cabang
+        return kp_coa
+    
+    ###hitungan saldo
+    def hitung_saldo_akhir(self):
+        return self.id_coa.saldo_pjb #+ (self.debet - self.kredit)    
+
+    def get_jumlah_saldo_test(self):
+        total =0
+        for kp in self.jurnal.tbl_transaksi_set.all():
+            total += kp.debet() 
+        total = self.hitung_saldo_akhir() + (self.debet - self.kredit)
+        return total
+    ###hitungan saldo
+    
+    def get_jumlah_debet(self):
+        return self.debet + self.kredit
+    
+    def __unicode__(self):
+        return "%s" % (self.id_cabang)
+ 
+    def get_absolute_url_batal_jurnal(self):
+        return "/jurnal/add_baru/"
+   
+    def get_absolute_url(self):
+        return "/jurnal/%s/add/" % self.id_cabang
+
+    def get_absolute_url_staff(self):
+        return "/jurnal/%s/add_staff/" % self.id_cabang
+
+    def get_absolute_url_non(self):
+        return "/jurnal/%s/add_non_kas/" % self.id_cabang
+
+    def get_absolute_url_non_staff(self):
+        return "/jurnal/%s/add_staff_non_kas/" % self.id_cabang
+    
+    def get_absolute_url_biaya(self):
+        return "/biaya/%s/add/" % self.id_cabang
+
+    def get_absolute_url_biaya_keuangan(self):
+        return "/keuangan/%s/add/" % self.id_cabang
+    
+    def number_tampil(self):
+        return "%s.%s" % (self.kepala_coa(), self.id)
+    
+    def next_group(self):
+        ret = 'MANKEU'
+        if self.cekmankeu and (self.manopkeu.status == '1'):
+            return ret
+        #else:
+            #ret = 'MANKEU'
+        
+    
+    def cekmankeu(self):
+        try:
+            s = self.manopkeu
+            ret = s.status == '1'
+        except ManopKeu.DoesNotExist:
+            ret = False
+        return ret
+    
+STATUS_MANKEU = (
+    ('1','OK'),
+    ('2','TOLAK'),
+)       
+        
+class ManopKeu(models.Model):
+    manop = models.OneToOneField('Tbl_Transaksi',blank=True,null=True)
+    mankeu = models.OneToOneField('Tbl_Akun',blank=True,null=True)
+    status = models.CharField(max_length=1, choices=STATUS_MANKEU)
+    tanggal = models.DateField()
+    cu = models.ForeignKey(User, related_name='c_mankeu', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_mankeu', editable=False, null=True, blank=True)
+    note = models.CharField(max_length=200, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'manopkeu'
+        verbose_name = 'ManopKeu'
+        verbose_name_plural = verbose_name
+
+STATUS_KPLGERAI = (
+    ('1','OK'),
+    ('2','TOLAK'),
+)    
+class KplGerai(models.Model):
+    kpl_gerai = models.OneToOneField('Tbl_Transaksi',blank=True,null=True)
+    akun_kpl = models.OneToOneField('Tbl_Akun',blank=True,null=True)
+    status = models.CharField(max_length=1, choices=STATUS_KPLGERAI)
+    tanggal = models.DateField()
+    cu = models.ForeignKey(User, related_name='c_kplgerai', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_kplgerai', editable=False, null=True, blank=True)
+    note = models.CharField(max_length=200, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'kplgerai'
+        verbose_name = 'KplGerai'
+        verbose_name_plural = verbose_name
+        
+class KepalaGerai(models.Model):
+    kepala_gerai = models.OneToOneField('AkadGadai',blank=True,null=True)
+    status = models.CharField(max_length=1, choices=STATUS_KPLGERAI)
+    tanggal = models.DateField()
+    cu = models.ForeignKey(User, related_name='c_kepalagerai', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_kepalagerai', editable=False, null=True, blank=True)
+    note = models.CharField(max_length=200, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'kepalagerai'
+        verbose_name = 'KepalaGerai'
+        verbose_name_plural = verbose_name
+        
+class Wilayah(models.Model):
+    nama_admin = models.CharField(max_length=50,null=True)
+    alamat = models.CharField(max_length=255, blank=True, null=True)
+    no_telp = models.CharField(max_length=35, blank=True, null=True)
+    init_cabang = models.CharField(max_length=12,null=True)
+    
+    class Meta:
+        abstract = True
+        
+class GeraiGadaiManager(models.Manager):
+    pass
+
+    def for_user(self, user):
+        try:
+            gerai = user.get_profile().gerai
+            geraigadai_list = self.all().filter(id__exact=gerai.id) | gerai.tbl_cabang_set.all()
+        except:
+            geraigadai_list = None
+        return geraigadai_list
+
+class Tbl_Cabang(Wilayah):
+    kode_cabang = models.CharField(max_length=3)    
+    nama_cabang = models.CharField(max_length=30,null=True)
+    objects = GeraiGadaiManager()
+    parent = models.ForeignKey('self', blank=True, null=True)
+    kode_unit = models.CharField(max_length=3)
+    nama_unit = models.CharField(max_length=30)
+           
+    class Meta:
+        db_table = 'tbl_cabang'
+        verbose_name = 'Tabel Cabang'
+        verbose_name_plural = verbose_name
+        
+       
+    def __unicode__(self):
+        return "%s" % (self.nama_cabang)
+    
+    def is_gerai(self):
+        return self.parent == None
+    
+    def aktif (self):
+        return self.akadgadai_set.filter(lunas__isnull =True).count()
+    
+    def get_jumlah_nilai(self, hari=None):
+        if not hari:			
+            rs_pk = self.akadgadai_set.filter(lunas__isnull=True)
+        else:
+            rs_pk = self.akadgadai_set.filter(tanggal=hari).filter(kode_unit=300)
+        nilai= 0
+        for p in rs_pk:
+            nilai += p.nilai
+        return nilai
+    
+    def piutang(self):
+        ag = self.akadgadai_set.all() 
+        return sum([p.piutang() for p in ag])
+    
+    def total_jatuhtempo(self):
+        sekarang = datetime.date.today()
+        return self.akadgadai_set.filter(pelunasan__isnull = True).filter(jatuhtempo__lte=sekarang).count()
+    
+    def get_jumlah_jatuhtempo(self, hari=None):
+        sekarang = datetime.date.today()
+        if not hari:			
+            rs_pk = self.akadgadai_set.filter(pelunasan__isnull = True).filter(jatuhtempo__lte=sekarang)
+        else:
+            rs_pk = self.akadgadai_set.filter(tanggal=hari)
+        nilai= 0
+        for p in rs_pk:
+            nilai += p.nilai
+        return nilai
+    
+    def get_banyak_lunas(self):
+        return self.akadgadai_set.filter(lunas__isnull=False).count()
+
+    def get_banyak_lelang(self):
+        return self.akadgadai_set.filter(status_transaksi = u'LELANG').count()
+    
+    def get_total_nilailelang(self):
+        rs_pk = self.akadgadai_set.filter(status_transaksi=u'LELANG')
+        nilai= 0
+        for p in rs_pk:
+            nilai = p.hargalelang()
+        return nilai
+    
+    def total_barang(self):
+        return self.aktif() + self.get_banyak_lunas() - self.get_banyak_lelang()
+        
+class Tbl_Product(models.Model):
+    kode_produk= models.IntegerField(max_length=1)
+    nama_produk = models.CharField(max_length=30,null=True)
+
+    class Meta:
+        db_table ="tbl_product"
+    
+class Tbl_Unit(models.Model):
+    kode_unit = models.CharField(max_length=3)
+    nama_unit = models.CharField(max_length=30)
+    
+    class Meta:
+        db_table ="tbl_unit"
+
+STATUS_LUNAS=(
+    ('1','LUNAS'),
+    ('2','BLM LUNAS'),    
+)
+
+STATUS_OTORISASI=(
+    ('1','---------'),
+    ('2','OTORISASI'),
+)
+
+class Pelunasan(models.Model):
+    pelunasan = models.ForeignKey(AkadGadai)
+    status_pelunasan= models.CharField(max_length=4 ,choices=STATUS_LUNAS, null=True, blank=True)
+    tanggal=models.DateField()
+    
+    nilai = models.DecimalField(max_digits=12, decimal_places=2)
+    terlambat = models.DecimalField(max_digits=12, decimal_places=2,default=0)
+    denda = models.DecimalField(max_digits=12, decimal_places=2)
+    bea_jasa = models.DecimalField(max_digits=12, decimal_places=2)
+    gerai = models.ForeignKey (Tbl_Cabang)
+    ###kendaraan
+    jenis_barang= models.CharField(max_length=20 ,null=True, blank=True)
+    terlambat_kendaraan = models.DecimalField(max_digits=12, decimal_places=2,default=0,null=True, blank=True)
+    nilai_lebih = models.DecimalField(max_digits=12, decimal_places=2,default=0,null=True, blank=True)
+    denda_kendaraan = models.DecimalField(max_digits=12, decimal_places=2)
+    bea_jasa_kendaraan = models.DecimalField(max_digits=12, decimal_places=2,default=0)
+    nocoa_titipan = models.CharField(max_length=15,blank=True,null=True)
+    nocoa_kas = models.CharField(max_length=15,blank=True,null=True)
+    val = models.CharField(max_length=3,blank=True,null=True)
+    cu = models.ForeignKey(User, related_name='c_pelunasan', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_pelunasan', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+    #nilai = models.DecimalField(max_digits=12, decimal_places=2,default=0,null=True, blank=True)
+    status_kwlunas = models.CharField(max_length=10,blank=True,null=True)
+    comment = models.CharField(max_length=100,blank=True,null=True)
+    status = models.CharField(max_length=10,choices=STATUS_OTORISASI,blank=True,null=True)
+    
+    def __unicode__(self):
+        return '%s %s' % (self.pelunasan, self.tanggal)
+        
+    class Meta:
+        db_table ="pelunasan"
+        verbose_name= "Pelunasan"
+        verbose_name_plural = verbose_name
+        get_latest_by = 'tanggal'
+        ordering = ['-tanggal']
+        
+    def kwlunas_validasi(self):
+        return "KL %s %s %s %s %s WIB %s" % ((self.pelunasan.norek()),self.nocoa_titipan,self.nilai,self.nocoa_kas,self.pelunasan.mdate,(str(self.pelunasan.gerai.init_cabang))) 
+        
+    def total_terima_bersih_plns(self):
+        return self.denda_all() + self.bea_jasa_total+ self.nilai
+
+    def get_absolute_url(self):
+        return "/akadgadai/%s/show/" % self.pelunasan.id
+    
+    def cekkasirgerai(self):
+        try:
+            s = self.kasirgerai
+            ret = s.status=='1'
+        except KasirGerai.DoesNotExist:
+            ret = False
+        return ret
+    
+    def denda_all(self):
+        if self.jenis_barang == u'1':
+            return (self.denda)
+        else:
+            return (self.denda_kendaraan)
+    
+    def jasa_all(self):
+        if self.jenis_barang == u'1':
+            return self.bea_jasa
+        else:
+            return self.bea_jasa_kendaraan
+
+    def akumulasi_jasa_denda(self):
+        return self.denda_all() + self.jasa_all()
+
+     ####JUMLAH BEA JASA & DENDA####
+    def get_jasa_denda(self):
+        D = decimal.Decimal
+        return  self.bea_jasa + self.denda + D(self.bea_jasa_kendaraan) + self.denda_kendaraan
+    jasa_denda = property(get_jasa_denda)
+    
+    def get_jasa_denda_kendaraan(self):
+        return  self.bea_jasa_kendaraan + self.denda_kendaraan
+    jasa_denda_kendaraan = property(get_jasa_denda_kendaraan)
+    
+    ###18 april 2013
+    @property
+    def bea_jasa_total(self):
+        return self.bea_jasa + self.bea_jasa_kendaraan
+    
+    @property
+    def denda_total(self):
+        return self.denda + self.denda_kendaraan
+    ####rekap haraian gerai
+    @property
+    def tot_jasa_denda_plns(self):
+        return self.bea_jasa_total + self.denda_total
+    ###18 april 2013
+
+    ####TOTAL PELUNASAN####
+    def get_jumlah_pelunasan(self):
+        return self.nilai + self.jasa_denda
+    jumlah_pelunasan = property(get_jumlah_pelunasan)
+
+    def get_jumlah_pelunasan_kendaraan(self):
+        return float(str(self.nilai)) + self.get_jasa_denda_kendaraan()
+    jumlah_pelunasan_kendaraan = property(get_jumlah_pelunasan_kendaraan)
+    
+    def norek(self):
+        return "%s.%s.%s" % (str(self.gerai.kode_cabang).zfill(2),str(self.tanggal.year).zfill(1),str(self.id).zfill(6))
+  
+STATUS_MANOP_PELUNASAN =(
+    ('1','OTORISAI'),
+    ('2','OTORISAI OK')
+)
+
+
+class ManopPelunasan(models.Model):
+    pelunasan = models.OneToOneField('Pelunasan',null=True, blank=True)
+    status = models.CharField(max_length=1, choices=STATUS_MANOP_PELUNASAN)
+    tanggal = models.DateField()
+    cu = models.ForeignKey(User, related_name='c_manopelunasan', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_manopelunasan', editable=False, null=True, blank=True)
+    note = models.CharField(max_length=200, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'manoppelunasan'
+        verbose_name = 'ManopPelunasan'
+        verbose_name_plural = verbose_name
+
+  
+class UserProfile(models.Model):
+    user = models.ForeignKey(User, unique=True)
+    rekening = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    gerai = models.ForeignKey(Tbl_Cabang, null=True, blank=True)
+
+    class Meta:
+        db_table = 'userprofile'
+
+    def __unicode__(self):
+        return self.user.username
+
+User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
+
+

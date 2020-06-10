@@ -1,0 +1,61 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="/static/tedi/css/jquery.dataTables.css">
+<script type="text/javascript" language="javascript" src="/static/tedi/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/tedi/js/jquery.dataTables.js"></script>
+<script type="text/javascript" language="javascript" class="init">	
+$(document).ready(function() {
+    $('#example').DataTable();
+} );
+    $(document).ready(function() {
+        $('#menuinput').click(function() {
+        	$('.chosen-container-single').trigger("liszt:updated");
+        	$('.tampil').slideToggle("fast");
+
+        });
+    });
+</script>
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2 align="center">DATA NASABAH TITIPAN &nbsp<small><small>KSU RA</small></h2>
+
+	<table id="example" class="display" cellspacing="0" >
+		<thead>
+			<tr>
+				<th>NO</th>
+				<th>NOREK</th>
+				<th>NASABAH</th>
+				<th>GERAI</th>
+				<th>TITIPAN(Rp)</th>
+				<th>Menu</th>
+				
+			</tr>
+		</thead>
+                <tbody>
+{% for a in titip%}
+	        <tr>
+			<td>{{ forloop.counter }}</td>
+			<td>{{ a.norek }}</td>
+			<td>{{ a.nama  }}</td>
+			<td>{{ a.gerai}}</td>
+			<td>{{ a.nilai|number_format}}</td>
+
+			<td align="center"><a href="/kasirgerai/{{a.id}}/slip_setoran_titipan_pelunasan/" class="cari">SLIP SETORAN</a>
+                    		
+                    		<!--{% if a.status_kwlunas = '0' %}  {% if a.pelunasan.jenis_transaksi = '1'  %}
+			        <a href="/pelunasan/{{a.id}}/kwlunas/" class="cetak">Elektronik</a>{%else%}
+                    		<a href="/pelunasan/{{a.id}}/kwlunas_kendaraan/" class="cetak">Kendaraan</a>
+                    		{% endif %}{% endif %} -->
+			</td>
+		</tr>
+{% endfor %}
+</tbody>
+	</table>
+</div>
+
+{% endblock %}
+

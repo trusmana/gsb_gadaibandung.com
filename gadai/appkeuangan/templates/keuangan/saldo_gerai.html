@@ -1,0 +1,117 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}ledger{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2>SALDO GERAI<small> &nbsp;DIV PJB</small>&nbsp;&nbsp;<a href="/rkeuangan/create_saldo/" class="edit" align="right">Input Saldo</a></h2>  
+<form method="GET" action="/rkeuangan/saldo_gerai/">{%csrf_token%}
+   <table id="tabel" align="center">
+   <li><label for="id_cabang">Kode Cabang</label> :
+      <select id="id_id_cabang" data-placeholder="None" class="chosen-select" name="id_cabang">
+            <option value="" selected="selected">---------</option>
+            <option value="500">GABUNGAN</option><option value="300">BANDUNG_pjb</option>
+            <option value="301">JAKARTA</option><option value="302">SUCI</option>
+            <option value="303">DIPATIUKUR</option><option value="304">BALUBUR</option>
+            <option value="306">GERLONG HILIR</option><option value="307">KOPO/JAMIKA</option>
+            <option value="308">CIBIRU</option><option value="310">JATINANGOR</option>
+            <option value="327">CIMAHI</option><option value="311">BUAH BATU</option>
+            <option value="313">CIWASTRA/KORDON</option><option value="315">MARANATA</option>
+            <option value="320">UJUNGBERUNG - PJB</option><option value="322">BOJONGSOANG</option>
+            <option value="324">KATAPANG/KOPO SAYATI</option><option value="325">CIMINDI</option>
+            <option value="326">CEMARA</option><option value="332">TURANGGA</option>
+            <option value="331">GADAINIGHT JAKARTA</option><option value="330">GADAINIGHT BALUBUR</option>
+            <option value="333">GADAINIGHT DU</option><option value="328">GADAINIGHT CIBIRU</option>
+            <option value="334">PADJAJARAN</option><option value="335">AGEN KOPO</option>
+      </select>      
+   </li>
+   <li><label for="id_tgl_trans">Tanggal </label> :<input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m-d" %}" /> </li>
+   <br>
+   <li>
+	<input type="submit" value="CARI SALDO" class="neraca" name="submit_satu"/>&nbsp;
+   </li> 
+   </table>
+</form>
+
+<br>
+{% if ledger_search %}
+   <h3 style='text-align: center'><b><small>SALDO GERAI KSU RIZKY ABADI</small> </b></h3>
+   <h3 style='text-align: center'><b><small>UNIT PJB <small><small><small>{{id_cabang}}</small>
+</small>
+{% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA{%endif%} 
+   {% if id_cabang = '302' %}GERAI SUCI{%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR{%endif%}
+   {% if id_cabang = '304' %}GERAI BALUBUR{%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
+   {% if id_cabang = '307' %}GERAI KOPO{%endif%} {% if id_cabang = '308' %}GERAI CIBIRU{%endif%}
+   {% if id_cabang = '309' %}GERAI CIPACING {%endif%} {% if id_cabang = '310' %}GERAI JATINANGOR{%endif%}
+   {% if id_cabang = '327' %}GERAI CIMAHI  {%endif%} {% if id_cabang = '312' %}GERAI BUAH BATU{%endif%}
+   {% if id_cabang = '313' %}GERAI KORDON  {%endif%} {% if id_cabang = '314' %}GERAI CIHANJUANG{%endif%}
+   {% if id_cabang = '315' %}GERAI MARANATA{%endif%} {% if id_cabang = '316' %}GERAI KIARACONDONG{%endif%}
+   {% if id_cabang = '317' %}GERAI CIREBON PERJUANGN {%endif%} {% if id_cabang = '318' %}GERAI CIREBON {%endif%}
+   {% if id_cabang = '319' %}GERAI CIUMBELEUIT {%endif%} {% if id_cabang = '113' %}GERAI UJUNG BERUNG{%endif%}
+   {% if id_cabang = '322' %}GERAI BOJONGSOANG{%endif%}{% if id_cabang = '300' %}KANTOR PUSAT{%endif%}
+   {% if id_cabang = '329' %}GERAI LEWIGAJAH{%endif%}{% if id_cabang = '333' %}GADAI NIGHT DU{%endif%}
+   {% if id_cabang = '331' %}GADAI NIGHT JAKARTA{%endif%}{% if id_cabang = '311' %}GARAI BUAHBATU{%endif%}
+   {% if id_cabang = '320' %}GERAI UJUNGBERUNG{%endif%}{% if id_cabang = '324' %}GERAI KATAPANG SAYATI{%endif%}
+   {% if id_cabang = '325' %}GERAI CIMINDI{%endif%}{% if id_cabang = '326' %}GERAI CEMARA{%endif%}
+   {% if id_cabang = '332' %}GERAI TURANGGA{%endif%}{% if id_cabang = '328' %}GADAI NIGHT CIBIRU{%endif%}
+   {% if id_cabang = '330' %}GADAI NIGHT BALUBUR{%endif%}
+</small> </b>
+</h3>
+<h3 style='text-align: center'><b><small>Periode : {{start_date}}</small> </b></h3>
+<table class="list">
+   <thead>
+   <tr>
+      <th>ID</th><th>Tanggal</th>
+      <th>Nama COA</th>
+      <th>Keterangan</th>
+       <th>Saldo</th>
+   </tr>
+   </thead>
+{% for d in ledger_search %}
+   <tbody>	
+   <tr>   <td><a href="/rkeuangan/{{d.id_tt}}/{{d.id}}/edit_saldo/" >{{d.id}}</a></td>
+	  <td>{{ d.tgl_trans|date:'d-M-Y' }}</td>
+	  <td>{{ id_cabang}}.{{d.coa}}</td>
+	  <td>{{ d.deskripsi }}</td>
+	  <td style="text-align:right">{{ d.saldo|number_format:0}}</td>
+   </tr>
+
+{% endfor %}
+     </tbody>
+     
+</table>
+{% else %}
+
+<!--gabungan-->
+{% for p in ledger %}
+{% ifchanged p.id_coa %}{% if not forloop.first %}</table>{% endif %}
+<p>Akun : {{ p.id_coa }}<small>( {{ p.id_coa.tbl_transaksi_set.all.count }} )</small></p>
+<table class="list">
+   <tr>
+      <th>Tanggal</th>
+      <th>NO BUKTI</th>
+      <th>Kode COA</th>
+      <th>Nama COA</th>
+      <th>Keterangan</th>
+      <th>Debet (Rp.)</th>
+      <th>Kredit (Rp.)</th>
+      <th>Saldo (Rp.)</th>
+   </tr>
+{% endifchanged %}
+
+<tr>
+   <td>{{ p.tgl_trans|date:'d-M-Y' }}</td>
+   <td>{{p.jurnal.nobukti}}</td>
+   <td>{{p.kepala_coa}}.{{p.id_coa.coa}}</td>
+   <td>{{ p.id_coa.deskripsi }}</td>
+   <td>{{ p.jurnal.diskripsi }}</td>
+   <td class="debet uang r">{{ p.debet|number_format:0 }}</td>
+   <td class="kredit uang r">{{ p.kredit|number_format:0 }}</td>
+   <td class="saldo uang r">{{ p.get_jumlah_debet|number_format:0 }}</td>
+</tr>
+{% if forloop.last %}</table>{% endif %}{% endfor %}
+{% endif %}
+{% endblock %}
+

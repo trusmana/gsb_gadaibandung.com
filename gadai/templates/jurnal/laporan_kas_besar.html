@@ -1,0 +1,101 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}{{ block.super }}{% endblock %}
+{% block section %}Bank{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="left">POSISI KAS PUSAT <small>KSU RA</small></h2>
+<table class="list">
+     <tr>
+         <td><b>SALDO AWAL</b></td>
+         <td></td>
+         <td align="right"><b>{{saldo_awal_bank|number_format:0}}</b></td>
+     </tr>
+</table>
+<br>
+
+<table class="list">
+    <tr >
+        <th colspan="2">PENERIMAAN TUNAI DARI GERAI</th><th colspan="2">PENGELUARAN TUNAI KE GERAI</th>
+    </tr>
+
+ {% for c in gr%}
+    </tr>
+    {% ifchanged c.kode_cabang %}
+    <tr class="row1" >
+    {% endifchanged %}
+        <!--
+        <td align="left" >- <a href='/kasirgerai/{{c.kode_cabang}}/all_transaksi_kas_pusat/'> {{c.nama_cabang}}</a></td><td align="right">{{c.pendapatan_kas|number_format:0}}</td>
+        <td align="left">- {{c.nama_cabang}}</td><td align="right">{{c.pengeluaran_kas|number_format:0}}</td>
+        -->
+        {% if c.kode_cabang == '300' %}
+        <td align="left" >- <a href='/kasirgerai/{{c.kode_cabang}}/transaksi_kas_pusat/'> {{c.nama_cabang}}</a></td><td align="right">{{c.pendapatan_kas|number_format:0}}</td>
+        {%else%}
+        <td align="left" >- <a href='/kasirgerai/{{c.kode_cabang}}/all_transaksi_kas_pusat/'> {{c.nama_cabang}}</a></td><td align="right">{{c.pendapatan_kas|number_format:0}}</td>
+        {% endif %}
+        <td align="left">- {{c.nama_cabang}}</td><td align="right">{{c.pengeluaran_kas|number_format:0}}</td>
+    </tr>
+ {% endfor%}
+     <tr class="row1" >
+        <th align="left" >- Total Penerimaan</th><th align="right">{{total_penerimaan|number_format:0}}</th>
+        <th align="left">&nbsp;</th><th align="right">{{total_pengeluaran|number_format:0}}</th>
+    </tr>
+</table>
+
+
+</br></br>
+<h3 align="center"> PENERIMAAN TUNAI LAINNYA</h3>
+<table class="list">
+
+<tr> <th>Id Coa</th>
+      <th>Keterangan</th>
+     <th>Nilai</th>
+</tr>
+{% for j in jrn_pendapatan %}
+<tr>
+    <td align="left">{{j.id_coa}}</td>
+    <td align="left">{{j.jurnal.diskripsi}}</td>
+    <td align="right">{{j.debet|number_format:0}}</td>
+</tr>
+{% endfor %}
+<tr>
+    <td>TOTAL</td>
+    <td></td>
+    <td align="right"><b>{{j_pendapatan|number_format:0}}</b></td>
+</tr>
+</table>
+
+<h3 align="center">PENGELUARAN TUNAI LAINNYA</h3>
+
+<table class="list">
+<tr> <th>Id Coa</th>
+     <th>Keterangan</th>
+     <th>Nilai</th>
+</tr>
+{% for j in jrn_pengeluaran %}
+<tr>
+    <td align="left">{{j.id_coa}}</td>
+    <td align="left">{{j.deskripsi}}</td>
+    <td align="right">{{j.kredit|number_format:0}}</td>
+
+</tr>
+{% endfor %}
+<tr>
+    <td>TOTAL</td>
+    <td></td>
+    <td align="right"><b>{{j_pengeluaran|number_format:0}}</b></td>
+</tr>
+</table>
+<br><br>
+<table class="list">
+     <tr>
+         <td><b>SALDO AKHIR</b></td>
+ <td></td>
+ <td align="right"><b>{{saldo_akhir_bank|number_format:0}}</b></td>
+     </tr>
+</table>
+{% endblock %}
+

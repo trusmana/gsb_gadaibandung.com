@@ -1,0 +1,56 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="/static/tedi/css/jquery.dataTables.css">
+<script type="text/javascript" language="javascript" src="/static/tedi/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/tedi/js/jquery.dataTables.js"></script>
+<script type="text/javascript" language="javascript" class="init">	
+$(document).ready(function() {
+    $('#example').DataTable();
+} );
+    $(document).ready(function() {
+        $('#menuinput').click(function() {
+        	$('.chosen-container-single').trigger("liszt:updated");
+        	$('.tampil').slideToggle("fast");
+
+        });
+    });
+</script>
+{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+	<h2>Parameter RKA Pusat</h2>
+	<div id="menuinput"><button class="neraca">+TAMBAH</button></div>
+	<div class="tampil" >
+	<form class ="tabular" method='POST' action="." enctype="multipart/form-data" >{% csrf_token %}
+		<table>
+			{{form.as_table}}
+		</table>
+		<li><input  type="submit" name="submit" value="&radic; Simpan" class="simpan"></li>
+	</form>
+	</div>
+	<br>
+	<h3 align="center">Parameter Rak Pusat</h3>
+	<table id="example" class="display" cellspacing="0" >
+		<thead>
+		<tr>
+		    <th>No</th><th>Nama Cabang</th><th>Rka Cabang</th><th>Rka Pusat</th><th>Menu</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for a in gu %}
+		<tr class="{% cycle 'row1' 'row2' %}">
+			<td>{{ forloop.counter }}</td>
+			<td>{{a.cabang}}</td>
+			<td>{{a.coa_rak_cabang}}</td><td>{{a.coa_rak_pusat}}</td>
+			<td><a href="/parameter/{{a.id}}/edit_rak_pusat/"><button class="neraca">&radic; Edit</button></a></td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}
+
+
+
+
+

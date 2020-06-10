@@ -1,0 +1,82 @@
+{% extends "base_aplikasi.html" %}
+{% block extrahead %}
+{% include "alat/ledger.html" %}
+{% endblock %}
+{% block section %}ledger{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<h2>JURNAL UNIT PJB &nbsp;</h2>  
+<form method="GET" action="/rreport/buku_besar_all_keu/">{% csrf_token %}
+   <table id="tabel" align="center">
+   <li><label for="id_cabang">Kode Cabang</label> :
+        {{form.id_cabang}}
+   </li>
+   <li><label >Jenis Report</label>: {{form.jenis}} </li>
+   <li><label for="id_tgl_trans">Tanggal Awal</label> : {{form.start_date}}</li>
+   <li><label for="id_tgl_trans">Tanggal Akhir</label> : {{form.end_date}}</li>
+   <br>
+   <li>
+      <input type="submit" value="&radic;Tampil" class="nonposting" name="submit_satu" />
+      <input type="submit" value="&raquo; Cetak" class="nonposting" name="submit_dua" />
+      <input type="submit" value="&prop; Excel" class="nonposting" name="submit_tiga" />
+   </li>
+   </table>
+</form>
+<br>
+<hr>
+{% for p in ledger %}
+{% ifchanged p.id_coa and p.id_coa.saldo_pjb %}{% if not forloop.first %}</table>{% endif %}
+{% if forloop.first %}
+   <p style='text-align: center'><b>UNIT PJB 
+   {% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA{%endif%} 
+   {% if id_cabang = '302' %}GERAI SUCI{%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR{%endif%}
+   {% if id_cabang = '304' %}GERAI BALUBUR{%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
+   {% if id_cabang = '307' %}GERAI KOPO{%endif%} {% if id_cabang = '308' %}GERAI CIBIRU{%endif%}
+   {% if id_cabang = '309' %}GERAI CIPACING {%endif%} {% if id_cabang = '310' %}GERAI JATINANGOR{%endif%}
+   {% if id_cabang = '327' %}GERAI CIMAHI  {%endif%} {% if id_cabang = '312' %}GERAI BUAH BATU{%endif%}
+   {% if id_cabang = '313' %}GERAI KORDON  {%endif%} {% if id_cabang = '314' %}GERAI CIHANJUANG{%endif%}
+   {% if id_cabang = '315' %}GERAI MARANATA{%endif%} {% if id_cabang = '316' %}GERAI KIARACONDONG{%endif%}
+   {% if id_cabang = '317' %}GERAI CIREBON PERJUANGN {%endif%} {% if id_cabang = '318' %}GERAI CIREBON {%endif%}
+   {% if id_cabang = '319' %}GERAI CIUMBELEUIT {%endif%} {% if id_cabang = '113' %}GERAI UJUNG BERUNG{%endif%}
+   {% if id_cabang = '322' %}GERAI BOJONGSOANG{%endif%}{% if id_cabang = '300' %}KANTOR PUSAT{%endif%}
+   {% if id_cabang = '329' %}GERAI LEWIGAJAH{%endif%}{% if id_cabang = '333' %}GADAI NIGHT DU{%endif%}
+   {% if id_cabang = '331' %}GADAI NIGHT JAKARTA{%endif%}{% if id_cabang = '311' %}GARAI BUAHBATU{%endif%}
+   {% if id_cabang = '320' %}GERAI UJUNGBERUNG{%endif%}{% if id_cabang = '324' %}GERAI KATAPANG SAYATI{%endif%}
+   {% if id_cabang = '325' %}GERAI CIMINDI{%endif%}{% if id_cabang = '326' %}GERAI CEMARA{%endif%}
+   {% if id_cabang = '332' %}GERAI TURANGGA{%endif%}{% if id_cabang = '328' %}GADAI NIGHT CIBIRU{%endif%}
+   {% if id_cabang = '330' %}GADAI NIGHT BALUBUR{%endif%}   
+   </b></p>
+   <p style='text-align: center'><b>REKAP JURNAL KSU RIZKY ABADI</b></p>
+    <p style='text-align: center'><b>Periode : {{start_date }} S.D  {{end_date }}</b></p>
+{%endif%}
+<p>Akun : {{ p.id_coa }}<small>( {{ p.id_coa.tbl_transaksi_set.all.count }} )</small></p>
+<table class="list">
+    <tr>
+	<th>Tanggal</th>
+	<th>NO BUKTI</th>
+        <th>Keterangan</th>
+	<th>Debet (Rp.)</th>
+	<th>Kredit (Rp.)</th>
+	<th>Saldo (Rp.)</th><th>User</th>
+    </tr>
+    <tr> 
+         <td></td><td></td><td>Saldo Awal</td><td></td><td></td><td>{{p.saldo_pjb|default_if_none:"0"|number_format:0}}</td><td></td>
+</tr>
+{% endifchanged %}
+
+
+<tr class="{% cycle 'row1' 'row2' %}">
+	  <td>{{ p.tgl_trans|date:'d-M-Y' }}</td>
+	  <td>{{p.deskripsi}}</td>
+	  <td>{% if p.diskripsi = None and p.keterangan = None %} {{p.ket}}{% elif p.diskripsi = None %}
+              {{p.ket}} {% else%}{{ p.diskripsi }}{% endif %}</td>	
+          <td class="kredit uang r">{{ p.debet|number_format:0 }}</td>
+          <td class="debet uang r">{{ p.kredit|number_format:0 }}</td>
+          <td class="saldo uang r">{{ p.saldo_akhir|number_format:0 }} </td><td>{{p.cu}}</td>          
+</tr>
+ {% if forloop.last %}</table>{% endif %}{% endfor %}
+
+{% endblock %}
+
+

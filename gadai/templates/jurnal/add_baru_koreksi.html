@@ -1,0 +1,186 @@
+{% extends "base_aplikasi.html" %}
+{% block title %}Jurnal Koreksi{% endblock %}
+{% block extrahead %}
+<style type="text/css">
+div.item_jurnal { width: 48%; border-bottom: solid 2px #999; border-top: solid 2px #999;}
+div#debet { float: left;}
+div#kredit { float: right; }
+</style>
+<link href="/static/css/smoothness/jquery-ui-1.7.1.custom.css" type="text/css" rel="Stylesheet" />
+<script src="/static/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.meio.mask.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery.autocomplete.pack.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    updateJumlahKredit();
+    updateJumlahDebet();
+    setSubmitEnabled();
+    $("input.rp_kredit").keypress(function(event){
+        if (event.charCode && (event.charCode < 46 || event.charCode > 57 || event.charCode == 47))
+        { event.preventDefault(); }
+    });
+    $("input.rp_debet").keypress(function(event){
+        if (event.charCode && (event.charCode < 46 || event.charCode > 57 || event.charCode == 47))
+        { event.preventDefault(); }
+    });
+    $("input.rp_kredit").change(function() {
+        updateJumlahDebet();
+        updateJumlahKredit();
+        if ($("#selisih_jurnal").html() != '0') { 
+            setSubmitEnabled(false);
+        } else { setSubmitEnabled(); }
+    });
+    $("input.rp_debet").change(function() {
+        updateJumlahDebet();
+        updateJumlahKredit();
+        if ($("#selisih_jurnal").html() != '0') { 
+            setSubmitEnabled(false);
+        } else { setSubmitEnabled(); }
+    });
+    $("#id_tanggal").datepicker({'dateFormat': 'yy-mm-dd'});
+    $(".kode_rekening").autocomplete('/jurnal/rekening/search/?ajax=1&jurnal=1', {
+        formatItem: function (row, i, max) { return row[0] + "|" + row[1]; },
+        formatMatch: function (row, i, max) { return row[1]; },
+        formatResult: function(row) { return row[0]+ "|" + row[1]; }
+    });
+    $("#form_jurnal").submit(function () {
+        $("input.uang").each(function () {
+            $(this).val(to_number($(this).val()));
+        });
+        return true;
+    });
+});
+
+function setSubmitEnabled (state) {
+    if (state==null & 
+        ($("#total_kredit").html() != '0')) stat = '';
+    else stat = 'disabled';
+    $("input#id_simpan").attr("disabled",stat);
+}
+
+function updateJumlahKredit() {
+    var tot_kredit = 0;
+    $("input.rp_kredit").each(function() {
+        tot_kredit += parseFloat(to_number(this.value));
+    });
+    $("#total_kredit").text(format_number(String(tot_kredit)));
+    $("#selisih_jurnal").text(format_number(String(to_number($("#total_debet").text()) - to_number($("#total_kredit").text()))));
+}
+
+function updateJumlahDebet() {
+    var tot_debet = 0;
+    $("input.rp_debet").each(function() {
+        tot_debet += parseFloat(to_number(this.value));
+    });
+    $("#total_debet").text(format_number(String(tot_debet)));
+    $("#selisih_jurnal").text(format_number(String(to_number($("#total_debet").text()) - to_number($("#total_kredit").text()))));
+}
+
+</script>
+<script type="text/javascript" src="/static/fomset/js/jquery.formset.js"></script>
+<script type="text/javascript" src="/static/fomset/js/fix_chosen.js"></script>
+<link rel="stylesheet" href="/static/chosen/docsupport/chosen.css">
+<script type="text/javascript">
+    $(function() {
+        $('#id_orders_table tbody tr').formset({
+            prefix: 'ordered_items'
+        })
+    })
+</script>
+<style type="text/css">
+    .delete-row {
+        margin-left:5px;
+    }
+</style>
+{% include "alat/sidebar.html" %}
+{% include "alat/jurnal.html" %}
+{% endblock %}
+{% block content %}
+{% load useringroup number_format %}  
+<h2 align="right">INPUT JURNAL KOREKSI<small> <i>Divisi PJB</i></small></h2>
+   <form action="/jurnal/{{cabang}}/{{user.id}}/jurnal_koreksi/" method="POST" class="tabular" id="form_jurnal">{% csrf_token %}
+     <p id="selisih_jurnal" title="Selisih Debet Kredit" style="float: right; font-size:1.7em;font-weight: bold;">0</p>
+            {{ form.as_p }}
+            
+            <table id="id_orders_table" border="0" cellpadding="0" cellspacing="5">
+                <thead>
+                    <tr>
+                        <th>Kode COA</th><th></th>
+                        <th scope="col">Keterangan</th>
+                        <th scope="col">Debet</th>
+                        <th scope="col">Kredit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset.forms %}
+                    <tr id="{{ form.prefix }}-row">
+                        <td>
+                            {% for fld in form.hidden_fields %}{{ fld }}{% endfor %}
+                            {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
+                            {{ form.koderekening }}
+                        </td>
+                        <td>{{ form.id_cabang }}</td>
+                        <td>{{ form.deskripsi }}</td>
+                        <td>{{ form.debet }}</td>
+                        <td>{{ form.kredit }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <td>{{ formset.management_form }}
+                    <input type="submit" id="id_simpan" value="&radic; Tambah" class="simpan"/>
+                    </td>
+                    <td></td><td></td>
+                    <td align="right"><b><span id="total_debet">0</span></b></td>
+                    <td align="right"><b><span id="total_kredit">0</span></b></td></tr>
+                </tfoot>
+            </table>
+        </form>
+
+
+<h3 align="center">Data Transaksi</h3>
+<form method="POST" action="/jurnal/jurnal_post_koreksi/">{% csrf_token %}
+<table class="list">
+<thead>
+    <tr>
+      <th><input id="select_all" type="checkbox" align="center"></th>
+      
+      <th>Kode Account</th>
+      <th>No Bukti</th>
+      <th>Keterangan</th>          
+      <th>Debet(Rp)</th>
+      <th>Kredit(Rp)</th>
+      <th>Menu</th>
+    </tr>
+</thead>
+    
+    <tbody>
+    {% regroup show by jurnal_h as grouped %}
+    {% for group in grouped %}
+    {% for p in group.list %}
+        <tr style="background-color: {% ifchanged group.list %}{% cycle "#CCFFFF" "white" as rowcolors %}{% else %}
+            {{ rowcolors }}{% endifchanged %}">
+            {% ifchanged %}<td rowspan="{{ group.list|length }}"><input type="checkbox"  value="{{ p.jurnal.id }}" class="checkbox_delete" name='id_pilih' /></td>
+            {% endifchanged %}
+            <td>{{p.id_coa}}</td>
+            <td>{{p.no_trans}}</td>            
+            <td>{% if forloop.counter %}<i>{{p.deskripsi}}</i>{% endif %}</td>
+            <td align="right">{{ p.debet|number_format:0 }}</td>
+            <td align="right">{{ p.kredit|number_format:0 }}</td>
+            {% ifchanged %} <td rowspan="{{ group.list|length }}" align="center"><a href="/jurnal/{{p.jurnal.id }}/hapus_jurnal_koreksi/" class="cari">Batal</a></td>{% endifchanged %}
+        </tr>
+    {% endfor %}
+    {% endfor %}
+    </tbody>
+  <tfoot>
+  <tr>
+    <td colspan="7" align="right"><input type="submit" value="&radic; Simpan" class="cetak" /></td>
+  </tr>
+  </tfoot>
+</table>
+
+</form>
+{% endblock %}
+
+
+

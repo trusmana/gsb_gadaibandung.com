@@ -1,0 +1,57 @@
+{% extends "base_aplikasi.html" %}
+{% block section %}Jurnal_Transaksi{% endblock %}
+{% block extrahead %}
+{% include "alat/sidebar.html" %}{% include "alat/jurnal.html" %}
+{% load useringroup number_format %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2>REKAPITULASI TRANSAKSI   <small>DIV PJB</small>{{cabang.kode_cabang}}
+<a href="/kasirgerai/{{kocab.kode_cabang}}/cetak_all_transaksi/"><img src="/static/printer.png"  height="22" width="22" ></a></h2>
+<h3 align="Center">UNIT PJB GERAI {{kocab.nama_cabang}}</h3>
+<h3 style='text-align: center'><b> UANG MUKA </b></h3>
+<h3 style='text-align: center'><b><small>Periode : {{sekarang|date:"d-M-Y"}}<!--{{sekarang|date:"d-M-Y"}} --></small> </b></h3>
+<table class="list">
+<tr>
+	
+</tr>
+		<tr class="orange">
+            <td align="center"><b>Saldo Uang Muka Awal</b></td>
+			<td></td>
+			<td><b>{{total_penerimaan|number_format:0}},00</b></td>
+        </tr>
+
+		<tr class="orange">
+            <td><b>Pengambilan Uang Muka</b></td>
+			<td></td>
+			<td>{{uang_muka|number_format:0}},00</td>
+        </tr>
+		<tr class="ijo">
+            <td>Pemakaian uang muka</td>
+			<td align="right"><b></b></td>
+			<td></td>
+        </tr>
+		{% for a in transaksi_jurnal %} {% if a.debet > 0 %}
+		<tr>
+           	<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ a.jurnal.diskripsi}} - {{ a.id_coa.deskripsi}}</td>
+			<td align="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {{ a.debet|number_format:0}},00</td>	
+			<td></td>
+        </tr>
+		{% endif %}{% endfor %}
+		<tr class="orange">
+            <td><b>Pengembalian Uang Muka</b></td>
+			<td></td>
+			<td> <b>{{pengembalian_uk|number_format:0}},00</b></td>
+        </tr>
+		
+		<tr class="orange">
+            <td align="center"><b>Saldo Uang Muka Akhir</b></td>
+			<td></td>
+			<td> <b>{{saldo_uk_akhir|number_format:0}},00</b></td>
+        </tr>
+ 
+
+	</tbody>
+</table>
+{% endblock %}
+
