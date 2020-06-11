@@ -1,7 +1,7 @@
 from django.contrib.auth import logout
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.template import RequestContext    
-from django.shortcuts import render_to_response, get_object_or_404
+from django.template import RequestContext
+from django.shortcuts import render_to_response, get_object_or_404,render
 from django import forms
 import datetime
 from django.conf import settings
@@ -1239,14 +1239,16 @@ def jurnal_pengembalian_titipan_bank(kasir, nilai, user):
         kredit = nilai,debet = 0,id_product = '4',status_jurnal ='2',tgl_trans = sekarang,
         id_cabang = user.profile.gerai.kode_cabang,id_unit= 300)
 
-def mastertiket_ayda_gerai(request,object_id):
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def mastertiket_ayda_gerai(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
     sekarang = datetime.date.today()
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=u'2').\
-        filter(jenis='PENJUALAN_AYDA_CABANG')
-    template = 'kasir/tiket/mastertiket_ayda_gerai.html'
-    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
-    return render_to_response(template, variables)
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang,id_cabang=cab,status_jurnal=u'2',jenis='PENJUALAN_AYDA_CABANG')
+    return render(request,'kasir/tiket/mastertiket_ayda_gerai.html', {'cabang':cabang,'user':user,'g':gr,
+        'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
 
 
 def denominasi(request,object_id):
@@ -3454,26 +3456,26 @@ def jurnal_kas_jkt_plns_rpp(ks, user):
     jurnal.tbl_transaksi_set.create(
         jenis = '%s' % ("Pelunasan_kasir"), id_coa = a_titipan_pelunasan,
         debet = 0,kredit = ks.nilai_pembulatan_lunas,id_product = '4',status_jurnal ='2',tgl_trans = ks.tanggal,
-        id_cabang = user.profile.gerai.kode_cabang,id_unit= 300) 
+        id_cabang = user.profile.gerai.kode_cabang,id_unit= 300)
 
- 
-##################batas akhir jurnal kas kasir pelunasan        
 
-@login_required
-@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
-def data_approve(request,object_id):
-    approve=AkadGadai.objects.all()
-    view = approve.filter(gerai__kode_cabang=object_id).filter(status_transaksi = 3)
-    template = 'kasir/view/data_approve.html'
-    variables = RequestContext(request,{'approve':approve,'view':view})
-    return render_to_response(template,variables)
+##################batas akhir jurnal kas kasir pelunasan
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
-def lunas(request,object_id):    
+def data_approve(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    view = AkadGadai.objects.filter(gerai__kode_cabang=cab,status_transaksi = 3)
+    return render(request,'kasir/view/data_approve.html',{'view':view})
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def lunas(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
-    a = Pelunasan.objects.all()
-    akad = a.filter(gerai__kode_cabang=object_id).exclude(pelunasan__sts_tdr='1')
+    akad = Pelunasan.objects.filter(gerai__kode_cabang=cab).exclude(pelunasan__sts_tdr='1')
     paginator = Paginator(akad, 20)
     try:
         page = int(request.GET.get('page', '1'))
@@ -3483,22 +3485,17 @@ def lunas(request,object_id):
         akad = paginator.page(page)
     except (EmptyPage, InvalidPage):
         akad_list = paginator.page(paginator.num_pages)
-    template='kasir/view/data_lunas.html'
-    variable = RequestContext(request,{'akad': akad})
-    return render_to_response(template,variable)   
+    return render(request,'kasir/view/data_lunas.html',{'akad':akad})   
 
  
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
-def kwitansi_gu_adm(request,object_id):    
+def kwitansi_gu_adm(request):
     sekarang = datetime.date.today()
-    a = AkadGadai.objects.all()
-    #akad = a.filter(gerai__kode_cabang=object_id).filter(tanggal = sekarang)
-    ####menu baru menghindari transaksi terhenti di salah satu approve
-    akad = a.filter(gerai__kode_cabang=object_id).filter(tanggal = sekarang).filter(kepalagerai__status ='1').filter(kasirgerai__status = '1')
-    template='kasir/view/data_lunas_gu.html'
-    variable = RequestContext(request,{'akad': akad})
-    return render_to_response(template,variable)
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    akad = AkadGadai.objects.filter(gerai__kode_cabang=cab,tanggal = sekarang,kepalagerai__status ='1',kasirgerai__status = '1')
+    return render(request,'kasir/view/data_lunas_gu.html',{'akad':akad})
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))

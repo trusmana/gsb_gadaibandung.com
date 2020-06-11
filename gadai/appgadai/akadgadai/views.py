@@ -1,6 +1,6 @@
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.template import RequestContext    
-from django.shortcuts import render_to_response, get_object_or_404
+from django.template import RequestContext
+from django.shortcuts import render_to_response, get_object_or_404,render
 from gadai.appgadai.models import *
 from django import forms
 from reportlab.pdfgen import canvas
@@ -2110,12 +2110,13 @@ def batal_cair_manop(request, object_id):
     return HttpResponseRedirect(ag.get_absolute_url())
 
 @login_required
-def data_tolak(request, object_id):
-    akad = AkadGadai.objects.filter(status_transaksi__in=('4','5')).filter(gerai__kode_cabang=object_id)
-    #barang.status_kondisi_barang = 1
-    #barang.save()
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def data_tolak(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    akad = AkadGadai.objects.filter(status_transaksi__in=('4','5')).filter(gerai__kode_cabang=cab)
     variables = RequestContext(request, {'akad': akad})
-    return render_to_response('akadgadai/data_tolak.html', variables)
+    return render(request,'akadgadai/data_tolak.html', {'akad':akad})
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))

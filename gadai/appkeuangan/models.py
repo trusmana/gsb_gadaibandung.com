@@ -1,8 +1,10 @@
 from django.db import models
+from django.contrib.auth.models import User,Group
+
 Gabungan_Cabang = (
     ('0','Per Gerai'),
     ('1','Gabungan'),
-) 
+)
 
 DATACABANG =(
     ('500','GABUNGAN'),('300','BANDUNG'),('301','JAKARTA'),('302','SUCI'),('303','DIPATIUKUR'),('304','BALUBUR'),
@@ -118,3 +120,42 @@ JENIS_DESKRIPSI =(
    ('SALDOKASGERAI','SALDOKASGERAI'),
    ('SALDOBANKGERAI','SALDOBANKGERAI'),
 )
+
+class Menu(models.Model):
+    objects = models.Manager()
+    nama = models.CharField(max_length=100)
+    url_utama = models.CharField(max_length=100, blank=True, null=True)
+    deskripsi = models.TextField(blank=True, null=True)
+    akses_grup = models.ManyToManyField(Group, blank=True)
+    status_aktif = models.BooleanField(default=True)
+
+    class Admin:
+        pass
+
+    def __unicode__(self):
+        return "%s" % self.nama
+
+    class Meta:
+        db_table = 'menu'
+        verbose_name = 'Menu'
+        verbose_name_plural = verbose_name
+
+class MenuItem(models.Model):
+    menu = models.ForeignKey(Menu)
+    order = models.IntegerField()
+    link_url = models.CharField(max_length=100, help_text='http://kspra.co.id')
+    judul = models.CharField(max_length=100)
+    login_required = models.BooleanField(default=True)
+    user = models.ManyToManyField(User, blank=True)
+    status_aktif = models.BooleanField(default=True)
+
+    class Admin:
+        pass
+
+    class Meta:
+        db_table = 'menuitem'
+        verbose_name = 'MenuItem'
+        verbose_name_plural = verbose_name
+
+    def __unicode__(self):
+        return "%s. %s" % (self.order, self.judul)

@@ -1,9 +1,21 @@
 from django.contrib import admin
 import datetime
 from gadai.appgadai.models import *
+from gadai.appkeuangan.models import *
 from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportMixin, ExportActionModelAdmin
+
+class MenuAdmin(ImportExportMixin,admin.ModelAdmin):
+    list_display = ['id']
+    search_fields = ['id']
+admin.site.register(Menu, MenuAdmin)
+
+class MenuItemAdmin(ImportExportMixin,admin.ModelAdmin):
+    list_display = ['id','link_url','judul']
+    search_fields = ['id']
+admin.site.register(MenuItem, MenuItemAdmin)
+
 
 class TeguranAdmin(ImportExportMixin,admin.ModelAdmin):
     list_display = ['id']

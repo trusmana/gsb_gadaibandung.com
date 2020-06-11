@@ -729,24 +729,60 @@
 
 {% endifusergroup %}
 {% ifusergroup ADM_GERAI%}
-<div id='cssmenu'>
-    <ul>
-	 <li class='active'><a href=''><span>MENU ADM GERAI</span></a></li>
-	 {% if cek_menu > 0 %}
-         {% for a in menu %}
-	 <li class='has-sub'><a href=''><span>{{a.nama}}</span></a>
-	    <ul>	 
-            {% for b in a.menuitem_set.all %}
-            {% if b in user.menuitem_set.all%}
-             	<li><a href="{{b.link_url}}" ><span>{{b.judul}}</span></a></li>
-	    {% endif %} {% endfor %}
 
-	    </ul>
-	 {% endfor %} {% endif%}
-	</li>
-    </ul>
-</div>
-{% endifusergroup %}
+			<div id='cssmenu'>
+				  <ul>
+					 <li class='active'><a href=''><span>MENU ADM GERAI</span></a></li>
+					 <li class='has-sub'><a href=''><span>Menu Input</span></a>
+						<ul>
+						   <li><a href="/akadgadai/add/" title="Akad Baru" ><span>Input New Akad</span></a></li>
+                                                   <!--<li><a href="/pencairan/produk/" title="Akad Parameter" ><span>New Akad Parameter</span></a></li>-->
+						   <li><a href="/akadgadai/lunas/" title="Input Pelunasan" ><span>Input Pelunasan</span></a></li>
+						   <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/show/"  title="Permintaan"><span>Input Permintaan</span></a></li>
+						   
+						</ul>
+					 </li>
+					 <li class='has-sub'><a href=''><span>Menu Report </span></a>
+                                             <ul>
+                                              <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_gabungan/"><span>Master Tiket Gabungan</span></a></li>
+                                              <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket/"><span>Master Tiket Pencairan</span></a></li>
+                                              <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_adm_pelunasan/"><span>Master Tiket Pelunasan</span></a></li>	  
+                                              <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_adm_pelunasan_gadai_ulang/"><span>Master Tiket Pelunasan GU</span></a></li>
+                                              <!--<li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_adm_penjualan_pelelangan/"><span>Master Tiket Penjualan Pelelangan</span></a></li>-->
+                                              <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_ayda_gerai/" ><span>Master Tiket Ayda Gerai</span></a></li>
+					      <li><a href="/gerai/{{cabang.kode_cabang}}/suratjalan/" title="surat jalan"><span>Cetak Surat Jalan</span></a></li>
+					      <li><a href="/barang/barangnonlunas/" title="Nasabah JT"><span>Nasabah Jatuh Tempo</span></a></li>
+					      <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/cetakminta/"><span>Cetak Permintaan</span></a></li>
+                                              <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/rekap/"><span>Cetak Rekap Harian</span></a></li>
+                                              <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/plan_gerai/">Plan Jatuh Tempo</span></a></li>
+                                              <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/status_barang_gerai/">Laporan Barang Di Gerai</span></a></li>
+                                              <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/cetak_status_barang/">Cetak Laporan Barang Di Gerai</span></a></li>
+                                              <li><a href="/gerai/{{cabang.kode_cabang}}/status_pencairan_gerai/"><span>Status Aprrove Transaksi</span></a></li>
+					     </ul>
+					 </li>
+					 <li class='has-sub'><a href=''><span>Menu Data Gerai</span></a>
+						<ul>
+						   <li><a href="/kasirgerai/{{cabang.kode_cabang}}/lunas/"><span>Data Nasabah Lunas</span></a></li>
+						   <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/data_approve/"><span>Data Nasabah Approve</span></a></li>
+						   <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/kwitansi_gu_adm/"><span>Kw GU</span></a></li>
+                                                   <li><a href="/akadgadai/{{cabang.kode_cabang}}/data_tolak/"><span>Data Pending / Tolak</span></a></li>
+                                                   <li><a href="/akadgadai/cari_sop/">Lihat SOP</a></li>
+						</ul>
+					 </li>
+					 <li class='has-sub'><a href=''><span>Menu Approve</span></a>
+						<ul>
+						<li><a href="/kplgerai/{{cabang.kode_cabang}}/data_approve_kplg/" ><span> Approve Data Kredit</span></a></li>				
+						</ul>
+					</li>
+				       	<li class='has-sub'><a href=''><span>Simulasi</span></a>
+                        			<ul>
+                            			<li><a href="/gerai/simulasi/" target="_blank" ><span>Simulasi Kredit</span></a></li>               
+                        			</ul>
+                    			</li>
+				  </ul>
+			 </div>
+
+		{% endifusergroup %}
 
 		{% ifusergroup KASIR_GERAI%}
 			<div id='cssmenu'>

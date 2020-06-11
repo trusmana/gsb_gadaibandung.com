@@ -1,4 +1,4 @@
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404,render
 from django.forms.formsets import formset_factory
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
@@ -148,13 +148,15 @@ def reset_status_tolak(request,object_id):
     kp.delete()
     return HttpResponseRedirect("/") 
 
-def data_approve_kplg(request,object_id):
-    gr = Tbl_Cabang.objects.get(kode_cabang =object_id)
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def data_approve_kplg(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    gr = Tbl_Cabang.objects.get(kode_cabang =cab)
     kpl = KepalaGerai.objects.filter(kepala_gerai__gerai=gr)
     akad = AkadGadai.objects.filter(gerai=gr)
-    template = 'kplgerai/approve_approve_kplg.html'
-    variable = RequestContext(request, {'kpl': kpl,'gerai':gr,'akad':akad})
-    return render_to_response(template,variable)
+    return render(request,'kplgerai/approve_approve_kplg.html',{'kpl': kpl,'gerai':gr,'akad':akad})
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='KPLGERAI'))    

@@ -12,10 +12,12 @@ from gadai.appgadai.models import *
 def homepage(request):
     template_name = 'homepage.html'
     user = request.user
+    cek_menu = user.menuitem_set.all().count()
+    cek_group = user.groups.all()
+    menu = Menu.objects.filter(akses_grup__in=(cek_group)).filter(status_aktif = True)
     try:
         cabang = user.get_profile().gerai
         if cabang:
-            #akad_list = AkadGadai.objects.for_user(user)
             akad_list = AkadGadai.objects.for_user(user).all().filter(lunas__isnull=True).order_by('-tanggal')
             paginator = Paginator(akad_list, 30)
 
@@ -26,10 +28,9 @@ def homepage(request):
             try:
                 akad_list = paginator.page(page)
             except (EmptyPage, InvalidPage):
-                akad_list = paginator.page(paginator.num_pages) 
- 
+                akad_list = paginator.page(paginator.num_pages)
             template_name = 'home_gerai.html'
-            variables = RequestContext(request, {'akad_list': akad_list,'cabang':cabang})
+            variables = RequestContext(request, {'akad_list': akad_list,'cabang':cabang,'cek_menu':cek_menu,'menu':menu})
     except:
         variables = RequestContext(request, {})
     if user.is_staff:
@@ -38,31 +39,25 @@ def homepage(request):
         for k in akad_list:
             if k.akadgadai_set.all().count() > 0:
                 kp.append(k)
-        
         total_piutang = total_akad= total_lunas = total_jt = total_nilai = total_jt_nilai = total_aktif = 0
         total_nilai_lunas = total_lelang= total_nilai_lelang= total_laba_lelang= total_all_barang= 0
-        for k in kp :        
+        for k in kp :
             total_piutang += k.piutang()
             total_akad += k.aktif()
             total_nilai += k.get_jumlah_nilai()
             total_jt += k.total_jatuhtempo()
             total_jt_nilai +=k.get_jumlah_jatuhtempo()
             total_lunas +=k.get_banyak_lunas()
-            #total_nilai_lunas +=k.plns_nilai_bulanan()
             total_lelang +=k.get_banyak_lelang()
             total_nilai_lelang += k.get_total_nilailelang()
             total_all_barang +=k.total_barang()
         template_name = 'home_admin.html'
-        variables = RequestContext(request, {'akad_list': akad_list,'kp':kp,
-            'nkp' : len(kp),
-            'total':total_akad,
-            'tot_nilai':total_nilai,
+        variables = RequestContext(request, {'akad_list': akad_list,'kp':kp,'cek_menu':cek_menu,
+            'nkp' : len(kp),'total':total_akad,'tot_nilai':total_nilai,
             'tot_jatuh':total_jt,
             'tot_jt_nilai':total_jt_nilai,
             'tot_lunas':total_lunas,
-            #'tot_nilai_lunas':total_nilai_lunas,
             'tot_lelang':total_lelang,
             'tot_nilai_lelang':total_nilai_lelang,
-            #'tot_laba_lelang':total_laba_lelang,
             'tot_all_barang':total_all_barang,})
     return render_to_response(template_name, variables)

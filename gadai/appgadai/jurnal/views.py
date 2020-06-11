@@ -1,4 +1,4 @@
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404,render
 from django.forms.formsets import formset_factory
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
@@ -514,15 +514,17 @@ def laporan_kas_kecil(request):
 ## MASTER TIKET GABUNGAN ADM
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
-def mastertiket_gabungan(request,object_id):
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
+def mastertiket_gabungan(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
     sekarang = datetime.date.today()
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal= 2).filter(jenis__in=(u'Pencairan',\
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=cab).filter(status_jurnal= 2).filter(jenis__in=(u'Pencairan',\
         u'Pencairan_barang_sama',u'Pelunasan_Barang_sama',u'Pelunasan_Barang_sama_nilai_lebih',u'Pelunasan_Barang_sama',\
         u'Pelunasan_Barang_sama_nilai_lebih',u'Penjualan_lelang_adm','PENJUALAN_AYDA_CABANG',
         u'Pelunasan_adm',u'Pelunasan_adm_diskon','Pelunasan_kasir_rak1','Pelunasan_kasir_bank_rak1',
         u'Pelunasan_Barang_sama',u'Pelunasan_Barang_sama_nilai_lebih',
-        'PENJUALAN_AYDA_CABANG' 
+        'PENJUALAN_AYDA_CABANG'
         ))
     template = 'ledger/mastertiket_gabungan.html'
     variables = RequestContext(request, {'cabang':cabang,'g': gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
@@ -1021,6 +1023,7 @@ def show(request, object_id):
 def mastertiket_setoran_pengeluaran_gerai(request,object_id):
     sekarang = datetime.date.today()
     #user = request.user
+    mastertiket
     gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=2).\
         filter(jenis__in=(u'GL_GL_PENAMBAHAN_PUSAT_BANK',u'GL_GL_PENAMBAHAN_PUSAT_KAS',u'GL_GL_PENGELUARAN_PUSAT_BANK',
         'GL_GL_PENAMBAHAN_PUSAT_KAS_GERAI',\
@@ -1049,12 +1052,14 @@ def mastertiket_penjualan_ayda(request,object_id):
     variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
     return render_to_response(template, variables)
 
-def mastertiket(request,object_id):
+def mastertiket(request):
     sekarang = datetime.date.today()
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id) 
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
     template = 'ledger/mastertiket_pencairan.html'
     variables = RequestContext(request, {'cabang':cabang,'user':User})
-    return render_to_response(template, variables)
+    return render(request,'ledger/mastertiket_pencairan.html',{'cabang':cabang,'user':user})
 
 def mastertiket_pencairan(request,object_id):
     dari = None
@@ -1071,24 +1076,28 @@ def mastertiket_pencairan(request,object_id):
     return render_to_response('ledger/mastertiket.html', variables)
 
 ### MASTER TIKET PELUNASAN ADM GADAI ULANG BARANG SAMA
-def mastertiket_adm_pelunasan_gadai_ulang(request,object_id):
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def mastertiket_adm_pelunasan_gadai_ulang(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
     sekarang = datetime.date.today()
-    #user = request.user
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=2).filter(jenis__in=(u'Pelunasan_Barang_sama',u'Pelunasan_Barang_sama_nilai_lebih'))
-    template = 'ledger/mastertiket_adm_pelunasan_gu.html'
-    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
-    return render_to_response(template, variables)
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=cab,status_jurnal=2,jenis__in=(u'Pelunasan_Barang_sama',\
+        u'Pelunasan_Barang_sama_nilai_lebih'))
+    return render(request,'ledger/mastertiket_adm_pelunasan_gu.html', {'cabang':cabang,'user':user,'g':gr,\
+        'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
 ### AKHIR MASTER TIKET PELUNASAN ADM GADAI ULANG BARANG SAMA
 
-def mastertiket_adm_pelunasan(request,object_id):
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
+def mastertiket_adm_pelunasan(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
     sekarang = datetime.date.today()
-    #user = request.user
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=2).filter(jenis__in=(u'Pelunasan_adm',u'Pelunasan_adm_diskon','Pelunasan_kasir_rak1','Pelunasan_kasir_bank_rak1'))   
-    template = 'ledger/mastertiket_adm_pelunasan.html'
-    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
-    return render_to_response(template, variables)
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang,id_cabang=cab,status_jurnal=2,jenis__in=(u'Pelunasan_adm',\
+        u'Pelunasan_adm_diskon','Pelunasan_kasir_rak1','Pelunasan_kasir_bank_rak1'))
+    return render(request,'ledger/mastertiket_adm_pelunasan.html', {'cabang':cabang,'user':User,'g':gr,
+        'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
 
 def mastertiket_adm_penjualan_pelelangan(request,object_id):
     cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)

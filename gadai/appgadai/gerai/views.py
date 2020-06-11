@@ -2,7 +2,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import RequestContext
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404,render
 from gadai.appgadai.gerai.views import*
 from gadai.appgadai.models import *
 import datetime
@@ -48,23 +48,23 @@ def keluar(request):
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
-def status_pencairan_gerai(request,object_id):
+def status_pencairan_gerai(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     now = datetime.date.today()
     h=now.day
     m=now.month
     y=now.year
     kemarin  = now - relativedelta(days=1)
-    gr = Tbl_Cabang.objects.get(kode_cabang = object_id)
-    ag = gr.akadgadai_set.filter(tanggal=now).filter(jns_gu = 0)
-    gu = gr.akadgadai_set.filter(tanggal=now).filter(jns_gu = 1).filter(lunas__isnull = True)
+    gr = Tbl_Cabang.objects.get(kode_cabang = cab)
+    ag = gr.akadgadai_set.filter(tanggal=now,jns_gu = 0)
+    gu = gr.akadgadai_set.filter(tanggal=now,jns_gu = 1,lunas__isnull = True)
 
-    akad = AkadGadai.objects.filter(tanggal = now).filter(lunas__isnull = True).filter(gerai__kode_cabang=object_id).filter(jns_gu = 0)
-    akad_gu = AkadGadai.objects.filter(tanggal = now).filter(lunas__isnull = True).filter(gerai__kode_cabang=object_id).filter(jns_gu = 2)
-    lunas = KasirGeraiPelunasan.objects.filter(tanggal =now).filter(status = 1).filter(kasir_lunas__gerai__kode_cabang =object_id)
+    akad = AkadGadai.objects.filter(tanggal = now).filter(lunas__isnull = True).filter(gerai__kode_cabang=cab).filter(jns_gu = 0)
+    akad_gu = AkadGadai.objects.filter(tanggal = now).filter(lunas__isnull = True).filter(gerai__kode_cabang=cab).filter(jns_gu = 2)
+    lunas = KasirGeraiPelunasan.objects.filter(tanggal =now,status = 1,kasir_lunas__gerai__kode_cabang =cab)
     lunas_kemarin= gr.pelunasan_set.filter(tanggal = now).exclude(sts_plns =2)
-    template = 'gerai/status_pencairan_gerai.html'
-    variable = RequestContext(request, {'gr':gr,'ag':ag,'gu':gu,'lunas':lunas,})
-    return render_to_response(template,variable)
+    return render(request,'gerai/status_pencairan_gerai.html',{'gr':gr,'ag':ag,'gu':gu,'lunas':lunas,})
 
 def is_in_multiple_groups(user):
     return user.groups.filter(name__in=['KEPALAGUDANG','GUDANGAKTIF'])
@@ -223,54 +223,48 @@ def filter_neraca(request):
 
 
 @login_required
-def plan_jatuh_tempo_gerai(request,object_id):
-    rekap = Tbl_Cabang.objects.get(kode_cabang=object_id)
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def plan_jatuh_tempo_gerai(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    rekap = Tbl_Cabang.objects.get(kode_cabang=cab)
     plns = []
     sekarang = datetime.date.today()
     aa = rekap.akadgadai_set.filter(jatuhtempo=sekarang).filter(lunas__isnull = True)
-    #plan_jt = AkadGadai.objects.filter(jatuhtempo=sekarang)#.filter(lunas__isnull=True) firman 04 april 2015
     all_pk_lunas = Pelunasan.objects.filter(tanggal=sekarang)
-    all_pk_akad  = AkadGadai.objects.filter(tanggal=sekarang)#.filter(lunas__isnull=True) firman 04 april 2015
-    #all_pk_prpj  = Perpanjang.objects.filter(tanggal=sekarang)
-
+    all_pk_akad  = AkadGadai.objects.filter(tanggal=sekarang)
     template = 'manop/filter/plan_jatuh_tempo_gerai.html'
     variables = RequestContext(request, {'rekap':rekap,
             'aa': aa ,'total_noa_jt' : aa.count(),
             'total_nilai_jt':sum([p.nilai for p in aa]),
             'total_nilai_plan_jt': sum([p.nilai for p in aa]) * 0.008,})
-           
     return render_to_response(template,variables)
 
 @login_required
-def status_barang_gerai(request, object_id):
-    gr = Tbl_Cabang.objects.get(kode_cabang = object_id)
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def status_barang_gerai(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    gr = Tbl_Cabang.objects.get(kode_cabang = cab)
     start_date = datetime.date(2015,03,18)
     end_date = datetime.date.today()
-    gerai = gr.akadgadai_set.filter(sts_tdr__isnull = True).filter(tanggal_permintaan__range =(start_date,end_date)).filter(status_permintaan__in=('3')).exclude(sts_tdr = 1)
-
+    gerai = gr.akadgadai_set.filter(sts_tdr__isnull = True,tanggal_permintaan__range =(start_date,end_date),status_permintaan__in=('3')).exclude(sts_tdr = 1)
     template = 'gerai/status/status_barang_gerai.html'
-    variables = RequestContext(request, {
-        'gr':gr,'total':len(gerai),
-        'gerai':gerai,
-        'nilai': sum([b.terima_bersih for b in gerai ]),
-        #'jasa': sum([b.jasa for b in gerai ]),
-        #'adm': sum([b.adm for b in gerai ]),
-        #'simpan': sum([b.biayasimpan for b in gerai ]),
-    })
+    variables = RequestContext(request, {'gr':gr,'total':len(gerai),'gerai':gerai,
+        'nilai': sum([b.terima_bersih for b in gerai ]),})
     return render_to_response(template,variables)
 
 @login_required
-def cetak_status_barang(request, object_id):
-    gr = Tbl_Cabang.objects.get(kode_cabang = object_id)
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def cetak_status_barang(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    gr = Tbl_Cabang.objects.get(kode_cabang = cab)
     start_date = datetime.date(2015,03,18)
     end_date = datetime.date.today()
-    gerai = gr.akadgadai_set.filter(sts_tdr__isnull = True).filter(tanggal_permintaan__range =(start_date,end_date)).filter(status_permintaan__in=('3'))
-
+    gerai = gr.akadgadai_set.filter(sts_tdr__isnull = True,tanggal_permintaan__range =(start_date,end_date),status_permintaan__in=('3'))
     template = 'gerai/status/cetak_status_barang.html'
-    variables = RequestContext(request, {
-        'gr':gr,'total':len(gerai),
-        'gerai':gerai,'end_date':end_date,
-    })
+    variables = RequestContext(request, {'gr':gr,'total':len(gerai),'gerai':gerai,'end_date':end_date,})
     return render_to_response(template,variables)
 
 @login_required
@@ -2807,7 +2801,10 @@ def permintaan(request):
     return HttpResponseRedirect('/gerai/%s/show/' % pk.gerai.kode_cabang)
 
 @login_required
-def cetakminta(request, object_id):
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def cetakminta(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     try :
         f = forms.DateField()
     except :
@@ -2816,29 +2813,23 @@ def cetakminta(request, object_id):
         except:
             tanggal = AkadGadai.objects.filter(tanggal__month=tanggal_permintaan.month)
     now = datetime.date.today()
-    gr = Tbl_Cabang.objects.get(kode_cabang = object_id)
-    gerai = gr.akadgadai_set.filter(tanggal_permintaan=now).filter(status_permintaan='1').order_by('gerai')
+    gr = Tbl_Cabang.objects.get(kode_cabang = cab)
+    gerai = gr.akadgadai_set.filter(tanggal_permintaan=now,status_permintaan='1').order_by('gerai')
     rekap_jenis = dict([[k, 0] for k,v in JENIS_BARANG])
-    #for ag in gerai:
-        #rekap_jenis[ag.barang.jenis_barang] += 1
-    template = 'gerai/permintaan.html'
-    variables = RequestContext(request, {
-        'gr':gr,
-        'gerai':gerai,'rekap_jenis': [(dict(JENIS_BARANG)[k], v) for k,v in rekap_jenis.iteritems()],
-    })
-    return render_to_response(template,variables)
+    return render(request,'gerai/permintaan.html',{'gr':gr,
+        'gerai':gerai,'rekap_jenis': [(dict(JENIS_BARANG)[k], v) for k,v in rekap_jenis.iteritems()]})
 ###End Permintaan Gerai###
+
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name__in= ('ADM_GERAI','KPLGERAI')))
-def show(request,object_id):
+def show(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    aa = Tbl_Cabang.objects.get(kode_cabang=cab)
     sekarang = datetime.date.today()
     sekarang1 = datetime.datetime.now()
-    aa = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    #gr = aa.akadgadai_set.filter(status_transaksi__isnull=True)
-    #gr =  aa.akadgadai_set.filter(lunas__isnull = True).filter(sts_tdr__isnull = False).exclude(status_transaksi__in=('1','')) #True)
-    #gr =  aa.akadgadai_set.all()
+    aa = Tbl_Cabang.objects.get(kode_cabang=cab)
     gr = aa.akadgadai_set.filter(kepalagerai__status = 1).exclude(sts_tdr = u'1').exclude(status_transaksi__in = ('2','4','5','6','7','8','9','10'))
-    #gr = aa.akadgadai_set.exclude(sts_tdr = 1).filter(kepalagerai__status = 1)
     variables = RequestContext(request, {'tes':aa,'object':gr,'sekarang':sekarang,'sekarang1':sekarang1})
     return render_to_response('gerai/detail.html', variables)
 
@@ -2846,7 +2837,9 @@ def show(request,object_id):
 ###cetak Rekap Harian###
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
-def cetak_rekap(request, object_id):
+def cetak_rekap(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     batas = datetime.date(2010,1,1)
     batas_awal = datetime.date(2017,1,1)
     now = datetime.date.today()
@@ -2854,56 +2847,42 @@ def cetak_rekap(request, object_id):
     m=now.month
     y=now.year
     kemarin  = now - relativedelta(days=1)
-
     aa = now.year
     bb = 1
     cc = 1
     awal = datetime.date(aa,bb,cc)
-
-
-    gr = Tbl_Cabang.objects.get(kode_cabang = object_id)
+    gr = Tbl_Cabang.objects.get(kode_cabang = cab)
     ag = gr.akadgadai_set.filter(tanggal=now).filter(jns_gu = 0).filter(kepalagerai__status = 1)
-    #gu = gr.akadgadai_set.filter(tanggal=now).filter(jns_gu = 1).filter(lunas__isnull = True)
-    gu = gr.akadgadai_set.filter(tanggal=now).filter(jns_gu = 1).filter(kepalagerai__status = 1).filter(lunas__isnull = True)
-    akad = AkadGadai.objects.filter(tanggal = now).filter(lunas__isnull = True).filter(gerai__kode_cabang=object_id).filter(jns_gu = u'0').exclude(status_transaksi__in=('5'))
-    #akad_pencairan = AkadGadai.objects.filter(tanggal__range = (batas,now)).filter(lunas__isnull = True).filter(gerai__kode_cabang=object_id).filter(jns_gu = u'0')
-    akad_pencairan =AkadGadai.objects.exclude(status_transaksi__in=('1','2','4','5','6','7','8','9','10')).filter(tanggal__lte=now).filter(gerai__kode_cabang = object_id)
-    #akad_jasa = AkadGadai.objects.filter(tanggal__range =(batas_awal,now)).filter(lunas__isnull = True).filter(gerai__kode_cabang=object_id).filter(jns_gu = u'0')
-    akad_jasa = AkadGadai.objects.filter(tanggal__range=(awal,kemarin)).filter(kepalagerai__status = 1).filter(gerai__kode_cabang = object_id)
-    akad_gu = AkadGadai.objects.filter(tanggal = now).filter(lunas__isnull = True).filter(gerai__kode_cabang=object_id).filter(jns_gu = u'2')
-    akad_gu_jasaterlambat = AkadGadai.objects.filter(tanggal__range =(awal,now)).filter(lunas__isnull = True).filter(gerai__kode_cabang=object_id).filter(jns_gu = u'2')
-    lunas= gr.pelunasan_set.filter(tanggal=now).filter(sts_plns =1)
+    gu = gr.akadgadai_set.filter(tanggal=now).filter(jns_gu = 1,kepalagerai__status = 1,lunas__isnull = True)
+    akad = AkadGadai.objects.filter(tanggal = now,lunas__isnull = True,gerai__kode_cabang=cab,jns_gu = u'0').exclude(status_transaksi__in=('5'))
+    akad_pencairan= AkadGadai.objects.exclude(status_transaksi__in=('1','2','4','5','6','7','8','9','10')).filter(tanggal__lte=now,gerai__kode_cabang = cab)
+    akad_jasa = AkadGadai.objects.filter(tanggal__range=(awal,kemarin),kepalagerai__status = 1,gerai__kode_cabang = cab)
+    akad_gu = AkadGadai.objects.filter(tanggal = now).filter(lunas__isnull = True,gerai__kode_cabang=cab,jns_gu = u'2')
+    akad_gu_jasaterlambat = AkadGadai.objects.filter(tanggal__range =(awal,now),lunas__isnull=True,gerai__kode_cabang=cab,jns_gu = u'2')
+    lunas= gr.pelunasan_set.filter(tanggal=now,sts_plns =1)
     lunas_kemarin= gr.pelunasan_set.filter(tanggal = now).exclude(sts_plns =2)
     lunas_kemarin_jasaterlambat= gr.pelunasan_set.filter(tanggal__range =(awal,kemarin))
-    akad_beasimpan = AkadGadai.objects.filter(tanggal__range = (awal,kemarin)).filter(gerai__kode_cabang=object_id).exclude(status_transaksi = 5)
-    akad_adm = AkadGadai.objects.filter(tanggal__range = (awal,kemarin)).filter(gerai__kode_cabang=object_id).exclude(status_transaksi =5)
-    akad_gu_denda = AkadGadai.objects.filter(tanggal__range =(awal,kemarin)).filter(gerai__kode_cabang=object_id).filter(jns_gu = u'2')
+    akad_beasimpan = AkadGadai.objects.filter(tanggal__range = (awal,kemarin),gerai__kode_cabang=cab).exclude(status_transaksi = 5)
+    akad_adm = AkadGadai.objects.filter(tanggal__range = (awal,kemarin),gerai__kode_cabang=cab).exclude(status_transaksi =5)
+    akad_gu_denda = AkadGadai.objects.filter(tanggal__range =(awal,kemarin),gerai__kode_cabang=cab,jns_gu = u'2')
     lunas_kemarin_denda= gr.pelunasan_set.filter(tanggal__range =(awal,kemarin)).exclude(sts_plns =3)
-    saldo_akhir_akad = AkadGadai.objects.exclude(status_transaksi__in=('1','2','4','5','6','7','8','9','10')).filter(tanggal__lte=now).filter(gerai__kode_cabang = object_id)
-    ##SUM PINJAMAN
-    #saldo_awal = sum([b.nilai for b in akad_pencairan ])
+    saldo_akhir_akad = AkadGadai.objects.exclude(status_transaksi__in=('1','2','4','5','6','7','8','9','10')).\
+        filter(tanggal__lte=now,gerai__kode_cabang = cab)
     saldo_awal_debet = sum([b.nilai for b in ag ]) + sum([b.nilai for b in gu ])
     saldo_awal_kredit = sum([b.nilai for b in lunas ]) + sum([b.nilai_gu for b in gu ])
-    #saldo_akhir = (saldo_awal + saldo_awal_debet) - float(saldo_awal_kredit)
     saldo_akhir = sum([b.nilai for b in saldo_akhir_akad ])
     saldo_awal = float(sum([b.nilai for b in saldo_akhir_akad ])) + float((sum([b.nilai for b in lunas ]) + sum([b.nilai_gu for b in gu ]) )) - float(sum([b.nilai for b in ag ]) + sum([b.nilai for b in gu ]))
 
     ##SUM JASA
     saldo_awal_jasa = sum([b.tot_jasa_kend_elek for b in akad_jasa ])#sum([b. for b in akad_jasa ])
-    #saldo_awal_jasa_kredit = sum([b.tot_jasa_kend_elek for b in akad_jasa ]) + sum([b.tot_jasa_kend_elek for b in gu ])#sum([b.jasa_all() for b in ag ])+ sum([b.jasa_all() for b in gu ])
     saldo_awal_jasa_kredit= sum([b.jasa_all() for b in ag ])+ sum([b.jasa_all() for b in gu ])
     saldo_akhir_jasa = saldo_awal_jasa + saldo_awal_jasa_kredit
-
-
-
     ##SUM JASA TERLAMBAT
     saldo_awal_jasaterlambat = sum([a.bea_jasa_kendaraan for a in lunas_kemarin_jasaterlambat]) + sum([a.bea_jasa for a in lunas_kemarin_jasaterlambat])
-    #saldo_awal_jasaterlambat = sum([b.jasa_gu for b in akad_gu_jasaterlambat ]) + sum([b.jasa_all() for b in lunas_kemarin_jasaterlambat])
     saldo_awal_jasaterlambat_kredit = sum([b.jasa_gu for b in gu ])+ sum([b.jasa_all() for b in lunas ])
     saldo_akhir_jasaterlambat = saldo_awal_jasaterlambat + saldo_awal_jasaterlambat_kredit
 
     ##SUM SIMPAN
-    #saldo_awal_simpan = sum([b.beasimpan_all() for b in akad_beasimpan ]) 
     saldo_awal_simpan = sum([b.biayasimpan for b in akad_beasimpan ]) + sum([b.beasimpan_kendaraan for b in akad_beasimpan ])
     saldo_awal_simpan_kredit = sum([b.beasimpan_all() for b in ag ])+ sum([b.beasimpan_all() for b in gu ])
     saldo_akhir_simpan = saldo_awal_simpan + saldo_awal_simpan_kredit
@@ -2914,7 +2893,7 @@ def cetak_rekap(request, object_id):
     saldo_akhir_adm = saldo_awal_adm+ saldo_awal_adm_kredit
 
     ##SUM DENDA
-    saldo_awal_denda = sum([b.denda_total for b in lunas_kemarin_denda]) #sum([b.denda_gu for b in akad_gu_denda ]) + sum([b.denda_total for b in lunas_kemarin_denda])
+    saldo_awal_denda = sum([b.denda_total for b in lunas_kemarin_denda])
     saldo_awal_denda_kredit = sum([b.denda_gu for b in gu ])+ sum([b.denda_all() for b in lunas ])
     saldo_akhir_denda = saldo_awal_denda + saldo_awal_denda_kredit
 
@@ -3149,7 +3128,10 @@ def neracaunit(request, object_id):
     return render_to_response(template,variable)
 
 @login_required
-def sjalan(request, object_id):
+@user_passes_test(lambda u: u.groups.filter(name='ADM_GERAI'))
+def sjalan(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     try :
         f = forms.DateField()
         tanggal = f.clean(request.GET.get('tgl',''))
@@ -3157,32 +3139,14 @@ def sjalan(request, object_id):
         try:
             tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC").filter(tanggal__month=tanggal.month)[0] 
         except:
-            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0] 
-    
-    #tanggal = forms.DateField()
+            tanggal =  AkadGadai.objects.dates('tanggal', 'day', order="DESC")[0]
     now = datetime.date.today()
-    gr = Tbl_Cabang.objects.get(kode_cabang = object_id)
+    gr = Tbl_Cabang.objects.get(kode_cabang = cab)
     gerai = gr.akadgadai_set.filter(tanggal=now).exclude(lunas=now).filter(tanggal__year=tanggal.year).order_by('gerai')
-    brg_retur = gr.akadgadai_set.filter(tanggal_permintaan=now).filter(status_permintaan="2").order_by('gerai')
+    brg_retur = gr.akadgadai_set.filter(tanggal_permintaan=now,status_permintaan="2").order_by('gerai')
     rekap_jenis = dict([[k, 0] for k,v in JENIS_BARANG])
-    #rekap_retur = dict([[k, 0] for k,v in JENIS_BARANG])
-    
-    #for ag in gerai:
-        #rekap_jenis[ag.barang.jenis_barang] += 1
-
-    #for ret in brg_retur:
-        #rekap_retur[ret.barang.jenis_barang] += 1
-        
-        
-    template = 'gerai/suratjalan.html'
-    variables = RequestContext(request, {
-        'gr':gr,
-        'gerai':gerai,
-        'tanggal':tanggal,
-        'rekap_jenis': [(dict(JENIS_BARANG)[k], v) for k,v in rekap_jenis.iteritems()],
-        'brg_retur': brg_retur,
-    })
-    return render_to_response(template,variables)
+    return render(request,'gerai/suratjalan.html',{'gr':gr,'gerai':gerai,'tanggal':tanggal,
+        'rekap_jenis': [(dict(JENIS_BARANG)[k], v) for k,v in rekap_jenis.iteritems()],'brg_retur':brg_retur})
 
 ###Rekap Transaksi Harian All Gerai###  
 @login_required
