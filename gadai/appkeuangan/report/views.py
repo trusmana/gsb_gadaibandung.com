@@ -262,11 +262,11 @@ def refisi_jurnal_harian(request):
         return render_to_response(template,variable)
 
 @login_required
-def kembaligu(request, object_id):
-    ag = AkadGadai.objects.filter(gerai__kode_cabang = object_id)#.filter(lunas = sekarang)
+def kembaligu(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    ag = AkadGadai.objects.filter(gerai__kode_cabang = cab)#.filter(lunas = sekarang)
     titip = TitipanAkadUlang.objects.filter(norek__in = ag).filter(status = 2)
-
-    ttp =titip.count()
     total_titip = sum([a.nilai for a in titip])
     template = 'kasir/laporan/show_kembaligu.html'
     variable = RequestContext(request, {

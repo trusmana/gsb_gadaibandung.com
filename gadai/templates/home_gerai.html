@@ -523,8 +523,6 @@
         <li><a href="/jurnal/laporan_kas_kecil/"><span>Laporan Kas Kecil</span></a></li>
         <li><a href="/jurnal/laporan_kas_uang_muka/"><span>Laporan Uang Muka Pusat</span></a></li>
         <li><a href="/mankeu/rekapitulasi_transaksi_gl_gl/">Rekapitulasi Transaksi GL Tunai</a></li>
-        <!--<li class='last'><a href="/keuangan/{{cabang.kode_cabang}}/{{user.id}}/mastertiket_gl_gl_pusat/">Mastertiket Transaksi GL & Biaya</a></li>
-    --> 
     </ul>
         </li>
         <!--<li class='has-sub'><a href=''><span>Posting</span></a>
@@ -602,27 +600,18 @@
 				<li><a href="/kplgerai/{{cabang.kode_cabang}}/neraca/"><span>Neraca</span></a></li>
 				<li><a href="/kplgerai/{{cabang.kode_cabang}}/labarugi/"><span>Laba Rugi</span></a></li>
                                 <li><a href="/akadgadai/cari_sop/">Lihat SOP</a></li>
-				<!--<li><a href="/kplgerai/{{cabang.kode_cabang}}/list/"><span>Approve Transaksi Gl to Gl</span></a></li>-->
 			</ul>
 		</li>
                           <li class='has-sub'><a href=''><span>Laporan Transaksi</span></a>
 			<ul>
 				<li><a href="/kplgerai/{{cabang.kode_cabang}}/pencairan_gerai/" ><span> Laporan Pencairan</span></a></li>
-
-				<!--<li><a href="/kplgerai/{{cabang.kode_cabang}}/pelunasan_gerai/"><span>Laporan Pelunasan</span></a></li>
-				<li><a href="/kplgerai/all_transaksi/"><span>Laporan Transaksi All</span></a></li>
-				<li><a href="/kplgerai/{{cabang.kode_cabang}}/tutup_saldo_gerai/"><span>Posting Transaksi</span></a></li> -->
 			</ul>
 		</li>
               		<li class='has-sub'><a href=''><span>Menu Input</span></a>
 			<ul>
-                             <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/show/"  title="Permintaan"><span>Input Permintaan</span></a></li>
+                             <li class='last'><a href="/gerai/{{cabang.kode_cabang}}/show/" title="Permintaan"><span>Input Permintaan</span></a></li>
                              <li><a href="/kplgerai/price_list/">Price List</span></a></li>
-                                <!---
-				<li><a href="/kplgerai/{{cabang.kode_cabang}}/data_approve_kplg/" ><span> Approve Data </span></a></li>
-				<li><a  href="/kplgerai/{{cabang.kode_cabang}}/data_kplg/"><span> TEST</span></a></li>
-                                -->
-			</ul>
+                        </ul>
 		</li>
                         <li class='has-sub'><a href=''><span>Simulasi</span></a>
                            <ul>
@@ -633,6 +622,23 @@
         <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
     </ul>
                          </div>
+<div id='cssmenu'>
+    <ul>
+         <li class='active'><a href=''><span>MENU KEPALA GERAI</span></a></li>
+         {% if cek_menu > 0 %}
+         {% for a in menu %}
+         <li class='has-sub'><a href=''><span>{{a.nama}}</span></a>
+            <ul> 
+            {% for b in a.menuitem_set.all %}
+            {% if b in user.menuitem_set.all%}
+                <li><a href="{{b.link_url}}" ><span>{{b.judul}}</span></a></li>
+            {% endif %} {% endfor %}
+
+            </ul>
+         {% endfor %} {% endif%}
+        </li>
+    </ul>
+</div>
 
 {% endifusergroup %}
 
@@ -748,61 +754,25 @@
 </div>
 {% endifusergroup %}
 
-		{% ifusergroup KASIR_GERAI%}
-			<div id='cssmenu'>
-				  <ul>
-				<li class='active'><a href=''><span>MENU KASIR</span></a></li>
-				
-				<li class='has-sub'><a href=''><span>Menu Input</span></a>
-					<ul>
-                                         <li class='active'><a href="/jurnal/{{cabang.kode_cabang}}/gl_glcabang/"><span>Input GL to GL</span></a></li>
-				 	 <li class='last'><a  href="/biaya/{{cabang.kode_cabang}}/add/">Transaksi Kasir</a></li>
-                                         <!--<li class='last'><a  href="/rreport/{{cabang.kode_cabang}}/denominasi/">Input DENOMINASI</a></li>-->
-					 <li><a href="/kasirgerai/lunas_kasir/" title="Input Pelunasan" ><span>Input Pelunasan</span></a></li>
-                                         <li><a href="/kasirgerai/cari/" title="Input Pelunasan" ><span>Input Pengembalian Pelunasan</span></a></li>
-                                         <li><a href="/kasirgerai/{{cabang.kode_cabang}}/kembaligu/" title="Input Pengembalian " ><span>Input Pengembalian Gadai Ulang</span></a></li>
-                                         <li><a href="/kasirgerai/{{cabang.kode_cabang}}/app_gu/" title="Input Pelunasan" ><span>Transaksi Gadai Ulang</span></a></li>
-					</ul>
-				</li>
-                                <li class='has-sub'><a href=''><span>Menu Laporan Kasir</span></a>
-                           	    <ul>
-                               		<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/all_transaksi_kas/" ><span>Rekapitulasi Transaksi Kas</span></a></li>
-                                        <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/all_transaksi_bank/"><span>Rekapitulasi Transaksi Bank</span></a></li>
-                                        <li class='last'><a href="/materaicabang/{{cabang.kode_cabang}}/biaya_materai/" ><span>Report Materai</span></a></li>
+{% ifusergroup KASIR_GERAI%}
+<div id='cssmenu'>
+    <ul>
+	 <li class='active'><a href=''><span>MENU KASIR</span></a></li>
+	 {% if cek_menu > 0 %}
+         {% for a in menu %}
+	 <li class='has-sub'><a href=''><span>{{a.nama}}</span></a>
+	    <ul>	 
+            {% for b in a.menuitem_set.all %}
+            {% if b in user.menuitem_set.all%}
+             	<li><a href="{{b.link_url}}" ><span>{{b.judul}}</span></a></li>
+	    {% endif %} {% endfor %}
 
-                                        <li class='last'><a  href="/kasirgerai/{{kocab.kode_cabang}}/cetak_all_transaksi_kas/" ><span>Rekapitulasi Transaksi Teler</span></a></li>
-					<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/uangmuka/" ><span>Rekapitulasi Transaksi Uang Muka</span></a></li>
-					<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/laporan_pencairan/" ><span>Laporan Pencairan</span></a></li>
-					<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/laporan_pelunasan/" ><span>Laporan Pelunasan</span></a></li>
-					<li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/laporan_pelunasan_titipan/" ><span>Laporan Titipan Pelunasan</span></a></li>
-                             	   </ul>
-                               </li>
-                               <li class='has-sub'><a href=''><span>Menu Data Kasir</span></a>
-                               <ul>
-                                    <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/data_lunas_kasir/" ><span>Data Pelunasan</span></a></li>
-                                <li class='last'><a href="/rreport/{{cabang.kode_cabang}}/kembali_gu/" ><span>Data Titipan Gu</span></a></li>
-                                    <li class='last'><a href="/kasirgerai/{{cabang.kode_cabang}}/data_titipan_pelunasan/" ><span>Data Titipan Pelunasan</span></a></li>
-                               </ul>
-                                </li>
-                                </li>
-                                    <li class='has-sub'><a href=''><span>Menu Master Tiket Kasir</span></a>
-					<ul>
-                                            <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_gabungan_kasir/" ><span>Mastertiket Gabungan Kasir</span></a></li>
-					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_pencairan_kasir/" ><span>Mastertiket Pencairan Kasir</span></a></li>
-					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/master_tiket_kasir_pelunasan/" ><span>Mastertiket Pelunasan Kasir</span></a></li>
-                                            <!-- <li><a href="/jurnal/{{cabang.kode_cabang}}/mastertiket_kasir_penjualan_pelelangan/"><span>Master Tiket Penjualan Pelelangan</span></a></li>-->
-		 			    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_gl_gl/" ><span>Mastertiket Transaksi Kas</span></a></li>
-                                            <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_uangmuka/" ><span>Mastertiket Transaksi Uang Muka</span></a></li>
- 					    <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_antargerai/" ><span>Mastertiket Transaksi Antar Kantor</span></a></li>
-                                            <li><a href="/jurnal/{{cabang.kode_cabang}}/master_tiket_pelunasan_gadai_ulang_kasir/" ><span>Mastertiket Transaksi Gadai Ulang</span></a></li>
-                                            <!-- <li><a href="/kasirgerai/{{cabang.kode_cabang}}/mastertiket_ayda_gerai/" ><span>Mastertiket Ayda Gerai</span></a></li>-->
-                                        </ul>
-				</li>
-					<li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
-				</ul>
-			 </div>
-
-	{% endifusergroup %}
+	    </ul>
+	 {% endfor %} {% endif%}
+	</li>
+    </ul>
+</div>
+{% endifusergroup %}
   </div>      
 
 

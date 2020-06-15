@@ -743,11 +743,13 @@ def add_baru_h(request,object_id,user,form_class):
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
-def gl_glcabang(request,object_id,form_class):
+def gl_glcabang(request,form_class):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
     Tbl_Transaksi_HistoryFormset = get_ordereditem_formset(form_class, extra=1, can_delete=True)
     ju = Jurnal_History.objects.all()
-    show = Tbl_Transaksi.objects.all().filter(status_jurnal=1).filter(id_cabang=object_id).filter(tgl_trans= sekarang).\
+    show = Tbl_Transaksi.objects.filter(status_jurnal=1).filter(id_cabang=cab).filter(tgl_trans= sekarang).\
         filter(jenis__in=('GL_GL_CABANG','GL_GL_CABANG_BANK','GL_GL_JUNAL_PENDAPATAN'))
     order = Tbl_Transaksi_History.objects.all()
     user = request.user
@@ -767,7 +769,7 @@ def gl_glcabang(request,object_id,form_class):
                     rekening = Tbl_Akun.objects.get(coa=kdd)                    
                     if not rekening:
                         message_set.create( messages.add_message(request, messages.INFO,"Kode Rekening Tidak Ditemukan"))
-                        return HttpResponseRedirect('/jurnal/%s/gl_glcabang/'% (object_id))
+                        return HttpResponseRedirect('/jurnal/%s/gl_glcabang/'% (cab))
                     debet = itemform.cleaned_data['debet']
                     kredit = itemform.cleaned_data['kredit']
                     deskripsi = itemform.cleaned_data['deskripsi']
@@ -795,12 +797,12 @@ def gl_glcabang(request,object_id,form_class):
                         no_trans =jurnal.no_akad,jurnal = jurnal_asli,id_product=4,status_jurnal=1,id_cabang=user.profile.gerai.kode_cabang,\
                         id_unit=300,jenis='GL_GL_CABANG',deskripsi=deskripsi) 
             messages.add_message(request, messages.INFO,"Jurnal telah disimpan dengan baik")
-            return HttpResponseRedirect('/jurnal/%s/gl_glcabang/'% (object_id))
+            return HttpResponseRedirect('/jurnal/%s/gl_glcabang/'% (cab))
         else:
             request.user.message_set.create(messages.add_message(request, messages.INFO,"Form Tidak Valid"))
-        var = {'form': form, 'formset': formset,'show':show,'cabang':object_id}
+        var = {'form': form, 'formset': formset,'show':show,'cabang':cab}
     else:
-        var = {'form': MainJurnalForm(), 'formset': Tbl_Transaksi_HistoryFormset(),'show':show,'cabang':object_id}
+        var = {'form': MainJurnalForm(), 'formset': Tbl_Transaksi_HistoryFormset(),'show':show,'cabang':cab}
     variables = RequestContext(request, var)
     return render_to_response('jurnal/gl_glcabang.html', variables)
 
@@ -1927,7 +1929,11 @@ def akun_list(request):
     variables = RequestContext(request, {'object_list': akun_list})
     return render_to_response('akun/list.html', variables)
 
-def add(request,object_id):
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def add(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
     show = Tbl_Transaksi.objects.all().filter(status_jurnal=1).filter(id_cabang=object_id).filter(tgl_trans= sekarang).filter(jenis='GL_GL')
     Tbl_TransaksiFormSet = formset_factory(Tbl_TransaksiForm, extra=1,max_num=1)

@@ -100,18 +100,19 @@ def list(request):
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
-def add(request,object_id):
+def add(request):
 	sekarang = datetime.date.today()
-	c = object_id
-	bea = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal = 1L).\
+        user = request.user
+        cab =  user.profile.gerai.kode_cabang
+	c = cab
+	bea = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=cab).filter(status_jurnal = 1L).\
 	filter(jenis__in=( u'GL_GL_CABANG',u'GL_GL_PUSAT_UK',u'GL_GL_PUSAT',u'GL_GL_BIAYA_GERAI','GL_GL_CABANG_PENGEMBALIAN','PENGELUARAN_KE_GERAI',\
                 'GL_GL_PENAMBAHAN_GERAI','GL_GL_PENAMBAHAN_BANK','GL_GL_PENAMBAHAN_KAS','GL_GL_PENGELUARAN_KAS_PUSAT','GL_GL_PENAMBAHAN_BANK_RAK',\
 		'GL_GL_PENGEMBALIAN_GERAI','GL_GL_PENGEMBALIAN_PUSAT','GL_GL_PENAMBAHAN_SALDO','GL_GL_PENGELUARAN_BANK','Penerimaan Materai',\
                 'GL_GL_PENGELUARAN_BANK_PUSAT','GL_GL_PENGELUARAN_KAS','GL_GL_PENAMBAHAN_PUSAT_BANK','GL_GL_PENGEMBALIAN_PUSAT_BANK',\
 		'GL_GL_PENGEMBALIAN_UK','GL_GL_CABANG_UK','PENGELURAN_BANK_PUSAT','GL_GL_PENGELUARAN_BANK_RAK','GL_GL_PENGEMBALIAN_PUSAT_BANK_RAK',\
                 'GL_GL_PENGEMBALIAN_SALDO_GERAI','GL_GL_PENGEMBALIAN_BANK_CABANG_RAK','GL_GL_PENGELUARAN_PUSAT_BANK','GL_GL_CABANG_ADM_BANK'))
-		
-	user = request.user
+
 	if request.method == "POST":
 		form = BiayaForm(request.POST)
 		if form.is_valid():
@@ -365,16 +366,16 @@ def add(request,object_id):
                             jurnal_biaya_adm_bank(biaya, request.user)
                             messages.add_message(request, messages.INFO,"JURNAL TELAH TERSIMPAN (355)")
 
-			return HttpResponseRedirect('/biaya/%s/add/' % (object_id))
+			return HttpResponseRedirect('/biaya/%s/add/' % (cab))
 		else:
 			form  = BiayaForm()
-			form.fields['gerai'].queryset = Tbl_Cabang.objects.filter(kode_cabang=object_id)
+			form.fields['gerai'].queryset = Tbl_Cabang.objects.filter(kode_cabang=cab)
 		variables = RequestContext(request, {'form': form,'bea':bea,'c':object_id,'total_kredit': sum([p.kredit for p in bea]),'total_debet': sum([p.kredit for p in bea])})
-		return HttpResponseRedirect('/biaya/%s/add/' % (object_id))
+		return HttpResponseRedirect('/biaya/%s/add/' % (cab))
 	else:
 		form  = BiayaForm()
-		form.fields['gerai'].queryset = Tbl_Cabang.objects.filter(kode_cabang=object_id)
-	variables = RequestContext(request, {'form': form,'bea':bea,'c':object_id,'total_kredit': sum([p.kredit for p in bea]),'total_debet': sum([p.kredit for p in bea])})
+		form.fields['gerai'].queryset = Tbl_Cabang.objects.filter(kode_cabang=cab)
+	variables = RequestContext(request, {'form': form,'bea':bea,'c':cab,'total_kredit': sum([p.kredit for p in bea]),'total_debet': sum([p.kredit for p in bea])})
 	return render_to_response('biaya/addbiaya.html', variables)
 
 

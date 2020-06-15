@@ -7,7 +7,7 @@ from import_export import resources
 from import_export.admin import ImportExportMixin, ExportActionModelAdmin
 
 class MenuAdmin(ImportExportMixin,admin.ModelAdmin):
-    list_display = ['id']
+    list_display = ['id','deskripsi']
     search_fields = ['id']
 admin.site.register(Menu, MenuAdmin)
 

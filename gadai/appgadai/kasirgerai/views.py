@@ -497,11 +497,12 @@ def all_transaksi_kas_pusat(request,object_id):
     template='kasir/view/all_transaksi_kas_pusat.html'
     return render_to_response(template,variables)
 
-
-def kembaligu(request, object_id):
-    #sekarang = datetime.date(2016, 9, 3)
-
-    ag = AkadGadai.objects.filter(gerai__kode_cabang = object_id)#.filter(lunas = sekarang)
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def kembaligu(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    ag = AkadGadai.objects.filter(gerai__kode_cabang = cab)
     titip = TitipanAkadUlang.objects.filter(norek__in = ag).filter(status = 2)
 
     ttp =titip.count()
@@ -1110,14 +1111,14 @@ def slip_setoran_titipan_pelunasan(request, object_id):
     c.save()
     return response
 
-
-def data_titipan_pelunasan(request, object_id):
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def data_titipan_pelunasan(request):
     user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
-    
     akad = AkadGadai.objects.all()
     titip = TitipanPelunasan.objects.filter(status = 2,tanggal = sekarang, gerai = user.profile.gerai).filter(norek__in = akad)
-    
     ttp =titip.count()
     total_titip = sum([a.nilai for a in titip])
     template = 'kasir/laporan/show_titipan.html'
@@ -1304,10 +1305,14 @@ def denominasi(request,object_id):
     variables = RequestContext(request, {'form': form,'gerai':gr,'cabang':cabang})
     return render_to_response('kasir/inputdenominasi.html', variables)
 
-def mastertiket_gabungan_kasir(request,object_id):
-    sekarang = datetime.date.today() 
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id) 
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=u'2').\
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def mastertiket_gabungan_kasir(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    sekarang = datetime.date.today()
+    kocab = Tbl_Cabang.objects.get(kode_cabang=cab)
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=cab).filter(status_jurnal=u'2').\
         filter(jenis__in=('Pencairan_kasir','Pencairan_kasir_sisa','Pencairan_kasir_kurang','Pencairan_kasir_bank',\
             'Pencairan_kasir_lebih_bank','Pencairan_kasir_kurang_bank_kecil','Pencairan_kasir_kurang_bank',u'Pelunasan_kasir',\
             u'Pelunasan_kasir_kurang',u'Pelunasan_kasir_bank','Pelunasan_kasir_bank_bol','Pelunasan_kasir_kurang_rak',\
@@ -1356,10 +1361,11 @@ def posting_akhir_hari(request, object_id):
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
-def app_gu(request,object_id):
+def app_gu(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    #gr = AkadGadai.objects.filter(gerai__kode_cabang=kocab.kode_cabang).filter(jns_gu = 1)
+    kocab = Tbl_Cabang.objects.get(kode_cabang=cab)
     gr = KasirGerai.objects.filter(status = 2).filter(kasir__gerai__kode_cabang=kocab.kode_cabang)
     template = 'kasir/laporan/gadai_ulang.html'
     variables = RequestContext(request, {'user':User,'gr':gr,'kocab':kocab})
@@ -1910,60 +1916,86 @@ def jurnal_bank_jkt_gu_nilai_kurang(nas, user):
         jenis = '%s' % ("Pelunasan_gu_kasir_nilai_sblm_kurang_bank"), id_coa = a_titipan_pencairan,
         kredit = nas.sisa_bayar_lunas,debet = 0,id_product = '4',status_jurnal ='2',tgl_trans = nas.tanggal_lunas,
         id_cabang =user.profile.gerai.kode_cabang,id_unit= 300)
-
-## AKHIR JURNAL TRANSAKSI MELALUI BANK
-def laporan_pelunasan_titipan(request,object_id):
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def laporan_pelunasan_titipan(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    gr = Pelunasan.objects.filter(tanggal=sekarang).filter(gerai__kode_cabang=kocab.kode_cabang)
+    kocab = Tbl_Cabang.objects.get(kode_cabang=cab)
+    gr = Pelunasan.objects.filter(tanggal=sekarang,gerai__kode_cabang=kocab.kode_cabang)
     template = 'kasir/laporan/laporan_pelunasan_titipan.html'
     variables = RequestContext(request, {'user':User,'gr':gr,'kocab':kocab})
     return render_to_response(template, variables)
 
-def laporan_pelunasan(request,object_id):
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def laporan_pelunasan(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    gr = Pelunasan.objects.filter(tanggal=sekarang).filter(gerai__kode_cabang=kocab.kode_cabang).filter(status_pelunasan = u'1')
+    kocab = Tbl_Cabang.objects.get(kode_cabang=cab)
+    gr = Pelunasan.objects.filter(tanggal=sekarang,gerai__kode_cabang=kocab.kode_cabang,status_pelunasan = u'1')
     template = 'kasir/laporan/laporan_pelunsan.html'
     variables = RequestContext(request, {'user':User,'gr':gr,'kocab':kocab})
     return render_to_response(template, variables)
 
-def laporan_pencairan(request,object_id):
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def laporan_pencairan(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    gr = AkadGadai.objects.filter(tanggal=sekarang).filter(gerai__kode_cabang=kocab.kode_cabang).filter(kasirgerai__val=1)
+    kocab = Tbl_Cabang.objects.get(kode_cabang=cab)
+    gr = AkadGadai.objects.filter(tanggal=sekarang,gerai__kode_cabang=kocab.kode_cabang,kasirgerai__val=1)
     template = 'kasir/laporan/laporan_pencairan.html'
     variables = RequestContext(request, {'user':User,'gr':gr,'kocab':kocab})
     return render_to_response(template, variables)
 
-def mastertiket_antargerai(request,object_id):
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    sekarang = datetime.date.today()  
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=u'2').\
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def mastertiket_antargerai(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
+    sekarang = datetime.date.today()
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=cab).filter(status_jurnal=u'2').\
         filter(jenis__in=('GL_GL_PENAMBAHAN_KAS','GL_GL_PENGELUARAN_KAS_PUSAT','GL_GL_PENAMBAHAN_GERAI','GL_GL_PENAMBAHAN_BANK','GL_GL_RAK_CABANG ',\
         'GL_GL_PENAMBAHAN_BANK_RAK','GL_GL_PENGELUARAN_BANK_RAK','GL_GL_PENGEMBALIAN_PUSAT_BANK_RAK','PENGELUARAN_KE_GERAI',\
         'GL_GL_PENGELUARAN_BANK','GL_GL_PENGELUARAN_BANK_PUSAT','GL_GL_PENGELUARAN_KAS','GL_GL_PENGEMBALIAN_PUSAT',\
         'GL_GL_PENGEMBALIAN_BANK_CABANG_RAK','GL_GL_PENGEMBALIAN_PUSAT_BANK',u'Pelunasan_kasir_rak','GL_GL_RAK_PUSAT_CABANG',\
-        u'Pelunasan_kasir_bank_rak','GL_GL_PENGEMBALIAN_SALDO_GERAI'))  
+        u'Pelunasan_kasir_bank_rak','GL_GL_PENGEMBALIAN_SALDO_GERAI'))
     template = 'kasir/tiket/mastertiket_antargerai.html'
-    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),\
+        'total_kredit': sum([p.kredit for p in gr])})
     return render_to_response(template, variables)
 
-def mastertiket_uangmuka(request,object_id):
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    sekarang = datetime.date.today()  
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=u'2').filter(jenis__in=('GL_GL_PUSAT_UK','GL_GL_CABANG_UK','GL_GL_PENGEMBALIAN_UK'))  
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def mastertiket_uangmuka(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
+    sekarang = datetime.date.today()
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=cab).filter(status_jurnal=u'2').\
+        filter(jenis__in=('GL_GL_PUSAT_UK','GL_GL_CABANG_UK','GL_GL_PENGEMBALIAN_UK'))  
     template = 'kasir/tiket/mastertiket_uangmuka.html'
-    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),\
+        'total_kredit': sum([p.kredit for p in gr])})
     return render_to_response(template, variables)
 
-def uangmuka(request,object_id):
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    cab = object_id
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def uangmuka(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    kocab = Tbl_Cabang.objects.get(kode_cabang=cab)
     saldo_uangmuka_awal = 0
-    transaksi_jurnal = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = (u'GL_GL_CABANG_UK')).filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'1')
-    uang_muka_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PUSAT_UK').filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_uk = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGEMBALIAN_UK').filter(id_cabang=cab).filter(status_jurnal=2)
+    transaksi_jurnal = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis =
+        (u'GL_GL_CABANG_UK'),id_cabang=cab,status_jurnal=2)
+    uang_muka_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis = 'GL_GL_PUSAT_UK',id_cabang=cab,status_jurnal=2)
+    pengembalian_uk = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis =
+        'GL_GL_PENGEMBALIAN_UK',id_cabang=cab,status_jurnal=2)
     variables = RequestContext(request,{'kocab':kocab,'uang_muka':sum ([a.debet for a in uang_muka_gerai]),'transaksi_jurnal':transaksi_jurnal,
             'uang_muka_sum':sum ([a.debet for a in transaksi_jurnal]),'pengembalian_uk':sum ([a.kredit for a in pengembalian_uk]),
             'saldo_uk_akhir': sum ([a.debet for a in uang_muka_gerai]) - sum ([a.debet for a in transaksi_jurnal]) - sum ([a.kredit for a in pengembalian_uk])})
@@ -1974,25 +2006,22 @@ def uangmuka(request,object_id):
 ### ASLI
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
-def all_transaksi_kas(request,object_id):
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    cab = object_id
+def all_transaksi_kas(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    kocab = Tbl_Cabang.objects.get(kode_cabang=cab)
     sekarang = datetime.date.today()
-    bray_posting = PostingGerai.objects.filter(kode_cabang=object_id,tanggal =sekarang)
+    bray_posting = PostingGerai.objects.filter(kode_cabang=cab,tanggal =sekarang)
     tes_posting = bray_posting.count()
 
     tgl = timedelta(days=1)
     tanggal = sekarang - tgl
     a = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang).filter(id_coa__coa__startswith ='11.01').filter(jenis='SALDOKASGERAI').latest('id')
-    #b = a[0]
     c = a.tgl_trans
     d = sekarang - c
-    print'c', c, 'd',d,'tanggal',tanggal
     s_awal = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang).filter(id_coa__coa__startswith ='11.01').filter(tgl_trans=sekarang).\
         filter(jenis='SALDOKASGERAI')
     s_awal_lates = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang).filter(id_coa__coa__startswith ='11.01').filter(jenis='SALDOKASGERAI').filter(tgl_trans=c)
-    #s_awal =Tbl_Transaksi.objects.filter(jurnal__kode_cabang=kocab.kode_cabang).filter(id_coa__coa__contains ='11.01').\
-        #filter(jenis='SALDOKASGERAI').latest('id')
     tampil =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(status_posting__isnull = True).\
         filter(jurnal__kode_cabang=kocab.kode_cabang)
     setoran_bank_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PENAMBAHAN_BANK').\
@@ -2002,54 +2031,53 @@ def all_transaksi_kas(request,object_id):
     pengembalian_uk_bank = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_BANK').\
         filter(id_cabang=cab).filter(status_jurnal=2)
     pengembalian_bank_pusat = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGEMBALIAN_SALDO_GERAI').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
+        filter(id_cabang=cab,status_jurnal=2)
     pengembalian_kas_pusat = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_KAS_PUSAT').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
+        filter(id_cabang=cab,status_jurnal=2)
     pengembalian_bank = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_BANK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
+        filter(id_cabang=cab,status_jurnal=2)
     pengembalian_kas = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
         filter(jenis__in =('GL_GL_PENGELUARAN_KAS_PUSAT','PENGELUARAN_KE_GERAI')).filter(id_cabang=cab).filter(status_jurnal=2)
     uang_muka_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PUSAT_UK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
+        filter(id_cabang=cab,status_jurnal=2)
     pencairan_kasir = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'Pencairan_kasir').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
+        filter(id_cabang=cab,status_jurnal=2)
     pencairan_kasir_sisa = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pencairan_kasir',\
         'Pelunasan_kasir','Pelunasan_gu_kasir_nilai_sblm_lebih_pol','Pelunasan_gu_kasir_nilai_sblm_kurang_pdl','Pencairan_kasir_sisa',\
         'Pelunasan_kasir_rak','Pencairan_Kasir')).\
-        filter(id_cabang=cab).filter(status_jurnal=2).filter(id_coa__in= (448L,546L))
+        filter(id_cabang=cab,status_jurnal=2,id_coa__in= (448L,546L))
     pengembalian_uk = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGEMBALIAN_UK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)    
+        filter(id_cabang=cab,status_jurnal=2)
     saldo_yang_dikirim = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'3')
+        filter(id_cabang=cab).filter(status_jurnal=2)
     transaksi_jurnal = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = (u'GL_GL_CABANG',\
         u'Pelunasan_gu_kasir_nilai_sblm_lebih_bl',u'Pencairan_kasir_kurang','Pelunasan_gu_kasir_nilai_sblm_kurang_bol',\
         'Pelunasan_kasir_kurang_rak','Pelunasan_kasir_kurang')).filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'1')
     saldo_awal_hari = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_BIAYA_GERAI').\
         filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'2')
     saldo_uang_muka_hari = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT_UK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'2')
+        filter(id_cabang=cab,status_jurnal=2)#.filter(jurnal__status_jurnal = u'2')
     jurnal_list = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'Pencairan_kasir').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 7L)
+        filter(id_cabang=cab).filter(status_jurnal=2).filter(id_coa= 7L)
     pndptn_lainnya = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in =('Pencairan_kasir')).\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 448L)
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 448L)
     tbl = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = (u'Pelunasan_kasir',\
-        u'Pelunasan_kasir',u'Pelunasan_kasir_kas_rak')).filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa__in= (651L,287L,635L,378L))
+        u'Pelunasan_kasir',u'Pelunasan_kasir_kas_rak')).filter(id_cabang=cab,status_jurnal=2,id_coa__in= (651L,287L,635L,378L))
     tbl_beban =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 516L)
+        filter(id_cabang=cab).filter(status_jurnal=2).filter(id_coa= 516L)
     rakp =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 378L)    
-    #penjualan = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = ('Penjualan_lelang_kasir')).filter(id_cabang=object_id).filter(status_jurnal=2)
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 378L)
     ak_ulang = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pelunasan_gu_kasir_nilai_sblm_lebih',\
-        'Pelunasan_Gadai_Ulang_kasir','Pelunasan_gu_kasir_nilai_sblm_kurang')).filter(id_cabang=object_id).filter(status_jurnal=2).\
+        'Pelunasan_Gadai_Ulang_kasir','Pelunasan_gu_kasir_nilai_sblm_kurang')).filter(id_cabang=cab).filter(status_jurnal=2).\
         filter(id_coa__in= (448L,287L,298L))
     akad_ulang_pengeluaran = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
-        filter(jenis = ('Pelunasan_Gadai_Ulang_kasir_pinjaman_besar')).filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 298L)
+        filter(jenis = ('Pelunasan_Gadai_Ulang_kasir_pinjaman_besar')).filter(id_cabang=cab).filter(status_jurnal=2).filter(id_coa= 298L)
 
     pengeluaran_gadai_ulang = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
         filter(jenis__in = (u'Pelunasan_Gadai_Ulang_Kasir_nilai_pinjaman_lebih',u'Pelunasan_Gadai_Ulang_kasir_pinjaman_besar_tp',\
         u'Pelunasan_gu_kasir_nilai_sblm_lebih_tp',u'Pelunasan_gu_kasir_nilai_sblm_kurang','Pelunasan_Gadai_Ulang_kasir_pinjaman_besar')).\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa=298L)                                                                                                                                                                                                                   
-   ###
+        filter(id_cabang=cab,status_jurnal=2,id_coa=298L)
+    ###
     titipan_kas = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = ('GL_GL_JUNAL_PENDAPATAN')).filter(id_cabang=cab).filter(status_jurnal=2)
    ###
     pengembalian_nasabah = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
@@ -2132,31 +2160,28 @@ def all_transaksi_kas(request,object_id):
     return render_to_response(template,variables)
 
 ## AKHIR ALL TRANSAKSI KAS ASLI
-
-def cetak_all_transaksi_kas(request,object_id):
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    cab = object_id
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def cetak_all_transaksi_kas(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    kocab = Tbl_Cabang.objects.get(kode_cabang=cab)
     sekarang = datetime.date.today()
     tgl = timedelta(days=1)
     tanggal = sekarang - tgl
-    a = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang).filter(id_coa__coa__startswith ='11.01').filter(jenis='SALDOKASGERAI').latest('id')
-    #b = a[0]
+    a = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang,id_coa__coa__startswith ='11.01',jenis='SALDOKASGERAI').latest('id')
     c = a.tgl_trans
     d = sekarang - c
-    print'c', c, 'd',d,'tanggal',tanggal
-    s_awal = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang).filter(id_coa__coa__startswith ='11.01').filter(tgl_trans=sekarang).\
-        filter(jenis='SALDOKASGERAI')
-    s_awal_lates = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang).filter(id_coa__coa__startswith ='11.01').filter(jenis='SALDOKASGERAI').filter(tgl_trans=c)
-    #s_awal =Tbl_Transaksi.objects.filter(jurnal__kode_cabang=kocab.kode_cabang).filter(id_coa__coa__contains ='11.01').\
-        #filter(jenis='SALDOKASGERAI').latest('id')
-    tampil =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(status_posting__isnull = True).\
-        filter(jurnal__kode_cabang=kocab.kode_cabang)
-    setoran_bank_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PENAMBAHAN_BANK').\
+    s_awal = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang,id_coa__coa__startswith ='11.01',tgl_trans=sekarang,jenis='SALDOKASGERAI')
+    s_awal_lates = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang,id_coa__coa__startswith
+            ='11.01',jenis='SALDOKASGERAI',tgl_trans=c)
+    tampil =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),status_posting__isnull = True,jurnal__kode_cabang=kocab.kode_cabang)
+    setoran_bank_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis = u'GL_GL_PENAMBAHAN_BANK').\
         filter(jurnal__kode_cabang=cab).filter(status_jurnal=2)
-    setoran_kas_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in =( 'GL_GL_PENAMBAHAN_KAS',u'Pelunasan_kasir_rak')).\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_uk_bank = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_BANK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
+    setoran_kas_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis__in =( 'GL_GL_PENAMBAHAN_KAS',u'Pelunasan_kasir_rak')).\
+        filter(id_cabang=cab,status_jurnal=2)
+    pengembalian_uk_bank = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis = 'GL_GL_PENGELUARAN_BANK').\
+        filter(id_cabang=cab,status_jurnal=2)
     pengembalian_bank_pusat = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGEMBALIAN_SALDO_GERAI').\
         filter(id_cabang=cab).filter(status_jurnal=2)
     pengembalian_kas_pusat = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_KAS_PUSAT').\
@@ -2185,37 +2210,34 @@ def cetak_all_transaksi_kas(request,object_id):
     saldo_uang_muka_hari = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT_UK').\
         filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'2')
     jurnal_list = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'Pencairan_kasir').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 7L)
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 7L)
     pndptn_lainnya = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in =('Pencairan_kasir')).\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 448L)
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 448L)
     tbl = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = (u'Pelunasan_kasir',\
-        u'Pelunasan_kasir',u'Pelunasan_kasir_kas_rak')).filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa__in= (651L,287L,635L,378L))
+        u'Pelunasan_kasir',u'Pelunasan_kasir_kas_rak'),id_cabang=cab,status_jurnal=2,id_coa__in= (651L,287L,635L,378L))
     tbl_beban =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 516L)
-    rakp =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 378L)    
-    #penjualan = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = ('Penjualan_lelang_kasir')).filter(id_cabang=object_id).filter(status_jurnal=2)
-    ak_ulang = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pelunasan_gu_kasir_nilai_sblm_lebih',\
-        'Pelunasan_Gadai_Ulang_kasir','Pelunasan_gu_kasir_nilai_sblm_kurang')).filter(id_cabang=object_id).filter(status_jurnal=2).\
-        filter(id_coa__in= (448L,287L,298L))
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 516L)
+    rakp =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis = u'GL_GL_PUSAT').\
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 378L)
+    ak_ulang = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis__in = ('Pelunasan_gu_kasir_nilai_sblm_lebih',\
+        'Pelunasan_Gadai_Ulang_kasir','Pelunasan_gu_kasir_nilai_sblm_kurang'),id_cabang=cab,status_jurnal=2,\
+        id_coa__in= (448L,287L,298L))
     akad_ulang_pengeluaran = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
-        filter(jenis = ('Pelunasan_Gadai_Ulang_kasir_pinjaman_besar')).filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 298L)
-
+        filter(jenis = ('Pelunasan_Gadai_Ulang_kasir_pinjaman_besar'),id_cabang=cab,status_jurnal=2,id_coa= 298L)
     pengeluaran_gadai_ulang = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
         filter(jenis__in = (u'Pelunasan_Gadai_Ulang_Kasir_nilai_pinjaman_lebih',u'Pelunasan_Gadai_Ulang_kasir_pinjaman_besar_tp',\
         u'Pelunasan_gu_kasir_nilai_sblm_lebih_tp',u'Pelunasan_gu_kasir_nilai_sblm_kurang','Pelunasan_Gadai_Ulang_kasir_pinjaman_besar')).\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa=298L)
+        filter(id_cabang=cab,status_jurnal=2,id_coa=298L)
    ###
     titipan_kas = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = ('GL_GL_JUNAL_PENDAPATAN')).filter(id_cabang=cab).filter(status_jurnal=2)
-   ###                                                                                                                                                                                  
+   ###
     pengembalian_nasabah = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
         filter(jenis__in = ('Pengembalian_titipan_kelebihan','Pengembalian_titipan_kelebihan_gu')).\
-        filter(id_cabang=cab).filter(status_jurnal=2) 
-    hitung_a = sum(a.debet for a in titipan_kas) + sum ([a.kredit for a in ak_ulang]) +sum ([a.kredit for a in setoran_kas_gerai]) + sum ([a.kredit for a in setoran_bank_gerai])\
-        +  sum ([a.kredit for a in pencairan_kasir_sisa]) + sum ([a.kredit for a in tbl]) 
+        filter(id_cabang=cab).filter(status_jurnal=2)
+    hitung_a = sum(a.debet for a in titipan_kas) + sum ([a.kredit for a in ak_ulang]) +sum ([a.kredit for a in setoran_kas_gerai]) \
+        + sum ([a.kredit for a in setoran_bank_gerai]) +  sum ([a.kredit for a in pencairan_kasir_sisa]) + sum ([a.kredit for a in tbl]) 
     hitung_b = sum ([a.debet for a in transaksi_jurnal]) + sum ([a.debet for a in pengembalian_nasabah]) + \
-            sum ([a.debet for a in pencairan_kasir]) +\
-            sum ([a.kredit for a in pengembalian_kas]) +\
+            sum ([a.debet for a in pencairan_kasir]) + sum ([a.kredit for a in pengembalian_kas]) +\
             sum ([a.debet for a in pengeluaran_gadai_ulang])
     saldo_awal =  sum([p.saldo for p in s_awal])
     saldo_awal_lates =  sum([p.saldo for p in s_awal_lates])
@@ -2474,14 +2496,20 @@ def view_cabang(request,object_id):
         'total_debet':sum([p.debet for p in jurnal_list]),'total_kredit':sum([p.kredit for p in jurnal_list])})
     return render_to_response('kasir/view/viewcabang.html', variables)
 
-def master_tiket_kasir_pelunasan(request,object_id):
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def master_tiket_kasir_pelunasan(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
     sekarang = datetime.date.today()
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=2).\
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=cab).filter(status_jurnal=2).\
         filter(jenis__in = (u'Pelunasan_kasir',u'Pelunasan_kasir_kurang',u'Pelunasan_kasir_bank','Pelunasan_kasir_bank_bol',\
-        'Pelunasan_kasir_kurang_rak'))  
+        'Pelunasan_kasir_kurang_rak'))
     template = 'kasir/tiket/mastertiket_pelunasan_kasir.html'
-    variables = RequestContext(request, {'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr]),'cabang':cabang})
+    variables = RequestContext(request, {'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),\
+        'total_kredit': sum([p.kredit for p in gr]),'cabang':cabang})
     return render_to_response(template, variables)
 
 def is_in_multiple_groups(user):
@@ -3499,28 +3527,36 @@ def kwitansi_gu_adm(request):
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
-def data_lunas_kasir(request,object_id):    
+def data_lunas_kasir(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
-    akad1 = KasirGeraiPelunasan.objects.filter(kasir_lunas__gerai__kode_cabang = object_id,kasir_lunas__status_kwlunas = '0',tanggal = sekarang).order_by('-tanggal')
-    #akad1 = KasirGeraiPelunasan.objects.filter(kasir_lunas__gerai = object_id)
-    #akad = a.filter(gerai__kode_cabang=object_id).filter(kasirgerai__kasir_lunas=None)
-    #akadkasir = akad1.filter(kasir_lunas__gerai__kode_cabang=object_id)#.filter(tanggal = sekarang)
-    template='kasir/view/data_lunas_kasir.html'
-    variable = RequestContext(request,{'akad1': akad1})
-    return render_to_response(template,variable)
+    akad1 = KasirGeraiPelunasan.objects.filter(kasir_lunas__gerai__kode_cabang = cab,kasir_lunas__status_kwlunas = '0',tanggal = sekarang).order_by('-tanggal')
+    return render(request,'kasir/view/data_lunas_kasir.html',{'akad1':akad1})
 
-def mastertiket_gl_gl(request,object_id):
-    sekarang = datetime.date.today()  
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=u'2').filter(jenis__in=('GL_GL_PUSAT','GL_GL_NON_KAS','GL_GL_CABANG'))  
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def mastertiket_gl_gl(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    sekarang = datetime.date.today()
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=cab).filter(status_jurnal=u'2').\
+        filter(jenis__in=('GL_GL_PUSAT','GL_GL_NON_KAS','GL_GL_CABANG'))
     template = 'kasir/tiket/mastertiketgl_gl.html'
-    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
+    variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),\
+        'total_kredit': sum([p.kredit for p in gr])})
     return render_to_response(template, variables)
 
-def mastertiket_pencairan_kasir(request,object_id):
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
+def mastertiket_pencairan_kasir(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
     sekarang = datetime.date.today()
-    cabang = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=object_id).filter(status_jurnal=u'2').filter(jenis=u'Pencairan_kasir')  
+    cabang = Tbl_Cabang.objects.get(kode_cabang=cab)
+    gr = Tbl_Transaksi.objects.filter(tgl_trans=sekarang).filter(id_cabang=cab).filter(status_jurnal=u'2').filter(jenis=u'Pencairan_kasir')
     template = 'kasir/tiket/mastertiket_pencairan_uji_coba.html'
     variables = RequestContext(request, {'cabang':cabang,'user':User,'g':gr,'total_debet': sum([p.debet for p in gr]),'total_kredit': sum([p.kredit for p in gr])})
     return render_to_response(template, variables)
@@ -4658,158 +4694,39 @@ def jurnal_bank_ciwastra_kecil(ks, user):###teddy
         debet = 0,kredit = ks.nilai_pembulatan,
         id_product = '4',status_jurnal ='2',tgl_trans =ks.tanggal,
         id_cabang =ks.kasir.gerai.kode_cabang,id_unit= 300)
-'''
-def all_transaksi_bank(request,object_id):
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    cab = object_id
-    sekarang = datetime.date.today()
-    s_awal =Tbl_Transaksi.objects.filter(id_cabang=kocab.kode_cabang).filter(tgl_trans=sekarang).filter(id_coa__coa__contains ='11.05').\
-        filter(jenis='SALDOKASGERAI')
-    #s_awal =Tbl_Transaksi.objects.filter(jurnal__kode_cabang=kocab.kode_cabang).filter(id_coa__coa__contains ='11.05').\
-        #filter(jenis='SALDOKASGERAI').latest('id')
-    tampil =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(status_posting__isnull = True).\
-        filter(jurnal__kode_cabang=kocab.kode_cabang)
-    setoran_bank_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
-        filter(jenis__in = (u'GL_GL_PENGELUARAN_BANK','GL_GL_PENAMBAHAN_BANK_RAK',u'Pelunasan_kasir_bank_rak')).\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    #setoran_kas_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENAMBAHAN_KAS').\
-        #filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_uk_bank = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_BANK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_bank_pusat = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('GL_GL_PENGEMBALIAN_PUSAT_BANK','GL_GL_PENGEMBALIAN_PUSAT_BANK_RAK','GL_GL_PENGEMBALIAN_BANK_CABANG_RAK')).\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_kas_pusat = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_KAS_PUSAT').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_bank = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in =('GL_GL_PENAMBAHAN_BANK','GL_GL_PENGELUARAN_BANK_RAK')).\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_kas = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_KAS_PUSAT').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    uang_muka_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PUSAT_UK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    pencairan_kasir = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pencairan_kasir_bank',\
-        'Pencairan_kasir_lebih_bank','Pencairan_kasir_kurang_bank')).\
-        filter(id_cabang=cab).filter(status_jurnal=2).filter(id_coa = 298L)
-    pencairan_kasir_sisa = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pencairan_kasir_bank',\
-        'Pencairan_kasir_lebih_bank','Pencairan_kasir_kurang_bank','Pelunasan_kasir_bank','Pelunasan_gu_kasir_nilai_sblm_kurang_bank',\
-        'Pelunasan_gu_kasir_nilai_sblm_lebih_bank','Pelunasan_Gadai_Ulang_kasir_bank','Pelunasan_Gadai_Ulang_kasir_bank',\
-        'Pelunasan_gu_kasir_nilai_sblm_kurang_bank_bol','Pelunasan_kasir_bank_rak',\
-        'Pencairan_kasir_sisa','Pelunasan_gu_bank_nilai_sblm_lebih_pol')).filter(id_cabang=cab).filter(status_jurnal=2).filter(id_coa__in= (448L,546L))    
-    pengembalian_uk = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGEMBALIAN_UK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)    
-    saldo_yang_dikirim = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'3')
-    transaksi_jurnal = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pencairan_kasir_kurang_bank_kecil','Pelunasan_gu_kasir_nilai_sblm_kurang_bol_bank','Pelunasan_gu_kasir_nilai_sblm_lebih_bank_10_bol',\
-        'Pelunasan_kasir_bank_bol',)).filter(id_cabang=cab).filter(status_jurnal=2)
-    saldo_awal_hari = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_BIAYA_GERAI').\
-        filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'2')
-    saldo_uang_muka_hari = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT_UK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'2')
-    jurnal_list = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'Pencairan_kasir_bank').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 7L)
-    pndptn_lainnya = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
-        filter(jenis__in =('Pencairan_kasir_bank','Pelunasan_kasir','Pelunasan_kasir_bank')).filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 448L)
-    tbl = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = (u'Pelunasan_kasir_bank',u'Pelunasan_kasir_bank_rak')).\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa__in= (287L,651L,635L))
-    tbl_beban =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 516L)
-    rakp =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 378L)    
-    #penjualan = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = ('Penjualan_lelang_kasir')).\
-        #filter(id_cabang=object_id).filter(status_jurnal=2)
-    ak_ulang = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pelunasan_gu_kasir_nilai_sblm_lebih_bank',\
-        'Pelunasan_Gadai_Ulang_kasir_bank','Pelunasan_gu_kasir_nilai_sblm_kurang_bank','Pelunasan_gu_bank_nilai_sblm_lebih',\
-        'Penerimaan Gadai Ulang',)).filter(id_cabang=object_id).filter(status_jurnal=2)\
-        .filter(id_coa__in= (448L,287L,298L))
-                                                                                                       
-
-    akad_ulang_pengeluaran = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
-         filter(jenis = ('Pelunasan_Gadai_Ulang_kasir_pinjaman_besar')).filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 298L)
-
-    pengeluaran_gadai_ulang = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
-        filter(jenis__in=( u'Pelunasan_Gadai_Ulang_Kasir_nilai_pinjaman_lebih','Pelunasan_gu_kasir_nilai_sblm_kurang_bank',\
-        'Pelunasan_Gadai_Ulang_kasir_bank','Pelunasan_gu_kasir_nilai_sblm_lebih_bank_10')).filter(id_cabang=object_id).\
-        filter(status_jurnal=2).filter(id_coa =298L)
-
-    hitung_a = sum ([a.kredit for a in ak_ulang]) + sum ([a.kredit for a in setoran_bank_gerai])\
-        + sum ([a.kredit for a in pencairan_kasir_sisa]) + sum ([a.kredit for a in tbl]) #+ sum([a.kredit for a in penjualan])
-
-    hitung_b = sum ([a.debet for a in pengembalian_bank])  + sum ([a.debet for a in pencairan_kasir]) \
-        + sum([a.debet for a in pengeluaran_gadai_ulang]) + sum([a.debet for a in transaksi_jurnal])
-
-    saldo_awal = sum([p.saldo for p  in s_awal])
-    
-    variables = RequestContext(request,{'kocab':kocab,'transaksi_jurnal':transaksi_jurnal,'a':jurnal_list,\
-        'total_pencairan':sum ([a.kredit for a in jurnal_list]),\
-        'setoran_bank_gerai' : sum ([a.kredit for a in setoran_bank_gerai]),\
-        'pengembalian_bank_pusat_pjb' :sum ([a.debet for a in pengembalian_bank_pusat]) ,
-        'pengembalian_bank' :sum ([a.debet for a in pengembalian_bank]) + sum ([a.kredit for a in pengembalian_kas]),\
-        'uang_muka':sum ([a.kredit for a in uang_muka_gerai]),'saldo_awal':saldo_awal,
-        #'saldo_awal': sum([a.saldo for a in s_awal]),
-        'total_penerimaan':hitung_a,
-        'total_pengeluaran': hitung_b ,
-        'saldo_akhir': saldo_awal + int(hitung_a) - int(hitung_b),
-        'saldo_keseluruhan': (saldo_awal + hitung_a - hitung_b) - sum ([a.kredit for a in pengembalian_bank_pusat]),             
-        'pencairan':sum ([a.debet for a in pencairan_kasir]),\
-        'pencairan_kasir_sisa':pencairan_kasir_sisa,\
-        'saldo_awal_hari':sum ([a.debet for a in saldo_awal_hari]),\
-        'saldo_uangmuka_hari':sum ([a.debet for a in saldo_uang_muka_hari]),\
-        'total_pelunasan':tbl,\
-        'total_pendapatan_lainnya':sum ([a.kredit for a in pndptn_lainnya]),'sekarang':datetime.date.today(),\
-        'beban_listrik':(sum ([a.debet for a in tbl_beban])),\
-        'total_rakp':sum ([a.kredit for a in rakp]), \
-        'total_transaksi_jurnal': sum ([a.debet for a in transaksi_jurnal]),\
-        'total_saldo' :  saldo_awal ,'ak_ulang':ak_ulang,
-        #'penjualan': penjualan,
-        'pengeluaran_gadai_ulang': pengeluaran_gadai_ulang,'pengembalian_kas_pusat':pengembalian_kas_pusat,\
-        'pengembalian_bank_pusat':pengembalian_kas_pusat,\
-        'saldo_yang_di_kirim':sum ([a.debet for a in saldo_yang_dikirim]), 'pengembalian_kas':pengembalian_kas,\
-        't_kasir':pencairan_kasir,'tampil':tampil,
-        'pengembalian_bank':pengembalian_bank,'setoran_bank_gerai':setoran_bank_gerai,'cabang':kocab,
-        'pengembalian_uk_bank':pengembalian_uk_bank})
-    template='kasir/view/all_transaksi_bank.html'
-    return render_to_response(template,variables)    
-'''
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))
-def all_transaksi_bank(request,object_id):
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
+def all_transaksi_bank(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    kocab = Tbl_Cabang.objects.get(kode_cabang=cab)
     sekarang = datetime.date.today()
     tgl = timedelta(days=1)
     tanggal = sekarang - tgl
-    a = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang).filter(id_coa__coa__startswith ='11.05').filter(jenis='SALDOKASGERAI').latest('id')
-    #b = a[0]
+    a = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang,id_coa__coa__startswith ='11.05',jenis='SALDOKASGERAI').latest('id')
     c = a.tgl_trans
     d = sekarang - c
-    print'c', c, 'd',d,'tanggal',tanggal
-    s_awal = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang).filter(id_coa__coa__startswith ='11.05').filter(tgl_trans=sekarang).\
+    s_awal = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang,id_coa__coa__startswith ='11.05',tgl_trans=sekarang).\
         filter(jenis='SALDOKASGERAI')
-    s_awal_lates = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang).filter(id_coa__coa__startswith ='11.05').filter(jenis='SALDOKASGERAI').filter(tgl_trans=c)
-
-    kocab = Tbl_Cabang.objects.get(kode_cabang=object_id)
-    cab = object_id
+    s_awal_lates = Tbl_TransaksiKeu.objects.filter(id_cabang=kocab.kode_cabang,id_coa__coa__startswith ='11.05',jenis='SALDOKASGERAI').\
+        filter(tgl_trans=c)
     sekarang = datetime.date.today()
-    #s_awal =Tbl_Transaksi.objects.filter(id_cabang=kocab.kode_cabang).filter(tgl_trans=sekarang).filter(id_coa__coa__contains ='11.05').\
-        #filter(jenis='SALDOKASGERAI')
-    #s_awal =Tbl_Transaksi.objects.filter(jurnal__kode_cabang=kocab.kode_cabang).filter(id_coa__coa__contains ='11.05').\
-        #filter(jenis='SALDOKASGERAI').latest('id')
     tampil =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(status_posting__isnull = True).\
         filter(jurnal__kode_cabang=kocab.kode_cabang)
     setoran_bank_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
         filter(jenis__in = (u'GL_GL_PENGELUARAN_BANK','GL_GL_PENAMBAHAN_BANK_RAK',u'Pelunasan_kasir_bank_rak')).\
         filter(id_cabang=cab).filter(status_jurnal=2)
-    #setoran_kas_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENAMBAHAN_KAS').\
-        #filter(id_cabang=cab).filter(status_jurnal=2)
     pengembalian_uk_bank = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_BANK').\
         filter(id_cabang=cab).filter(status_jurnal=2)
     pengembalian_bank_pusat = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('GL_GL_PENGEMBALIAN_PUSAT_BANK','GL_GL_PENGEMBALIAN_PUSAT_BANK_RAK','GL_GL_PENGEMBALIAN_BANK_CABANG_RAK')).\
         filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_kas_pusat = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_KAS_PUSAT').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_bank = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in =('GL_GL_PENAMBAHAN_BANK','GL_GL_PENGELUARAN_BANK_RAK')).\
-        filter(id_cabang=cab).filter(status_jurnal=2)
-    pengembalian_kas = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGELUARAN_KAS_PUSAT').\
-        filter(id_cabang=cab).filter(status_jurnal=2)
+    pengembalian_kas_pusat = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis = 'GL_GL_PENGELUARAN_KAS_PUSAT').\
+        filter(id_cabang=cab,status_jurnal=2)
+    pengembalian_bank = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis__in =('GL_GL_PENAMBAHAN_BANK',\
+        'GL_GL_PENGELUARAN_BANK_RAK'),id_cabang=cab,status_jurnal=2)
+    pengembalian_kas = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today(),jenis = 'GL_GL_PENGELUARAN_KAS_PUSAT').\
+        filter(id_cabang=cab,status_jurnal=2)
     uang_muka_gerai = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PUSAT_UK').\
         filter(id_cabang=cab).filter(status_jurnal=2)
     pencairan_kasir = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pencairan_kasir_bank',\
@@ -4825,40 +4742,41 @@ def all_transaksi_bank(request,object_id):
     pengembalian_uk = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'GL_GL_PENGEMBALIAN_UK').\
         filter(id_cabang=cab).filter(status_jurnal=2)    
     saldo_yang_dikirim = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'3')
+        filter(id_cabang=cab,status_jurnal=2)
     transaksi_jurnal = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pencairan_kasir_kurang_bank_kecil','Pelunasan_gu_kasir_nilai_sblm_kurang_bol_bank','Pelunasan_gu_kasir_nilai_sblm_lebih_bank_10_bol',\
         'Pelunasan_kasir_bank_bol','GL_GL_CABANG_ADM_BANK')).filter(id_cabang=cab).filter(status_jurnal=2)
     saldo_awal_hari = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_BIAYA_GERAI').\
-        filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'2')
+        filter(id_cabang=cab,status_jurnal=2)#.filter(jurnal__status_jurnal = u'2')
     saldo_uang_muka_hari = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT_UK').\
-        filter(id_cabang=cab).filter(status_jurnal=2)#.filter(jurnal__status_jurnal = u'2')
+        filter(id_cabang=cab,status_jurnal=2)
     jurnal_list = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'Pencairan_kasir_bank').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 7L)
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 7L)
     pndptn_lainnya = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
-        filter(jenis__in =('Pencairan_kasir_bank','Pelunasan_kasir','Pelunasan_kasir_bank')).filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 448L)
+        filter(jenis__in =('Pencairan_kasir_bank','Pelunasan_kasir','Pelunasan_kasir_bank')).\
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 448L)
     tbl = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = (u'Pelunasan_kasir_bank',u'Pelunasan_kasir_bank_rak')).\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa__in= (287L,651L,635L))
+        filter(id_cabang=cab,status_jurnal=2,id_coa__in= (287L,651L,635L))
     tbl_beban =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 516L)
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 516L)
     rakp =Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = u'GL_GL_PUSAT').\
-        filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 378L)    
-    #penjualan = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = ('Penjualan_lelang_kasir')).\
-        #filter(id_cabang=object_id).filter(status_jurnal=2)
+        filter(id_cabang=cab,status_jurnal=2,id_coa= 378L)
     ak_ulang = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pelunasan_gu_kasir_nilai_sblm_lebih_bank',\
         'Pelunasan_Gadai_Ulang_kasir_bank','Pelunasan_gu_kasir_nilai_sblm_kurang_bank','Pelunasan_gu_bank_nilai_sblm_lebih',\
-        'Penerimaan Gadai Ulang','Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer_pendapatan','Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer','Pelunasan_Gadai_ulang_kasir_bank_kelebihan_pendapatan')).filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa__in= (448L,287L,298L))
-
+        'Penerimaan Gadai Ulang','Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer_pendapatan',\
+        'Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer','Pelunasan_Gadai_ulang_kasir_bank_kelebihan_pendapatan')).\
+        filter(id_cabang=cab,status_jurnal=2,id_coa__in= (448L,287L,298L))
     akad_ulang_pengeluaran = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
-         filter(jenis = ('Pelunasan_Gadai_Ulang_kasir_pinjaman_besar')).filter(id_cabang=object_id).filter(status_jurnal=2).filter(id_coa= 298L)
-
+         filter(jenis = ('Pelunasan_Gadai_Ulang_kasir_pinjaman_besar')).filter(id_cabang=cab,status_jurnal=2,id_coa= 298L)
     pengeluaran_gadai_ulang = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
         filter(jenis__in=( u'Pelunasan_Gadai_Ulang_Kasir_nilai_pinjaman_lebih','Pelunasan_gu_kasir_nilai_sblm_kurang_bank',\
-        'Pelunasan_Gadai_Ulang_kasir_bank','Pelunasan_gu_kasir_nilai_sblm_lebih_bank_10')).filter(id_cabang=object_id).\
-        filter(status_jurnal=2).filter(id_coa =298L)
-
-    pelunasan_kelebihan_kasir = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis = 'Pelunasan_kasir_bank').filter(id_cabang=cab).filter(status_jurnal=2).filter(id_coa= 771)
-
-    gadai_ulang_kelebihan_kasir = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).filter(jenis__in = ('Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer_pendapatan','Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer','Pelunasan_Gadai_ulang_kasir_bank_kelebihan_pendapatan','Pendapatan1_Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer_pendapatan','Pendapatan1_Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer')).filter(id_cabang=cab).filter(status_jurnal=2).filter(id_coa= 771)
+        'Pelunasan_Gadai_Ulang_kasir_bank','Pelunasan_gu_kasir_nilai_sblm_lebih_bank_10'),id_cabang=cab,status_jurnal=2,id_coa =298L)
+    pelunasan_kelebihan_kasir = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
+        filter(jenis = 'Pelunasan_kasir_bank',id_cabang=cab,status_jurnal=2,id_coa= 771)
+    gadai_ulang_kelebihan_kasir = Tbl_Transaksi.objects.filter(tgl_trans = datetime.date.today()).\
+        filter(jenis__in = ('Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer_pendapatan',\
+        'Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer','Pelunasan_Gadai_ulang_kasir_bank_kelebihan_pendapatan',\
+        'Pendapatan1_Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer_pendapatan',\
+        'Pendapatan1_Pelunasan_Gadai_ulang_kasir_bank_kelebihan_transfer'),id_cabang=cab,status_jurnal=2,id_coa= 771)
     hitung_a = sum ([a.kredit for a in ak_ulang]) + sum ([a.kredit for a in setoran_bank_gerai]) \
         + sum ([a.kredit for a in pencairan_kasir_sisa]) + sum ([a.kredit for a in tbl]) + sum([a.kredit for a in pelunasan_kelebihan_kasir])\
         + sum ([a.kredit for a in gadai_ulang_kelebihan_kasir])
@@ -4866,7 +4784,7 @@ def all_transaksi_bank(request,object_id):
         + sum ([a.debet for a in pencairan_kasir])\
         + sum([a.debet for a in pengeluaran_gadai_ulang])\
         + sum([a.debet for a in transaksi_jurnal])
-    saldo_awal = sum([p.saldo for p  in s_awal])   
+    saldo_awal = sum([p.saldo for p  in s_awal])
     saldo_awal_lates =  sum([p.saldo for p in s_awal_lates])
 
     if d > datetime.timedelta(1) :
@@ -4877,7 +4795,6 @@ def all_transaksi_bank(request,object_id):
             'pengembalian_bank_pusat_pjb' :sum ([a.debet for a in pengembalian_bank_pusat]) ,
             'pengembalian_bank' :sum ([a.debet for a in pengembalian_bank]) + sum ([a.kredit for a in pengembalian_kas]),\
             'uang_muka':sum ([a.kredit for a in uang_muka_gerai]),'saldo_awal':saldo_awal,
-            #'saldo_awal': sum([a.saldo for a in s_awal]),
             'total_penerimaan':hitung_a,
             'total_pengeluaran': hitung_b ,
             'saldo_akhir': saldo_awal + int(hitung_a) - int(hitung_b),
@@ -4912,7 +4829,7 @@ def all_transaksi_bank(request,object_id):
             'total_penerimaan':hitung_a,
             'total_pengeluaran': hitung_b ,
             'saldo_akhir': saldo_awal_lates + int(hitung_a) - int(hitung_b),
-            'saldo_keseluruhan': (saldo_awal_lates + hitung_a - hitung_b) - sum ([a.kredit for a in pengembalian_bank_pusat]),             
+            'saldo_keseluruhan': (saldo_awal_lates + hitung_a - hitung_b) - sum ([a.kredit for a in pengembalian_bank_pusat]),
             'pencairan':sum ([a.debet for a in pencairan_kasir]),\
             'pencairan_kasir_sisa':pencairan_kasir_sisa,\
             'saldo_awal_hari':sum ([a.debet for a in saldo_awal_hari]),\
@@ -4931,7 +4848,7 @@ def all_transaksi_bank(request,object_id):
             'pengembalian_bank':pengembalian_bank,'setoran_bank_gerai':setoran_bank_gerai,'cabang':kocab,
             'pengembalian_uk_bank':pengembalian_uk_bank})
     template='kasir/view/all_transaksi_bank.html'
-    return render_to_response(template,variables)    
+    return render_to_response(template,variables)
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='KASIR_GERAI'))

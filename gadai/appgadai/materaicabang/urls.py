@@ -6,5 +6,5 @@ from gadai.appgadai.materaicabang.views import *
 import datetime
 
 urlpatterns = patterns('',
-    url(r'^(?P<object_id>\d+)/biaya_materai/$',materai_cabang),
+    url(r'^biaya_materai/$',materai_cabang),
 )

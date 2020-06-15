@@ -20,7 +20,5 @@ urlpatterns = patterns('',
     url(r'^neraca_keu/$', neraca),
     url(r'^laba_rugi_keu/$', laba_rugi),
     url(r'^(?P<object_id>\d+)/slip_setoran_titipan_gu/$',slip_setoran_titipan_gu),
-    url(r'^(?P<object_id>\d+)/kembali_gu/$', kembaligu),
-    #url(r'^baru_beda_barang/$', baru_beda_barang),
-    #url(r'^(?P<object_id>\d+)/barang_beda/$',barang_beda),#############nasabah lama,barang sama   
+    url(r'^kembali_gu/$', kembaligu),
 )
