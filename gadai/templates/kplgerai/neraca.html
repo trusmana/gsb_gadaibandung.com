@@ -9,7 +9,7 @@
 <h2> NERACA <small>&nbsp;Div PJB</small></h2>  
 <table id="tabel" align="center">
 <br/>
-<form method="GET" action="/kplgerai/{{kocab}}/neraca/">{% csrf_token %}
+<form method="GET" action=".">{% csrf_token %}
     <li><label for="id_tgl_trans"></label> <input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> -
     <label for="id_tgl_trans"></label> <input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
 	<li>&nbsp;<input type="submit" value="VIEW" class="cari"/></li>

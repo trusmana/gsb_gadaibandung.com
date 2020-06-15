@@ -7,7 +7,7 @@
 {% load number_format useringroup %}
 
 <h2> BUKU BESAR ALL ACCOUNT &nbsp;<small>DIV PJB</small></h2>  
-<form method="GET" action="/kplgerai/{{kocab}}/buku_besar_cabang/">{% csrf_token %}
+<form method="GET" action=".">{% csrf_token %}
    <table id="tabel" align="center">
    <li><label for="id_tgl_trans">Tanggal </label> :<input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> 
    <label for="id_tgl_trans">Tanggal </label> :<input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>

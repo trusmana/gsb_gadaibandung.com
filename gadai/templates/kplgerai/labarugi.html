@@ -10,7 +10,7 @@
 <h2> Laporan Laba Rugi </h2>  
 <table id="tabel" align="center">
 <br/>
-<form method="GET" action="/kplgerai/{{kocab}}/labarugi/">
+<form method="GET" action="."> {% csrf_token %}
     <li><label for="id_tgl_trans"></label> <input type="text" name="start_date" id="id_start_date" size="15" value="{% now "Y-m" %}-01" /> -
     <label for="id_tgl_trans"></label> <input type="text" name="end_date" id="id_end_date" size="15" value="{% now "Y-m-d" %}"/></li>
 </table>

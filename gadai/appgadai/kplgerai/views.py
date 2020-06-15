@@ -820,9 +820,11 @@ def pencairan_gerai(request,object_id):
         return render_to_response('kplgerai/laporan/rekaphari.html', variables)
 
 
-
-def labarugi(request,object_id):
-    kocab = object_id
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KPLGERAI'))
+def labarugi(request):
+    user = request.user
+    kocab =  user.profile.gerai.kode_cabang
     t_debet = 0
     t_kredit = 0
     t_saldo_akhir = 0
@@ -833,7 +835,7 @@ def labarugi(request,object_id):
     if  'start_date' in request.GET and request.GET['start_date']:
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
-        id_cabang = object_id
+        id_cabang = kocab
         lb_akun = Tbl_Akun.objects.filter(view_unit__in=('300','0')).filter(jenis="l")
         for c in lb_akun :
             akun.append({'c':c,'deskripsi':c.deskripsi,'kredit':c.my_kredit(id_cabang,start_date,end_date),'debet':c.my_debet(id_cabang,start_date,end_date),#'saldo_awal':saldo_dk ,
@@ -841,7 +843,7 @@ def labarugi(request,object_id):
                'saldo_akhir': c.view_saldo_akhir(id_cabang,start_date,end_date),
                'saldo_awal': c.saldo_pjb,})
             start_date = start_date
-            id_cabang = id_cabang
+            id_cabang = kocab
             end_date = end_date    
 
     template='kplgerai/labarugi.html'
@@ -849,15 +851,17 @@ def labarugi(request,object_id):
         'start_date':start_date,'id_cabang':id_cabang,'end_date':end_date,'kocab':kocab})
     return render_to_response(template,variable)
 
-def neraca(request,object_id):
-    kocab = object_id
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KPLGERAI'))
+def neraca(request):
+    user = request.user
+    kocab =  user.profile.gerai.kode_cabang
     t_debet = 0
     t_kredit = 0
     t_saldo_akhir = 0
     start_date = None
     end_date = None
     id_cabang = None
-
     akun =[]
 
     if  'start_date' in request.GET and request.GET['start_date']:
@@ -882,26 +886,28 @@ def neraca(request,object_id):
         'total_saldo_akhir':t_saldo_akhir,'start_date':start_date,'id_cabang':id_cabang,'end_date':end_date})
     return render_to_response(template,variable)
 
-
-def neraca_percobaan(request,object_id):
-    kocab = object_id
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KPLGERAI'))
+def neraca_percobaan(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    kocab = cab
     t_debet = 0
     t_kredit = 0
     t_saldo_akhir = 0
     start_date = None
     end_date = None
     id_cabang = None
-    
     akun =[]
     if  'start_date' in request.GET and request.GET['start_date'] and 'submit_satu' in request.GET:
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
-        id_cabang = object_id
-        lb_akun = Tbl_Akun.objects.filter(view_unit__in =('0','300')).filter(jenis__in = ('a','p','l')).order_by('coa')
+        id_cabang = cab
+        lb_akun = Tbl_Akun.objects.filter(view_unit__in =('0','300'),jenis__in = ('a','p','l')).order_by('coa')
         for c in lb_akun :
             akun.append({'c':c,'deskripsi':c.deskripsi,
                 'kredit':c.my_kredit(id_cabang,start_date,end_date),'debet':c.my_debet(id_cabang,start_date,end_date),
-                'coa':c.coa,'id':c.id,'id_cabang':300 + (int(object_id)) ,'header_parent':c.header_parent,
+                'coa':c.coa,'id':c.id,'id_cabang':300 + (int(cab)) ,'header_parent':c.header_parent,
                 'saldo_akhir': c.view_saldo_akhir(id_cabang,start_date,end_date),
                 'saldo_awal': c.saldo_pjb,})
             t_debet += c.total_debet_nenek(id_cabang,start_date,end_date)
@@ -918,11 +924,11 @@ def neraca_percobaan(request,object_id):
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
         id_cabang = object_id
-        lb_akun = Tbl_Akun.objects.filter(view_unit__in =('0','300')).filter(jenis__in = ('a','p','l')).order_by('coa')
+        lb_akun = Tbl_Akun.objects.filter(view_unit__in =('0','300'),jenis__in = ('a','p','l')).order_by('coa')
         for c in lb_akun :
             akun.append({'c':c,'deskripsi':c.deskripsi,
                 'kredit':c.my_kredit(id_cabang,start_date,end_date),'debet':c.my_debet(id_cabang,start_date,end_date),
-                'coa':c.coa,'id':c.id,'id_cabang':300 + (int(object_id)) ,'header_parent':c.header_parent,
+                'coa':c.coa,'id':c.id,'id_cabang':300 + (int(cab)) ,'header_parent':c.header_parent,
                 'saldo_akhir': c.view_saldo_akhir(id_cabang,start_date,end_date),
                 'saldo_awal': c.saldo_pjb,})
             t_debet += c.total_debet_nenek(id_cabang,start_date,end_date)
@@ -939,8 +945,12 @@ def neraca_percobaan(request,object_id):
         variables = RequestContext(request, {'kocab':kocab})
         return render_to_response('kplgerai/neraca_percobaan.html', variables)    
 
-def buku_besar_cabang(request,object_id):
-    kocab = object_id
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='KPLGERAI'))
+def buku_besar_cabang(request):
+    user = request.user
+    cab =  user.profile.gerai.kode_cabang
+    kocab = cab
     ledger = Tbl_Transaksi.objects.all()
     banyak = ledger.all
     start_date = None
@@ -950,7 +960,7 @@ def buku_besar_cabang(request,object_id):
     if 'start_date' in request.GET and request.GET['end_date'] and 'submit_satu' in request.GET :   
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
-        if object_id == '0':
+        if cab == '0':
             for (l,k) in AKUN:
                 tb = Tbl_Transaksi.objects.filter(id_coa = l ).filter(tgl_trans__range=(start_date,end_date)).filter(status_jurnal =2)
                 akumulasi_debet = 0
@@ -974,7 +984,7 @@ def buku_besar_cabang(request,object_id):
         else:
             for (l,k) in AKUN:
                 tb = Tbl_Transaksi.objects.filter(id_coa=l).filter(tgl_trans__range=(start_date,end_date)).\
-                    filter(id_cabang=object_id).filter(status_jurnal = 2)
+                    filter(id_cabang=cab,status_jurnal = 2)
                 akumulasi_debet = 0
                 akumulasi_kredit = 0
                 for t in tb:
@@ -994,15 +1004,14 @@ def buku_besar_cabang(request,object_id):
                         'id_coa':t.id_coa,'saldo_pjb':t.id_coa.saldo_pjb})# (t.id_coa.saldo_pjb + akumulasi_debet - akumulasi_kredit)
                     #all.append(t)
         template='kplgerai/buku_besar_cabang.html'
-        variable = RequestContext(request,{'ledger':all,'form':form,'start_date':start_date,'end_date':end_date,'id_cabang':object_id})
+        variable = RequestContext(request,{'ledger':all,'form':form,'start_date':start_date,'end_date':end_date,'id_cabang':cab})
         return render_to_response(template,variable)
-    
+
     if 'start_date' in request.GET and request.GET['end_date'] and 'submit_dua' in request.GET:
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
         #id_cabang = request.GET['id_cabang']
-        
-        if object_id == '0':
+        if cab == '0':
             for (l,k) in AKUN:
                 tb = Tbl_Transaksi.objects.filter(id_coa = l ).filter(tgl_trans__range=(start_date,end_date)).filter(status_jurnal= 2)
                 akumulasi_debet = 0
@@ -1016,7 +1025,7 @@ def buku_besar_cabang(request,object_id):
         else:
             for (l,k) in AKUN:
                 tb = Tbl_Transaksi.objects.filter(id_coa = l).filter(tgl_trans__range=(start_date,end_date))\
-                    .filter(id_cabang=object_id).filter(status_jurnal=2)
+                    .filter(id_cabang=cab).filter(status_jurnal=2)
                 akumulasi_debet = 0
                 akumulasi_kredit = 0
                 for t in tb:
@@ -1028,19 +1037,16 @@ def buku_besar_cabang(request,object_id):
         template='kplgerai/buku_besar_cabang_pdf.html'
         variable = RequestContext(request,{'ledger':all,'form':form,'start_date':start_date,'end_date':end_date,'id_cabang':object_id})
         return render_to_response(template,variable)
-        
     if 'start_date' in request.GET and request.GET['end_date'] and 'submit_tiga' in request.GET:
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
-        
         for (l,k) in AKUN:
-            tb = Tbl_Transaksi.objects.filter(id_coa = l ).filter(tgl_trans__range=(start_date,end_date)).filter(id_cabang=object_id).\
+            tb = Tbl_Transaksi.objects.filter(id_coa = l,tgl_trans__range=(start_date,end_date)).filter(id_cabang=cab).\
                     filter(status_jurnal=2)
             akumulasi_debet = 0
             akumulasi_kredit = 0
             for t in tb:
                 all.append(t)
-        
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         worksheet = workbook.add_worksheet()
@@ -1078,23 +1084,24 @@ def buku_besar_cabang(request,object_id):
         worksheet.write(row, 0, 'Total', bold)
         worksheet.write(row, 4, '=SUM(E2:E27)', money_format)
         worksheet.write(row, 5, '=SUM(F2:F27)', money_format)
-        workbook.close()    
-        output.seek(0)    
+        workbook.close()
+        output.seek(0)
         response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response['Content-Disposition'] = "attachment; filename=bukubesar_pjb_all).xlsx"
         return response
-        
+
     else:
         variables = RequestContext(request, {'form': form,'ag':ledger,'kocab':kocab})
         return render_to_response('kplgerai/buku_besar_cabang.html', variables)
-                
+
+@login_required
 def list(request,object_id):
     mankeu = Tbl_Transaksi.objects.filter(status_jurnal=1)
     akun=[]
     form = Tbl_AkunForm()
     start_date = None
     end_date = None
-    
+
     if 'start_date' in request.GET and request.GET['start_date']:
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
