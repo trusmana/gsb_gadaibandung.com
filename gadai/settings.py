@@ -51,9 +51,8 @@ STATIC_URL = os.path.join(PROJECT_ROOT,'/static/admin/')
 
 ADMIN_MEDIA_PREFIX=  os.path.join(PROJECT_ROOT,'/static/admincss/')
 
-#STATICFILES_DIRS = os.path.join(PROJECT_ROOT + '/static/')
-STATICFILES_DIRS = (
-)
+#STATICFILES_DIRS = (
+#)
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -107,6 +106,9 @@ INSTALLED_APPS = (
     #'twitter_bootstrap',
     #'bootstrap_toolkit',
 )
+
+STATICFILES_DIRS = os.path.join(PROJECT_ROOT, '/static/new_gsb/'),
+
 
 LOGGING = {
     'version': 1,

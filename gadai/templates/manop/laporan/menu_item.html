@@ -1,0 +1,92 @@
+{% extends "base_aplikasi.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block content %}
+<link href="/static/new_tmp/css/bootstrap.min.css" rel="stylesheet">
+{% load number_format useringroup %}
+<h4>Menu Akses Aplikasi  </h4>
+<table class="table table-bordered"  id="menu-table">
+    <thead >
+        <tr>
+            <th>Akses Menu</th><th>Jenis Menu</th><th>Nama Menu</th><th>Pengguna</th><th>Menu</th>
+        </tr>
+    </thead>
+    <tbody>
+{% regroup orders by akses_group as grouped %}
+    {% for a in grouped %}
+    {% for p in a.list %}
+    <tr>
+    {% ifchanged %}
+    <td ALIGN="CENTER" rowspan="{{ a.list|length }}">{{p.akses_group }}</td>
+    {% endifchanged %}
+    {% include 'manop/laporan/menu_list.html' %}
+    {% endfor %}
+    {% endfor %}
+    </tbody>
+</table>
+  <div class="modal fade" id="modal-menu">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+      </div>
+    </div>
+  </div>
+<script src="/static/new_tmp/js/jquery-3.1.1.min.js"></script>
+<script src="/static/new_tmp/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+$(function () {
+  var loadForm = function () {
+    var btn = $(this);
+    $.ajax({
+      url: btn.attr("data-url"),
+      type: 'get',
+      dataType: 'json',
+      beforeSend: function () {
+        $("#modal-menu .modal-content").html("");
+        $("#modal-menu").modal("show");
+      },
+      success: function (data) {
+        $("#modal-menu .modal-content").html(data.html_form);
+      }
+    });
+  };
+
+  var saveForm = function () {
+    var form = $(this);
+    $.ajax({
+      url: form.attr("action"),
+      data: form.serialize(),
+      type: form.attr("method"),
+      dataType: 'json',
+      success: function (data) {
+        if (data.form_is_valid) {
+          $("#menu-table tbody").html(data.html_book_list);
+          $("#modal-menu").modal("hide");
+        }
+        else {
+          $("#modal-menu .modal-content").html(data.html_form);
+        }
+      }
+    });
+    return false;
+  };
+
+
+  /* Binding */
+
+  // Create book
+  $(".js-create-book").click(loadForm);
+  $("#modal-menu").on("submit", ".js-book-create-form", saveForm);
+
+  // Update book
+  $("#menu-table").on("click", ".js-update-menu", loadForm);
+  $("#modal-menu").on("submit", ".js-book-update-form", saveForm);
+
+  // Delete book
+  $("#menu-table").on("click", ".js-delete-book", loadForm);
+  $("#modal-menu").on("submit", ".js-book-delete-form", saveForm);
+
+});
+    </script>
+    {% endblock %}

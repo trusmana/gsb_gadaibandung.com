@@ -3,8 +3,11 @@ from django.views.generic import list_detail, create_update, date_based
 from gadai.appgadai.manop.views import *
 from gadai.appgadai.models import *
 from gadai.appgadai.manop.report import views as report
+from gadai.appgadai.manop.manage import views as manop
 
 urlpatterns = patterns('',
+    url(r'^(?P<pk>\d+)/menu_update/$',manop.menu_update),
+    url(r'manage/menu_item/$', manop.menu_item),
     url(r'all_data_cair/$', all_data_cair),
     url(r'pencairan_gerai_saja/$', pencairan_gerai_saja),
     url(r'^(?P<object_id>\d+)/menu_penjualan_ayda_esekusi/$',menu_penjualan_ayda_esekusi),

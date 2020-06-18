@@ -121,11 +121,15 @@ JENIS_DESKRIPSI =(
    ('SALDOBANKGERAI','SALDOBANKGERAI'),
 )
 
+MENU_ADMIN = (('1','Menu Admin Gerai'),('2','Menu Kasir Gerai'),('3','Menu Kepala Gerai'),('4','Menu Gudang Lapur'),
+    ('5','Menu Gudang Aktif'),('6','Menu Manop'),('7','Menu Admin Kredit'),('8','Menu Bisnis'),)
+
 class Menu(models.Model):
     objects = models.Manager()
     nama = models.CharField(max_length=100)
     url_utama = models.CharField(max_length=100, blank=True, null=True)
     deskripsi = models.TextField(blank=True, null=True)
+    akses_menu = models.CharField(choices = MENU_ADMIN,max_length=100)
     akses_grup = models.ManyToManyField(Group, blank=True)
     status_aktif = models.BooleanField(default=True)
 

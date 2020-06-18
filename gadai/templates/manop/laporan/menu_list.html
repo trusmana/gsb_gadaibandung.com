@@ -1,0 +1,11 @@
+    <td ALIGN="CENTER">{{p.nama}}</td>
+    <td ALIGN="CENTER"> {{ p.judul}}</td>
+    <td ALIGN="CENTER">{{p.pengguna.all|join:", "}}</td>
+    <td style="width: 150px">
+      <button type="button"
+              class="js-update-menu"
+              data-url="/manop/{{p.id}}/menu_update/">
+        <span class="glyphicon glyphicon-pencil"></span> Edit
+      </button>
+    </tr>
+
