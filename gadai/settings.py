@@ -51,8 +51,8 @@ STATIC_URL = os.path.join(PROJECT_ROOT,'/static/admin/')
 
 ADMIN_MEDIA_PREFIX=  os.path.join(PROJECT_ROOT,'/static/admincss/')
 
-#STATICFILES_DIRS = (
-#)
+STATICFILES_DIRS = (
+)
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -96,8 +96,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django.contrib.admin',
-    'gadai.appgadai',
-    'chosen',
+    'gadai.appgadai','chosen',
     'gadai.xlsxwriter',
     'import_export',
     'gadai.django_pdf',
@@ -106,8 +105,6 @@ INSTALLED_APPS = (
     #'twitter_bootstrap',
     #'bootstrap_toolkit',
 )
-
-STATICFILES_DIRS = os.path.join(PROJECT_ROOT, '/static/new_gsb/'),
 
 
 LOGGING = {

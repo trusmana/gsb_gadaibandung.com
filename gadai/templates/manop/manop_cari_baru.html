@@ -1,0 +1,46 @@
+{% extends "base_aplikasi.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block sidebar %}
+{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<h2 align="right">Menu Cari Debitur</h2>
+<form action="." method="get"  class="form-inline">{% csrf_token %}
+    <input type="text" name="q" placeholder ="Masukan Nama " ><input type="submit" value="Cari " class="btn btn-info">
+</form>
+    <br>
+{% if daftar %}
+    <h4 style="color: red;" align="center">Ditemukan {{ daftar|length }} Debutir {{ daftar|pluralize }}</h4>
+</table>
+<br>  
+<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%" align="center">
+<thead>
+    <tr class="tableizer-firstrow">
+        {% ifusergroup MANOP %}<th>Status</th> <th>No Nasabah</th>{% else %}<th>No Nasabah</th>{% endifusergroup %}
+        <th>Nama</th><th>No Ktp</th><th>Alamat</th><th>Gerai</th></tr>
+    </tr>
+</thead>
+      <tbody>
+{% for nasabah in daftar %}
+<tr class="{% cycle 'odd' 'even' %}"> 
+    {% ifusergroup MANOP %} 
+    <td align="center">{% if nasabah.status_nasabah == "2" %}BLACKLIST{% else %}WHITLIST{% endif %}</td> 
+    <td align="center"><a href="/manop/{{ nasabah.id}}/show_manop/">{{ nasabah.nomor_nasabah}}</a></td> 
+    {% else %} 
+    <td align="center">
+        {% if nasabah.status_nasabah == "2" %}BLACKLIST{% else %}
+        <a href="/manop/{{ nasabah.id}}/show_manop/">{{ nasabah.nomor_nasabah}}{%endif%}</a>
+    </td> 
+    {% endifusergroup %} 
+    <td>{{ nasabah.nama }}</td><td>{{ nasabah.no_ktp }}</td> 
+    <td>{{ nasabah.alamat_ktp }}</td><td>{{ nasabah.geraigadai }}</td> 
+</tr>
+      {% endfor %}
+      </tbody>
+    </table> 
+{% else %}
+{% endif %}
+{% endblock %}
+

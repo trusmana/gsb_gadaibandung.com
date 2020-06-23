@@ -21,15 +21,18 @@ def daftar_user(request):
     variables = RequestContext(request, {'show':show})
     return render_to_response('gerai/daftar_user.html', variables)
 
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='MANOP'))
 def aktifkan_user(request):
     us = request.user
-    show = User.objects.filter(groups__name__in =("ADM_GERAI","KASIR_GERAI")).exclude(groups__name = "NON_AKTIF").exclude(userprofile__gerai_id= 1).order_by('userprofile')
+    show = User.objects.filter(groups__name__in =("ADM_GERAI","KASIR_GERAI")).exclude(groups__name = "NON_AKTIF").\
+        exclude(userprofile__gerai_id= 1).order_by('userprofile')
     if request.method == "POST":
         form = aktifasi_userForm(request.POST)
         if form.is_valid():
             id_cabang = form.cleaned_data['id_cabang']
-
-            kunci = User.objects.filter(userprofile__gerai =  id_cabang).filter(groups__name__in =("ADM_GERAI","KASIR_GERAI")).exclude(groups__name = "NON_AKTIF")
+            kunci = User.objects.filter(userprofile__gerai =  id_cabang).filter(groups__name__in=("ADM_GERAI","KASIR_GERAI")).\
+                exclude(groups__name = "NON_AKTIF")
             kunci.update(is_active = True)
             messages.add_message(request, messages.INFO, 'Buka User Berhasil')
             return HttpResponseRedirect('/')

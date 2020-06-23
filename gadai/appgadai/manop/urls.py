@@ -6,7 +6,10 @@ from gadai.appgadai.manop.report import views as report
 from gadai.appgadai.manop.manage import views as manop
 
 urlpatterns = patterns('',
-    url(r'^(?P<pk>\d+)/menu_update/$',manop.menu_update),
+    url(r'(?P<object_id>\d+)/aktif_tombol_gu/$',manop.aktif_tombol_gu),
+    url(r'(?P<object_id>\d+)/show_manop/$',manop.show_manop),
+    url(r'manage/list_cari_baru/$',manop.list_cari_baru),
+    url(r'manage/(?P<pk>\d+)/menu_update/$',manop.menu_update),
     url(r'manage/menu_item/$', manop.menu_item),
     url(r'all_data_cair/$', all_data_cair),
     url(r'pencairan_gerai_saja/$', pencairan_gerai_saja),
