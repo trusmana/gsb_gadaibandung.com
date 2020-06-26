@@ -6,6 +6,8 @@ from gadai.appgadai.manop.report import views as report
 from gadai.appgadai.manop.manage import views as manop
 
 urlpatterns = patterns('',
+    url(r'manage/report_oto_pelunasan/$',manop.report_oto_pelunasan),
+
     url(r'(?P<object_id>\d+)/aktif_tombol_gu/$',manop.aktif_tombol_gu),
     url(r'(?P<object_id>\d+)/show_manop/$',manop.show_manop),
     url(r'manage/list_cari_baru/$',manop.list_cari_baru),

@@ -6,7 +6,18 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, HttpResponseRedirect
 from gadai.appgadai.manop.manage.forms import MenuItemForm
 from django.template.loader import render_to_string
-from gadai.appgadai.models import AkadGadai,Nasabah,Barang
+from gadai.appgadai.models import AkadGadai,Nasabah,Barang,ManopPelunasan,ManopPelunasanGu
+import datetime
+
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('MANOP','administrator')))
+def report_oto_pelunasan(request):
+    start_date = datetime.date(2019,9,1)
+    end_date = datetime.date.today()
+    report = ManopPelunasanGu.objects.filter(status= 2).filter(tanggal__range=(start_date,end_date))
+    return render(request,'manop/manage/report_oto_plns.html',{'report':report})
+
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name__in=('MANOP','administrator')))

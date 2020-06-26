@@ -23,13 +23,13 @@ def all_data_cair(request):
     if 'start_date' in request.GET and request.GET['end_date'] and 'submit_satu' in request.GET:
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
-        id_cabang = request.GET['id_cabang']         
+        id_cabang = request.GET['id_cabang']
         if id_cabang == '500':
             tb = AkadGadai.objects.filter(tanggal__range=(start_date,end_date)).filter(kepalagerai__status = 1).order_by('gerai')
             a = sum([b.nilai for b in tb ])
-            c = sum([b.jasa_all() for b in tb ]) 
-            d = sum([b.adm_all() for b in tb ]) 
-            e = sum([b.beasimpan_all() for b in tb ]) 
+            c = sum([b.jasa_all() for b in tb ])
+            d = sum([b.adm_all() for b in tb ])
+            e = sum([b.beasimpan_all() for b in tb ])
             f = start_date
             g = end_date
             output = io.BytesIO()
@@ -41,8 +41,8 @@ def all_data_cair(request):
             date_format = workbook.add_format({'num_format': 'dd-mm-yyyy'})
             merge_format = workbook.add_format({'bold': 1,'border': 1,'align': 'center','valign': 'vcenter','fg_color': '#C0C0C0'})
             merge_format1 = workbook.add_format({'bold': 1,'border': 1,'align': 'center','valign': 'vcenter',})
-        
-            worksheet.set_column(0, 0, 10) 
+
+            worksheet.set_column(0, 0, 10)
             worksheet.set_column(1, 1, 18)
             worksheet.set_column(2, 2, 11)
             worksheet.set_column(3, 3, 11)
@@ -1013,15 +1013,17 @@ def jurnal_ref(request, object_id):
 def otorisasi_pelunasan(request):
     manop = ManopPelunasan.objects.filter(status='1')
     template = 'manop/otorisasi_pelunasan.html'
-    variables = RequestContext(request, {'manop': manop})    
+    variables = RequestContext(request, {'manop': manop})
     return render_to_response(template, variables)
 
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('manop','asmanpjb')))
 def edit_view(request, object_id):
     user = request.user
     sekarang = datetime.date.today()
     manop = get_object_or_404(ManopPelunasan, id=object_id)
     cc = manop.pelunasan.id
-    akad = AkadGadai.objects.get(pk=cc) 
+    akad = AkadGadai.objects.get(pk=cc)
     form = MyForm(request.POST or None, instance=manop,
         initial={'tanggal': sekarang,'nilai': int(manop.pelunasan.nilai_lunas),
         'terlambat':int(manop.pelunasan.terlambat) +int(manop.pelunasan.terlambat_kendaraan),
@@ -1050,7 +1052,6 @@ def edit_view(request, object_id):
             akad.save()
             messages.add_message(request, messages.INFO,'### PELUNASAN BERHASIL 2###')
         return HttpResponseRedirect('/manop/otorisasi_pelunasan/')
-       
     variables = RequestContext(request, {'ag': manop, 'form': form})
     return render_to_response('manop/edit_template.html', variables)
 ###PINDAHAN JURNAL

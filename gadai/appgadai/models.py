@@ -7320,11 +7320,13 @@ class ManopPelunasan(models.Model):
     cu = models.ForeignKey(User, related_name='c_manopelunasan', editable=False, null=True, blank=True)
     mu = models.ForeignKey(User, related_name='m_manopelunasan', editable=False, null=True, blank=True)
     note = models.CharField(max_length=200, null=True, blank=True)
-    
+
     class Meta:
         db_table = 'manoppelunasan'
         verbose_name = 'ManopPelunasan'
         verbose_name_plural = verbose_name
+
+
 
 class ManopPelunasanGu(models.Model):
     gu = models.OneToOneField('Pelunasan',null=True, blank=True)
@@ -7337,12 +7339,34 @@ class ManopPelunasanGu(models.Model):
     denda_kendaraan = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)########Perubahan Nilai Pelunasan
     bea_jasa_kendaraan = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)########Perubahan Nilai Pelunasan
     cu = models.ForeignKey(User, related_name='+', editable=False, null=True, blank=True)
-    mu = models.ForeignKey(User, related_name='+', editable=False, null=True, blank=True)    
-    
+    mu = models.ForeignKey(User, related_name='+', editable=False, null=True, blank=True)
+
     class Meta:
         db_table = 'manoppelunasangu'
         verbose_name = 'ManopPelunasanGu'
         verbose_name_plural = verbose_name
+
+    def tot_denda(self):
+        return self.denda + self.denda_kendaraan
+
+    def tot_jasa(self):
+        return self.bea_jasa + self.bea_jasa_kendaraan
+
+    def get_terlambat(self):
+        selisih =  self.tanggal - self.gu.pelunasan.jatuhtempo
+        if selisih.days < 0 :
+            return 0
+        else:
+            return selisih.days
+
+    def get_h_denda_plns(self):
+        return int(round(((self.gu.pelunasan.nilai*0.05/30))*(self.get_terlambat())))
+
+    def get_jasa_pel_mo(self):
+        if self.gu.pelunasan.jenis_transaksi == u'1':
+            return int(round((self.gu.pelunasan.nilai*0.02/7)*(self.get_terlambat())))
+        else:
+            return int(round((self.gu.pelunasan.nilai*0.04/30)*(self.get_terlambat())))
 
 STATUS_TITIPAN =(
     ('1','Titipan'),
