@@ -5949,9 +5949,8 @@ def pencairan_gerai(request):
 @user_passes_test(lambda u: u.groups.filter(name__in=('manop','asmanpjb')))
 def list(request):
     manop = AkadGadai.objects.filter(status_taksir=2)
-    
     template = 'manop/manop.html'
-    variables = RequestContext(request, {'manop': manop})    
+    variables = RequestContext(request, {'manop': manop})
     return render_to_response(template, variables)
 
 def list_cari(request):

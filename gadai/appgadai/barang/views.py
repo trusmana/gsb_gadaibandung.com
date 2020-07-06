@@ -179,7 +179,6 @@ def xls_jatuh_tempo(request):
     simple_report.addSheet("jatuhtempo")
     filter = ExcelFilter(order='id,agnasabah,gerai,barang,tanggal,jatuhtempo,nilai')
     simple_report.addQuerySet(akad,REPORT_HORZ,formatter, filter)
-    
     response = HttpResponse(simple_report.writeReport(),mimetype='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename=jatuh_tempo.xls'
     return response
@@ -195,11 +194,10 @@ def barang_gerai(request):
     for k in gerai:
         if k.akadgadai_set.all().count() > 0:
             kp.append(k)
-    
     total_piutang = total_akad= total_lunas = total_jt = total_nilai = total_jt_nilai = total_aktif = 0
     total_nilai_lunas = total_lelang= total_nilai_lelang= total_laba_lelang= total_all_barang= 0
-    for k in kp :        
-        total_piutang += k.piutang()       
+    for k in kp :
+        total_piutang += k.piutang()
         total_akad += k.aktif()
         total_nilai += k.get_jumlah_nilai()
         total_jt += k.total_jatuhtempo()
@@ -208,9 +206,7 @@ def barang_gerai(request):
         total_nilai_lunas +=k.plns_nilai_bulanan()
         total_lelang +=k.get_banyak_lelang()
         total_nilai_lelang += k.get_total_nilailelang()
-        #total_laba_lelang +=k.get_total_labalelang()
         total_all_barang +=k.total_barang()
-    
     template = 'barang/barang_gerai.html'
     variables = RequestContext(request, {
     'kp': kp ,
@@ -227,7 +223,7 @@ def barang_gerai(request):
     'tot_all_barang':total_all_barang,
     })
     return render_to_response(template, variables)
-    
+
 @login_required
 @user_passes_test(is_in_multiple_groups)
 def lebih(request, object_id):

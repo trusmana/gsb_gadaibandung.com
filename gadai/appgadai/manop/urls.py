@@ -4,10 +4,12 @@ from gadai.appgadai.manop.views import *
 from gadai.appgadai.models import *
 from gadai.appgadai.manop.report import views as report
 from gadai.appgadai.manop.manage import views as manop
+from gadai.appgadai.manop.dlapur import views as lapur
 
 urlpatterns = patterns('',
+    url(r'dlapur/lapur_barang_new/$',lapur.lapur_barang_new),
     url(r'manage/report_oto_pelunasan/$',manop.report_oto_pelunasan),
-
+    url(r'manage/report_taksiran/$',manop.report_taksiran),
     url(r'(?P<object_id>\d+)/aktif_tombol_gu/$',manop.aktif_tombol_gu),
     url(r'(?P<object_id>\d+)/show_manop/$',manop.show_manop),
     url(r'manage/list_cari_baru/$',manop.list_cari_baru),

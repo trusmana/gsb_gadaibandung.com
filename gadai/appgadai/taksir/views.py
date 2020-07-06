@@ -47,28 +47,28 @@ def add(request):
         form = TaksirForm()
     variables = RequestContext(request,{'form':form})
     return render_to_response('taksir/add.html',variables)
-        
+
+
 def show(request,object_id):
     tkr=Taksir.objects.get(id=object_id)
-    
     template='taksir/show.html'
     variable = RequestContext(request,{'tkr': tkr})
     return render_to_response(template,variable)
 
 @login_required
-@user_passes_test(lambda u: u.groups.filter(name__in=('manop','staffops')))        
+@user_passes_test(lambda u: u.groups.filter(name__in=('manop','staffops')))
 def edit(request,object_id):
     user = request.user
     sekarang1 = datetime.datetime.now()
     post = get_object_or_404(Taksir, id=object_id)
     taksir=Taksir.objects.get(id=object_id)
-    historitaksir =  TaksirHistory(history = taksir,type =taksir.type,spesifikasi =taksir.spesifikasi,\
-                         harga_baru =taksir.harga_baru, harga_pasar =taksir.harga_pasar, maxpinjaman =taksir.maxpinjaman,\
-                         tglupdate = sekarang1, tgl= sekarang1, status =taksir.status,cu =user,mu = user)
-    historitaksir.save()
     if request.method == "POST":
         form = TaksirEditForm(request.POST, instance=post)
         if form.is_valid():
+            historitaksir =  TaksirHistory(history = taksir,type =taksir.type,spesifikasi =taksir.spesifikasi,\
+                harga_baru =taksir.harga_baru, harga_pasar =taksir.harga_pasar, maxpinjaman =taksir.maxpinjaman,\
+                tglupdate = sekarang1, tgl= sekarang1, status =taksir.status,cu =user,mu = user)
+            historitaksir.save()
             post.save()
             return HttpResponseRedirect("/taksir/")
     else:

@@ -1,0 +1,33 @@
+
+
+    .navbar-inner {
+        background: #FFC107;
+        background: -moz-linear-gradient(top, #FFC107 0%, #FFC107 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFC107), color-stop(100%,#FFC107);
+        background: -webkit-linear-gradient(top, #FFC107 0%,#FFC107 100%);
+        background: -o-linear-gradient(top, #FFC107 0%,#FFC107 100%);
+        background: -ms-linear-gradient(top, #FFC107 0%,#FFC107 100%);
+        background: linear-gradient(top, #FFC107 0%,#FFC107 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFC107', endColorstr='#FFC107',GradientType=0 );
+    }
+    .navbar .nav > li > a {
+        color: #c1dce7;
+    }
+    .navbar .nav > li:hover > a {
+        color:#fff;
+    }
+    .navbar .nav .active > a, .navbar .nav .active > a:hover {
+        background: #206484 !important;
+    }
+    .navbar .divider-vertical {
+        border-left-color:#2078A1;
+        border-right-color:#3497C2;
+    }
+    .dropdown-menu li > a:hover, .dropdown-menu .active > a,
+	.dropdown-menu .active > a:hover,
+    .nav-list > .active > a, .nav-list > .active > a:hover {
+        background: #48a6d2 !important;
+    }
+	
+	.table thead th {background-color:#ebf2f6 !important}
+	.dataTables_wrapper th.sorting_asc,.dataTables_wrapper th.sorting_desc {background-color:#d4e3eb !important}

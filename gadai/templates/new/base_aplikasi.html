@@ -1,0 +1,114 @@
+{% load static from static %}
+<html lang="en">
+  <head>
+    {% include "new/head.html" %}
+    {% block extrahead %}{% endblock %}   
+  </head>
+  <body class="sidebar_hidden sidebar_right">
+    <div id="maincontainer" class="clearfix">
+      <header>
+        <div class="navbar navbar-fixed-top">
+          <div class="navbar-inner">
+            <div class="container-fluid">
+              <a class="brand" href ="/" ><i class="icon-home icon-white"></i> GadaiBandung <span class="sml_t">com</span></a>
+              <ul class="nav user_menu pull-right">
+                <li class="hidden-phone hidden-tablet">
+                  <div class="nb_boxes clearfix">
+                    <a data-backdrop="static" class="label ttip_b" title="Tanggal">{% now "d - m - Y" %}<i class="splashy-calendar_day"></i>
+                    </a>
+                  </div>
+                </li>                             
+                
+                <li class="dropdown">
+                  <a href ="/" class="dropdown-toggle" data-toggle="dropdown"><img src="{% static '/static/kspra/img/user_avatar.png' %}"  alt="" class="user_avatar" />
+                  {% if user.is_authenticated %}{{ user.first_name }} {{ user.last_name }} {%else%} Anonymous {% endif %} 
+                  <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    {% if user.is_superuser %}<li ><a href="/admin/">Admin</a></li>{%endif%}
+                    <li><a href="/password_reset/">Ganti Password</a></li>
+                    <li class="divider"></li>
+                    <li><a href ="/logout/" >Log Out</a></li>
+                  </ul>
+                </li>
+              </ul>
+              <ul class="nav" id="mobile-nav">
+                <li class="dropdown">
+                  <a href="/simulasi/"><i class="icon-list-alt icon-white"></i> Simulasi </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" >
+            <a class="close" data-dismiss="alert" href="#" >&times;</a> <strong>{{ message }}</strong></div>{% endfor %}
+        </div>
+
+                
+      </header>
+      <div id="contentwrapper">
+          <div class="main_content">
+          {% block content %}
+
+          {% endblock %}
+          </div>
+      </div>
+      <a href ="javascript:void(0)" class="sidebar_switch on_switch ttip_r" title="Sembunyikan Sidebar">Tampilkan Sidebar</a>
+      <div class="sidebar">
+  {% block sidebar %}
+  <div class="antiScroll">
+    <div class="antiscroll-inner">
+      <div class="antiscroll-content">    
+        <div class="sidebar_inner">
+          <div id="side_accordion" class="accordion"> 
+            
+            {% if cek_menu > 0 %}
+
+            {% for a in menu %}           
+            <div class="accordion-group">
+              <div class="accordion-heading ">
+                <a class="accordion-toggle active" data-toggle="collapse" data-parent="side_accordion" href="#{{a.id}}" >
+                <i class="icon-cog"></i> {{ a }}
+              </a>
+              </div>
+            <div id="{{a.id}}" class="accordion-body collapse">
+              <div class="accordion-inner">
+              {% for b in a.menuitem_set.all %}
+              {% if b in user.menuitem_set.all%}
+                <ul class="nav nav-list">
+                  <li><a href="{{ b.link_url }}">{{b.judul}}</a></li>
+                </ul>
+              {% endif %}
+              {% endfor %}
+              </div>
+            </div>
+            </div>
+            {% endfor %}
+            {% endif %}           
+            
+          </div>          
+          <div class="push"></div>
+        </div>
+           
+        <div class="sidebar_info">
+          <ul class="unstyled">
+            <li>
+              <span class="act act-warning">65</span>
+              <strong>Data Baru</strong>
+            </li>
+            <li>
+              <span class="act act-success">10</span>
+              <strong>New articles</strong>
+            </li>
+            <li>
+              <span class="act act-danger">85</span>
+              <strong>New registrations</strong>
+            </li>
+          </ul>
+        </div> 
+      
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+
+{% include "new/footer.html" %}

@@ -890,6 +890,12 @@ class AkadGadai(models.Model):
         verbose_name_plural = verbose_name
         get_latest_by = 'tanggal'
 
+    def tot_denda_lns(self):
+        return self.denda_lunas + self.denda_kendaraan_lunas
+    
+    def tot_jasa_lns(self):
+        return self.jasa_lunas + self.jasa_kendaraan_lunas
+
     def date_date_cuy(self):
         if self.tanggal == self.agnasabah.mdate.date():
             return True
@@ -2808,7 +2814,8 @@ class Tbl_Akun(models.Model):
 
     #### Untuk Posting Saldo Masuk Ke SHU
     def pdp_lb_rugi_saldo_gabungan_posting(self, start_date, id_cabang):
-        return sum([a.saldo for a in Tbl_TransaksiKeu.objects.filter(id_coa__coa__in = AA).filter(id_cabang = id_cabang).filter(tgl_trans=start_date).filter(jenis ='SALDOKASGERAI') ])
+        return sum([a.saldo for a in Tbl_TransaksiKeu.objects.filter(id_coa__coa__in = AA,id_cabang =
+            id_cabang,tgl_trans=start_date,jenis ='SALDOKASGERAI') ])
 
     def pdp_non_lb_rugi_saldo_gabungan_posting(self, start_date,end_date, id_cabang):
         return sum([a.debet for a in Tbl_Transaksi.objects.filter(id_coa__coa__in = BB).filter(id_cabang = id_cabang).filter(tgl_trans__range=(start_date,end_date)).filter(jenis ='SALDOKASGERAI') ])
@@ -6744,7 +6751,7 @@ class Pelunasan(models.Model):
         return "KL %s %s %s %s %s WIB %s" % ((self.pelunasan.norek()),self.nocoa_titipan,self.nilai,self.nocoa_kas,self.pelunasan.mdate,(str(self.pelunasan.gerai.init_cabang))) 
         
     def total_terima_bersih_plns(self):
-        return self.denda_all() + self.bea_jasa_total+ self.nilai
+        return self.denda_all() + self.bea_jasa_total+ self.nilaimas
 
     def get_absolute_url(self):
         return "/akadgadai/%s/show/" % self.pelunasan.id

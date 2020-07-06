@@ -106,7 +106,6 @@ def data_gudang_barang_aktif(request):
             variables = RequestContext(request, {'kp':kp,'start_date':start_date,'form':form,'end_date':end_date,'id_cabang':id_cabang,\
                 'nilai':sum([a.nilai for a in akad])})
             return render_to_response(template, variables)
-        
         ## cbng All - brng Id MOBIL
         elif id_cabang == '500' and id_barang == '7':
             akad= AkadGadai.objects.exclude(status_transaksi__in=('1','2','4','5','6','7','8')).\

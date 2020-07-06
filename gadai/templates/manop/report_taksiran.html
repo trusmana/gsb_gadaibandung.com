@@ -1,0 +1,54 @@
+{% extends "new/base_aplikasi.html" %}
+{% block title %} {{ block.super }}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block content %}
+<script type="text/javascript">
+$(document).ready(function(){
+   $( "#id_start_date,#id_end_date" ).datepicker({changeMonth: true,
+    changeYear: true,firstDay: 1,dateFormat: 'yy-mm-dd',
+    })
+});
+</script>
+{% load number_format useringroup %}
+<form method="GET" action="." class="well form-inline">{% csrf_token %}
+    <p class="f_legend">Data Otorisasi Taksiran</p>
+    <input type="text" name="start_date" id="id_start_date" value="{% now "Y-m" %}-01"  class="input-small"/> -
+    <input type="text" name="end_date" id="id_end_date" value="{% now "Y-m-d" %}" class="input-small"/>
+      <input type="submit" value="VIEW" class="btn btn-success" name="submit_satu" value="View"/>
+	  <input type="submit" value="CETAK XLS" class="btn btn-inverse" name="submit_dua"/>
+</form>
+{% if report %}
+<div class="row-fluid">
+  <div class="span24">
+  <h4 class="heading">Data Taksiran Edit : {{start_date}} - {{end_date}}</h4>
+			<div class="tab-content">
+				<div class="tab-pane active" id="tab1">
+				<table class="table table-bordered table-striped table_vam" id="smpl_tbl">
+          <thead>
+            <tr>
+              <th >No</th>
+              <th>Tanggal</th><th>Nama Barang</th>
+              <th>Max NonEdit</th><th>Max Edit</th>
+              <th>Petugas Edit</th> 
+
+            </tr>
+          </thead>
+  	      <tbody>
+          {% for k in report %}
+          <tr><td>{{forloop.counter}}</td><td>{{k.tglupdate|date:"d-m-Y"}} {{k.id}}</td>
+            <td>{{k.history.type}}</td>
+  					<td>{{k.history.maxpinjaman|number_format:0}}</td><td>{{k.maxpinjaman|number_format:0}}</td>
+  					<td>{{k.cu.first_name}}</td>
+  				</tr>
+          {% endfor %}
+  			  </tbody>
+		    </table>
+	</div>
+</div>
+{% else %}
+<h3 align="center">Data Yang Anda Cari Tidak Ada</h3>
+{% endif %}
+
+{% endblock %}
+

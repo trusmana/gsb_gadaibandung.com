@@ -8,15 +8,37 @@ from django.forms import ModelForm,Select
 from gadai.appkeuangan.models import *
 from gadai.appkeuangan.models import DATACABANG
 
+JENIS_REPORT =(
+    ('1','EXCEL'),('2','PDF'),('3','VIEW'),
+)
+
 JENIS_DATA =(
     ('1','NONPOSTING'),('2','POSTING'),('3','CETAK POSTING'),('4','EXCEL')
 )
 JENIS_LAPORAN =(
     ('1','VIEW'),
 )
+
+STATUS_BARANG = (
+    ('1','AYDA'),('2','TERJUAL'),('3','Pinjam'),
+    )
+
 class HorizRadioRenderer(forms.RadioSelect.renderer):
     def render(self):
         return mark_safe(u'\n'.join([u'%s\n' % w for w in self ]))
+
+class FilterNewForm(forms.Form):
+    report = chosenforms.ChosenChoiceField(widget=chosenforms.ChosenSelect({'class':'id_report'}), choices = JENIS_REPORT)
+    barang = chosenforms.ChosenChoiceField(widget=chosenforms.ChosenSelect({'class':'id_barang'}),choices = JENIS_BARANG)
+    kendaraan = chosenforms.ChosenChoiceField(widget=chosenforms.ChosenSelect({'class':'id_kendaraan'}),choices =JENIS_KENDARAAN)
+    id_cabang = chosenforms.ChosenChoiceField(widget=forms.Select(), choices=DATACABANG,initial='0',required=False) 
+    start_date = forms.DateField(initial= datetime.date.today,widget=forms.widgets.DateInput(attrs={'size': 12}, format="%Y-%m-01"))
+    end_date = forms.DateField(initial= datetime.date.today,widget=forms.widgets.DateInput(attrs={'size': 12}, format="%Y-%m-%d"))
+    jenis_laporan = chosenforms.ChosenChoiceField(widget=chosenforms.ChosenSelect({'class':'id_jenis_laporan'}),choices = JENIS_LAPORAN)
+    status_barang = chosenforms.ChosenChoiceField(widget=chosenforms.ChosenSelect({'class':'id_status_barang'}),choices =
+            STATUS_BARANG)
+
+
 class Format_laporanForm(forms.Form):
     id_cabang = chosenforms.ChosenChoiceField(widget=forms.Select(), choices=DATACABANG,initial='0',required=False)
     start_date = forms.DateField(initial = datetime.date.today,widget=forms.widgets.DateInput(attrs={'size': 12,}, format="%Y-%m-%d"))
