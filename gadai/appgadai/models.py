@@ -20,7 +20,7 @@ JENIS_AGUNAN = (
 
 CHOICES_PRODUK_PARAM =(
     ('1','1 Minggu'),('2','2 Minggu'),('3','3 Minggu'),('4','4 Minggu'),('5','1 Bulan'),('6','2 Bulan'),
-    ('7','3 Bulan'),    
+    ('7','3 Bulan'),
 )
 
 GERAI_KEMBALI =(('','---------'),
@@ -51,8 +51,8 @@ JENIS_TRANSAKSI = (
 STATUS_PENCAIRAN_NASABAH=(
     ('0','PENCAIRAN BARU'),
     ('1','PENCAIRAN GADAI ULANG'),
-    
 )
+
 class KasirGeraiPelunasan(models.Model):
     kasir_lunas = models.OneToOneField('AkadGadai',null=True, blank=True)
     status = models.CharField(max_length=1, choices=STATUS)
@@ -456,6 +456,65 @@ class Barang(models.Model):
     def totallebih(self):
         a = self.akadgadai_set.all().count()
         return a
+
+    def totallebih(self):
+        a = self.akadgadai_set.all().count()
+        return a
+
+    def t_aktif(self):
+        tmp = '1'
+        a = self.kondisi_aktifb_set.count()
+        if a > 0:
+            return tmp
+        else:
+            return 0
+
+
+
+class Kondisi_AktifB(models.Model):
+    baktif = models.ForeignKey(Barang)
+    keterangan = models.CharField(max_length =100)
+    tanggal = models.DateField(null=True)
+
+    charger = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_charger = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    batre = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_batre = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    keybord= models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_keybord = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    cassing = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_cassing = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+
+    layar = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_layar = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    lensa  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_lensa = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    batre_kamera  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_batre_kamera = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    cassing_kamera  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_cassing_kamera = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+
+    harddisk  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_harddisk = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    stick  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_stick = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    hdmi  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_hdmi = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+
+    layar_tv = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_layar_tv = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    remote = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_remote = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+
+    cu = models.ForeignKey(User, related_name='ck_baktif', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='mk_baktif', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'kondisi_aktifb'
+        verbose_name = 'Kondisi_AktifB'
+
 
 AKTIFASI_PARAMETER =(
     ('1','Non Aktif'),
@@ -2149,7 +2208,7 @@ STATUS_LAPUR = (
 class Lapur(models.Model):
     aglapur = models.ForeignKey(AkadGadai)
     gerai = models.CharField(max_length =30)
-    tanggal = models.DateField(null=True)    
+    tanggal = models.DateField(null=True)
     status = models.CharField(max_length=7,choices=STATUS_LAPUR)
     nilai = models.DecimalField(max_digits=12, decimal_places=2,null=True,blank=True,default=0)
     jasa = models.DecimalField(max_digits=12,decimal_places=2,default=0,null=True,blank=True)
@@ -2159,7 +2218,7 @@ class Lapur(models.Model):
     mu = models.ForeignKey(User, related_name='m_lapur', editable=False, null=True, blank=True)
     cdate = models.DateTimeField(auto_now_add=True)
     mdate = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'lapur'
         verbose_name = 'Lapur'
@@ -2170,8 +2229,74 @@ class Lapur(models.Model):
     def total_ayda(self):
         return self.nilai + self.jasa + self.denda
 
-    def norek_lapur(self): 
+    def norek_lapur(self):
         return "%s.%s.%s.%s" % (str(self.aglapur.gerai.kode_cabang).zfill(1),(self.tanggal.year),str(self.aglapur.jenis_transaksi).zfill(1),str(self.id).zfill(6))
+
+STATUS_PINJAM= (('1','Pinjam'),('2','Ok'),('3','Kembali'))
+
+class Kondisi_Lapur(models.Model):
+    klapur = models.ForeignKey(Lapur)
+    keterangan = models.CharField(max_length =100)
+    tanggal = models.DateField(null=True)
+
+    charger = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_charger = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    batre = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_batre = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    keybord= models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_keybord = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    cassing = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_cassing = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+
+    layar = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_layar = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    lensa  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_lensa = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    batre_kamera  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_batre_kamera = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    cassing_kamera  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_cassing_kamera = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+
+    harddisk  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_harddisk = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    stick  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_stick = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    hdmi  = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_hdmi = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+
+    layar_tv = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_layar_tv = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+    remote = models.CharField(max_length = 5, choices = CHOICES_BARANG)
+    kondisi_remote = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
+
+    cu = models.ForeignKey(User, related_name='ck_lapur', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='mk_lapur', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'kondisi_lapur'
+        verbose_name = 'Kondisi_Lapur'
+
+class Peminjaman(models.Model):
+    aglapur = models.ForeignKey(Lapur)
+    nama_peminjam = models.CharField(max_length =30)
+    tanggal = models.DateField(null=True)
+    jt_tanggal = models.DateField(null=True)
+    alamat = models.CharField(max_length=100)
+    status = models.CharField(max_length=100,choices=STATUS_PINJAM)
+
+    keterangan = models.CharField(max_length =30)
+    cu = models.ForeignKey(User, related_name='c_pinjam', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='m_pinjam', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'peminjaman'
+        verbose_name = 'Peminjaman'
+
+
 
 class HistoryLapur(models.Model):
     aglapur = models.ForeignKey(AkadGadai)

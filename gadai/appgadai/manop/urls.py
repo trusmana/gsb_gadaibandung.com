@@ -5,8 +5,17 @@ from gadai.appgadai.models import *
 from gadai.appgadai.manop.report import views as report
 from gadai.appgadai.manop.manage import views as manop
 from gadai.appgadai.manop.dlapur import views as lapur
+from gadai.appgadai.manop.daktif import views as aktif
+
 
 urlpatterns = patterns('',
+    url(r'(?P<pk>\d+)/show_data_bap/$',aktif.show_data_bap),
+    url(r'(?P<pk>\d+)/input_bapna/$',aktif.input_bapna),
+    url(r'data_kredit_kmr/$',aktif.data_kredit_kmr),
+    url(r'sh_kondisi_lapur/$',lapur.sh_kondisi_lapur),
+    url(r'(?P<pk>\d+)/show_data_ref/$',lapur.show_data_ref),
+    url(r'(?P<pk>\d+)/sts_lpr/$',lapur.sts_lpr),
+    url(r'dlapur/barang_pinjam/$',lapur.barang_pinjam),
     url(r'dlapur/lapur_barang_new/$',lapur.lapur_barang_new),
     url(r'manage/report_oto_pelunasan/$',manop.report_oto_pelunasan),
     url(r'manage/report_taksiran/$',manop.report_taksiran),

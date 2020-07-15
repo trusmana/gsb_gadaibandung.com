@@ -1,81 +1,96 @@
-{% extends "base_aplikasi.html" %}
-{% block section %}nasabah{% endblock %}
-{% block sidebar %}
+{% extends "new/base_aplikasi.html" %}
+{% block extrahead %}
 {% endblock %}
+{% block section %}{% endblock %}
 {% block content %}
-<script type='text/javascript'>
-$(document).ready(function(){$(&#39;.notification&#39;).hover(function(){$(this).css(&#39;cursor&#39;,&#39;auto&#39;);});
-$(&#39;.notification span&#39;).click(function(){$(this).parent().fadeOut(800);});});
-</script>
 {% load number_format useringroup %}
-<h2 align="right">:: DATA NASABAH  {{ ag.nasabah.nama }}::</h2>
+<div id="jCrumbs" class="breadCrumb module">
+    <ul>
+        <li>
+            <a href="/"><i class="icon-home"></i></a>
+        </li>
+        <li>
+            <a href="/manop/manage/list_cari_baru/">Cari Nasabah</a>
+        </li>
+        <li>
+            Data CIF 
+        </li>
+    </ul>
+</div>  
 
-<table width="90%">
-<tr>
-    <td><STRONG>Nama</STRONG></td><td>: {{nsb.nama}}</td>
-{% ifusergroup ADM_GERAI %}
-    <td><a href="/gerai/{{nsb.id}}/barang_beda/" class ="harian" title="AKAD DENGAN BARANG BEDA">AKAD BARU</a></td>
-{% endifusergroup %}
-</tr>
-<tr><td><STRONG>Alamat      </STRONG></td><td>: {{nsb.alamat_ktp}}  </td></tr>
-<tr><td><strong>No Identitas     </strong> </td><td width="50%">: {{nsb.no_ktp}}  </td></tr>
-<tr> <td><strong>RT / RW  <strong> </td><td>: {{nsb.rt_ktp}}  / {{nsb.rw_ktp}}</td></tr>
-</table>
+<div class="row-fluid">
+<div class="span12">
+<h3 class="headling">Costumer Information File: {{ nsb.nama }}</h3>
+    <table class="table table-striped table-bordered table-condensed" >
+        <tr>
+            <td colspan="4" align="center"><b>Data Nasabah</b> </td>
+        </tr>
+        <tr>
+            <td>Nama Ktp</td><td>: {{nsb.nama}}</td>
+            <td>Tempat Tanggal Lahir </td><td>: {{nsb.tempat}}, {{nsb.tgl_lahir|date:"d-M-Y"}} </td>
+        </tr>
+        <tr>
+            <td>RT / RW</td><td>: {{nsb.rt_ktp}} / {{nsb.rw_ktp}}</td>
+            <td>Nomor Identitas</td><td>: {{nsb.no_ktp}} </td>
+        </tr>
+        <tr>
+            <td>Telepon</td><td>: {{nsb.telepon_ktp}}</td>
+            <td></td>
+            <td>
+            {% ifusergroup ADM_GERAI %}
+            <a href="/gerai/{{nsb.id}}/barang_beda/" class ="harian" title="AKAD DENGAN BARANG BEDA">AKAD BARU</a></td>{% endifusergroup %}
+        </tr>
+    </table>
+</div>
 
-
-<h3 align="center">:: Data Pinjaman Barang Sebelumnya ::</h3>
-<table class="tableizer-table" cellpadding="0" cellspacing="0" border="1" bordercolor="silver " width="100%" align="center">
-    <tr class="tableizer-firstrow">
-    <th>No Rek</th>
-    <th>No Barang</th>
-    <th>Transaksi</th>
-    <th>Gerai</th>
-    <th>Nama</th>
-    <th>JW</th>
-    <th>Jatuh Tempo</th>
-    <th>Nilai</th>
-    <th>Barang</th>
-    <th>Status Akad</th>
-
-    <th colspan = '2'>MENU</th>
-    <th>Keterangan Akad</th>
+<div class="span12">
+<h3 class="heading">Riwayat Kredit</h3>
+<table class="table table-bordered table-striped">
+    <thead>
+    <tr>
+        <th>Norek</th><th>Transaksi</th>
+        <th>Gerai</th><th>JW</th>
+        <th>JT</th><th>Nilai</th><th>Barang</th>
+        <th>Status</th><th colspan = '2'>Menu</th><th>Keterangan</th>
     </tr>
+    </thead>
     {% for p in ag %}
-
-<tr>
-    <td><a href="{{p.get_absolute_url}}" class="lihat" title="Lihat Data Akad" >{{ p.norek}}</a></td>
-    <td><a href="/nasabah/{{p.barang.id}}/history_gu/" class="lihat" title="Lihat Data Akad">{{p.barang.id}}</a></td>
-    <td>{{p.tanggal|date:"d M Y "}}</td>
-    <td>{{p.gerai.nama_cabang}}</td>
-    <td>{{p.agnasabah.nama}}</td>
-    <td>{% if p.jenis_transaksi = '2' %} {{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
-    {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
-    <td><abbr title="{{ p.cdate }}">{{ p.jatuhtempo|date:" d-M-Y"}}</abbr></td>
-    <td >Rp. {{p.nilai|number_format:0}}</td>
-    <td >{% if ag.jenis_transaksi = 1 %}{{p.barang.no_polisi}}|{{p.barang.no_rangka}}{%else%}{{p.barang.merk|truncatewords:3}}|{{p.barang.type|truncatewords:3}}{%endif%}</td>
-    <td>{%if p.status_transaksi == 'HILANG' %} {%else%}{{ p.get_status_transaksi_display|default_if_none:"AKTIF"}}{%endif%}</td>    
-    <td>{% if p.status_oto_akad_gu == '1' %} <b> OTIRISASI MANOP </b>{%endif%}
-        {% if p.status_oto_akad_gu == '2' %}<td>
-    {% ifusergroup ADM_GERAI %}
-    <a href="/gerai/{{p.agnasabah.id}}/barang_sama_oto_manop/{{p.barang.id}}/{{p.taksir.id}}/" title="PELUNASAN OTO MANOP" class="cari" method="post">GU OTO MANOP</a>
-    {% endifusergroup %} {%endif%}
-    {% if p.barang.akad_ulang >= p.param_tombol and p.barang.buka_tutup_gu == 99 %}
-    <b>AKAD MELEBIHI BATAS MAKSIMAL</b>
-    {% else %}
-    {% if p.status_transaksi == None or p.status_transaksi == '3'%}
-    {% ifusergroup ADM_GERAI %}
-    <a href="/gerai/{{p.agnasabah.id}}/barang_sama/{{p.barang.id}}/{{p.taksir.id}}/" title="AKAD DENGAN BARANG SAMA" class="next" method="post">GADAI ULANG</a>{% endifusergroup %}{% endif %}{% endif %}</td>
-    {% ifusergroup MANOP|ASMANPJB|staffops %}
-    {% if p.barang.akad_ulang >= p.param_tombol and p.barang.buka_tutup_gu == 99 %}
-    <td><a href="/manop/{{p.barang.id}}/aktif_tombol_gu/" title="Buka Tombol Gu" class="simpan"  
-	    onclick="if (confirm('Yakin akan membuka Gadai Ulang')) { var f = document.createElement('form');f.csrfmiddlewaretoken= csrftoken;
-	    f.style.display = 'None'; this.parentNode.appendChild(f);  f.action = this.href; f.submit(); }; 
-	    return false;">{% csrf_token %}Aktif_GU</a>
-    </td>
-    {% else %}<td>&nbsp;</td>{% endif %}{% endifusergroup %}</td>
-    <td> {{ p.barang.akad_ulang }} x GU </td>
-</tr>
+    <tbody>
+    <tr>
+        <td><a href="{{p.get_absolute_url}}" class="btn btn-info" title="Lihat Data Akad" >{{ p.norek}}</a></td>
+        <td>{{p.tanggal|date:"d M Y "}}</td>
+        <td>{{p.gerai.nama_cabang}}</td>
+        <td>{% if p.jenis_transaksi = '2' %} {{ p.jangka_waktu_kendaraan|default_if_none:"" }} Bulan{%else%}
+        {{ p.jangka_waktu|default_if_none:"" }} Hari</td>{% endif %}
+        <td>{{ p.jatuhtempo|date:" d-M-Y"}}</td>
+        <td> {{p.nilai|number_format:0}}</td>
+        <td>{% if ag.jenis_transaksi = 1 %}{{p.barang.no_polisi}}|{{p.barang.no_rangka}}{%else%}{{p.barang.merk|truncatewords:3}}|{{p.barang.type|truncatewords:3}}{%endif%}</td>
+        <td>{%if p.status_transaksi == 'HILANG' %} {%else%}{{ p.get_status_transaksi_display|default_if_none:"AKTIF"}}{%endif%}</td>    
+        <td>{% if p.status_oto_akad_gu == '1' %} <b> OTIRISASI MANOP </b>{%endif%}
+            {% if p.status_oto_akad_gu == '2' %}<td>
+        {% ifusergroup ADM_GERAI %}
+        <a href="/gerai/{{p.agnasabah.id}}/barang_sama_oto_manop/{{p.barang.id}}/{{p.taksir.id}}/" title="PELUNASAN OTO MANOP" class="cari" method="post">GU OTO MANOP</a>
+        {% endifusergroup %} {%endif%}
+        {% if p.barang.akad_ulang >= p.param_tombol and p.barang.buka_tutup_gu == 99 %}
+        <b><small>MELEBIHI BATAS MAKSIMAL</small></b>
+        {% else %}
+        {% if p.status_transaksi == None or p.status_transaksi == '3'%}
+        {% ifusergroup ADM_GERAI %}
+        <a href="/gerai/{{p.agnasabah.id}}/barang_sama/{{p.barang.id}}/{{p.taksir.id}}/" title="AKAD DENGAN BARANG SAMA" class="next" method="post">GADAI ULANG</a>{% endifusergroup %}{% endif %}{% endif %}</td>
+        {% ifusergroup MANOP|ASMANPJB|staffops %}
+        {% if p.barang.akad_ulang >= p.param_tombol and p.barang.buka_tutup_gu == 99 %}
+        <td><a href="/manop/{{p.barang.id}}/aktif_tombol_gu/" title="Buka Tombol Gu" class="simpan btn btn-gebo"  
+    	    onclick="if (confirm('Yakin akan membuka Gadai Ulang')) { var f = document.createElement('form');f.csrfmiddlewaretoken= csrftoken;
+    	    f.style.display = 'None'; this.parentNode.appendChild(f);  f.action = this.href; f.submit(); }; 
+    	    return false;">{% csrf_token %}Aktif_GU</a>
+        </td>
+        {% else %}<td>&nbsp;</td>{% endif %}{% endifusergroup %}</td>
+        <td> {{ p.barang.akad_ulang }} x GU </td>
+    </tr>
+    </tbody>
     {% endfor %}
 </table>
+</div>
+</div>
 {% endblock %}
 

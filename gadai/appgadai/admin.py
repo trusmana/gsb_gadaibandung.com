@@ -6,6 +6,18 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportMixin, ExportActionModelAdmin
 
+class Kondisi_AktifBAdmin(ImportExportMixin,admin.ModelAdmin):
+    list_display = ['id','tanggal']
+    search_fields = ['id']
+admin.site.register(Kondisi_AktifB, Kondisi_AktifBAdmin)
+
+
+class Kondisi_LapurAdmin(ImportExportMixin,admin.ModelAdmin):
+    list_display = ['id','tanggal']
+    search_fields = ['id']
+admin.site.register(Kondisi_Lapur, Kondisi_LapurAdmin)
+
+
 class MenuAdmin(ImportExportMixin,admin.ModelAdmin):
     list_display = ['id','akses_menu',]
     search_fields = ['id']

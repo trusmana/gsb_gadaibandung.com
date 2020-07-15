@@ -1946,6 +1946,8 @@ def delete(request,object_id):
     variable = RequestContext(request,{'lapur':lapur})
     return render_to_response('manop/lapur_barang/',variable)
 
+@login_required
+@user_passes_test(is_in_multiple_groups)
 def lunasterjual_barang(request):
     start_date = None
     end_date = None

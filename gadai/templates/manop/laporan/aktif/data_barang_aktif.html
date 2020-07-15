@@ -1,0 +1,53 @@
+{% extends "new/base_aplikasi.html" %}
+{% block extrahead %}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<div id="jCrumbs" class="breadCrumb module">
+    <ul>
+        <li>
+            <a href="/"><i class="icon-home"></i></a>
+        </li>
+        
+        <li>Data Pencairan Aktif</li>
+
+    </ul>
+</div>  
+
+<div class="row-fluid">
+    <div class="span12">
+        <h3 class="heading">Data Pencairan  </h3>
+        <table class="table table-bordered table-striped table_vam" id="dt_gal">
+            <thead>
+                <tr><th class="table_checkbox">Gerai</th>
+                    <th class="table_checkbox">Nama Debitur</th>
+                    <th style="width:60px">Tanggal</th>
+                    <th>Keterangan</th>
+                    <th>User</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            {% for p in data %}
+
+            <tbody>    
+                <tr><td>{{p.gerai.nama_cabang }}</td>
+                    <td>{{p.agnasabah.nama }}</td>
+                    <td>{{p.tanggal}}</td>
+                    <td>{{p.barang.get_jenis_barang_display}}</td>
+                    <td>{{p.cu}}</td>
+                    <td>{% if p.barang.t_aktif == '1' %}
+                        <a href="/manop/{{p.barang.id}}/show_data_bap/" class="btn btn-danger">OnChek </a>
+                        {%else %}
+                        <a href="/manop/{{p.id}}/input_bapna/" class="btn btn-info">BAP </a>{%endif%}
+                    </td>
+                </tr>
+            </tbody>
+            {% endfor %}
+            </table>
+                  
+    </div>
+</div>
+
+
+{% endblock %}

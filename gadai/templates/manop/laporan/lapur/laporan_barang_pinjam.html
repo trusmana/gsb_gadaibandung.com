@@ -1,0 +1,50 @@
+{% extends "new/base_aplikasi.html" %}
+{% block extrahead %}
+{% endblock %}
+{% block section %}ledger{% endblock %}
+{% block content %}
+<script type="text/javascript">
+$(document).ready(function(){
+   $( "#id_start_date,#id_end_date" ).datepicker({changeMonth: true,
+    changeYear: true,firstDay: 1,dateFormat: 'yy-mm-dd',
+    })
+});
+</script>
+{% load number_format useringroup %}
+<div class="row-fluid">
+    <div class="span12">
+        <h3 class="heading">Data Barang Peminjaman</h3>
+    <table class="table table-bordered table-striped table_vam" id="dt_gal">
+      <thead>
+        <tr>
+          <th class="table_checkbox"><input type="checkbox" name="select_rows" class="select_rows" data-tableid="dt_gal" /></th>
+          <th style="width:60px">Image</th>
+          <th>Name</th>
+          <th>Size</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="checkbox" name="row_sel" class="select_row" /></td>
+          <td></td>
+          <td></small></td>
+          <td></td>
+          <td>28/06/2012</td>
+          <td>
+            <a href="#" class="sepV_a" title="Edit"><i class="icon-pencil"></i></a>
+            <a href="#" class="sepV_a" title="View"><i class="icon-eye-open"></i></a>
+            <a href="#" title="Delete"><i class="icon-trash"></i></a>
+          </td>
+        </tr>
+        
+      </tbody>
+    </table>
+    
+  </div>
+</div>
+  {% endblock %}
+
+
+

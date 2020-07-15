@@ -11,6 +11,19 @@ $(document).ready(function(){
 });
 </script>
 {% load number_format useringroup %}
+<div id="jCrumbs" class="breadCrumb module">
+    <ul>
+        <li>
+            <a href="/"><i class="icon-home"></i></a>
+        </li>
+        <li>
+            <a href="/manop/dlapur/lapur_barang_new/">Report Barang Lapur</a>
+        </li>
+
+    </ul>
+</div>
+
+
 <div class="row-fluid">
   <div class="span12">
     <form class="form-horizontal well" method="GET" action=".">{% csrf_token %}
@@ -55,11 +68,11 @@ $(document).ready(function(){
       </fieldset>
     </form>
   </div>
-
+</div>
 {% if lapur %}
  <div class="row-fluid">
     <div class="span12">
-    <h3 class="heading">LAPORAN AYDA 
+    <h3 class="heading f_legend">LAPORAN AYDA 
     {% if id_cabang = '500'%}GABUNGAN {%endif%} {% if id_cabang = '301' %}GERAI JAKARTA{%endif%} 
    {% if id_cabang = '302' %}GERAI SUCI{%endif%} {% if id_cabang = '303' %}GERAI DIPATIUKUR{%endif%}
    {% if id_cabang = '304' %}GERAI BALUBUR{%endif%} {% if id_cabang = '306' %}GERAI GERLONG HILIR{%endif%}
@@ -79,7 +92,7 @@ $(document).ready(function(){
    {% if id_cabang = '330' %}GADAI NIGHT BALUBUR{%endif%}  
     Periode {{start_date}} {{end_date}}
     </h3>    
-    <table class="table table-striped table-bordered table-condensed">
+    <table class="table table-bordered table-striped" id="smpl_tbl">
       <thead>
         <tr>
           <th>No</th>
@@ -97,7 +110,7 @@ $(document).ready(function(){
       <tbody>
         {% for p in lapur %}
         <tr>
-          <td>{{ forloop.counter }}</td>
+          <td><a href="/manop/{{p.id}}/sts_lpr/">{{ forloop.counter }}</a></td>
           <td>{{ p.aglapur.gerai }}</td>
           <td>{{ p.aglapur.agnasabah.nama}}</td>
           <td>{{ p.aglapur.get_status_transaksi_display}}</td>
@@ -115,11 +128,49 @@ $(document).ready(function(){
 Data Tidak Ada
 {%endif%}
 </div>
+
 <link rel="stylesheet" href="/static/chosen/static/css/chosen.css">
 <script src="/static/chosen/static/js/chosen.jquery.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(".chosen-select").chosen()
 </script>
 {% endblock %}
+{% block sidebar %}
+  <div class="antiScroll">
+    <div class="antiscroll-inner">
+      <div class="antiscroll-content">    
+        <div class="sidebar_inner">
+          <div id="side_accordion" class="accordion"> 
+            {% if cek_menu > 0 %}
+            {% for a in menu %}           
+            <div class="accordion-group">
+              <div class="accordion-heading ">
+                <a class="accordion-toggle active" data-toggle="collapse" data-parent="side_accordion" href="#{{a.id}}" >
+                <i class="icon-cog"></i> {{ a }}
+              </a>
+              </div>
+            <div id="{{a.id}}" class="accordion-body collapse">
+              <div class="accordion-inner">
+              {% for b in a.menuitem_set.all %}
+              {% if b in user.menuitem_set.all%}
+                <ul class="nav nav-list">
+                  <li><a href="{{ b.link_url }}">{{b.judul}}</a></li>
+                </ul>
+              {% endif %}
+              {% endfor %}
+              </div>
+            </div>
+            </div>
+            {% endfor %}
+            {% endif %}           
+            
+          </div>          
+          <div class="push"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+
 
 

@@ -8,14 +8,100 @@ import xlwt
 import io
 import xlsxwriter
 from gadai.xlsxwriter.workbook import Workbook
-from gadai.appgadai.akadgadai.forms import *
+from gadai.appgadai.akadgadai.forms import Peminjaman,Lapur
 from gadai.appgadai.manop.forms import *
 from django.shortcuts import render_to_response, get_object_or_404,render,redirect
 from gadai.appkeuangan.report.forms import SearchForm,FilterNewForm
+from gadai.appkeuangan.models import Menu
+from gadai.appgadai.manop.dlapur.forms import DataLapurnaForm
 
 @login_required
-@user_passes_test(lambda u: u.groups.filter(name__in=('staffops','administrator')))
-def lapur_barang_new(request):###teddy27042015
+@user_passes_test(lambda u: u.groups.filter(name__in=('staffops','administrator','MANOP')))
+def sh_kondisi_lapur(request):
+    da= Kondisi_Lapur.objects.filter(tanggal__isnull = False)
+    list = []
+    for a in da:
+        list.append({'name':a.klapur,'id':a.klapur.id,'tanggal':a.tanggal,'ket':a.keterangan,'user':a.cu})
+    return render(request,'manop/laporan/lapur/kondisi_data_lapur.html',{'data':list})
+
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('staffops','administrator','MANOP')))
+def show_data_ref(request,pk):
+    data= Lapur.objects.get(id=pk)
+    return render(request,'manop/laporan/lapur/show_sts_lapur.html',{'data':data})
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('staffops','administrator','MANOP')))
+def sts_lpr(request,pk):
+    user = request.user
+    nsb = get_object_or_404(Lapur, id=pk)
+    if request.method == "POST":
+        form = DataLapurnaForm(request.POST,nsb)
+        if form.is_valid():
+            charger = form.cleaned_data['charger']
+            kondisi_charger = form.cleaned_data['kondisi_charger']
+            batre = form.cleaned_data['batre']
+            kondisi_batre = form.cleaned_data['kondisi_batre']
+            keybord = form.cleaned_data['keybord']
+            kondisi_keybord = form.cleaned_data['kondisi_keybord']
+            cassing = form.cleaned_data['cassing']
+            kondisi_cassing = form.cleaned_data['kondisi_cassing']
+
+            layar = form.cleaned_data['layar']
+            kondisi_layar = form.cleaned_data['kondisi_layar']
+            lensa = form.cleaned_data['lensa']
+            kondisi_lensa = form.cleaned_data['kondisi_lensa']
+            batre_kamera = form.cleaned_data['batre_kamera']
+            kondisi_batre_kamera = form.cleaned_data['kondisi_batre_kamera']
+            cassing_kamera = form.cleaned_data['cassing_kamera']
+            kondisi_cassing_kamera = form.cleaned_data['kondisi_cassing_kamera']
+
+            layar_tv = form.cleaned_data['layar_tv']
+            kondisi_layar_tv = form.cleaned_data['kondisi_layar_tv']
+            remote = form.cleaned_data['remote']
+            kondisi_remote = form.cleaned_data['kondisi_remote']
+
+            harddisk  = form.cleaned_data['harddisk']
+            kondisi_harddisk = form.cleaned_data['kondisi_harddisk']
+            stick  = form.cleaned_data['stick']
+            kondisi_stick = form.cleaned_data['kondisi_stick']
+            hdmi  = form.cleaned_data['hdmi']
+            kondisi_hdmi = form.cleaned_data['kondisi_hdmi']
+            keterangan = form.cleaned_data['keterangan']
+            simpan = Kondisi_Lapur(klapur= nsb,cu = user,mu =user,tanggal= datetime.date.today(),charger=charger,
+                kondisi_charger=kondisi_charger,batre=batre,kondisi_batre=kondisi_batre, keybord=keybord,cassing= cassing,
+                kondisi_cassing= kondisi_cassing,layar=layar,kondisi_layar=kondisi_layar,lensa=lensa
+                ,kondisi_lensa=kondisi_lensa,batre_kamera=batre_kamera,kondisi_batre_kamera=kondisi_batre_kamera,cassing_kamera=cassing_kamera,
+                kondisi_cassing_kamera= kondisi_cassing_kamera,layar_tv=layar_tv,kondisi_layar_tv=kondisi_layar_tv,remote=remote,
+                kondisi_remote=kondisi_remote,harddisk=harddisk,kondisi_harddisk= kondisi_harddisk,stick=stick,
+                kondisi_stick=kondisi_stick,hdmi =hdmi,kondisi_hdmi=kondisi_hdmi,keterangan=keterangan)
+            simpan.save()
+            messages.add_message(request, messages.INFO, 'Data Sudah Tersimpan.')
+            return HttpResponseRedirect('/manop/dlapur/sh_kondisi_lapur/' )
+    else:
+        form = DataLapurnaForm()
+    return render(request,'manop/laporan/lapur/input_sts_lapur.html',{'nsb':nsb,'form':form})
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('staffops','administrator','MANOP')))
+def barang_pinjam(request):
+    pnj = Peminjaman.objects.filter(status='1')
+    user = request.user
+    sekarang = datetime.date.today()
+    cek_menu = user.menuitem_set.all().count()
+    cek_group = user.groups.all()
+    menu = Menu.objects.filter(akses_grup__in=(cek_group)).filter(status_aktif = True)
+    return render(request,'manop/laporan/lapur/laporan_barang_pinjam.html',{'pnj':pnj,'menu':menu,'cek_menu':cek_menu})
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('staffops','administrator','MANOP')))
+def lapur_barang_new(request):
+    user = request.user
+    sekarang = datetime.date.today()
+    cek_menu = user.menuitem_set.all().count()
+    cek_group = user.groups.all()
+    menu = Menu.objects.filter(akses_grup__in=(cek_group)).filter(status_aktif = True)
     kp = []
     start_date = None
     end_date = None
@@ -35,30 +121,31 @@ def lapur_barang_new(request):###teddy27042015
             gabung_all = _get_gabung_all(start_date,end_date)
             return render(request, 'manop/laporan/lapur/laporan_lapur_new.html',{'form':form,'lapur': gabung_all ,
                 'start_date':start_date,'end_date':end_date,'id_cabang':id_cabang,'total':sum([p.nilai for p in gabung_all]),
-                'total_plafon':sum([p.nilai for p in gabung_all])})
+                'total_plafon':sum([p.nilai for p in gabung_all]),'cek_menu': cek_menu, 'menu':menu})
         elif id_cabang == '500' and report == '3' and barang == barang and kendaraan =='0' and status_barang == '1':
             gabung_all = _get_gabung_all_barang(start_date,end_date,barang)
             return render(request,'manop/laporan/lapur/laporan_lapur_new.html', {'form':form,'lapur': gabung_all ,'start_date':start_date,
                 'end_date':end_date,'id_cabang':id_cabang,'total':sum([p.nilai for p in gabung_all]),
-                'total_plafon':sum([p.nilai for p in gabung_all])})
+                'total_plafon':sum([p.nilai for p in gabung_all]),'cek_menu': cek_menu, 'menu':menu})
         elif id_cabang == '500' and report == '3' and barang == '0' and kendaraan == kendaraan and status_barang == '1':
             gabung_all = _get_gabung_all_kendaraan(start_date,end_date,kendaraan)
             return render(request,'manop/laporan/lapur/laporan_lapur_new.html', {'form':form,'lapur': gabung_all ,'start_date':start_date,
                 'end_date':end_date,'id_cabang':id_cabang,'total':sum([p.nilai for p in gabung_all]),
-                'total_plafon':sum([p.nilai for p in gabung_all])})
+                'total_plafon':sum([p.nilai for p in gabung_all]),'cek_menu': cek_menu, 'menu':menu})
         elif id_cabang == id_cabang and barang =='0' and kendaraan =='0' and status_barang == '1' and report =='3':
             rekap = Lapur.objects.filter(status = '1',tanggal__range=(start_date,end_date),aglapur__gerai__kode_cabang =
                     id_cabang,aglapur__status_transaksi = '6')
             template = 'manop/laporan/lapur/laporan_lapur_new.html'
             variables = RequestContext(request, {'form':form,'lapur': rekap ,'start_date':start_date,'end_date':end_date,'id_cabang':id_cabang,\
-                'total':sum([p.nilai for p in rekap]),'total_plafon':sum([p.nilai for p in rekap])})
+                'total':sum([p.nilai for p in rekap]),'total_plafon':sum([p.nilai for p in rekap]),'cek_menu': cek_menu, 'menu':menu})
             return render_to_response(template, variables)
         elif id_cabang == '500' and report == '2':
             plns = []
             rekap = Lapur.objects.filter(status = '1').filter(tanggal__range=(start_date,end_date)).filter(aglapur__status_transaksi = '6')
             template = 'manop/laporan/lapur/laporan_lapur_pdf.html'
             variables = RequestContext(request, {'form':form,'lapur': rekap ,'start_date':start_date,'end_date':end_date,'id_cabang':id_cabang,\
-                'total':sum([p.aglapur.nilai for p in rekap]),'total_plafon':sum([p.nilai for p in rekap])})
+                'total':sum([p.aglapur.nilai for p in rekap]),'total_plafon':sum([p.nilai for p in rekap]),'cek_menu':
+                cek_menu, 'menu':menu})
             return render_to_response(template, variables)
         elif id_cabang == id_cabang and report =='2':
             rekap = Lapur.objects.filter(status = '1').filter(tanggal__range=(start_date,end_date)).filter(aglapur__gerai__kode_cabang = id_cabang)
@@ -67,8 +154,7 @@ def lapur_barang_new(request):###teddy27042015
             id_cabang = id_cabang
             template = 'manop/laporan/lapur/laporan_lapur_pdf.html'
             variables = RequestContext(request, {'form':form,'lapur': rekap ,'start_date':start_date,'end_date':end_date,'id_cabang':id_cabang,\
-                'total':sum([p.aglapur.nilai for p in rekap]),\
-                'total_plafon':sum([p.nilai for p in rekap])})
+                'total':sum([p.aglapur.nilai for p in rekap]),'total_plafon':sum([p.nilai for p in rekap]),'cek_menu': cek_menu, 'menu':menu})
             return render_to_response(template, variables)
 
         elif id_cabang == '500' and report == '1' and barang =='0' and kendaraan =='0' and status_barang == '1':
@@ -479,7 +565,7 @@ def lapur_barang_new(request):###teddy27042015
 
 
     template='manop/laporan/lapur/laporan_lapur_new.html'
-    variable = RequestContext(request,{'form':form})
+    variable = RequestContext(request,{'form':form,'cek_menu': cek_menu, 'menu':menu})
     return render_to_response(template,variable)
 
 

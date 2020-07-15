@@ -1,0 +1,56 @@
+{% extends "new/base_aplikasi.html" %}
+{% block extrahead %}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<div id="jCrumbs" class="breadCrumb module">
+    <ul>
+        <li>
+            <a href="/"><i class="icon-home"></i></a>
+        </li>
+        <li>
+            <a href="manop/dlapur/lapur_barang_new/">Riport Barang Lapur</a>
+        </li>
+        <li>Riwayat Barang Lapur</li>
+
+    </ul>
+</div>  
+
+<div class="row-fluid">
+    <div class="span12">
+        <h3 class="heading">Riwayat Barang Lapur</h3>
+        <table class="table table-bordered table-striped table_vam" id="dt_gal">
+            <thead>
+                <tr>
+                    <th class="table_checkbox">Nama Debitur</th>
+                    <th style="width:60px">Tanggal</th>
+                    <th>Keterangan</th>
+                    <th>User</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            {% regroup data by name as grouped %}
+                {% for a in grouped %}
+                {% for p in a.list %}
+
+                <tr>{% ifchanged %}
+                    <td ALIGN="CENTER" rowspan="{{ a.list|length }}">{{p.name }}</td>
+                    {% endifchanged %}
+                    <td ALIGN="CENTER">{{p.tanggal}}</td>
+                    <td ALIGN="CENTER"> {{ p.ket}}</td>
+                    <td ALIGN="CENTER">{{p.user}}</td>
+                    <td style="width: 150px">
+                      <a href="/manop/{{p.id}}/show_data_ref/"> Cek</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+                  
+    </div>
+</div>
+
+
+{% endblock %}
