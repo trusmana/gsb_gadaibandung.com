@@ -9,7 +9,9 @@ from gadai.appgadai.manop.daktif import views as aktif
 
 
 urlpatterns = patterns('',
-    url(r'(?P<pk>\d+)/show_data_bap/$',aktif.show_data_bap),
+    url(r'(?P<pk>\d+)/(?P<object_id>\d+)/cek_kredit/$',aktif.cek_kredit),
+    url(r'cek_kgaktif/$',aktif.cek_kgaktif),
+    url(r'(?P<pk>\d+)/(?P<object_id>\d+)/show_data_bap/$',aktif.show_data_bap),
     url(r'(?P<pk>\d+)/input_bapna/$',aktif.input_bapna),
     url(r'data_kredit_kmr/$',aktif.data_kredit_kmr),
     url(r'sh_kondisi_lapur/$',lapur.sh_kondisi_lapur),

@@ -175,11 +175,12 @@
             <td>Remote </td><td>: {{da.baktif.get_remote_display}} </td>             
             <td>Kondisi</td><td><b>{{da.baktif.get_kondisi_remote_display}}</b></td>
         </tr>
+        
+        {% endif %}
         <tr>
             <td>Keterangan </td><td colspan="3">: {{da.keterangan}} </td>             
             
         </tr>
-        {% endif %}
         {%endfor%}
     </table>
 </div>

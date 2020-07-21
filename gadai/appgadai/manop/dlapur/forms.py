@@ -49,8 +49,7 @@ class DataLapurnaForm(forms.Form):
             initial='2',required=False)
     kondisi_layar_tv = forms.ChoiceField(widget =forms.RadioSelect(attrs={'class':'radio inline'}),required=False,
         choices=CHOICES_KONDISI_BARANG,initial='5')
-    remote = forms.ChoiceField(widget =forms.Select(attrs={'class':'radio inline formtv'}), choices=CHOICES_BARANG,
-            initial='2',required=False)
+    remote = forms.ChoiceField(widget =forms.Select(attrs={'class':'radio inline formtv'}), choices=CHOICES_BARANG,required=False)
     kondisi_remote = forms.ChoiceField(widget =forms.RadioSelect(attrs={'class':'radio inline'}),required=False,
         choices=CHOICES_KONDISI_BARANG,initial='5')
     keterangan = forms.CharField(widget=forms.Textarea(attrs={'placeholder':'Isi Keterangan'}))

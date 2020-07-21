@@ -76,13 +76,37 @@
                 <li><a href="/admgudang/data_retur_gaktif/">Permintaan Retur</a></li>
                 <li><a href="/gudang/data_gudang_barang_aktif/">Data Barang Aktif</a></li>
                 <li><a href="/manop/aktif_lapur/">Rekap Barang Aktif & Ayda</a></li>
+                <li><a href="/manop/data_kredit_kmr/">Pemeriksaan Barang</a></li>
+
             </ul>
         </li>
         <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>
    </ul>
 </div>
+{% endifusergroup %}
+
+{% ifusergroup STAFGUDANGAKTIF1 %}
+
+
+<div id='cssmenu'>
+    <ul>
+         <li class='active'><a href=''><span>MENU STAFF GUDANG</span></a></li>
+         {% if cek_menu > 0 %}{% for a in menu %}
+         <li class='has-sub'><a href=''><span>{{a.nama}}</span></a>
+            <ul> 
+            {% for b in a.menuitem_set.all %}
+            {% if b in user.menuitem_set.all%}
+                <li><a href="{{b.link_url}}" >{{b.judul}}</a></li>
+            {% endif %}{% endfor %}
+            </ul>
+         {% endfor %} {% endif%}
+        </li>
+    </ul>
+</div>
 
 {% endifusergroup %}
+
+
 {% ifusergroup GUDANGLAPUR %}
 <div id='cssmenu'>
     <ul>
@@ -146,8 +170,7 @@
         <li><a href="/admgudang/data_retur_gaktif/">Permintaan Retur</a></li>
         <li><a href="/gudang/data_gudang_barang_aktif/">Data Barang Aktif</a></li>
         <li><a href="/manop/aktif_lapur/">Rekap Barang Aktif & Ayda</a></li>
-	<li><a href="/manop/data_kredit_kmr/">Pemeriksaan Barang</a></li>
-
+	
     </ul>
         </li>
         <li class='last'><a href=''><span>KSU RIZKY ABADI</span></a></li>

@@ -3,6 +3,13 @@
 {% endblock %}
 {% block section %}{% endblock %}
 {% block content %}
+<script type="text/javascript">
+$(document).ready(function(){
+   $( "#id_start_date,#id_end_date" ).datepicker({changeMonth: true,
+    changeYear: true,firstDay: 1,dateFormat: 'yy-mm-dd',
+    })
+});
+</script>
 {% load number_format useringroup %}
 <div id="jCrumbs" class="breadCrumb module">
     <ul>
@@ -14,30 +21,42 @@
 
     </ul>
 </div>  
+<div class="row-fluid">
+<div class="span6">
+        <form class="well form-inline" method="GET" action="."> {% csrf_token %}
+            <p class="f_legend">Inline form</p>
+            {{form.start_date}} {{form.end_date}}
+            <button class="btn" type="submit" name="submit_satu">Proses</button>
+        </form>
+    </div>
+<s/div>
 
 <div class="row-fluid">
     <div class="span12">
         <h3 class="heading">Data Pencairan  </h3>
         <table class="table table-bordered table-striped table_vam" id="dt_gal">
             <thead>
-                <tr><th class="table_checkbox">Gerai</th>
+                <tr><th>Nomor</th>
+                    <th class="table_checkbox">Gerai</th>
                     <th class="table_checkbox">Nama Debitur</th>
                     <th style="width:60px">Tanggal</th>
-                    <th>Keterangan</th>
+                    <th>Barang</th>
                     <th>User</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             {% for p in data %}
 
-            <tbody>    
-                <tr><td>{{p.gerai.nama_cabang }}</td>
+            <tbody>
+                <tr><td>{{forloop.counter }}</td>
+                    <td>{{p.gerai.nama_cabang }}</td>
                     <td>{{p.agnasabah.nama }}</td>
                     <td>{{p.tanggal}}</td>
-                    <td>{{p.barang.get_jenis_barang_display}}</td>
-                    <td>{{p.cu}}</td>
+                    <td>{% if p.jenis_transaksi == '1' %}{{p.barang.get_jenis_barang_display}}{%else%}{{p.barang.get_jenis_kendaraan_display}}
+                        {%endif%}</td>
+                    <td>{{p.cu.first_name}}</td>
                     <td>{% if p.barang.t_aktif == '1' %}
-                        <a href="/manop/{{p.barang.id}}/show_data_bap/" class="btn btn-danger">OnChek </a>
+                        <a href="/manop/{{p.barang.id}}/{{p.id}}/show_data_bap/" class="btn btn-danger">OnChek </a>
                         {%else %}
                         <a href="/manop/{{p.id}}/input_bapna/" class="btn btn-info">BAP </a>{%endif%}
                     </td>
@@ -45,7 +64,7 @@
             </tbody>
             {% endfor %}
             </table>
-                  
+
     </div>
 </div>
 

@@ -29,10 +29,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from reportlab.graphics.barcode import code128
 from reportlab.lib.units import mm
 D = decimal.Decimal
-## Untuk QR Code
-#from reportlab.graphics.shapes import Drawing 
-#from reportlab.graphics.barcode.qr import QrCodeWidget 
-#from reportlab.graphics import renderPDF
 
 
 #import locale
@@ -4361,10 +4357,10 @@ def pelunasan_terbit_bulan_csv(request, year, month):
 
 
 @login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('STAFGUDANGAKTIF1','GUDANGAKTIF','MANOP')))
 def list(request):
     akad = AkadGadai.objects.all()
     paginator = Paginator(akad, 10)
-
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:
@@ -4373,7 +4369,6 @@ def list(request):
         akad = paginator.page(page)
     except (EmptyPage, InvalidPage):
         akad = paginator.page(paginator.num_pages)
-
     template='akadgadai/index.html'
     variable = RequestContext(request,{'akad': akad})
     return render_to_response(template,variable)

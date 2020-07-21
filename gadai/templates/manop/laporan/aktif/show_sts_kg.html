@@ -1,0 +1,48 @@
+{% extends "new/base_aplikasi.html" %}
+{% block extrahead %}
+{% endblock %}
+{% block section %}Show{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+<div id="jCrumbs" class="breadCrumb module">
+    <ul>
+        <li>
+            <a href="/"><i class="icon-home"></i></a>
+        </li>
+        <li>Data Approve BAP</li>
+
+    </ul>
+</div>
+
+<div class="row-fluid">
+    <div class="span12">
+        <h3 class="heading">Data Approve BAP </h3>
+        <table class="table table-bordered table-striped table_vam" >
+            <thead>
+                <tr><th>Nomor</th>
+                    <th>Norek</th>
+                    
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            {% for p in data %}
+
+            <tbody>
+                <tr><td>{{forloop.counter }}</td>
+                    <td> <a href="/manop/{{p.no_akad}}/{{p.baktif.id}}/cek_kredit/" class="btn btn-warning btn-sm">{{p.no_akad}}</a></td>                    
+                    <td>{{p.tanggal}}</td>
+                    <td>{{p.check_kg.get_status_display}}
+                    <td>{{p.cu.first_name}}</td>
+                    
+                </tr>
+            </tbody>
+            {% endfor %}
+            </table>
+
+    </div>
+</div>
+
+{% endblock %}
+

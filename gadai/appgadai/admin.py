@@ -6,6 +6,12 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportMixin, ExportActionModelAdmin
 
+class Check_KgAdmin(ImportExportMixin,admin.ModelAdmin):
+    list_display = ['id','tanggal']
+    search_fields = ['id']
+admin.site.register(Check_Kg, Check_KgAdmin)
+
+
 class Kondisi_AktifBAdmin(ImportExportMixin,admin.ModelAdmin):
     list_display = ['id','tanggal']
     search_fields = ['id']

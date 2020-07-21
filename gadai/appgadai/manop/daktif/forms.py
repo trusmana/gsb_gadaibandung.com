@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from gadai.appgadai.models import CHOICES_BARANG, CHOICES_KONDISI_BARANG
+from gadai.appgadai.models import CHOICES_BARANG, CHOICES_KONDISI_BARANG,STATUS_VER
 
 
 class DataAktifnaForm(forms.Form):
@@ -50,6 +50,9 @@ class DataAktifnaForm(forms.Form):
             initial='2',required=False)
     kondisi_remote = forms.ChoiceField(widget =forms.RadioSelect(attrs={'class':'radio inline'}),required=False,
         choices=CHOICES_KONDISI_BARANG,initial='5')
+    status = forms.ChoiceField(widget =forms.Select(attrs={'class':'radio inline'}),required=False,
+        choices=STATUS_VER)
+
     keterangan = forms.CharField(widget=forms.Textarea(attrs={'placeholder':'Isi Keterangan'}))
 
 

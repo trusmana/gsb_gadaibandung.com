@@ -359,12 +359,12 @@ CHOICES_JENIS_TRANSAKSI=(
 
 class Barang(models.Model):
     jenis_barang = models.CharField(max_length=4 ,choices=JENIS_BARANG, null =True, blank=True,default=0)
-    merk = models.CharField(max_length=500)   
+    merk = models.CharField(max_length=500)
     type = models.CharField(max_length=500)
     sn = models.CharField(max_length=20)
     warna = models.CharField(max_length=200)
     tahun_pembuatan = models.CharField(max_length=10)
-    bulan_produksi = models.CharField(max_length=10)   
+    bulan_produksi = models.CharField(max_length=10)
     accesoris_barang1 = models.CharField(max_length=500)
     lampiran_dokumen = models.CharField(max_length = 2,choices =JENIS_DOKUMEN)
     barang_masuk= models.DateField(null=True, blank=True)
@@ -475,7 +475,7 @@ class Kondisi_AktifB(models.Model):
     baktif = models.ForeignKey(Barang)
     keterangan = models.CharField(max_length =100)
     tanggal = models.DateField(null=True)
-
+    no_akad = models.IntegerField()
     charger = models.CharField(max_length = 5, choices = CHOICES_BARANG)
     kondisi_charger = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
     batre = models.CharField(max_length = 5, choices = CHOICES_BARANG)
@@ -515,6 +515,22 @@ class Kondisi_AktifB(models.Model):
         db_table = 'kondisi_aktifb'
         verbose_name = 'Kondisi_AktifB'
 
+STATUS_VER =(('1','Konfirmasi'),('2','Barang Sesuai'))
+
+
+class Check_Kg(models.Model):
+    checker = models.OneToOneField(Kondisi_AktifB)
+    status = models.CharField(max_length=1, choices=STATUS_VER)
+    tanggal = models.DateField()
+    catatan = models.CharField(max_length= 500,blank=True,null=True)
+    cu = models.ForeignKey(User, related_name='check_kg10', editable=False, null=True, blank=True)
+    mu = models.ForeignKey(User, related_name='check_kg02', editable=False, null=True, blank=True)
+    cdate = models.DateTimeField(auto_now_add=True)
+    mdate = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'check_kg'
+        verbose_name = 'Check_Kg'
 
 AKTIFASI_PARAMETER =(
     ('1','Non Aktif'),

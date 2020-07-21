@@ -207,12 +207,11 @@ $(document).ready(function()
 			<li><a href="/biaya/add/">INPUT BIAYA</a></li>			
 		</ul>
 	</li>{%endifusergroup%}
-	{% ifusergroup KPLGERAI|KASIR_GERAI|ADM_GERAI|MANOP|KEUANGAN|KEUANGAN_PJB|KEUANGAN1|KEUANGAN2|GUDANGAKTIF|GUDANGLAPUR|KEPALAGUDANG|staffops|baranglapur|ASMANPJB|MUTUOPS|KADIV%}
         <li class="top"><a href="/" id="shop" class="top_link"><span class="down">{{ user.first_name }} {{ user.last_name }}</span></a>
 	    <ul class="sub">
 		    <li>{% if user.is_authenticated %}<a href="/accounts/password/change/" title="Ganti Password"><span>PASSWORD</span></a>{% endif %}</li>			
 	    </ul>
-	</li>{%endifusergroup%}
+	</li>
 
         <li class="top" align="right">
 			{% if user.is_authenticated %}
@@ -221,9 +220,7 @@ $(document).ready(function()
 			<a href="/accounts/login/" id="privacy" class="top_link" align="right"><span>LOGIN APLIKASI</span></a>
 			{% endif %}
 	</li>		
-    {% ifusergroup KPLGERAI|KASIR_GERAI|ADM_GERAI|MANOP|KEUANGAN|KEUANGAN_PJB|KEUANGAN1|KEUANGAN2|GUDANGAKTIF|GUDANGLAPUR|KEPALAGUDANG|baranglapur|staffops|ASMANPJB|MUTUOPS|KADIV%}   
     <li class="top"><a href="/" id="separator" id="shop" class="top_link" ><span><strong class="hamburger"></strong></span></a></li>
-    {%endifusergroup%}
 </ul>
 <div id="center-wrapper">
 
