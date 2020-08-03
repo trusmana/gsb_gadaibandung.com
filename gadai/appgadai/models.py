@@ -437,6 +437,45 @@ class Barang(models.Model):
         verbose_name = 'Barang'
         verbose_name_plural = verbose_name
 
+
+    def _keybord_cab(self):
+        return "%s" %(self.get_keybord_display())
+    def _kkeybord_cab(self):
+        return "%s" %(self.get_kondisi_keybord_display())
+
+
+    def _charger_cab(self):
+        return "%s" %(self.get_charger_display())
+    def _kcharger_cab(self):
+        return "%s" %(self.get_kondisi_charger_display())
+
+    def _batre_cab(self):
+        return "%s" %(self.get_batre_display())
+    def _kbatre_cab(self):
+        return "%s" %(self.get_kondisi_batre_display())
+
+
+    def _pass_cab(self):
+        return "%s" %(self.get_password_display())
+
+    def _cassing_cab(self):
+        return "%s" %(self.get_cassing_display())
+    def _kcassing_cab(self):
+        return "%s" %(self.get_kondisi_cassing_display())
+
+    def _layar_cab(self):
+        return "%s" %(self.get_layar_display())
+    def _klayar_cab(self):
+        return "%s" %(self.get_kondisi_layar_display())
+
+
+    def _tas_cab(self):
+        return "%s" %(self.get_tas_display())
+
+    def _dus_cab(self):
+        return "%s" %(self.get_dus_display())
+
+
     def __unicode__(self):
         return "%s-%s-%s-%s" %(self.id, self.merk, self.type, self.sn)
 
@@ -506,6 +545,8 @@ class Kondisi_AktifB(models.Model):
     remote = models.CharField(max_length = 5, choices = CHOICES_BARANG)
     kondisi_remote = models.CharField(max_length = 5, choices = CHOICES_KONDISI_BARANG)
 
+    dus = models.CharField(max_length = 5, choices = CHOICES_BARANG,null=True,blank=True)
+    tas = models.CharField(max_length = 5, choices = CHOICES_BARANG,null=True,blank=True)
     cu = models.ForeignKey(User, related_name='ck_baktif', editable=False, null=True, blank=True)
     mu = models.ForeignKey(User, related_name='mk_baktif', editable=False, null=True, blank=True)
     cdate = models.DateTimeField(auto_now_add=True)
@@ -515,7 +556,38 @@ class Kondisi_AktifB(models.Model):
         db_table = 'kondisi_aktifb'
         verbose_name = 'Kondisi_AktifB'
 
-STATUS_VER =(('1','Konfirmasi'),('2','Barang Sesuai'))
+    def _keybord_aktif(self):
+        return "%s" %(self.get_keybord_display())
+    def _kkeybord_aktif(self):
+        return "%s" %(self.get_kondisi_keybord_display())
+
+    def _charger_aktif(self):
+        return "%s" %(self.get_charger_display())
+    def _kcharger_aktif(self):
+        return "%s" %(self.get_kondisi_charger_display())
+
+    def _batre_aktif(self):
+        return "%s" %(self.get_batre_display())
+    def _kbatre_aktif(self):
+        return "%s" %(self.get_kondisi_batre_display())
+
+
+    def _pass_aktif(self):
+        return "%s" %(self.baktif.get_password_display())
+
+    def _cassing_aktif(self):
+        return "%s" %(self.get_cassing_display())
+    def _kcassing_aktif(self):
+        return "%s" %(self.get_kondisi_cassing_display())
+
+    def _layar_aktif(self):
+        return "%s" %(self.get_layar_display())
+    def _klayar_aktif(self):
+        return "%s" %(self.get_kondisi_layar_display())
+
+
+
+STATUS_VER =(('1','Konfirmasi'),('2','Barang Sesuai'),('3','Verivikasi Berhasil'))
 
 
 class Check_Kg(models.Model):

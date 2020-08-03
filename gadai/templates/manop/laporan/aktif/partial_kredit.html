@@ -56,8 +56,12 @@
             <td><b>Kondisi</b> </td><td><b>{{data.barang.get_kondisi_batre_display}}</b></td>
         </tr>
         <tr>
-            <td>Keyboard</td><td>: {{data.barang.get_keybord_display}}</td>
+            <td>Keyboard /KeyPad</td><td>: {{data.barang.get_keybord_display}}</td>
             <td>Kondisi</td><td>: {{data.barang.get_kondisi_keybord_display}} </td>
+        </tr>
+        <tr>
+            <td>Password / Key Password</td><td>{{data.barang.get_password_display}}</td>
+            <td>Kondisi</td><td>{{data.barang.password_barang}}</td>
         </tr>
         <tr>
             <td>Display</td><td>: {{data.barang.get_cassing_kamera_display}}</td>
@@ -105,6 +109,10 @@
         </tr>
         {% endif %}
         <tr>
+            <td>Tas </td><td>: {{data.barang.get_tas_display}} </td>             
+            <td>Dus</td><td><b>{{data.barang.get_dus_display}}</b></td>
+        </tr>
+        <tr>
             <td>Keterangan</td><td colspan="3">: {{data.barang.accesoris_barang1}}</td>
         </tr>    
 
@@ -127,11 +135,15 @@
             <td><b>Kondisi</b> </td><td><b>{{da.baktif.get_kondisi_batre_display}}</b></td>
         </tr>
         <tr>
-            <td>Keyboard</td><td>: {{da.baktif.get_keybord_display}}</td>
+            <td>Keyboard /Keypad</td><td>: {{da.baktif.get_keybord_display}}</td>
             <td>Kondisi</td><td>: {{da.baktif.get_kondisi_keybord_display}} </td>
         </tr>
         <tr>
-            <td>Display</td><td>: {{da.baktif.get_cassing_kamera_display}}</td>
+            <td>Password / Key Password</td><td>{{da.baktif.get_password_display}}</td>
+            <td>Kondisi</td><td>{{da.baktif.password_barang}}</td>
+        </tr>
+        <tr>
+            <td>Layar</td><td>: {{da.baktif.get_cassing_kamera_display}}</td>
             <td>Kondisi</td><td>: {{da.baktif.get_kondisi_cassing_display}} </td>
         </tr>
 
@@ -171,11 +183,15 @@
             <td>Kondisi</td><td><b>{{da.baktif.get_kondisi_layar_tv_display}}</b></td>
         </tr>
         <tr>
-            <td>Remote </td><td>: {{da.get_remote_display}} </td>             
+            <td>Remote </td><td>: {{da.baktif.get_remote_display}} </td>             
             <td>Kondisi</td><td><b>{{da.baktif.get_kondisi_remote_display}}</b></td>
         </tr>
         
         {% endif %}
+        <tr>
+            <td>Tas </td><td>: {{da.baktif.get_tas_display}} </td>             
+            <td>Dus</td><td><b>{{da.baktif.get_dus_display}}</b></td>
+        </tr>
         <tr>
             <td>Keterangan </td><td colspan="3">: {{da.keterangan}} </td>             
             
@@ -183,9 +199,5 @@
         {%endfor%}
     </table>
 </div>
-
-
-</div>
-
-
+</div>               
 {% endblock %}

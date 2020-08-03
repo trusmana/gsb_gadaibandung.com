@@ -13,36 +13,45 @@
 
     </ul>
 </div>
-
+<div class="row-fluid">
+    <div class="span6">
+    <form class="well form-inline tabular" method="POST" action="/manop/proses_ver/" >{% csrf_token %}
+         <input type="text"  id="id_catatan" name="catatan" placeholder="Catatan"  cols="150" rows="2"/>
+         <button class="btn btn-info" type="submit">simpan</button>
+     
+    </div>
+</div>
 <div class="row-fluid">
     <div class="span12">
-        <h3 class="heading">Data Approve BAP </h3>
+        <h3 class="heading">Data Approve BAP</h3>
         <table class="table table-bordered table-striped table_vam" >
             <thead>
-                <tr><th>Nomor</th>
+                <tr><th>Chek</th>
                     <th>Norek</th>
-                    
                     <th>Tanggal</th>
+                    <th>Barang</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            {% for p in data %}
-
             <tbody>
-                <tr><td>{{forloop.counter }}</td>
-                    <td> <a href="/manop/{{p.no_akad}}/{{p.baktif.id}}/cek_kredit/" class="btn btn-warning btn-sm">{{p.no_akad}}</a></td>                    
+                <tr>{% for p in data %}
+                    <td><input type="checkbox"  value="{{p.check_kg.id }}"  name='checkeron' /></td>
+                    <td><a data-toggle="modal" data-backdrop="static" class="label ttip_b" title="verivikasi">
+                        {{p.check_kg.get_status_display}}</a>
+                    </td>
                     <td>{{p.tanggal}}</td>
-                    <td>{{p.check_kg.get_status_display}}
+                    <td> {{p.baktif.get_jenis_barang_display}}</td>
+                    <td>
+                    <a href="/manop/{{p.no_akad}}/{{p.baktif.id}}/cek_kredit/" target="_blank" class="btn btn-warning btn-sm">{{p.no_akad}}</a>
+                    </td>
                     <td>{{p.cu.first_name}}</td>
-                    
-                </tr>
+                </tr>{% endfor %}
             </tbody>
-            {% endfor %}
-            </table>
-
+        </table>
     </div>
 </div>
+</form>
 
 {% endblock %}
 

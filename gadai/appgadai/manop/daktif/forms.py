@@ -2,6 +2,9 @@ from django import forms
 from django.forms import ModelForm
 from gadai.appgadai.models import CHOICES_BARANG, CHOICES_KONDISI_BARANG,STATUS_VER
 
+class Verivikasi(forms.Form):
+    keterangan = forms.CharField(widget=forms.Textarea(attrs={'placeholder':'Isi Keterangan'}))
+
 
 class DataAktifnaForm(forms.Form):
     charger = forms.ChoiceField(widget =forms.Select(attrs={'class':'radio inline'}), choices=CHOICES_BARANG, initial='2',required=False)
@@ -54,5 +57,9 @@ class DataAktifnaForm(forms.Form):
         choices=STATUS_VER)
 
     keterangan = forms.CharField(widget=forms.Textarea(attrs={'placeholder':'Isi Keterangan'}))
+    dus = forms.ChoiceField(widget =forms.Select(attrs={'class':'radio inline '}), choices=CHOICES_BARANG,
+            initial='2',required=False)
+    tas = forms.ChoiceField(widget =forms.Select(attrs={'class':'radio inline'}), choices=CHOICES_BARANG,
+            initial='2',required=False)
 
 

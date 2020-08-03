@@ -1,0 +1,66 @@
+<head>
+<style>
+
+ul.a {list-style-type:circle;}
+ul.b {list-style-type:square;}
+ol.c {list-style-type:upper-roman; font-size:12px}
+ol.d {list-style-type:lower-alpha;}
+
+hr {page-break-after: always;
+    border: 0;
+}
+body {
+  margin-top: 0.5cm;
+  margin-bottom: 1.0cm;
+  margin-right: 0.5px;
+  margin-left: 0.5px;
+  text-align: justify;
+  font-size:11.49px;
+}
+p {
+  font-size:11.49px;
+}
+</style>
+</head>
+
+
+
+{% load number_format terbilang %}
+
+<!--<body style='margin-top:60px'>
+<p style="text-align:right">A/C No. {{pkb.nopin}}<br />
+AKAD No. SK/{{pkb.nopin}}/{{pkb.tgl_cair_bank|date:'m'}}/{{pkb.tgl_cair_bank|date:'Y'}}</p>-->
+
+<br/>
+<br/>
+<p style="text-align:center"><strong>PERJANJIAN KREDIT</strong><br />
+  <strong>No : SK/{{pkb.nopin}}/{{pkb.tgl_cair_bank|date:"m"}}/{{pkb.tgl_cair_bank|date:"Y"}}/RA </strong></p>
+
+<p>Perjanjian Kredit ini (selanjutnya  disebut Perjanjian) dibuat di {{pkb.kantor_cabang}} pada hari {{pkb.tgl_cair_bank|date:'l'}},
+   tanggal {{pkb.tgl_cair_bank|date:"d F Y"}} oleh dan antara :</p>
+
+<ol class="c">
+  <li >
+    <div align='justify'><b>{{pkb.nasabah.nama}}</b>, pemegang Kartu Tanda penduduk (KTP) No. {{pkb.nasabah.no_ktp}}, bertempat tinggal di 
+    {{pkb.nasabah.alamat_ktp}} Kel.{{pkb.nasabah.kelurahan_ktp}} Kec.{{pkb.nasabah.kecamatan_ktp}} Kab.{{pkb.nasabah.kab_kota.desc}} 
+      {{pkb.nasabah.kodepos_ktp}}, berwenang melakukan tindakan hukum dalam Perjanjian ini (selanjutnya disebut Debitur)
+
+      <div align='justify'></div>
+    </div>
+  </li>
+  <li >
+    <div align='justify'>
+      <div align='justify'><b>Oki Soemantri Winangoen</b>,dalam jabatannya KEPALA UNIT, berdasarkan 007/SK-RA/V/2016 tanggal 31 Mei
+          2016 dan Surat Kuasa Subtitusi No.SKU. 241/GMBM/III/2013 tanggal 28 Maret 2013, yang dikeluarkan oleh
+          Direksi PT. Bank Bukopin, Tbk. sehinga dengan demikian dalam perjanjian ini berwenang bertindak untuk dan atas
+          nama PT. Bank Bukopin, berdasarkan Akta Perjanjian Kerjasama Penerusan Pinjaman (Channeling) Akta Nomor 9
+          tanggal 8 April 2013, yang dibuat dihadapan ELSYE JAVANKA, Sarjana Hukum di Kota Bandung, berikut seluruh
+          perubahannya (Selanjutnya disebut Kreditur)
+      </div>
+    </div>
+  </li>
+</ol>
+
+</body>
+
+

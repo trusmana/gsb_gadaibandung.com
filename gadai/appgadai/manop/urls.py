@@ -7,8 +7,13 @@ from gadai.appgadai.manop.manage import views as manop
 from gadai.appgadai.manop.dlapur import views as lapur
 from gadai.appgadai.manop.daktif import views as aktif
 
-
 urlpatterns = patterns('',
+    url(r'(?P<pk>\d+)/(?P<barang>\d+)/(?P<check>\d+)/cetak_bap/$',aktif.cetak_bap),
+    url(r'data_bap/$',aktif.data_bap),
+    url(r'proses_ver/$',aktif.proses_ver),
+    url(r'rekap_gu/$',manop.rekap_gu),
+    url(r'(?P<object_id>\d+)/(?P<akad>\d+)/edit_nasabah_new/$',manop.edit_nasabah_new),
+    url(r'(?P<object_id>\d+)/show_new/$',manop.show_new),
     url(r'(?P<pk>\d+)/(?P<object_id>\d+)/cek_kredit/$',aktif.cek_kredit),
     url(r'cek_kgaktif/$',aktif.cek_kgaktif),
     url(r'(?P<pk>\d+)/(?P<object_id>\d+)/show_data_bap/$',aktif.show_data_bap),

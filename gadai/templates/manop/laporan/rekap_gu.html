@@ -1,0 +1,83 @@
+{% extends "new/base_aplikasi.html" %}
+{% block extrahead %}
+{% endblock %}
+{% block section %}{% endblock %}
+{% block content %}
+{% load number_format useringroup %}
+
+<div id="jCrumbs" class="breadCrumb module">
+    <ul>
+        <li>
+            <a href="/"><i class="icon-home"></i></a>
+        </li>
+        <li>
+            Rekap Gadai Ulang 
+        </li>
+    </ul>
+</div> 
+
+<div class="row-fluid">
+    <div class="span12">
+        <h3 class="heading">Gallery table view</h3>
+        <table class="table table-bordered table-striped table_vam" id="dt_gal">
+            <thead>
+                <tr>
+                    <th>Name</th><th>Norek</th><th>Barang</th><th>Gerai</th><th>Total GU</th><th>Jangka Waktu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% regroup orders by akses_group as grouped %}
+                {% for a in grouped %}
+                {% for p in a.list %}
+                <tr>{% ifchanged %}
+                    <td rowspan="{{ a.list|length }}" >
+                        <a href="/manop/{{p.id}}/show_manop/" class="btn btn-info">{{p.akses_group }} </a>
+                    </td> {% endifchanged %}                  
+                    <td> {{p.norek}}</td>
+                    <td>{{p.barang}}</td>
+                    <td>{{p.gerai}}</td>
+                    <td>{{p.tgu}} Kali</td>
+                    <td >{{p.jw}}</td>
+
+                </tr>
+                {% endfor %}
+                {% endfor %}                
+            </tbody>
+        </table>
+        
+    </div>
+</div>
+
+
+<div class="row-fluid">
+    <div class="span12">
+        <h3 class="heading">Rekap Gadai Ulang</h3>
+        <table class="table table-bordered table-striped table_vam" id="dt_gal">
+            <thead>
+                <tr>
+                     <th>Name</th><th>Norek</th><th>Barang</th><th>Gerai</th><th>Total GU</th><th>Jangka Waktu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% regroup orders by akses_group as grouped %}
+                {% for a in grouped %}
+                {% for p in a.list %}
+                <tr style="background-color: {% ifchanged a.list %}{% cycle "#F8F9F9" "white" as rowcolors %}{% else %}
+            {{ rowcolors }}{% endifchanged %}" >
+                    {% ifchanged %}
+                    <td rowspan="{{ a.list|length }}" ><a href="/manop/{{p.id}}/show_manop/" class="btn btn-info">{{p.akses_group }}</a></td>
+                    {% endifchanged %}
+                    <td> {{p.norek}}</td>
+                    <td>{{p.barang}}</td>
+                    <td>{{p.gerai}}</td>
+                    <td>{{p.tgu}} Kali</td>
+                    <td >{{p.jw}}</td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+        
+    </div>
+</div> 
+{% endblock %}

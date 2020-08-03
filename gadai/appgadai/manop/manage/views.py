@@ -6,9 +6,95 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, HttpResponseRedirect
 from gadai.appgadai.manop.manage.forms import MenuItemForm
 from django.template.loader import render_to_string
-from gadai.appgadai.models import AkadGadai,Nasabah,Barang,ManopPelunasan,ManopPelunasanGu,TaksirHistory
+from gadai.appgadai.models import AkadGadai,Nasabah,Barang,ManopPelunasan,ManopPelunasanGu,TaksirHistory,TitipanPelunasan
 from gadai.appkeuangan.models import Menu
 import datetime
+from gadai.appgadai.akadgadai.forms import PelunasanForm
+from gadai.appgadai.nasabah.form import EditNasabahForm
+from django.http import HttpResponse
+import json
+from django.core import serializers
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('MANOP','administrator')))
+def rekap_gu(request):
+    menu = AkadGadai.objects.filter(barang__akad_ulang__gte = 6,lunas__isnull= True)
+    list = []
+    for a in menu:
+        list.append({'akses_group':a.agnasabah.nama,'norek':a.norek,'id':a.agnasabah.id,'barang':a.barang.merk,
+            'gerai':a.gerai,'tgu':a.barang.akad_ulang,'jw':a.jw_all})
+    return render(request, 'manop/laporan/rekap_gu.html', {'orders': list})
+
+def save_nasabah_form(request, form, template_name):
+    data = dict()
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            data['form_is_valid'] = True
+            books = Book.objects.all()
+            data['html_book_list'] = render_to_string('books/includes/partial_book_list.html', {
+                'books': books
+            })
+        else:
+            data['form_is_valid'] = False
+    context = {'form': form}
+    #data['html_form'] = render(template_name, context,request)
+    #return JsonResponse(data)
+    st = serializers.serialize("json", template_name,context,request)
+    return HttpResponse(json.dumps(st))
+
+def getDeptList(request):
+    parentId = int(request.GET.get('parentId'))
+    if parentId ==0:
+        result = JobDept.objects.filter(dept_parentid__isnull=True).all()
+    else:
+        result = JobDept.objects.filter(dept_parentid=parentId).all()
+    data = serializers.serialize("json", result)
+    data = json.loads(data)
+
+    return HttpResponse(json.dumps({'code':1, 'data':data}), content_type="application/json")
+    pass
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('MANOP','administrator')))
+def edit_nasabah_new(request, object_id,akad):
+    nas = get_object_or_404(Nasabah, pk=object_id)
+    if request.method == 'POST':
+        form = EditNasabahForm(request.POST, instance=nas)
+    else:
+        form = EditNasabahForm(instance=nas)
+    return save_nasabah_form(request, form, 'manop/nasabah_update.html')
+
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('MANOP','administrator')))
+def edit_nasabah_new_dd(request,object_id,akad):
+    post = get_object_or_404(Nasabah, id=object_id)
+    akadgadai = akad
+    if request.method == "POST":
+        form = EditNasabahForm(request.POST, instance=post)
+        if form.is_valid():
+            post.save()
+            return HttpResponseRedirect('/akadgadai/%s/show/' %akad )
+    else:
+        form = EditNasabahForm(instance=post)
+    return render(request, 'nasabah/edit.html', {'form': form,'id':object_id})
+
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name__in=('MANOP','administrator')))
+def show_new(request,object_id):
+    ag = AkadGadai.objects.get(id=object_id)
+    sekarang = datetime.datetime.now()
+    skr = datetime.date.today()
+    titip = TitipanPelunasan.objects.filter(norek = object_id)
+    total_titip = sum([a.nilai for a in titip])
+    form = PelunasanForm(initial={'pelunasan': ag.id,'gerai': ag.gerai.id,'tanggal': sekarang.date, 'nilai': ag.nilai,'skr':skr})
+    template = 'manop/show_akad.html'
+    variable = RequestContext(request, {'ag': ag,'form': form,'skr':skr,'total_titip':total_titip,'titip':titip})
+    return render_to_response(template,variable)
+
+
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name__in=('MANOP','administrator')))

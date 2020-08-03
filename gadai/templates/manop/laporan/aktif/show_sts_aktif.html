@@ -37,7 +37,7 @@
             <td>Jenis Barang</td><td colspan="3">: {{akad.barang}} </td>
         </tr>
         <tr>
-            <td>Plafon</td><td>: {{akad.aglapur.nilai|number_format:0}}</td>
+            <td>Plafon</td><td>: {{akad.nilai|number_format:0}}</td>
             <td>Nilai Ayda</td><td>: {{akad.nilai|number_format:0}} </td>
         </tr>
 
@@ -52,21 +52,31 @@
             <td colspan="4" align="center"><b>Tangga Periksa {{akad.tanggal|date:"d-m-Y"}}  </b> {{akad.cu}} </td>
         </tr>
         {% if akad.barang.jenis_barang == '1' or akad.barang.jenis_barang == '2' %}
-        <tr><td>Charger </td><td>: {{akad.barang.get_charger_display}} </td> 
-            <td><b>Kondisi</b></td><td><b>{{akad.barang.get_kondisi_charger_display}}</b></td>
+        <tr>
+            <td>Charger</td><td>{{akad.barang.get_charger_display}}</td>
+            <td>Kondisi</td><td>{{akad.barang.get_kondisi_charger_display}}</td>
         </tr>
         <tr>
-            <td>Batre </td><td>: {{akad.barang.get_batre_display}} </td>             
-            <td><b>Kondisi</b> </td><td><b>{{akad.barang.get_kondisi_batre_display}}</b></td>
+            <td>Batre</td><td>{{akad.barang.get_batre_display}}</td>
+            <td>Kondisi</td><td>{{akad.barang.get_kondisi_batre_display}}</td>
         </tr>
         <tr>
-            <td>Keyboard</td><td>: {{akad.barang.get_keybord_display}}</td>
-            <td>Kondisi</td><td>: {{akad.barang.get_kondisi_keybord_display}} </td>
+            <td>Keyboard/Keypad</td><td>{{akad.barang.get_keybord_display}}</td>
+            <td>Kondisi</td> <td>{{akad.barang.get_kondisi_keybord_display}}</td>
         </tr>
         <tr>
-            <td>Display</td><td>: {{akad.barang.get_cassing_kamera_display}}</td>
-            <td>Kondisi</td><td>: {{akad.barang.get_konsisi_cassing_display}} </td>
+            <td>Password / Key Password</td><td>{{akad.barang.get_password_display}}</td>
+            <td>Kondisi</td><td>{{akad.barang.password_barang}}</td>
         </tr>
+        <tr>
+            <td>Cassing</td><td>{{akad.barang.get_cassing_display}}</td>
+            <td>Kondisi</td><td>{{akad.barang.get_kondisi_cassing_display}}</td>
+        </tr>
+        <tr>
+            <td>Layar</td><td>{{akad.barang.get_layar_display}}</td>
+            <td>Kondisi</td><td>{{akad.barang.get_kondisi_layar_display}}</td>
+        </tr>
+
 
         {% elif akad.barang.jenis_barang == '3' %}
         <tr><td>Layar </td><td>: {{akad.barang.get_layar_display}} </td> 
@@ -108,6 +118,14 @@
             <td>Kondisi</td><td><b>{{akad.barang.get_kondisi_remote_display}}</b></td>
         </tr>
         {% endif %}
+        <tr>
+            <td>Tas </td><td>: {{akad.barang.get_tas_display}} </td>             
+            <td>Dus</td><td><b>{{akad.barang.get_dus_display}}</b></td>
+        </tr>
+        <tr>
+            <td>Keterangan </td><td colspan="3">: {{akad.barang.accesoris_barang1}} </td>             
+            
+        </tr>
 
     </table>
 </div>
@@ -121,19 +139,27 @@
         </tr>
         {% if da.baktif.jenis_barang == '1' or da.baktif.jenis_barang == '2' %}
         <tr><td>Charger </td><td>: {{da.baktif.get_charger_display}} </td> 
-            <td><b>Kondisi</b></td><td><b>{{da.baktif.aglapur.barang.get_kondisi_charger_display}}</b></td>
+            <td><b>Kondisi</b></td><td><b>{{da.baktif.get_kondisi_charger_display}}</b></td>
         </tr>
         <tr>
-            <td>Batre </td><td>: {{da.baktif.barang.get_batre_display}} </td>             
+            <td>Batre </td><td>: {{da.baktif.get_batre_display}} </td>             
             <td><b>Kondisi</b> </td><td><b>{{da.baktif.get_kondisi_batre_display}}</b></td>
         </tr>
         <tr>
-            <td>Keyboard</td><td>: {{da.baktif.get_keybord_display}}</td>
-            <td>Kondisi</td><td>: {{da.baktif.aglapur.get_kondisi_keybord_display}} </td>
+            <td>Keyboard/Keypad</td><td>: {{da.baktif.get_keybord_display}}</td>
+            <td>Kondisi</td><td>: {{da.baktif.get_kondisi_keybord_display}} </td>
         </tr>
         <tr>
-            <td>Display</td><td>: {{da.baktif.get_cassing_kamera_display}}</td>
-            <td>Kondisi</td><td>: {{da.baktif.get_konsisi_cassing_display}} </td>
+            <td>Password / Key Password</td><td>{{akad.barang.get_password_display}}</td>
+            <td>Kondisi</td><td>{{akad.barang.password_barang}}</td>
+        </tr>
+        <tr>
+            <td>Cassing</td><td>{{akad.barang.get_cassing_display}}</td>
+            <td>Kondisi</td><td>{{akad.barang.get_kondisi_cassing_display}}</td>
+        </tr>        
+        <tr>
+            <td>Layar</td><td>: {{da.baktif.get_layar_display}}</td>
+            <td>Kondisi</td><td>: {{da.baktif.get_layar_display}} </td>
         </tr>
 
         {% elif da.baktif.jenis_barang == '3' %}
@@ -146,7 +172,7 @@
         </tr>
         <tr>
             <td>Batre Kamera</td><td>: {{da.baktif.get_batre_kamera_display}}</td>
-            <td>Kondisi</td><td>: {{da.baktif.aglapur.get_kondisi_batre_kamera_display}} </td>
+            <td>Kondisi</td><td>: {{da.baktif.get_kondisi_batre_kamera_display}} </td>
         </tr>
         <tr>
             <td>Cassing Kamera</td><td>: {{da.baktif.get_cassing_kamera_display}}</td>
@@ -178,14 +204,17 @@
         
         {% endif %}
         <tr>
+            <td>Tas </td><td>: {{da.baktif.get_tas_display}} </td>             
+            <td>Dus</td><td><b>{{da.baktif.get_dus_display}}</b></td>
+        </tr>
+        <tr>
             <td>Keterangan </td><td colspan="3">: {{da.keterangan}} </td>             
             
         </tr>
         {%endfor%}
     </table>
 </div>
-
-
 </div>
+
 
 {% endblock %}
